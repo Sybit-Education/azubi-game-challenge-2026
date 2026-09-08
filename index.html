@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Deep Sea Echoes – ein barrierefreies Unterwasser-Spiel für die Azubi Game Challenge 2026"
+    />
+    <title>Deep Sea Echoes</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <h1>🌊 Deep Sea Echoes</h1>
+      </header>
+
+      <div id="game-container" role="application" aria-label="Deep Sea Echoes Spielbereich"></div>
+
+      <div class="accessibility-controls" role="region" aria-label="Barrierefreie Steuerung">
+        <button id="btn-sonar" class="accessible-btn" aria-label="Sonar Impuls senden, Taste S">
+          🔊 Sonar Ping (S)
+        </button>
+        <button id="btn-shield" class="accessible-btn" aria-label="Schutzschild aktivieren, Leertaste">
+          🛡️ Schild (Leertaste)
+        </button>
+      </div>
+
+      <div id="game-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
