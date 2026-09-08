@@ -98,7 +98,7 @@ Das Spiel wächst schrittweise mit euren Fortschritten:
  ```ascii
  ┌──────────────────────────────────┐         ┌────────────────────────────────┐
  |         MAIN SCREEN              | <-----> |     BACKEND SERVER             |  
- | (Phaser.js auf Beamer / Monitor) |   Web   | (Node.js \+ Socket.io)         |  
+ | (Phaser.js auf Beamer / Monitor) |   Web   | (Node.js + Socket.io)         |  
  └──────────────────────────────────┘ Socket  └────────────────────────────────┘
                                                          ^ Web Socket  
                                                          v  
@@ -189,12 +189,12 @@ azubi-game-challenge-2026/
 
 ```javascript
 // Konfiguration für das Phaser.js Spiel  
-const config \= {  
+const config = {  
   type: Phaser.AUTO,  
   width: 960,  
   height: 540,  
   parent: 'game-container',  
-  backgroundColor: '\#0f172a',  
+  backgroundColor: '#0f172a',  
   physics: {  
     default: 'arcade',  
     arcade: { debug: false }  
@@ -205,29 +205,29 @@ const config \= {
 let submarine;  
 let cursors;  
 let keySonar, keyShield;  
-const game \= new Phaser.Game(config);
+const game = new Phaser.Game(config);
 
 function preload() {  
   // Bild- oder Sound-Assets können hier geladen werden  
 }
 
 function create() {  
-  const scene \= this;
+  const scene = this;
 
   // U-Boot (Platzhalter-Rechteck)  
-  submarine \= scene.add.rectangle(150, 270, 80, 30, 0x0284c7);  
+  submarine = scene.add.rectangle(150, 270, 80, 30, 0x0284c7);  
   scene.physics.add.existing(submarine);  
   submarine.body.setCollideWorldBounds(true);
 
   scene.add.text(20, 20, 'Steuerung: Pfeiltasten (Bewegen) | S (Sonar) | Leertaste (Schild)', {  
     font: '16px Arial',  
-    fill: '\#38bdf8'  
+    fill: '#38bdf8'  
   });
 
   // Tastatur-Eingaben initialisieren  
-  cursors \= scene.input.keyboard.createCursorKeys();  
-  keySonar \= scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);  
-  keyShield \= scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  cursors = scene.input.keyboard.createCursorKeys();  
+  keySonar = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);  
+  keyShield = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
   // Event Listener für Tastatur-Aktionen  
   keySonar.on('down', triggerSonar);  
@@ -239,13 +239,13 @@ function create() {
 
   function triggerSonar() {  
     // Visueller Effekt (Sichtbare Welle)  
-    let circle \= scene.add.circle(submarine.x, submarine.y, 10, 0x38bdf8, 0.6);  
+    let circle = scene.add.circle(submarine.x, submarine.y, 10, 0x38bdf8, 0.6);  
     scene.tweens.add({  
       targets: circle,  
       radius: 180,  
       alpha: 0,  
       duration: 800,  
-      onComplete: () \=\> circle.destroy()  
+      onComplete: () => circle.destroy()  
     });
 
     // Auditives Feedback (Web Audio API)  
@@ -259,23 +259,23 @@ function create() {
 
   function triggerShield() {  
     // Schild-Animation  
-    let shieldEffect \= scene.add.circle(submarine.x, submarine.y, 50, 0x0d9488, 0.4);  
+    let shieldEffect = scene.add.circle(submarine.x, submarine.y, 50, 0x0d9488, 0.4);  
     scene.tweens.add({  
       targets: shieldEffect,  
       alpha: 0,  
       duration: 500,  
-      onComplete: () \=\> shieldEffect.destroy()  
+      onComplete: () => shieldEffect.destroy()  
     });
 
     playTone(293.66, 0.3); // Tieferer Ton (D4)  
     if ('vibrate' in navigator) {  
-      navigator.vibrate(\[80, 40, 80\]);  
+      navigator.vibrate([80, 40, 80]);  
     }  
   }  
 }
 
 function update() {  
-  if (\!submarine || \!submarine.body) return;
+  if (!submarine || !submarine.body) return;
 
   // Bewegung zurücksetzen  
   submarine.body.setVelocity(0);
@@ -297,21 +297,21 @@ function update() {
 // Hilfsfunktion: Barrierefreie Tonerzeugung  
 function playTone(frequency, duration) {  
   try {  
-    const audioCtx \= new (window.AudioContext || window.webkitAudioContext)();  
-    const osc \= audioCtx.createOscillator();  
-    const gain \= audioCtx.createGain();  
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();  
+    const osc = audioCtx.createOscillator();  
+    const gain = audioCtx.createGain();  
       
-    osc.type \= 'sine';  
-    osc.frequency.value \= frequency;  
+    osc.type = 'sine';  
+    osc.frequency.value = frequency;  
       
     gain.gain.setValueAtTime(0.3, audioCtx.currentTime);  
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime \+ duration);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
 
     osc.connect(gain);  
     gain.connect(audioCtx.destination);  
       
     osc.start();  
-    osc.stop(audioCtx.currentTime \+ duration);  
+    osc.stop(audioCtx.currentTime + duration);  
   } catch (e) {  
     console.log('AudioContext wird vom Browser blockiert:', e);  
   }  
@@ -331,7 +331,7 @@ Damit jeder vollwertig mitspielen kann, achten wir von Anfang an auf folgende Ba
    * Benutzt `navigator.vibrate(ms)` bei Ereignissen wie Hindernis-Warnungen oder Sonar-Pings.  
    * Beispiel für Hindernis-Warnung: `navigator.vibrate([100, 50, 100, 50, 300]);` (Kurz-Kurz-Lang).  
 3. **Audio Cues (Web Audio API):**  
-   * Erzeugt klare Töne mit unterschiedlichen Tonhöhen (Hoher Ton \= Freie Fahrt / Erfolg, Tiefer Ton \= Gefahr / Hindernis).  
+   * Erzeugt klare Töne mit unterschiedlichen Tonhöhen (Hoher Ton = Freie Fahrt / Erfolg, Tiefer Ton = Gefahr / Hindernis).  
 4. **Gemeinsames Testen:**  
    * Testet das Spiel regelmäßig zusammen, um Töne und Feedback-Muster direkt anzupassen!
 
@@ -359,7 +359,7 @@ Arbeitet die Meilensteine ohne Fristen und in eurem eigenen Tempo ab:
                             v  
 ┌──────────────────────────────────────────────────────────┐  
 │ PHASE 3 (Optional): Multiplayer Upgrade                  │  
-│ • Node.js \+ Socket.io Backend aufsetzen                 │  
+│ • Node.js + Socket.io Backend aufsetzen                  │  
 │ • Smartphone-Controller als mobile Web-App gestalten  ─  │  
 │ • Rollenverteilung (Pilot, Sonar-Offizier, Maschinist)   │  
 └──────────────────────────────────────────────────────────┘
@@ -369,7 +369,7 @@ Arbeitet die Meilensteine ohne Fristen und in eurem eigenen Tempo ab:
 ## 6. Tipps für Einsteiger & Fehlerbehebung
 
 * **Audio-Sperre im Browser:** Moderne Browser blockieren Töne, bis der Nutzer einmal auf der Seite geklickt oder getippt hat. Der erste Klick auf einen Button schaltet den Sound frei.  
-* **Entwickler-Tools (F12):** Nutzt in Chrome/Firefox die F12\-Taste, um unter *Console* Fehlermeldungen zu prüfen.  
+* **Entwickler-Tools (F12):** Nutzt in Chrome/Firefox die F12-Taste, um unter *Console* Fehlermeldungen zu prüfen.  
 * **Barrierefreiheit im Browser testen:** Unter Chrome/Edge könnt ihr in den DevTools unter *Lighthouse* einen Barrierefreiheits-Audit durchführen.
 
 <a id="lernressourcen-dokumentationen--tools"></a>
@@ -400,4 +400,4 @@ Für das aktuelle Phaser-Projekt sind diese Tools besonders sinnvoll:
 - `vite-plugin-checker` – optional für Type-/Lint-Checks im Dev-Server
 - `gh-pages` – alternativ für manuelles Deployment außerhalb der GitHub-Actions
 
-**Viel Spaß beim Bauen von "Deep Sea Echoes"\! 🚀**
+**Viel Spaß beim Bauen von "Deep Sea Echoes"! 🚀**
