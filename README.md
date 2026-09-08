@@ -45,6 +45,8 @@ npm run preview
 
 Dieses Projekt ist für GitHub Pages vorbereitet. Die Workflow-Dateien in `.github/workflows/` bauen das Projekt automatisch und veröffentlichen die Inhalte aus dem `dist`-Ordner.
 
+Die aktuelle Version (vom `main`-Branch) ist live erreichbar: <https://sybit-education.github.io/azubi-game-challenge-2026/>
+
 <a id="projektstruktur"></a>
 ## Projektstruktur
 
