@@ -5,7 +5,7 @@ Willkommen zur **Azubi Game Challenge 2026**! 🎉
 Eure Aufgabe ist es, ein interaktives Unterwasser-Spiel zu entwickeln, das Spaß macht und auf Schülermessen oder unserer Weihnachtsfeier präsentiert werden kann.
 
 
-Das Spiel wird so konzipiert, dass jeder mit auditiven Tönen, Sprachausgabe (Screenreader) und haptischem Vibrations-Feedback das Spiel eigenständig und gleichberechtigt mitspielen kann – ganz ohne visuelle Barrieren.
+Das Spiel wird so konzipiert, dass jeder mit Tönen, Sprachausgabe (Screenreader) und haptischem Vibrations-Feedback das Spiel eigenständig und gleichberechtigt mitspielen kann – ganz ohne visuelle Barrieren.
 
 > 💡 **Entwicklungs-Strategie:** Startet mit einer **Single-Player-Version (MVP)** direkt im Browser. Sobald das Spielprinzip und die Barrierefreiheit perfekt funktionieren, kann das Spiel optional um ein Socket.io-Multiplayer-System mit Smartphone-Steuerung erweitert werden.
 
@@ -46,7 +46,7 @@ npm run preview
 
 Dieses Projekt ist für GitHub Pages vorbereitet. Die Workflow-Dateien in `.github/workflows/` bauen das Projekt automatisch und veröffentlichen die Inhalte aus dem `dist`-Ordner.
 
-Die aktuelle Version (vom `main`-Branch) ist live erreichbar: <https://sybit-education.github.io/azubi-game-challenge-2026/>
+Die aktuelle Version (vom `main`-Branch) ist live erreichbar: [https://sybit-education.github.io/azubi-game-challenge-2026/](https://sybit-education.github.io/azubi-game-challenge-2026/)
 
 <a id="projektstruktur"></a>
 ## Projektstruktur
@@ -80,7 +80,7 @@ Ihr steuert ein **Forschungs-U-Boot in der tiefen Ozean-Dunkelheit**. Der Bildsc
 
 
 
->💡Kreativität: Das ist nur eine Idee. Seid creativ! Überrascht uns mit einer coolen Spieidee
+>💡Kreativität: Das ist nur eine Idee: Seid creativ! Überrascht uns mit einer coolen Spielelogik
 
 ## Die Architektur: Vom Single-Player zum Multiplayer
 
