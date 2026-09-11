@@ -44,10 +44,15 @@ function create() {
     fill: '#38bdf8',
   });
 
-  const instructions = scene.add.text(20, 50, 'Pilot: mit Pfeiltasten bewegen, Sonar und Schild mit Buttons oder Tastatur aktivieren.', {
-    font: '14px Arial',
-    fill: '#e2e8f0',
-  });
+  const instructions = scene.add.text(
+    20,
+    50,
+    'Pilot: mit Pfeiltasten bewegen, Sonar und Schild mit Buttons oder Tastatur aktivieren.',
+    {
+      font: '14px Arial',
+      fill: '#e2e8f0',
+    },
+  );
   instructions.setDepth(1);
 
   statusText = document.getElementById('game-status');
