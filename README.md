@@ -11,19 +11,20 @@ Das Spiel wird so konzipiert, dass jeder mit Tönen, Sprachausgabe (Screenreader
 # **📑 Inhaltsverzeichnis**
 
 1. [Schnellstart](#schnellstart)
-2. [Production Build](#production-build)
-3. [Code-Qualität](#code-qualität)
-4. [GitHub Pages Deployment](#github-pages-deployment)
-5. [Projektstruktur](#projektstruktur)
-6. [Das Spielkonzept: Deep Sea Echoes](#das-spielkonzept-deep-sea-echoes)
-7. [Die Architektur: Vom Single-Player zum Multiplayer](#die-architektur-vom-single-player-zum-multiplayer)
-8. [Schritt-für-Schritt Starter-Code (Single-Player)](#schritt-für-schritt-starter-code-single-player)
-9. [Inklusions-Guide (Barrierefreiheit)](#inklusions-guide-barrierefreiheit)
-10. [Flexibles Phasenmodell (Ohne Zeitdruck)](#flexibles-phasenmodell-ohne-zeitdruck)
-11. [Tipps für Einsteiger & Fehlerbehebung](#tipps-für-einsteiger--fehlerbehebung)
-12. [Lernressourcen, Dokumentationen & Tools](#lernressourcen-dokumentationen--tools)
-13. [Corporate Design & SYBIT-Branding](#corporate-design--sybit-branding)
-14. [Vorschläge für wichtige Plugins und Erweiterungen](#vorschläge-für-wichtige-plugins-und-erweiterungen)
+2. [Entwicklungsumgebung einrichten](#entwicklungsumgebung-einrichten)
+3. [Production Build](#production-build)
+4. [Code-Qualität](#code-qualität)
+5. [GitHub Pages Deployment](#github-pages-deployment)
+6. [Projektstruktur](#projektstruktur)
+7. [Das Spielkonzept: Deep Sea Echoes](#das-spielkonzept-deep-sea-echoes)
+8. [Die Architektur: Vom Single-Player zum Multiplayer](#die-architektur-vom-single-player-zum-multiplayer)
+9. [Schritt-für-Schritt Starter-Code (Single-Player)](#schritt-für-schritt-starter-code-single-player)
+10. [Inklusions-Guide (Barrierefreiheit)](#inklusions-guide-barrierefreiheit)
+11. [Flexibles Phasenmodell (Ohne Zeitdruck)](#flexibles-phasenmodell-ohne-zeitdruck)
+12. [Tipps für Einsteiger & Fehlerbehebung](#tipps-für-einsteiger--fehlerbehebung)
+13. [Lernressourcen, Dokumentationen & Tools](#lernressourcen-dokumentationen--tools)
+14. [Corporate Design & SYBIT-Branding](#corporate-design--sybit-branding)
+15. [Vorschläge für wichtige Plugins und Erweiterungen](#vorschläge-für-wichtige-plugins-und-erweiterungen)
 
 <a id="schnellstart"></a>
 
@@ -33,6 +34,44 @@ Das Spiel wird so konzipiert, dass jeder mit Tönen, Sprachausgabe (Screenreader
 npm install
 npm run dev
 ```
+
+<a id="entwicklungsumgebung-einrichten"></a>
+
+## Entwicklungsumgebung einrichten
+
+Für die Entwicklung gibt es zwei Möglichkeiten. GitHub Codespaces läuft vollständig im Browser und benötigt keine Installation auf dem eigenen PC. Für die lokale Entwicklung unter Windows werden einige Programme einmalig installiert.
+
+### Mit GitHub Codespaces im Browser
+
+1. Öffnet die Repository-Seite auf GitHub und klickt auf **Code**.
+2. Wählt den Tab **Codespaces** und klickt auf **Create codespace on main**.
+3. Wartet, bis der Browser-Editor geöffnet ist. Die Konfiguration dieses Projekts installiert die Abhängigkeiten automatisch mit `npm ci` und verwendet Node.js 22.
+4. Öffnet im Editor das Terminal über **Terminal** > **New Terminal** und startet das Spiel:
+
+```bash
+npm run dev
+```
+
+5. GitHub zeigt eine Meldung für den weitergeleiteten Port `5173` an. Klickt auf **Open in Browser**, um das Spiel zu öffnen.
+
+### Lokal unter Windows
+
+Installiert diese Programme einmalig:
+
+1. [Git for Windows](https://git-scm.com/download/win), um das Projekt herunterzuladen.
+2. [Node.js 22 LTS](https://nodejs.org/), damit `npm` und der Entwicklungsserver verfügbar sind.
+3. [Visual Studio Code](https://code.visualstudio.com/), um den Code zu bearbeiten.
+
+Öffnet anschließend **PowerShell** oder **Git Bash** und führt diese Befehle aus:
+
+```bash
+git clone https://github.com/Sybit-Education/azubi-game-challenge-2026.git
+cd azubi-game-challenge-2026
+npm install
+npm run dev
+```
+
+Der letzte Befehl zeigt eine Adresse wie `http://localhost:5173` an. Öffnet diese Adresse im Browser. Um das Projekt später in VS Code zu öffnen, startet im Projektordner `code .` oder wählt in VS Code **File** > **Open Folder**.
 
 <a id="production-build"></a>
 
@@ -81,6 +120,8 @@ azubi-game-challenge-2026/
 │   └── workflows/
 │       ├── ci.yml
 │       └── deploy-pages.yml
+├── .devcontainer/
+│   └── devcontainer.json
 ├── src/
 │   ├── main.js
 │   └── style.css
