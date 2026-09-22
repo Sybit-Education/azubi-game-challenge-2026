@@ -18,32 +18,29 @@ class Car extends Phaser.GameObjects.Rectangle {
   constructor(scene, x, y, width = 50, height = 100, color = 0xff0000) {
     super(scene, x, y, width, height, color);
     scene.add.existing(this);
-    this.value = 10
-    this.lane = 1
-
+    this.value = 10;
+    this.lane = 1;
   }
 
-
   move() {
-
     this.scene.input.keyboard.on('keydown-A', () => {
       if (this.lane > 0) {
-        this.lane--
-        this.x = lanes[this.lane]
+        this.lane--;
+        this.x = lanes[this.lane];
       }
     });
 
     this.scene.input.keyboard.on('keydown-D', () => {
       if (this.lane < lanes.length - 1) {
-        this.lane++
-        this.x = lanes[this.lane]
+        this.lane++;
+        this.x = lanes[this.lane];
       }
     });
   }
 }
 
 class Obstacle extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y,) {
+  constructor(scene, x, y) {
     super(scene, x, y, 'obstacle-car');
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -51,25 +48,22 @@ class Obstacle extends Phaser.Physics.Arcade.Sprite {
   }
 }
 
-function show_main_menu() {
-
-}
-
+function show_main_menu() {}
 
 const config = {
   type: Phaser.AUTO,
   scale: {
     mode: Phaser.Scale.NONE,
     width: 800,
-    height: 600
+    height: 600,
   },
   backgroundColor: '#fffff',
   physics: {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
-      debug: false
-    }
+      debug: false,
+    },
   },
   scene: {
     preload() {
@@ -80,32 +74,26 @@ const config = {
       const car = new Car(this, lanes[1], 500, 150, 75, 0xffffff);
       car.move();
 
-      this.add.text(this.scale.width - 20, 20, `Score: ${car.value}`, {
-        fontSize: "30px"
-      }).setOrigin(1, 0);
+      this.add
+        .text(this.scale.width - 20, 20, `Score: ${car.value}`, {
+          fontSize: '30px',
+        })
+        .setOrigin(1, 0);
 
       const spawnObstacle = () => {
-        const obstacle = new Obstacle(
-          this,
-          Phaser.Math.RND.pick(lanes),
-          50,
-        );
+        const obstacle = new Obstacle(this, Phaser.Math.RND.pick(lanes), 50);
 
         obstacle.body.setVelocityY(200);
       };
-
 
       this.time.addEvent({
         delay: 2000,
         callback: spawnObstacle,
         callbackScope: this,
-        loop: true
-      })
-
-    }
-
-  }
-
+        loop: true,
+      });
+    },
+  },
 };
 
 new Phaser.Game(config);
