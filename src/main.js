@@ -1,3 +1,4 @@
+
 class Car extends Phaser.GameObjects.Image{
     constructor(scene, x, y) {
         super(scene, x, y,`car`);
@@ -35,31 +36,69 @@ function show_main_menu(scene){
             fontSize: "30px"
         }).setOrigin(1,0);
     });
-}
 
-let width = window.innerWidth;
-let height = width * 9 / 16;
-if (height > window.innerHeight) {
-    height = window.innerHeight;
-    width = height * 16 / 9;
+    this.scene.input.keyboard.on('keydown-D', () => {
+      if (this.lane < lanes.length - 1) {
+        this.lane++;
+        this.x = lanes[this.lane];
+      }
+    });
+  }
+
+
+class Obstacle extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene, x, y) {
+    super(scene, x, y, 'obstacle-car');
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setScale(0.3);
+  }
 }
 
 const config = {
-    type: Phaser.AUTO,
-    scale: {
-        mode: Phaser.Scale.RESIZE,
-        width: window.innerWidth,
-        height: window.innerHeight
+  type: Phaser.AUTO,
+  scale: {
+    mode: Phaser.Scale.NONE,
+    width: 800,
+    height: 600,
+  },
+  backgroundColor: '#fffff',
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 0 },
+      debug: false,
     },
-    backgroundColor: '#fffff',
-    scene: {
-        preload() {
-            this.load.image('car', 'sprites/car2.png');
-        },
-        create() {
-            show_main_menu(this);
-        }
-    }
+  },
+  scene: {
+    preload() {
+      this.load.image('obstacle-car', '../../sprites/obstacleCar.png');
+    },
+
+    create() {
+      const car = new Car(this, lanes[1], 500, 150, 75, 0xffffff);
+      car.move();
+
+      this.add
+        .text(this.scale.width - 20, 20, `Score: ${car.value}`, {
+          fontSize: '30px',
+        })
+        .setOrigin(1, 0);
+
+      const spawnObstacle = () => {
+        const obstacle = new Obstacle(this, Phaser.Math.RND.pick(lanes), 50);
+
+        obstacle.body.setVelocityY(200);
+      };
+
+      this.time.addEvent({
+        delay: 2000,
+        callback: spawnObstacle,
+        callbackScope: this,
+        loop: true,
+      });
+    },
+  },
 };
 
 new Phaser.Game(config);
