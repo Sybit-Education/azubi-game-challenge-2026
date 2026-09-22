@@ -268,7 +268,7 @@ Arbeitet die Meilensteine ohne Fristen und in eurem eigenen Tempo ab:
 
 ### Phaser.js & Spieleentwicklung
 
-- [Phaser 3 offizielle Dokumentation](https://phaser.io/documentation)
+- [Phaser 3 offizielle Dokumentation](https://docs.phaser.io/)
 - [Phaser 3 Beispiele & Code-Snippets](https://labs.phaser.io/)
 - [Phaser 3 API-Dokumentation](https://docs.phaser.io/api-documentation) – genaue Referenz für Szenen, Input, Physik und Game Objects
 - [Phaser 3 Beispiele auf GitHub](https://github.com/phaserjs/examples) – kleine, kopierbare Beispiele nach Themen sortiert
