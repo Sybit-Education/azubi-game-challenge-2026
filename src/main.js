@@ -1,31 +1,14 @@
-class Coin {
-    constructor(scene, x, y) {
-        this.sprite = scene.add.circle(x, y, 20, 0xffff00);
-        this.value = 10;
-    }
-}
-
-class Circle {
-    constructor(scene, x, y) {
-        this.sprite = scene.add.circle(x,y, 50, 0xffffff);
-        this.value = 10;
-    }
-}
-
 class Car extends Phaser.GameObjects.Rectangle{
     constructor(scene, x, y, width = 100, height = 50, color = 0xff0000) {
         super(scene, x, y, width, height, color);
         scene.add.existing(this);
         this.value = 10
-        
     }
 
     move(){
-    
         this.scene.input.keyboard.on('keydown-A', () => {
             this.x -= 20
         });
-        
         this.scene.input.keyboard.on('keydown-D', () => {
             this.x += 20
         });  
@@ -33,14 +16,11 @@ class Car extends Phaser.GameObjects.Rectangle{
 }
 
 function show_main_menu(scene){
-    
     const button = scene.add.text(400, 300, "Start Game", {
         fontSize: "32px",
         backgroundColor: "#00000",
         padding: { x: 10, y: 5 }
-    })
-    .setOrigin(0.5)
-    .setInteractive();
+    }).setOrigin(0.5).setInteractive();
 
     button.on("pointerdown", () => {
         button.setVisible(false);
