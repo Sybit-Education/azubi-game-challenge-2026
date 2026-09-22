@@ -1,17 +1,4 @@
 import Phaser from 'phaser';
-class Coin {
-  constructor(scene, x, y) {
-    this.sprite = scene.add.circle(x, y, 20, 0xffff00);
-    this.value = 10;
-  }
-}
-
-class Circle {
-  constructor(scene, x, y) {
-    this.sprite = scene.add.circle(x, y, 50, 0xffffff);
-    this.value = 10;
-  }
-}
 
 const lanes = [200, 400, 600];
 
@@ -49,7 +36,6 @@ class Obstacle extends Phaser.Physics.Arcade.Sprite {
   }
 }
 
-function show_main_menu() {}
 
 const config = {
   type: Phaser.AUTO,
