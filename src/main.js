@@ -1,20 +1,22 @@
-import Phaser from 'phaser';
-
 class Car extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {
     super(scene, x, y, 'car');
     scene.add.existing(this);
+
+    this.keys = scene.input.keyboard.addKeys('A,D');
+    this.speed = 5;
     this.value = 10;
     this.setScale(0.5);
   }
 
   move() {
-    this.scene.input.keyboard.on('keydown-A', () => {
-      this.x -= 20;
-    });
-    this.scene.input.keyboard.on('keydown-D', () => {
-      this.x += 20;
-    });
+    if (this.keys.A.isDown) {
+      this.x -= this.speed;
+    }
+
+    if (this.keys.D.isDown) {
+      this.x += this.speed;
+    }
   }
 }
 
@@ -29,23 +31,16 @@ function show_main_menu(scene) {
     .setInteractive();
 
   button.on('pointerdown', () => {
-    button.setVisible(false);
-    const car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25, 75, 120, 0xffffff);
-    car.move();
+    button.destroy();
+
+    scene.car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
 
     scene.add
-      .text(scene.scale.width - 20, 20, `Score: ${car.value}`, {
+      .text(scene.scale.width - 20, 20, `Score: ${scene.car.value}`, {
         fontSize: '30px',
       })
       .setOrigin(1, 0);
   });
-}
-
-let width = window.innerWidth;
-let height = (width * 9) / 16;
-if (height > window.innerHeight) {
-  height = window.innerHeight;
-  width = (height * 16) / 9;
 }
 
 const config = {
@@ -58,10 +53,17 @@ const config = {
   backgroundColor: '#000000',
   scene: {
     preload() {
-      this.load.image(`car`, `sprites/race_car.png`);
+      this.load.image('car', 'sprites/race_car.png');
     },
+
     create() {
       show_main_menu(this);
+    },
+
+    update() {
+      if (this.car) {
+        this.car.move();
+      }
     },
   },
 };
