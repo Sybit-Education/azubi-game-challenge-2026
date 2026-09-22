@@ -8,13 +8,14 @@ class Car extends Phaser.GameObjects.Image{
     }
     move(){
         this.scene.input.keyboard.on('keydown-A', () => {
-            this.x -= 20
+            this.x -= 5
         });
         this.scene.input.keyboard.on('keydown-D', () => {
-            this.x += 20
+            this.x += 5
         });  
     }
 }
+
 
 function show_main_menu(scene){
     const button = scene.add.text(400, 300, "Start Game", {
@@ -27,6 +28,7 @@ function show_main_menu(scene){
     button.on("pointerdown", () => {
         button.setVisible(false);
         const car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
+
         car.move();
         
         scene.add.text(scene.scale.width - 20, 20, `Score: ${car.value}`, {
