@@ -1,3 +1,5 @@
+/* global Phaser */
+
 class Car extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {
     super(scene, x, y, 'car');
