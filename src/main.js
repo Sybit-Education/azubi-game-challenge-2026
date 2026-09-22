@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 class Coin {
   constructor(scene, x, y) {
     this.sprite = scene.add.circle(x, y, 20, 0xffff00);
