@@ -1,10 +1,11 @@
-class Car extends Phaser.GameObjects.Rectangle{
-    constructor(scene, x, y, width = 100, height = 50, color = 0xff0000) {
-        super(scene, x, y, width, height, color);
+class Car extends Phaser.GameObjects.Image{
+    constructor(scene, x, y) {
+        super(scene, x, y,`car`);
         scene.add.existing(this);
         this.value = 10
+        this.setScale(0.25);
+        this.setAngle(180);
     }
-
     move(){
         this.scene.input.keyboard.on('keydown-A', () => {
             this.x -= 20
@@ -17,6 +18,7 @@ class Car extends Phaser.GameObjects.Rectangle{
 
 function show_main_menu(scene){
     const button = scene.add.text(400, 300, "Start Game", {
+        
         fontSize: "32px",
         backgroundColor: "#00000",
         padding: { x: 10, y: 5 }
@@ -24,7 +26,7 @@ function show_main_menu(scene){
 
     button.on("pointerdown", () => {
         button.setVisible(false);
-        const car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25, 75, 120, 0xffffff);
+        const car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
         car.move();
         
         scene.add.text(scene.scale.width - 20, 20, `Score: ${car.value}`, {
@@ -49,10 +51,12 @@ const config = {
     },
     backgroundColor: '#fffff',
     scene: {
+        preload() {
+            this.load.image('car', 'sprites/car2.png');
+        },
         create() {
             show_main_menu(this);
         }
-        
     }
 };
 
