@@ -30,9 +30,8 @@ function show_racetrack(scene) {
   bg.setDisplaySize(scene.scale.width, scene.scale.height);
 }
 
-
-function increase_score(){
-  return score += 5;
+function increase_score() {
+  return (score += 5);
 }
 
 function show_main_menu(scene) {
