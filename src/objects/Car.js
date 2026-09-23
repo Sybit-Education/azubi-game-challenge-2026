@@ -10,7 +10,7 @@ export default class Car extends Phaser.GameObjects.Image {
     this.score = 100000; //Score = 100000 Als Beispiel (Beim Start des Spiels ist Score = 0)
     this.speed = 5;
     this.value = 10;
-
+    this.distance = 0;
     this.setScale(0.5);
   }
 
@@ -18,7 +18,6 @@ export default class Car extends Phaser.GameObjects.Image {
     if (this.keys.A.isDown) {
       this.x -= this.speed;
     }
-
     if (this.keys.D.isDown) {
       this.x += this.speed;
     }
@@ -30,5 +29,17 @@ export default class Car extends Phaser.GameObjects.Image {
 
   decrease_score(points) {
     return (this.score -= points);
+  }
+
+  //stop can be used for collisions
+  stop() {
+    this.speed = 0;
+  }
+
+  //increase meters by 1 every frame if car hasnt crashed or stopped
+  update_meters() {
+    if (this.speed > 0) {
+      this.distance += 1;
+    }
   }
 }
