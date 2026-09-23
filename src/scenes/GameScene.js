@@ -11,7 +11,7 @@ export default class GameScene extends Phaser.Scene {
   //Bilder laden
   preload() {
     this.load.image('car', 'sprites/race_car.png');
-    this.load.image('track', 'sprites/race_track.png');
+    this.load.image('track', 'sprites/race_track1.png');
   }
 
   //Alle Objekte in der Szene initialisieren
