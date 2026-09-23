@@ -20,8 +20,6 @@ export default class GameScene extends Phaser.Scene {
 
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
 
-    let delay;
-    delay = 3000;
 
     const obstacleGameLoop = () => {
       const obstacle = new Obstacle(this, this.scale.width / 2, 0);
