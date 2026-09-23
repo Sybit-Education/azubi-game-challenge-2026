@@ -51,6 +51,11 @@ export default class GameScene extends Phaser.Scene {
       fontSize: '30px',
     });
 
+    //Highscoreanzeige
+    this.distancetext = this.add
+      .text(this.scale.width - 300, 20, `Distance: ${this.car.distance}`, { fontSize: '30px' })
+      .setOrigin(1, 0);
+
     //Scoreanzeige
     this.scoretext = this.add
       .text(this.scale.width - 20, 20, `Score: ${this.car.score}`, { fontSize: '30px' })
@@ -70,6 +75,8 @@ export default class GameScene extends Phaser.Scene {
     this.obstacles.forEach((Obstacle) => {
       Obstacle.move(delta);
     });
+    this.car.update_meters();
+    this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
     this.track1.move();
     this.track2.move();
   }
