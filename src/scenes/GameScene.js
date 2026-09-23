@@ -20,10 +20,9 @@ export default class GameScene extends Phaser.Scene {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
 
-    this.add
-      .text(this.scale.width - 20, 20, `Score: ${this.car.value}`, {
-        fontSize: '30px',
-      })
+    this.add.text(this.scale.width - 20, 20, `Score: ${this.car.value}`, {
+      fontSize: '30px',
+    });
 
     //Scoreanzeige
     this.scoretext = this.add
