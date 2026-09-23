@@ -6,9 +6,9 @@ class Car extends Phaser.GameObjects.Image {
     scene.add.existing(this);
 
     this.keys = scene.input.keyboard.addKeys('A,D');
-    this.speed = 5;
+    this.speed = 10;
     this.value = 10;
-    this.setScale(0.5);
+    this.setScale(0.35);
   }
 
   move() {
@@ -20,6 +20,18 @@ class Car extends Phaser.GameObjects.Image {
       this.x += this.speed;
     }
   }
+}
+
+function show_racetrack(scene){
+  const bg = scene.add.image(
+    scene.scale.width / 2,
+    scene.scale.height / 2,
+    'race_track'
+  );
+
+  bg.setAngle(90);
+  bg.setScale(3);
+  bg.setDisplaySize(scene.scale.width, scene.scale.height);
 }
 
 function show_main_menu(scene) {
@@ -34,6 +46,7 @@ function show_main_menu(scene) {
 
   button.on('pointerdown', () => {
     button.destroy();
+    
 
     scene.car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
 
@@ -56,9 +69,11 @@ const config = {
   scene: {
     preload() {
       this.load.image('car', 'sprites/race_car.png');
+      this.load.image('race_track', 'sprites/race_track.png');
     },
 
     create() {
+      show_racetrack(this);
       show_main_menu(this);
     },
 
