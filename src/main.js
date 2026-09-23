@@ -22,12 +22,8 @@ class Car extends Phaser.GameObjects.Image {
   }
 }
 
-function show_racetrack(scene){
-  const bg = scene.add.image(
-    scene.scale.width / 2,
-    scene.scale.height / 2,
-    'race_track'
-  );
+function show_racetrack(scene) {
+  const bg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'race_track');
 
   bg.setAngle(90);
   bg.setScale(3);
@@ -46,7 +42,6 @@ function show_main_menu(scene) {
 
   button.on('pointerdown', () => {
     button.destroy();
-    
 
     scene.car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
 
