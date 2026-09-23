@@ -36,7 +36,7 @@ export default class Car extends Phaser.GameObjects.Image {
     this.speed = 0;
   }
 
-  //increase meters by 1 every frame
+  //increase meters by 1 every frame if car hasnt crashed or stopped
   update_meters() {
     if (this.speed > 0) {
       this.distance += 1;
