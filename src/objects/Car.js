@@ -24,11 +24,11 @@ export default class Car extends Phaser.GameObjects.Image {
     }
   }
 
-  increase_score(points = 5){
-    return this.score += points;
+  increase_score(points = 5) {
+    return (this.score += points);
   }
 
-  decrease_score(points){
-    return this.score -= points;
+  decrease_score(points) {
+    return (this.score -= points);
   }
 }
