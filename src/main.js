@@ -1,5 +1,5 @@
 /* global Phaser */
-
+let score = 100000;
 class Car extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {
     super(scene, x, y, 'car');
@@ -30,6 +30,11 @@ function show_racetrack(scene) {
   bg.setDisplaySize(scene.scale.width, scene.scale.height);
 }
 
+
+function increase_score(){
+  return score += 5;
+}
+
 function show_main_menu(scene) {
   const button = scene.add
     .text(400, 300, 'Start Game', {
@@ -42,11 +47,11 @@ function show_main_menu(scene) {
 
   button.on('pointerdown', () => {
     button.destroy();
-
+    increase_score();
     scene.car = new Car(scene, scene.scale.width / 2, scene.scale.height / 1.25);
 
     scene.add
-      .text(scene.scale.width - 20, 20, `Score: ${scene.car.value}`, {
+      .text(scene.scale.width - 20, 20, `Score: ${score}`, {
         fontSize: '30px',
       })
       .setOrigin(1, 0);
