@@ -85,7 +85,7 @@ export default class GameScene extends Phaser.Scene {
       return obstacle.active;
     });
     this.car.update_meters();
-    const targetTrackSpeed = 600 + this.car.meters; //+ this.car.meters * 1
+    const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
 
