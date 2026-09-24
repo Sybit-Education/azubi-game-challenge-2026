@@ -2,7 +2,7 @@
 
 import Car from '../objects/Car.js';
 import Obstacle from '../objects/Obstacle.js';
-import Track from '../objects/Track.js';
+import Track, { Track_right, Track_left } from '../objects/Track.js';
 import Borders from '../objects/Walls.js';
 import HUD from '../objects/HUD.js';
 
@@ -14,8 +14,9 @@ export default class GameScene extends Phaser.Scene {
   //Bilder laden
   preload() {
     this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
-    this.load.image('track', 'sprites/road.png');
-
+    this.load.image('track', 'sprites/road copy.png');
+    this.load.image('trackLeft', 'sprites/roadLeft.png');
+    this.load.image('trackRight', 'sprites/roadRight.png');
     this.load.image('placeholder1', 'sprites/placeholder1.png');
     this.load.image('placeholder2', 'sprites/placeholder2.png');
     this.load.image('placeholder3', 'sprites/placeholder3.png');
@@ -57,12 +58,35 @@ export default class GameScene extends Phaser.Scene {
 
     obstacleGameLoop();
 
+    //nur Straßenteil initialisieren
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
-    this.walls = [
-      new Borders(this, 500, 700, 2, 600, 0x0000),
-      new Borders(this, 1020 + 387, 700, 2, 600, 0x0000),
+    let left_edge = this.track1.x - this.track1.displayWidth / 2;
+    let right_edge = this.track1.displayWidth + left_edge;
+
+    //Leitplanken initialisieren
+    this.track_left1 = new Track_left(this, left_edge, 0);
+    this.track_left2 = new Track_left(this, left_edge, this.track_left1.displayHeight);
+
+    this.track_right1 = new Track_right(this, right_edge, 0);
+    this.track_right2 = new Track_right(this, right_edge, this.track_right1.displayHeight);
+
+    //array für alle track teile
+    this.tracks = [
+      this.track1,
+      this.track2,
+      this.track_left1,
+      this.track_left2,
+      this.track_right1,
+      this.track_right2,
     ];
+
+    //Borders initialisieren
+    this.walls = [
+      new Borders(this, left_edge, 700, 2, 600, 0x0000),
+      new Borders(this, right_edge, 700, 2, 600, 0x0000),
+    ];
+
     //collision physics for car and walls to set movement limit
     this.physics.add.collider(this.car, this.walls);
     //Score- und Km-anzeigen initialisieren
@@ -85,12 +109,13 @@ export default class GameScene extends Phaser.Scene {
       return obstacle.active;
     });
     this.car.update_meters();
-    const targetTrackSpeed = 600 + this.car.meters; //+ this.car.meters * 1
-    this.track1.speed = targetTrackSpeed;
-    this.track2.speed = targetTrackSpeed;
 
-    this.track1.move(delta);
-    this.track2.move(delta);
+    const targetTrackSpeed = 600 + this.car.meters; //+ this.car.meters * 1
+    //Die Leitplanken und die Straße Synchronisieren
+    this.tracks.forEach((track) => {
+      track.speed = targetTrackSpeed;
+      track.move(delta);
+    });
     this.hud.update();
   }
 }
