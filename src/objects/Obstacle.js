@@ -29,7 +29,8 @@ export default class Obstacle extends Phaser.GameObjects.Image {
   }
   //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
-    this.speed = 600 + this.gameScene.car.meters * 1;
+    this.speed = Math.min(1500, 600 + this.gameScene.car.meters * 0.1);
+    console.log(this.speed);
     this.y += (this.speed * delta) / 1000;
 
     const buffer = 100;
