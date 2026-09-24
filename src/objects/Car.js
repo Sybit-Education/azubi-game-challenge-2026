@@ -18,10 +18,10 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   move() {
     this.setVelocityX(0);
     if (this.keys.A.isDown) {
-      this.setVelocityX(-300);
+      this.setVelocityX(-500);
     }
     if (this.keys.D.isDown) {
-      this.setVelocityX(300);
+      this.setVelocityX(500);
     }
   }
 
