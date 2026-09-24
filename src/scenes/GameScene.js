@@ -1,7 +1,7 @@
 /* global Phaser */
 
 import Car from '../objects/Car.js';
-import Obstacle from '../objects/Obstacle.js';
+import EnemyCar from '../objects/EnemyCar.js';
 import Track from '../objects/Track.js';
 import Borders from '../objects/Walls.js';
 import HUD from '../objects/HUD.js';
@@ -16,66 +16,62 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
     this.load.image('track', 'sprites/road.png');
 
-    this.load.image('placeholder1', 'sprites/placeholder1.png');
-    this.load.image('placeholder2', 'sprites/placeholder2.png');
-    this.load.image('placeholder3', 'sprites/placeholder3.png');
+    this.load.image('enemy-car1', 'sprites/enemy-car1.png');
+    this.load.image('enemy-car2', 'sprites/enemy-car2.png');
+    this.load.image('enemy-car3', 'sprites/enemy-car3.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
-    //array mit allen obstacles
     this.obstacles = [];
+    this.createPlayer();
+    this.createTrack();
+    this.createWalls();
+    this.createObstacle();
+    this.createHud();
+  }
 
+  createPlayer() {
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+  }
 
-    //funktion, die die Hinderniss logik beginnt
-    const obstacleGameLoop = () => {
-      const roadWidth = this.scale.width * 0.7; //die breite wird später korrigiert
-      const laneCount = 4;
-      const laneWidth = roadWidth / laneCount; //die lane breite wird ausgerechnet aus der menge lanes
-
-      const roadLeft = this.scale.width / 2 - roadWidth / 2; //die linke seite der road
-
-      const laneCenters = Array.from({ length: laneCount }, (_, i) => {
-        //die mitte der lane wird berechnet, und ins array getan
-        return roadLeft + laneWidth * (i + 0.5);
-      });
-
-      const x = laneCenters[Math.floor(Math.random() * laneCenters.length)]; //ein random lane aus dem array wird gewählt zum spawnen
-
-      const obstacle = new Obstacle(this, x, -100, laneWidth);
-
-      this.obstacles.push(obstacle);
-
-      //zufälliger delay der spawnrate
-      const delay = Math.random() * 2500 + 500;
-
-      this.time.delayedCall(delay, () => {
-        obstacleGameLoop();
-      });
-    };
-
-    obstacleGameLoop();
-
+  createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+  }
+
+  createWalls() {
     this.walls = [
       new Borders(this, 500, 700, 2, 600, 0x0000),
       new Borders(this, 1020 + 387, 700, 2, 600, 0x0000),
     ];
-    //collision physics for car and walls to set movement limit
+
     this.physics.add.collider(this.car, this.walls);
-    //Score- und Km-anzeigen initialisieren
+  }
+
+  createHud() {
     this.hud = new HUD(this, this.car);
-
-    //Score um 100 reduzieren als Beispiel
     this.car.decrease_score(100);
-
-    //Score mit 50 addieren als Beispiel
     this.car.increase_score(50);
   }
 
-  update(time, delta) {
+    createObstacle() {
+      const laneCount = 4;
+      const boaderWidth = 100;
+      const roadWidth = this.track1.displayWidth - (boaderWidth * 2);
+      const laneWidth = roadWidth / laneCount;
+      const roadLeftEdge = this.scale.width / 2 - roadWidth / 2;
+      const lane = Phaser.Math.Between(0, laneCount - 1);
+      const obstacleX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
+      const obstacle = new EnemyCar(this, obstacleX, -200);
+
+      this.obstacles.push(obstacle);
+
+      const delay = Phaser.Math.Between(500, 3000);
+      this.time.delayedCall(delay, () => this.createObstacle());
+    }
+
+  update(_, delta) {
     this.car.move();
 
     //alle obstacles die noch active sind, werden in den array gepackt, alle anderen werden gefiltert,...
