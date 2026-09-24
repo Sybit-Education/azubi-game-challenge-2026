@@ -2,6 +2,8 @@
 
 import Car from '../objects/Car.js';
 import Track from '../objects/Track.js';
+import Borders from '../objects/Walls.js';
+import HUD from '../objects/HUD.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -19,35 +21,27 @@ export default class GameScene extends Phaser.Scene {
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
-
-    this.add.text(this.scale.width - 20, 20, `Score: ${this.car.value}`, {
-      fontSize: '30px',
-    });
-
-    //Highscoreanzeige
-    this.distancetext = this.add
-      .text(this.scale.width - 300, 20, `Distance: ${this.car.distance}`, { fontSize: '30px' })
-      .setOrigin(1, 0);
-
-    //Scoreanzeige
-    this.scoretext = this.add
-      .text(this.scale.width - 20, 20, `Score: ${this.car.score}`, { fontSize: '30px' })
-      .setOrigin(1, 0);
+    this.walls = [
+      new Borders(this, 740, 700, 2, 600, 0x0000),
+      new Borders(this, 1170, 700, 2, 600, 0x0000),
+    ];
+    //collision physics for car and walls to set movement limit
+    this.physics.add.collider(this.car, this.walls);
+    //Score- und Km-anzeigen initialisieren
+    this.hud = new HUD(this, this.car);
 
     //Score um 100 reduzieren als Beispiel
     this.car.decrease_score(100);
 
     //Score mit 50 addieren als Beispiel
     this.car.increase_score(50);
-    //Score aktualisieren
-    this.scoretext.setText(`Score: ${this.car.score}`);
   }
 
   update() {
     this.car.move();
     this.car.update_meters();
-    this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
     this.track1.move();
     this.track2.move();
+    this.hud.update();
   }
 }
