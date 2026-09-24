@@ -1,6 +1,6 @@
 /* global Phaser */
 export default class Obstacle extends Phaser.GameObjects.Image {
-  constructor(scene, x, y, laneWidth) {
+  constructor(scene, x, y) {
     let obstacleImage;
 
     //nimmt eine random zahl
