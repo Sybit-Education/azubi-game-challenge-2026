@@ -109,7 +109,7 @@ export default class GameScene extends Phaser.Scene {
       return obstacle.active;
     });
     this.car.update_meters();
-    const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1);//+ this.car.meters * 1
+    const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1); //+ this.car.meters * 1
     //Die Leitplanken und die Straße Synchronisieren
     this.tracks.forEach((track) => {
       track.speed = targetTrackSpeed;
