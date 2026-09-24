@@ -38,12 +38,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setVelocityX(0);
   }
 
-  //increase meters by 1 every frame if car hasnt crashed or stopped
+  //increase meters while the game is running
   update_meters() {
-    if (this.body.velocity.x !== 0) {
-      this.meters += 1;
-      this.calculate_km();
-    }
+    this.meters += 1;
   }
 
   calculate_km() {
