@@ -23,12 +23,9 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     const targetWidth = laneWidth * 0.75;
     const aspectRatio = this.height / this.width;
 
-   
-
     this.gameScene = scene;
     //objekt wird erstellt
     scene.add.existing(this);
-
 
     this.setScale(0.2);
   }
