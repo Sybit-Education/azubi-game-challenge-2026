@@ -1,6 +1,7 @@
 /* global Phaser */
 
 import Car from '../objects/Car.js';
+import Obstacle from '../objects/Obstacle.js';
 import Track from '../objects/Track.js';
 import Borders from '../objects/Walls.js';
 import HUD from '../objects/HUD.js';
@@ -14,11 +15,52 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
     this.load.image('track', 'sprites/road.png');
+    
+    this.load.image('placeholder1', 'sprites/placeholder1.png');
+    this.load.image('placeholder2', 'sprites/placeholder2.png');
+    this.load.image('placeholder3', 'sprites/placeholder3.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    //array mit allen obstacles
+    this.obstacles = [];
+
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+
+    //funktion, die die Hinderniss logik beginnt
+    const obstacleGameLoop = () => {
+      const roadWidth = this.scale.width * 0.7; //die breite wird später korrigiert
+      const laneCount = 4;
+      const laneWidth = roadWidth / laneCount; //die lane breite wird ausgerechnet aus der menge lanes
+
+      const roadLeft = this.scale.width / 2 - roadWidth / 2; //die linke seite der road
+
+      const laneCenters = Array.from({ length: laneCount }, (_, i) => {
+        //die mitte der lane wird berechnet, und ins array getan
+        return roadLeft + laneWidth * (i + 0.5);
+      });
+
+      const x = laneCenters[Math.floor(Math.random() * laneCenters.length)]; //ein random lane aus dem array wird gewählt zum spawnen
+
+      const obstacle = new Obstacle(this, x, -100, laneWidth);
+
+      this.obstacles.push(obstacle);
+
+      //zufälliger delay der spawnrate
+      const delay = Math.random() * 2500 + 500;
+      console.log(delay);
+
+      this.time.delayedCall(delay, () => {
+        obstacleGameLoop();
+      });
+    };
+
+    obstacleGameLoop();
+
+    this.add.text(this.scale.width - 20, 20, `Score: ${this.car.value}`, {
+      fontSize: '30px',
+    });
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
     this.walls = [
@@ -37,11 +79,25 @@ export default class GameScene extends Phaser.Scene {
     this.car.increase_score(50);
   }
 
-  update() {
+  update(time, delta) {
     this.car.move();
+
+    //alle obstacles die noch active sind, werden in den array gepackt, alle anderen werden gefiltert,...
+    // ...damit sie nicht unendlich mal .move() auführen, während sie deleted sind
+    this.obstacles = this.obstacles.filter((obstacle) => {
+      obstacle.move(delta);
+      return obstacle.active;
+    });
     this.car.update_meters();
-    this.track1.move();
-    this.track2.move();
+    this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
+
+    const targetTrackSpeed = 300 + this.car.distance * 0.005;
+    this.track1.speed = targetTrackSpeed;
+    this.track2.speed = targetTrackSpeed;
+    console.log(targetTrackSpeed);
+
+    this.track1.move(delta);
+    this.track2.move(delta);
     this.hud.update();
   }
 }
