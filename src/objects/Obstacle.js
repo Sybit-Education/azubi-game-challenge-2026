@@ -26,7 +26,7 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     const targetWidth = laneWidth * 0.75;
     const aspectRatio = this.height / this.width;
 
-      this.setDisplaySize(targetWidth, targetWidth * aspectRatio);
+    this.setDisplaySize(targetWidth, targetWidth * aspectRatio);
   }
   //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
