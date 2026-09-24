@@ -5,7 +5,6 @@ export default class Obstacle extends Phaser.GameObjects.Image {
 
     //nimmt eine random zahl
     const randomInt = Math.floor(Math.random() * 3) + 1;
-    console.log(randomInt);
 
     //die random zahl entscheided welche sprite geladen wird
     //PLACEHOLDER ÄNDERN FÜR ANDERE SPRITES
@@ -30,7 +29,7 @@ export default class Obstacle extends Phaser.GameObjects.Image {
   }
   //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
-    this.speed = 300 + this.gameScene.car.meters * 0.005;
+    this.speed = 600 + this.gameScene.car.meters * 1;
     this.y += (this.speed * delta) / 1000;
 
     const buffer = 100;
@@ -38,7 +37,6 @@ export default class Obstacle extends Phaser.GameObjects.Image {
 
     //wenn ende erreicht und auserhalb sichtweite, delete obstacle
     if (this.y >= bottomLimit) {
-      console.log('delete');
       this.destroy();
     }
   }
