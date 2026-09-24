@@ -27,27 +27,32 @@ export default class GameScene extends Phaser.Scene {
 
     //funktion, die die Hinderniss logik beginnt
     const obstacleGameLoop = () => {
-      //straßenbreite
-      const roadWidth = this.scale.width * 0.3;
-      const laneWidth = roadWidth / 2;
-      const leftLane = this.scale.width / 2 - laneWidth / 2;
-      const rightLane = this.scale.width / 2 + laneWidth / 2;
+      const roadWidth = this.scale.width * 0.7; //die breite wird später korrigiert
+      const laneCount = 4;
+      const laneWidth = roadWidth / laneCount; //die lane breite wird ausgerechnet aus der menge lanes
 
-      //es wird entschieden für jeweiligen obstacle, ob links oder rechts zu spawnen
-      const x = Math.random() < 0.5 ? leftLane : rightLane;
+      const roadLeft = this.scale.width / 2 - roadWidth / 2; //die linke seite der road
+
+      const laneCenters = Array.from({ length: laneCount }, (_, i) => { //die mitte der lane wird berechnet, und ins array getan
+        return roadLeft + laneWidth * (i + 0.5);
+      });
+
+      const x = laneCenters[Math.floor(Math.random() * laneCenters.length)]; //ein random lane aus dem array wird gewählt zum spawnen
 
       const obstacle = new Obstacle(this, x, -100, laneWidth);
 
       this.obstacles.push(obstacle);
 
       //zufälliger delay der spawnrate
-      const delay = Math.random() * 3000 + 1000;
+      const delay = Math.random() * 2500 + 500;
       console.log(delay);
 
       this.time.delayedCall(delay, () => {
         obstacleGameLoop();
       });
     };
+
+    
 
     obstacleGameLoop();
 
@@ -91,7 +96,15 @@ export default class GameScene extends Phaser.Scene {
     });
     this.car.update_meters();
     this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
-    this.track1.move();
-    this.track2.move();
+    
+    const targetTrackSpeed = 300 + this.car.distance * 0.005;
+    this.track1.speed = targetTrackSpeed;
+    this.track2.speed = targetTrackSpeed;
+    console.log(targetTrackSpeed)
+
+    this.track1.move(delta);
+    this.track2.move(delta);
+
+    
   }
 }
