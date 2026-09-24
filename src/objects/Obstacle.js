@@ -1,10 +1,10 @@
 /* global Phaser */
 export default class Obstacle extends Phaser.GameObjects.Image {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, laneWidth) {
     let obstacleImage;
 
     //nimmt eine random zahl
-    let randomInt = Math.round(Math.random() * 3);
+    const randomInt = Math.floor(Math.random() * 3) + 1;
     console.log(randomInt);
 
     //die random zahl entscheided welche sprite geladen wird
@@ -23,12 +23,14 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     this.gameScene = scene;
     //objekt wird erstellt
     scene.add.existing(this);
+    const targetWidth = laneWidth * 0.75;
+    const aspectRatio = this.height / this.width;
 
-    this.setScale(0.2);
+      this.setDisplaySize(targetWidth, targetWidth * aspectRatio);
   }
   //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
-    this.speed = 300 + this.gameScene.car.distance * 0.005;
+    this.speed = 300 + this.gameScene.car.meters * 0.005;
     this.y += (this.speed * delta) / 1000;
 
     const buffer = 100;

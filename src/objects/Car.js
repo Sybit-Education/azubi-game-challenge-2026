@@ -35,7 +35,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   //stop can be used for collisions
   stop() {
-    this.speed = 0;
+    this.setVelocityX(0);
   }
 
   //increase meters by 1 every frame if car hasnt crashed or stopped
