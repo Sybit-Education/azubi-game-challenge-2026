@@ -20,9 +20,6 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     //(sonst laden die bilder nicht bzw obstacleImage wird kein bild zugewiesen)
     super(scene, x, y, obstacleImage);
 
-    const targetWidth = laneWidth * 0.75;
-    const aspectRatio = this.height / this.width;
-
     this.gameScene = scene;
     //objekt wird erstellt
     scene.add.existing(this);
