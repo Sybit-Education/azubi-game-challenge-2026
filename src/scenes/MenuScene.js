@@ -5,18 +5,45 @@ export default class MenuScene extends Phaser.Scene {
     super('MenuScene');
   }
 
-  create() {
-    const centerX = this.cameras.main.width / 2;
-    this.cameras.main.setBackgroundColor('#000056')
+preload() {
+  this.load.image(
+    "playButton",
+    "sprites/buttonTemplate.png");
+}
 
-    this.add.text(centerX, 100, 'SYBIT KART', {
+  create() {
+
+    const createButton = (x, y, label) => {
+      const button = this.add.image(x, y, "playButton")
+        .setScale(0.35)
+        .setInteractive();
+
+      const text = this.add.text(x, y, label, {
+        fontFamily: "Tiny5",
+        fontSize: "62px",
+        color: "#464646",
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+
+      return {button, text};
+    }
+
+    const centerX = this.cameras.main.centerX 
+    const centerY = this.cameras.main.centerY
+    const width = this.cameras.main.width
+    const height = this.cameras.main.height
+
+    this.cameras.main.setBackgroundColor('#6f3198');
+
+    this.add.text(centerX, 125, 'SYBIT KART', {
     fontFamily: 'Tiny5',
-    fontSize: '96px',
+    fontSize: '150px',
     color: '#ffffff'
     })
     .setOrigin(0.5);
 
-    this.add.text(1600, 1250, "v0.1", {
+    this.add.text(width - 50, height - 30, "v0.1", {
       fontFamily: 'Tiny5', 
       fontSize: '32px',
       fontStyle: 'bold',
@@ -28,110 +55,69 @@ export default class MenuScene extends Phaser.Scene {
     })
     .setOrigin(0.5);
 
-    let button0 = this.add
-      .text(centerX, 300, 'Start Game', {
-        backgroundColor: "#C1C3E9",
-        fontSize: '32px',
-        fontFamily: 'Tiny5',
-        fontStyle: 'bold',
-        color: '#000000',
-        padding: {
-          x: 10,
-          y: 5,
-        },
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-      const originalY0 = button0.y;
+      const playButton = createButton(centerX, centerY - 100, "PLAY")
 
-      const button1 = this.add
-      .text(centerX, 380, 'Settings', {
-        fontSize: '32px',
-        fontFamily: 'Tiny5',
-        fontStyle: 'bold',
-        backgroundColor: "#C1C3E9",
-        color: '#000000',
-        padding: {
-          x: 10,
-          y: 5,
-        },
-      })
-      .setOrigin(0.5)
-      .setInteractive();
+      const settingsButton = createButton(centerX, centerY + 100, "SETTINGS")
 
-      const originalY1 = button1.y;
+      const creditsButton = createButton(centerX, centerY + 300, "CREDITS")
 
-      const button2 = this.add
-        .text(centerX, 460, 'Credits', {
-        fontSize: '32px',
-        backgroundColor: "#C1C3E9",
-        fontFamily: 'Tiny5',
-        fontStyle: 'bold',
-        color: '#000000',
-        padding: {
-          x: 10,
-          y: 5,
-        },
-      })
-      .setOrigin(0.5)
-      .setInteractive();
+      const creditsButtonY = creditsButton.y;
 
-      const originalY2 = button2.y;
-
-    button0.on('pointerdown', () => {
+    playButton.on('pointerdown', () => {
       this.scene.start('GameScene');
     });
 
-    button0.on('pointerover', () => {
+    playButton.on('pointerover', () => {
       this.tweens.add({
-        targets: button0,
-        y: originalY0 - 5,
-        scale: 1.1,
+        targets: playButton,
+        y: playButton.y - 5,
+        scale: 0.27,
         duration: 100
       });
+
     });
 
-    button0.on('pointerout', () => {
+    playButton.on('pointerout', () => {
     this.tweens.add({
-      targets: button0,
-      y: originalY0,
-      scale: 1.0,
+      targets: playButton,
+      y: playButtonY,
+      scale: 0.25,
       duration: 100
     })
     });
 
-    button1.on('pointerover', () => {
+    settingsButton.on('pointerover', () => {
       this.tweens.add({
-        targets: button1,
-        y: originalY1 - 5,
-        scale: 1.1,
+        targets: settingsButton,
+        y: settingsButtonY - 5,
+        scale: 0.27,
         duration: 100
       });
     });
 
-    button1.on('pointerout', () => {
+    settingsButton.on('pointerout', () => {
     this.tweens.add({
-      targets: button1,
-      y: originalY1,
-      scale: 1.0,
+      targets: settingsButton,
+      y: settingsButtonY,
+      scale: 0.25,
       duration: 100
     })
     });
 
-    button2.on('pointerover', () => {
+    creditsButton.on('pointerover', () => {
       this.tweens.add({
-        targets: button2,
-        scale: 1.1,
-        y: originalY2 - 5,
+        targets: creditsButton,
+        scale: 0.27,
+        y: creditsButtonY - 5,
         duration: 100
       });
     });
 
-    button2.on('pointerout', () => {
+    creditsButton.on('pointerout', () => {
     this.tweens.add({
-      targets: button2,
-      scale: 1.0,
-      y: originalY2,
+      targets: creditsButton,
+      scale: 0.25,
+      y: creditsButtonY,
       duration: 100
     })
     });
