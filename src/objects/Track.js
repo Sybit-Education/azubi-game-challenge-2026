@@ -16,7 +16,7 @@ export default class Track extends Phaser.GameObjects.Image {
     this.y += (this.speed * delta) / 1000;
 
     if (this.y >= this.scene.scale.height) {
-      this.y = -this.scene.scale.height;
+      this.y -= this.displayHeight * 2;
     }
   }
 }
