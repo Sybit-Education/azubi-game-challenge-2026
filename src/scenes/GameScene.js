@@ -20,15 +20,27 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    //array mit allen obstacles
     this.obstacles = [];
 
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
 
+    //funktion, die die Hinderniss logik beginnt
     const obstacleGameLoop = () => {
-      const obstacle = new Obstacle(this, this.scale.width / 2, 0);
+      //straßenbreite
+      const roadWidth = this.scale.width * 0.3;
+      const laneWidth = roadWidth / 2;
+      const leftLane = this.scale.width / 2 - laneWidth / 2;
+      const rightLane = this.scale.width / 2 + laneWidth / 2;
+
+      //es wird entschieden für jeweiligen obstacle, ob links oder rechts zu spawnen
+      const x = Math.random() < 0.5 ? leftLane : rightLane;
+
+      const obstacle = new Obstacle(this, x, -100, laneWidth);
 
       this.obstacles.push(obstacle);
 
+      //zufälliger delay der spawnrate
       const delay = Math.random() * 3000 + 1000;
       console.log(delay);
 
@@ -70,8 +82,12 @@ export default class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     this.car.move();
-    this.obstacles.forEach((Obstacle) => {
-      Obstacle.move(delta);
+
+    //alle obstacles die noch active sind, werden in den array gepackt, alle anderen werden gefiltert,...
+    // ...damit sie nicht unendlich mal .move() auführen, während sie deleted sind
+    this.obstacles = this.obstacles.filter((obstacle) => {
+      obstacle.move(delta);
+      return obstacle.active;
     });
     this.car.update_meters();
     this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
