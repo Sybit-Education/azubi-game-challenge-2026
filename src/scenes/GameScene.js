@@ -63,8 +63,6 @@ export default class GameScene extends Phaser.Scene {
       new Borders(this, 500, 700, 2, 600, 0x0000),
       new Borders(this, 1020 + 387, 700, 2, 600, 0x0000),
     ];
-
-    console.log(this.track1.getBounds());
     //collision physics for car and walls to set movement limit
     this.physics.add.collider(this.car, this.walls);
     //Score- und Km-anzeigen initialisieren
@@ -87,7 +85,7 @@ export default class GameScene extends Phaser.Scene {
       return obstacle.active;
     });
     this.car.update_meters();
-    const targetTrackSpeed = 600 + this.car.meters * 1;
+    const targetTrackSpeed = 600 + this.car.meters; //+ this.car.meters * 1
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
 
