@@ -12,8 +12,6 @@ export default class Track extends Phaser.GameObjects.Image {
     this.setOrigin(0.5, 0);
   }
 
- 
-
   move(delta) {
     this.y += (this.speed * delta) / 1000;
 

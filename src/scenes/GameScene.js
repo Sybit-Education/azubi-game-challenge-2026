@@ -33,7 +33,8 @@ export default class GameScene extends Phaser.Scene {
 
       const roadLeft = this.scale.width / 2 - roadWidth / 2; //die linke seite der road
 
-      const laneCenters = Array.from({ length: laneCount }, (_, i) => { //die mitte der lane wird berechnet, und ins array getan
+      const laneCenters = Array.from({ length: laneCount }, (_, i) => {
+        //die mitte der lane wird berechnet, und ins array getan
         return roadLeft + laneWidth * (i + 0.5);
       });
 
@@ -51,8 +52,6 @@ export default class GameScene extends Phaser.Scene {
         obstacleGameLoop();
       });
     };
-
-    
 
     obstacleGameLoop();
 
@@ -96,15 +95,13 @@ export default class GameScene extends Phaser.Scene {
     });
     this.car.update_meters();
     this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
-    
+
     const targetTrackSpeed = 300 + this.car.distance * 0.005;
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
-    console.log(targetTrackSpeed)
+    console.log(targetTrackSpeed);
 
     this.track1.move(delta);
     this.track2.move(delta);
-
-    
   }
 }
