@@ -12,8 +12,8 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'sprites/race_car.png');
-    this.load.image('track', 'sprites/race_track1.png');
+    this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
+    this.load.image('track', 'sprites/road.png');
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -22,8 +22,8 @@ export default class GameScene extends Phaser.Scene {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
     this.walls = [
-      new Borders(this, 740, 700, 2, 600, 0x0000),
-      new Borders(this, 1170, 700, 2, 600, 0x0000),
+      new Borders(this, 770, 700, 2, 600, 0x0000),
+      new Borders(this, 1150, 700, 2, 600, 0x0000),
     ];
     //collision physics for car and walls to set movement limit
     this.physics.add.collider(this.car, this.walls);
