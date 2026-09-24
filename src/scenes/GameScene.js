@@ -88,9 +88,7 @@ export default class GameScene extends Phaser.Scene {
       return obstacle.active;
     });
     this.car.update_meters();
-    this.distancetext.setText(`Distance: ${(this.car.distance / 1000).toFixed(2)} km`);
-
-    const targetTrackSpeed = 300 + this.car.distance * 0.005;
+    const targetTrackSpeed = 300 + this.car.meters * 0.005;
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
     console.log(targetTrackSpeed);
