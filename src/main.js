@@ -13,7 +13,12 @@ const config = {
   },
 
   backgroundColor: '#000000',
-
+  physics: {
+    default: 'arcade',
+    aracde: {
+      debug: true,
+    },
+  },
   scene: [MenuScene, GameScene],
 };
 
