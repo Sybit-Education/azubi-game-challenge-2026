@@ -1,6 +1,6 @@
 /* global Phaser */
 export default class Obstacle extends Phaser.GameObjects.Image {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, laneWidth) {
     let obstacleImage;
 
     //nimmt eine random zahl
@@ -8,6 +8,7 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     console.log(randomInt);
 
     //die random zahl entscheided welche sprite geladen wird
+    //PLACEHOLDER ÄNDERN FÜR ANDERE SPRITES
     if (randomInt == 1) {
       obstacleImage = 'placeholder1';
     } else if (randomInt == 2) {
@@ -15,17 +16,33 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     } else {
       obstacleImage = 'placeholder3';
     }
-
+    //super ist hier und kann hier bleiben (wenn es funktioniert, lieber nicht anfassen lol :))
+    //(sonst laden die bilder nicht bzw obstacleImage wird kein bild zugewiesen)
     super(scene, x, y, obstacleImage);
 
+    const targetWidth = laneWidth * 0.75;
+    const aspectRatio = this.height / this.width;
+
+    this.setDisplaySize(targetWidth, targetWidth * aspectRatio);
+
+    this.gameScene = scene;
     //objekt wird erstellt
     scene.add.existing(this);
 
-    this.speed = 200;
+    this.speed = 300;
     this.setScale(0.2);
   }
-
+  //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
     this.y += (this.speed * delta) / 1000;
+
+    const buffer = 100;
+    const bottomLimit = this.gameScene.scale.height + this.displayHeight / 2 + buffer;
+
+    //wenn ende erreicht und auserhalb sichtweite, delete obstacle
+    if (this.y >= bottomLimit) {
+      console.log('delete');
+      this.destroy();
+    }
   }
 }
