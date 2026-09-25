@@ -6,12 +6,12 @@ export default class Obstacle extends Phaser.GameObjects.Image {
     this.gameScene = scene;
     scene.add.existing(this);
     this.setScale(0.5);
-    this.setRotation(Phaser.Math.DegToRad(180));
+    //this.setRotation(Phaser.Math.DegToRad(180));
     this.setOrigin(0.5, 0.5);
   }
   //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
   move(delta) {
-    this.speed = Math.min(1500, 600 + this.gameScene.car.meters * 0.1);
+    this.speed = Math.min(1500, 300 + this.gameScene.car.meters * 0.1);
     console.log(this.speed);
     this.y += (this.speed * delta) / 1000;
 
