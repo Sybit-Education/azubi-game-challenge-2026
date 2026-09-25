@@ -2,11 +2,10 @@
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
-
+import PopUpScene from './scenes/PopUpScene.js';
 // Global phaser config
 const config = {
   type: Phaser.AUTO,
-
   scale: {
     mode: Phaser.Scale.RESIZE,
   },
@@ -18,7 +17,7 @@ const config = {
       debug: true,
     },
   },
-  scene: [MenuScene, GameScene, LoadingScene],
+  scene: [MenuScene, GameScene, LoadingScene, PopUpScene],
 };
 
 // Create game
