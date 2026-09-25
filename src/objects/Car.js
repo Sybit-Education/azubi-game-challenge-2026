@@ -17,11 +17,16 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   move() {
     this.setVelocityX(0);
+    this.setAngle(0); //reset car angle when not moving
+    //car move left
     if (this.keys.A.isDown) {
       this.setVelocityX(-500);
+      this.setAngle(-3); //angled to the left
     }
+    //car move right
     if (this.keys.D.isDown) {
       this.setVelocityX(500);
+      this.setAngle(3); //angled to the right
     }
   }
 
