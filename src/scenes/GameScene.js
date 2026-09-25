@@ -27,13 +27,12 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
-    this.obstacles = [];
-    this.coins = [];
+    this.roadObjects = [];
     this.createPlayer();
     this.createTrack();
     this.createWalls();
-    this.createObstacle();
-    this.createCoin();
+    this.createRoadObject('obstacle');
+    this.createRoadObject('coin');
     this.createHud();
   }
 
@@ -75,54 +74,59 @@ export default class GameScene extends Phaser.Scene {
     this.car.increase_score(50);
   }
 
-  createObstacle() {
+  // road objects are obstacles and coins
+  createRoadObject(type) { 
     const laneCount = 4;
     const laneWidth = this.track1.displayWidth / laneCount;
     const roadLeftEdge = this.scale.width / 2 - this.track1.displayWidth / 2;
     const lane = Phaser.Math.Between(0, laneCount - 1);
-    const obstacleX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
-    const obstacle = new EnemyCar(this, obstacleX, -200);
+    const roadObjectX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
+    const spawnY = -200;
 
-    this.obstacles.push(obstacle);
+    if (this.positionFree(lane, spawnY)) {
+      let roadObject;
+
+      if (type === 'coin') {
+        roadObject = new Coin(this, roadObjectX, spawnY, lane);
+        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+      } else {
+        roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
+      }
+
+      this.roadObjects.push(roadObject);
+    }
 
     const delay = Phaser.Math.Between(500, 3000);
-    this.time.delayedCall(delay, () => this.createObstacle());
+    this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
 
-  createCoin() {
-    const laneCount = 4;
-    const laneWidth = this.track1.displayWidth / laneCount;
-    const roadLeftEdge = this.scale.width / 2 - this.track1.displayWidth / 2;
-    const lane = Phaser.Math.Between(0, laneCount - 1);
-    const coinX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
-    const coin = new Coin(this, coinX, -200);
+  // Checks if the lane is free for spawning a new road object
+  positionFree(lane, spawnY) {
+    const minimumDistance = 200; // Minimum distance between road objects
 
-    this.coins.push(coin);
-    this.physics.add.overlap(this.car, coin, this.collectCoin, undefined, this);
+    return this.roadObjects.every((roadObject) => {
+      if (roadObject.lane !== lane) {
+        return true;
+      }
 
-    const delay = Phaser.Math.Between(500, 3000);
-    this.time.delayedCall(delay, () => this.createCoin());
+      const distance = Math.abs(roadObject.y - spawnY);
+
+      return distance >= minimumDistance;
+    });
   }
 
   collectCoin(car, coin) {
     coin.destroy();
-    car.increase_score(car.value);
+    car.increase_score(coin.value);
   }
 
+  // Update the game state every frame
   update(_, delta) {
     this.car.move();
 
-    //alle obstacles die noch active sind, werden in den array gepackt, alle anderen werden gefiltert,...
-    // ...damit sie nicht unendlich mal .move() auführen, während sie deleted sind
-    this.obstacles = this.obstacles.filter((obstacle) => {
-      obstacle.move(delta);
-      return obstacle.active;
-    });
-
-    //alle coins die noch active sind, werden in den array gepackt, alle anderen werden gefiltert
-    this.coins = this.coins.filter((coin) => {
-      coin.move(delta);
-      return coin.active;
+    this.roadObjects = this.roadObjects.filter((roadObject) => {
+      roadObject.move(delta);
+      return roadObject.active;
     });
     
     this.car.update_meters();

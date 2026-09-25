@@ -1,26 +1,13 @@
-/* global Phaser */
+import RoadObject from './RoadObject.js';
 
-export default class Collectable extends Phaser.GameObjects.Image {
-  constructor(scene, x, y, texture) {
-    super(scene, x, y, texture);
+export default class Collectable extends RoadObject {
+  constructor(scene, x, y, texture, lane, value) {
+    super(scene, x, y, texture, lane);
 
-    this.GameScene = scene;
-    scene.add.existing(this);
-    scene.physics.add.existing(this);
-    this.setOrigin(0.5, 0.5);
+    this.value = value;
   }
 
-  move(delta) {
-    this.speed = Math.min(1500, 600 + this.GameScene.car.meters * 0.1);
-    console.log(this.speed);
-    this.y += (this.speed * delta) / 1000;
-
-    const buffer = 100;
-    const bottomLimit = this.GameScene.scale.height + this.displayHeight / 2 + buffer;
-
-    //wenn ende erreicht und auserhalb sichtweite, delete obstacle
-    if (this.y >= bottomLimit) {
-      this.destroy();
-    }
+  collect() {
+    this.destroy();
   }
 }
