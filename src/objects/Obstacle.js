@@ -1,7 +1,7 @@
 /* global Phaser */
 export default class Obstacle extends Phaser.GameObjects.Image {
-  constructor(scene, x, y, textureKey) {
-    super(scene, x, y, textureKey);
+  constructor(scene, x, y, texture) {
+    super(scene, x, y, texture);
 
     this.gameScene = scene;
     scene.add.existing(this);
