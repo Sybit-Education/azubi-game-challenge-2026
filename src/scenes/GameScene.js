@@ -75,7 +75,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // road objects are obstacles and coins
-  createRoadObject(type) { 
+  createRoadObject(type) {
     const laneCount = 4;
     const laneWidth = this.track1.displayWidth / laneCount;
     const roadLeftEdge = this.scale.width / 2 - this.track1.displayWidth / 2;
@@ -128,7 +128,7 @@ export default class GameScene extends Phaser.Scene {
       roadObject.move(delta);
       return roadObject.active;
     });
-    
+
     this.car.update_meters();
     const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1);
     this.track1.speed = targetTrackSpeed;
