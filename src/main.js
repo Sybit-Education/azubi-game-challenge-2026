@@ -1,9 +1,9 @@
 /* global Phaser */
-
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
 
+// Global phaser config
 const config = {
   type: Phaser.AUTO,
 
@@ -21,4 +21,5 @@ const config = {
   scene: [MenuScene, GameScene, LoadingScene],
 };
 
+// Create game
 new Phaser.Game(config);
