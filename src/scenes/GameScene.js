@@ -106,5 +106,12 @@ export default class GameScene extends Phaser.Scene {
     this.track1.move(delta);
     this.track2.move(delta);
     this.hud.update();
+
+    if (this.car.calculate_km() == 0.5) {
+      this.scene.start('GameoverScene', {
+        distance: this.car.calculate_km(),
+        score: this.car.score,
+      });
+    }
   }
 }
