@@ -22,6 +22,8 @@ create() {
     })
     .setOrigin(0.5);
 
+    this.add.rectangle
+
     this.add.text(centerX, centerY + 200, "Preparing SyCity for high speeds...", {
         fontFamily: "Tiny5",
         fontSize: "72px",
