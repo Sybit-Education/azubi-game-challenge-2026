@@ -1,6 +1,7 @@
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
     super('LoadingScene');
+    Phaser.Input.Keyboard.KeyCodes;
 }
 
 preload() {
@@ -11,7 +12,7 @@ create() {
 
     this.cameras.main.setBackgroundColor("#6f3198")
 
-    // Navigation and orientation variables
+    // Navigation, orientation, progress and scaling variables
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.centerY;
     const width = this.cameras.main.width;
@@ -23,6 +24,8 @@ create() {
       width / 1920,
       height / 1080
     );
+    let progress = 0;
+    const skipKey = "SPACE";
 
     // SYBIT KART Logo placeholder
     this.add.text(centerX, 200, 'SYBIT KART', {
@@ -36,6 +39,34 @@ create() {
     // Loading bar
     const barBg = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff)
     const fillBar = this.add.rectangle(centerX - barWidth / 2, centerY - spacing, 0, barHeight - 4, 0xcbfc2a)
+
+    this.tweens.add({
+        targets: fillBar,
+        width: barWidth,
+        duration: 3000
+    });
+
+    this.time.addEvent({
+        delay: 50,
+        repeat: 100,
+
+        callback: () => {
+            progress++;
+             if (progress >= 100) {
+                this.scene.start("GameScene");
+            }
+        }
+    })
+
+    this.input.keyboard.on('keydown-SPACE', () => {
+        this.scene.start("GameScene")
+    })
+
+    this.add.text(centerX, centerY + spacing * 2, "Press SPACE to skip", {
+        fontFamily: "Tiny5",
+        fontSize: `${32 * uiScale}px`,
+        color: "#ffffff"
+    }).setOrigin(0.5);
 
 
     // Funny comment, randomly selected
