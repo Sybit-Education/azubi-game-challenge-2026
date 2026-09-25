@@ -15,37 +15,44 @@ preload() {
 
     const createButton = (x, y, label) => {
       const button = this.add.image(x, y, "playButton")
-        .setScale(0.35)
+        .setScale(0.37 * uiScale)
         .setInteractive();
 
       const text = this.add.text(x, y, label, {
         fontFamily: "Tiny5",
-        fontSize: "62px",
+        fontSize: `${62 * uiScale}px`,
         color: "#464646",
       })
-      .setOrigin(0.5)
-      .setInteractive()
+      .setOrigin(0.5);
 
       return {button, text};
     }
 
-    const centerX = this.cameras.main.centerX 
-    const centerY = this.cameras.main.centerY
-    const width = this.cameras.main.width
-    const height = this.cameras.main.height
+    // Variables for orientation, positioning and scaling (if you read this, you're cool :))
+    const centerX = this.cameras.main.centerX;
+    const centerY = this.cameras.main.centerY;
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const spacing = height * 0.15;
+    const uiScale = Math.min(
+      width / 1920,
+      height / 1080
+    );
 
     this.cameras.main.setBackgroundColor('#6f3198');
 
+    // SYBIT KART Logo placeholder
     this.add.text(centerX, 125, 'SYBIT KART', {
-    fontFamily: 'Tiny5',
-    fontSize: '150px',
-    color: '#ffffff'
-    })
-    .setOrigin(0.5);
+      fontFamily: 'Tiny5',
+      fontSize: `${150 * uiScale}px`,
+      color: '#ffffff'
+      })
+      .setOrigin(0.5);
 
+    // Version tracker
     this.add.text(width - 50, height - 30, "v0.1", {
       fontFamily: 'Tiny5', 
-      fontSize: '32px',
+      fontSize: `${32 * uiScale}px`,
       fontStyle: 'bold',
       color: '#ffffff',
       padding: {
@@ -55,71 +62,73 @@ preload() {
     })
     .setOrigin(0.5);
 
-      const playButton = createButton(centerX, centerY - 100, "PLAY")
+      // Buttons + Text (function defined above)
+      const playButton = createButton(centerX, centerY - spacing, "START")
+      const settingsButton = createButton(centerX, centerY, "SETTINGS")
+      const creditsButton = createButton(centerX, centerY + spacing, "CREDITS")
 
-      const settingsButton = createButton(centerX, centerY + 100, "SETTINGS")
+      // List of useful button-specific variables
+      const playButtonY = playButton.button.y;
+      const settingsButtonY = settingsButton.button.y;
+      const creditsButtonY = creditsButton.button.y;
 
-      const creditsButton = createButton(centerX, centerY + 300, "CREDITS")
+      // Hover and unhover conditions
 
-      const creditsButtonY = creditsButton.y;
-
-    playButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
-    });
-
-    playButton.on('pointerover', () => {
+    playButton.button.on('pointerover', () => {
       this.tweens.add({
-        targets: playButton,
-        y: playButton.y - 5,
-        scale: 0.27,
+        targets: [playButton.button, playButton.text],
+        y: playButton.button.y - 5,
         duration: 100
       });
 
     });
 
-    playButton.on('pointerout', () => {
+    playButton.button.on('pointerout', () => {
     this.tweens.add({
-      targets: playButton,
+      targets: [playButton.button, playButton.text],
       y: playButtonY,
-      scale: 0.25,
       duration: 100
     })
     });
 
-    settingsButton.on('pointerover', () => {
+    settingsButton.button.on('pointerover', () => {
       this.tweens.add({
-        targets: settingsButton,
-        y: settingsButtonY - 5,
-        scale: 0.27,
+        targets: [settingsButton.button, settingsButton.text],
+        y: settingsButton.button.y - 5,
         duration: 100
       });
     });
 
-    settingsButton.on('pointerout', () => {
+    settingsButton.button.on('pointerout', () => {
     this.tweens.add({
-      targets: settingsButton,
+      targets: [settingsButton.button, settingsButton.text],
       y: settingsButtonY,
-      scale: 0.25,
       duration: 100
     })
     });
 
-    creditsButton.on('pointerover', () => {
+    creditsButton.button.on('pointerover', () => {
       this.tweens.add({
-        targets: creditsButton,
-        scale: 0.27,
-        y: creditsButtonY - 5,
+        targets: [creditsButton.button, creditsButton.text],
+        y: creditsButton.button.y - 5,
         duration: 100
       });
     });
 
-    creditsButton.on('pointerout', () => {
+    creditsButton.button.on('pointerout', () => {
     this.tweens.add({
-      targets: creditsButton,
-      scale: 0.25,
+      targets: [creditsButton.button, creditsButton.text],
       y: creditsButtonY,
       duration: 100
     })
     });
+
+    // Click events 
+
+      playButton.button.on('pointerdown', () => {
+      this.scene.start('GameScene');
+
+      });
   }
 }
+
