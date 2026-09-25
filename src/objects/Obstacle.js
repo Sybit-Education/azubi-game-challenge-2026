@@ -1,4 +1,4 @@
-/* global Phaser */
+//hier kein phaser importieren solange es nicht genutzt wird!!! sonst tweaked lint
 
 import RoadObject from './RoadObject.js';
 
