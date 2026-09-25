@@ -102,7 +102,7 @@ export default class GameScene extends Phaser.Scene {
 
   // Checks if the lane is free for spawning a new road object
   positionFree(lane, spawnY) {
-    const minimumDistance = 200; // Minimum distance between road objects
+    const minimumDistance = 500; // Minimum distance between road objects
 
     return this.roadObjects.every((roadObject) => {
       if (roadObject.lane !== lane) {

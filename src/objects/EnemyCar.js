@@ -9,4 +9,18 @@ export default class EnemyCar extends Obstacle {
 
     super(scene, x, y, texture, lane);
   }
+
+  move(delta) {
+    this.speed = Math.min(1500, 300 + this.gameScene.car.meters * 0.1);
+
+    this.y += (this.speed * delta) / 1000;
+
+    const buffer = 100;
+
+    const bottomLimit = this.gameScene.scale.height + this.displayHeight / 2 + buffer;
+
+    if (this.y >= bottomLimit) {
+      this.destroy();
+    }
+  }
 }

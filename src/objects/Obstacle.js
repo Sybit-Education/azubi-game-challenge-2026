@@ -7,6 +7,5 @@ export default class Obstacle extends RoadObject {
     super(scene, x, y, texture, lane);
 
     this.setScale(0.5);
-    this.setRotation(Phaser.Math.DegToRad(180));
   }
 }
