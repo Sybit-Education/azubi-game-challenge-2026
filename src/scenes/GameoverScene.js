@@ -32,15 +32,13 @@ export default class GameoverScene extends Phaser.Scene {
       fontSize: '20px',
     };
 
-    const gameover = this.add
-      .text(this.width / 2, this.height / 3, 'GAMEOVER', gameOverStyle)
-      .setOrigin(0.5);
+    this.add.text(this.width / 2, this.height / 3, 'GAMEOVER', gameOverStyle).setOrigin(0.5);
 
-    const totalDistance = this.add
+    this.add
       .text(this.width / 2, this.height / 15, `Total Distance: ${this.distance}`, statsStyle)
       .setOrigin(0.5);
 
-    const highScore = this.add
+    this.add
       .text(this.width / 2, this.height / 10, `High Score: ${this.score}`, statsStyle)
       .setOrigin(0.5);
 
