@@ -8,7 +8,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     scene.physics.add.existing(this);
 
     this.keys = scene.input.keyboard.addKeys('A,D');
-    this.score = 1000000; //Score = 100000 Als Beispiel (Beim Start des Spiels ist Score = 0)dd
+    this.score = 0;
     this.value = 10;
     this.meters = 0;
     this.setScale(0.5);

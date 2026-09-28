@@ -46,6 +46,7 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+    this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
   }
 
   createTrack() {
@@ -78,8 +79,6 @@ export default class GameScene extends Phaser.Scene {
 
   createHud() {
     this.hud = new HUD(this, this.car);
-    this.car.decrease_score(100);
-    this.car.increase_score(50);
   }
 
   // road objects are obstacles and coins
@@ -100,7 +99,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.2, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
         this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
       }
 
