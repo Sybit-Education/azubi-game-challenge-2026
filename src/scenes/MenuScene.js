@@ -38,25 +38,26 @@ export default class MenuScene extends Phaser.Scene {
     const centerY = this.cameras.main.centerY;
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    const spacing = height * 0.15;
     const uiScale = Math.min(
       width / 1920,
       height / 1080
     );
+    const spacing = 180 * uiScale;
+    let selectedIndex = 0;
 
     // Sets background color
     this.cameras.main.setBackgroundColor('#6f3198');
 
     // SYBIT KART Logo placeholder
-    this.add.text(centerX, 200, 'SYBIT KART', {
+    this.add.text(centerX, height * 0.10, 'SYBIT KART', {
       fontFamily: 'Tiny5',
-      fontSize: `${150 * uiScale}px`,
+      fontSize: `${175 * uiScale}px`,
       color: '#ffffff'
     })
       .setOrigin(0.5);
 
     // Version tracker
-    this.add.text(width - 50, height - 30, "v0.1", {
+    this.add.text(width * 0.97, height * 0.97, "v0.5", {
       fontFamily: 'Tiny5',
       fontSize: `${32 * uiScale}px`,
       fontStyle: 'bold',
@@ -69,20 +70,31 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     // Buttons + Text (function defined above)
-    const playButton = createButton(centerX, centerY - spacing, "START")
-    const settingsButton = createButton(centerX, centerY, "SETTINGS")
-    const creditsButton = createButton(centerX, centerY + spacing, "CREDITS")
+    const playButton = createButton(centerX, centerY - spacing * 1, "START")
+    const settingsButton = createButton(centerX, centerY * 1.05, "SETTINGS")
+    const creditsButton = createButton(centerX, centerY + spacing * 1.3, "CREDITS")
+
+    const buttons = [
+      playButton,
+      settingsButton,
+      createButton
+    ];
 
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
     const settingsButtonY = settingsButton.button.y;
     const creditsButtonY = creditsButton.button.y;
 
+    // Navigation with TAB
+    this.input.keyboard.on("keydown-TAB" , () => {
+
+    });
+
     // Hover and unhover conditions
     playButton.button.on('pointerover', () => {
       this.tweens.add({
         targets: [playButton.button, playButton.text],
-        y: playButton.button.y - 5,
+        y: playButton.button.y - 5 * uiScale,
         duration: 100
       });
 
