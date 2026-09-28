@@ -3,6 +3,8 @@ import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
 import PopUpScene from './scenes/PopUpScene.js';
+import StartScene from './scenes/StartScene.js';
+
 // Global phaser config
 const config = {
   type: Phaser.AUTO,
@@ -17,7 +19,7 @@ const config = {
       debug: true,
     },
   },
-  scene: [MenuScene, GameScene, LoadingScene, PopUpScene],
+  scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene],
 };
 
 // Create game

@@ -1,7 +1,7 @@
+/* global Phaser */
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
     super('LoadingScene');
-    Phaser.Input.Keyboard.KeyCodes;
 }
 
 preload() {
@@ -25,7 +25,6 @@ create() {
       height / 1080
     );
     let progress = 0;
-    const skipKey = "SPACE";
 
     // SYBIT KART Logo placeholder
     this.add.text(centerX, 200, 'SYBIT KART', {
@@ -37,7 +36,7 @@ create() {
 
     
     // Loading bar
-    const barBg = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff)
+    this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff)
     const fillBar = this.add.rectangle(centerX - barWidth / 2, centerY - spacing, 0, barHeight - 4, 0xcbfc2a)
 
     this.tweens.add({
@@ -53,13 +52,13 @@ create() {
         callback: () => {
             progress++;
              if (progress >= 100) {
-                this.scene.start("GameScene");
+                this.scene.start("StartScene");
             }
         }
     })
 
     this.input.keyboard.on('keydown-SPACE', () => {
-        this.scene.start("GameScene")
+        this.scene.start("StartScene")
     })
 
     this.add.text(centerX, centerY + spacing * 2, "Press SPACE to skip", {
