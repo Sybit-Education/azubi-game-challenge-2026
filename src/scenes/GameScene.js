@@ -23,6 +23,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'sprites/enemy-car3.png');
 
     this.load.image('coin', 'sprites/coin.png');
+    this.load.image('background', 'sprites/Hintergrund.png');
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -34,10 +35,18 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createHud();
+    this.setBackground('background');
+  }
+
+  setBackground(img) {
+    const background = this.add.image(0, 0, img).setOrigin(0, 0);
+    background.setDisplaySize(this.scale.width, this.scale.height);
+    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
   createPlayer() {
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+    this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
   }
 
   createTrack() {
@@ -70,8 +79,6 @@ export default class GameScene extends Phaser.Scene {
 
   createHud() {
     this.hud = new HUD(this, this.car);
-    this.car.decrease_score(100);
-    this.car.increase_score(50);
   }
 
   // road objects are obstacles and coins
@@ -88,9 +95,12 @@ export default class GameScene extends Phaser.Scene {
 
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
+        roadObject.body.setOffset(0, 5);
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
+        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
       }
 
       this.roadObjects.push(roadObject);
@@ -118,6 +128,11 @@ export default class GameScene extends Phaser.Scene {
   collectCoin(car, coin) {
     coin.destroy();
     car.increase_score(coin.value);
+  }
+
+  // Handle game over when the player collides with an enemy car
+  gameOver() {
+    this.scene.start('StartScene'); // Change to DeathScene once there is one
   }
 
   // Update the game state every frame
