@@ -21,7 +21,6 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car1', 'sprites/enemy-car1.png');
     this.load.image('enemy-car2', 'sprites/enemy-car2.png');
     this.load.image('enemy-car3', 'sprites/enemy-car3.png');
-
     this.load.image('coin', 'sprites/coin.png');
     this.load.image('background', 'sprites/Hintergrund.png');
   }

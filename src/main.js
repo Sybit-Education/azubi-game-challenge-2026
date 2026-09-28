@@ -1,16 +1,15 @@
 /* global Phaser */
-
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
+import LoadingScene from './scenes/LoadingScene.js';
+import PopUpScene from './scenes/PopUpScene.js';
 import StartScene from './scenes/StartScene.js';
 
+// Global phaser config
 const config = {
   type: Phaser.AUTO,
-
   scale: {
     mode: Phaser.Scale.RESIZE,
-    width: window.innerWidth,
-    height: window.innerHeight,
   },
 
   backgroundColor: '#000000',
@@ -20,7 +19,8 @@ const config = {
       debug: true,
     },
   },
-  scene: [MenuScene, StartScene, GameScene],
+  scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene],
 };
 
+// Create game
 new Phaser.Game(config);
