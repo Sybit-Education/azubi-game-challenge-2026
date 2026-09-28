@@ -28,9 +28,9 @@ create() {
     );
 
     // SYBIT KART Logo placeholder
-    this.add.text(centerX, 200, 'SYBIT KART', {
+    this.add.text(centerX, height * 0.10, 'SYBIT KART', {
       fontFamily: 'Tiny5',
-      fontSize: `${150 * uiScale}px`,
+      fontSize: `${175 * uiScale}px`,
       color: '#ffffff'
     })
       .setOrigin(0.5);
@@ -62,7 +62,7 @@ create() {
 
 
     // Funny comment, randomly selected
-    this.add.text(centerX, centerY + 200, "Preparing SyCity for high speeds...", {
+    this.add.text(centerX, centerY + spacing, "Preparing SyCity for high speeds...", {
         fontFamily: "Tiny5",
         fontSize: "72px",
         color: "#ffffff",
