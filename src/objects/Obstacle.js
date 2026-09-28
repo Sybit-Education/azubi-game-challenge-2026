@@ -1,43 +1,11 @@
-/* global Phaser */
-export default class Obstacle extends Phaser.GameObjects.Image {
-  constructor(scene, x, y, laneWidth) {
-    let obstacleImage;
+//hier kein phaser importieren solange es nicht genutzt wird!!! sonst tweaked lint
 
-    //nimmt eine random zahl
-    const randomInt = Math.floor(Math.random() * 3) + 1;
+import RoadObject from './RoadObject.js';
 
-    //die random zahl entscheided welche sprite geladen wird
-    //PLACEHOLDER ÄNDERN FÜR ANDERE SPRITES
-    if (randomInt == 1) {
-      obstacleImage = 'placeholder1';
-    } else if (randomInt == 2) {
-      obstacleImage = 'placeholder2';
-    } else {
-      obstacleImage = 'placeholder3';
-    }
-    //super ist hier und kann hier bleiben (wenn es funktioniert, lieber nicht anfassen lol :))
-    //(sonst laden die bilder nicht bzw obstacleImage wird kein bild zugewiesen)
-    super(scene, x, y, obstacleImage);
+export default class Obstacle extends RoadObject {
+  constructor(scene, x, y, texture, lane) {
+    super(scene, x, y, texture, lane);
 
-    this.gameScene = scene;
-    //objekt wird erstellt
-    scene.add.existing(this);
-    const targetWidth = laneWidth * 0.75;
-    const aspectRatio = this.height / this.width;
-
-    this.setDisplaySize(targetWidth, targetWidth * aspectRatio);
-  }
-  //obstacle bewegt sich nach unten, ändere den speed variable, um die geschwindigkeit anzupassen (z.b je höher der km stand, desto schneller)
-  move(delta) {
-    this.speed = 600 + this.gameScene.car.meters * 1;
-    this.y += (this.speed * delta) / 1000;
-
-    const buffer = 100;
-    const bottomLimit = this.gameScene.scale.height + this.displayHeight / 2 + buffer;
-
-    //wenn ende erreicht und auserhalb sichtweite, delete obstacle
-    if (this.y >= bottomLimit) {
-      this.destroy();
-    }
+    this.setScale(0.5);
   }
 }
