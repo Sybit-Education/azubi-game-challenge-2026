@@ -100,7 +100,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.displayWidth * 1.2, roadObject.displayHeight);
         this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
       }
 
