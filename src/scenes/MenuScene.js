@@ -12,6 +12,11 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image(
       "playButton",
       "sprites/buttonTemplate.png");
+      this.load.image('background',
+      'sprites/backgroundMenu.png');
+      this.load.image('gameLogo',
+      'sprites/sybitKartLogo.png'
+      );
   }
 
   // Create scene
@@ -20,7 +25,7 @@ export default class MenuScene extends Phaser.Scene {
     // Button genator wrapper
     const createButton = (x, y, label) => {
       const button = this.add.image(x, y, "playButton")
-        .setScale(0.37 * uiScale)
+        .setScale(buttonScale)
         .setInteractive();
 
       const text = this.add.text(x, y, label, {
@@ -38,22 +43,29 @@ export default class MenuScene extends Phaser.Scene {
     const centerY = this.cameras.main.centerY;
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    const spacing = height * 0.15;
     const uiScale = Math.min(
       width / 1920,
-      height / 1080
+      height / 1080,
+      1
     );
+    const spacing = 180 * uiScale;
+    const logoY = height * 0.18;
+    const buttonScale = Math.min(
+      0.35 * uiScale,
+      0.35
+    )
 
-    // Sets background color
-    this.cameras.main.setBackgroundColor('#6f3198');
+    // Sets background color, size AND scaling
+    const bg = this.add.image(centerX, centerY, 'background');
+    const scale = Math.max(
+      this.cameras.main.width / bg.width,
+      this.cameras.main.height / bg.height
+    );
+    bg.setScale(scale);
 
     // SYBIT KART Logo placeholder
-    this.add.text(centerX, 200, 'SYBIT KART', {
-      fontFamily: 'Tiny5',
-      fontSize: `${150 * uiScale}px`,
-      color: '#ffffff'
-    })
-      .setOrigin(0.5);
+    const sybitKartLogo = this.add.image(centerX, 200, "gameLogo")
+    sybitKartLogo.setScale(uiScale);
 
     // Version tracker
     this.add.text(width - 50, height - 30, "v0.1", {
@@ -69,9 +81,9 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     // Buttons + Text (function defined above)
-    const playButton = createButton(centerX, centerY - spacing, "START")
-    const settingsButton = createButton(centerX, centerY, "SETTINGS")
-    const creditsButton = createButton(centerX, centerY + spacing, "CREDITS")
+    const playButton = createButton(centerX - width * 0.25, centerY - spacing, "START")
+    const settingsButton = createButton(centerX  - width * 0.25, centerY, "SETTINGS")
+    const creditsButton = createButton(centerX - width * 0.25, centerY + spacing, "CREDITS")
 
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
