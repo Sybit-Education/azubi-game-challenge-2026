@@ -20,6 +20,12 @@ const config = {
       debug: true,
     },
   },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      debug: true,
+    },
+  },
   scene: [MenuScene, StartScene, GameScene],
 };
 
