@@ -70,7 +70,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   //increase meters while the game is running
   update_meters(currentSpeed, delta) {
-    this.meters += (currentSpeed * delta) / 50000;
+    this.meters += (currentSpeed * delta) / 30000;
   }
 
   calculate_km() {

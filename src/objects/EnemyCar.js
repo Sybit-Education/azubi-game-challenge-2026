@@ -11,7 +11,7 @@ export default class EnemyCar extends Obstacle {
   }
 
   move(time, delta) {
-    this.speed = Math.min(1500, 300 + time * 0.001);
+    this.speed = Math.min(1500, 300 + time * 0.005);
 
     this.y += (this.speed * delta) / 1000;
 
