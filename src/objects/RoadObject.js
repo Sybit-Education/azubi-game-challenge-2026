@@ -14,8 +14,8 @@ export default class RoadObject extends Phaser.GameObjects.Image {
     this.setOrigin(0.5);
   }
 
-  move(delta) {
-    this.speed = Math.min(1500, 600 + this.gameScene.car.meters * 0.1);
+  move(time, delta) {
+    this.speed = Math.min(1500, 600 + time * 0.005);
 
     this.y += (this.speed * delta) / 1000;
 
