@@ -15,7 +15,6 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
     this.load.image('track', 'sprites/road.png');
-
     this.load.image('placeholder1', 'sprites/placeholder1.png');
     this.load.image('placeholder2', 'sprites/placeholder2.png');
     this.load.image('placeholder3', 'sprites/placeholder3.png');
