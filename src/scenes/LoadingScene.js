@@ -1,4 +1,5 @@
 /* global Phaser */
+/* global Phaser */
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
