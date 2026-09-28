@@ -28,6 +28,7 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
     this.createTrack();
@@ -106,7 +107,7 @@ export default class GameScene extends Phaser.Scene {
       this.roadObjects.push(roadObject);
     }
 
-    const delay = Phaser.Math.Between(500, 3000);
+    const delay = Phaser.Math.Between(500, 2000);
     this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
 
@@ -137,17 +138,18 @@ export default class GameScene extends Phaser.Scene {
 
   // Update the game state every frame
   update(_, delta) {
+    this.elapsedTime += delta;
     this.car.move();
 
     this.roadObjects = this.roadObjects.filter((roadObject) => {
-      roadObject.move(delta);
+      roadObject.move(this.elapsedTime, delta);
       return roadObject.active;
     });
 
-    this.car.update_meters();
-    const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1);
+    const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.001);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
+    this.car.update_meters(targetTrackSpeed, delta);
 
     for (const wall of this.walls) {
       wall.speed = targetTrackSpeed;
