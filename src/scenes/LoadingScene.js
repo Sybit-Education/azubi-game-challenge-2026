@@ -5,6 +5,10 @@ export default class LoadingScene extends Phaser.Scene {
     super('LoadingScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   preload() {}
 
   create() {
@@ -41,12 +45,20 @@ export default class LoadingScene extends Phaser.Scene {
       duration: 3000,
 
       onComplete: () => {
-        this.scene.start('GameScene');
+        if (this.isMultiplayer) {
+          this.scene.start('StartScene', { isMultiplayer: true });
+        } else {
+          this.scene.start('StartScene');
+        }
       },
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('GameScene');
+      if (this.isMultiplayer) {
+        this.scene.start('StartScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('StartScene');
+      }
     });
 
     this.add

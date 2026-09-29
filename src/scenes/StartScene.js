@@ -9,6 +9,10 @@ export default class StartScene extends Phaser.Scene {
     super('StartScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   preload() {
     this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
     this.load.image('track', 'sprites/road.png');
@@ -45,8 +49,27 @@ export default class StartScene extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-    this.car.startAnim();
+    if (this.isMultiplayer) {
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+
+      this.secondCar = new Car(
+        this,
+        this.scale.width / 2 + 90,
+        this.scale.height / 1.25,
+        'LEFT,RIGHT',
+      );
+      this.secondCar.body.setSize(
+        this.secondCar.displayWidth * 1.25,
+        this.secondCar.displayHeight * 1.25,
+      );
+      this.car.startAnim();
+      this.secondCar.startAnim();
+    } else {
+      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.startAnim();
+    }
   }
 
   createTrack() {
@@ -79,7 +102,11 @@ export default class StartScene extends Phaser.Scene {
 
   update() {
     if (this.car.y <= -300) {
-      this.scene.start('GameScene');
+      if (this.isMultiplayer) {
+        this.scene.start('GameScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('GameScene');
+      }
     }
   }
 }

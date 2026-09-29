@@ -70,7 +70,7 @@ export default class MenuScene extends Phaser.Scene {
     const playButton = createButton(centerX, centerY - spacing * 1, 'START');
     const settingsButton = createButton(centerX, centerY * 1.05, 'SETTINGS');
     const creditsButton = createButton(centerX, centerY + spacing * 1.3, 'CREDITS');
-    const twoPlayerButton = createButton(centerX + 300, centerY + 20, 'SONION');
+    const twoPlayerButton = createButton(centerX + 300, centerY + 20, '2 PLAYER');
 
     // const buttons = [
     //  playButton,
@@ -158,7 +158,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     twoPlayerButton.button.on('pointerdown', () => {
-      this.scene.start('GameScene', { isMultiplayer: true });
+      this.scene.start('LoadingScene', { isMultiplayer: true });
       //logik um multiplayer zu starten
     });
 

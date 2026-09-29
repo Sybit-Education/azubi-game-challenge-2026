@@ -40,11 +40,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   startAnim() {
     //hier gegebenenfalls sounds einfügen (z.b motor zündstart etc.)
-
-    this.scene.time.delayedCall(2500, () => {
-      //delayed start um 2500 ms (2.5 sekunden)
-      let speed = 0; //auto startet bei 0
-
+    this.scene.time.delayedCall(1250, () => {
+      //delayed start um 2500 ms (1.25 sekunden)
+      let speed = 60; //auto startet bei 0
       const accelerate = () => {
         //funktion. die den speed variable senkt (negativ = positiv, weil -y ist oben und +y ist unten frag nicht wieso)
         this.setVelocityY(speed);
