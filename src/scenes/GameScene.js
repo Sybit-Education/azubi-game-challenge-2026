@@ -24,19 +24,18 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('coin', 'sprites/Entities/coin.png');
 
-    this.load.image(
-      'gameover-hintergrund',
-      'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
-    );
     this.load.image('gameover-title', 'sprites/Gameover Scene Assets/GAME OVER.png');
     this.load.image('gameover-play-again', 'sprites/Gameover Scene Assets/Nochmal spielen.png');
     this.load.image('gameover-menu-btn', 'sprites/Gameover Scene Assets/Hauptmenu.png');
     this.load.image('gameover-score-text', 'sprites/Gameover Scene Assets/score_.png');
     this.load.image('gameover-distance-text', 'sprites/Gameover Scene Assets/Distanz_.png');
+
+    this.load.image('gameover-hintergrund', 'sprites/GAME OVER Hintergrund.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
     this.createTrack();
@@ -44,10 +43,18 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createHud();
+    this.setBackground('background');
+  }
+
+  setBackground(img) {
+    const background = this.add.image(0, 0, img).setOrigin(0, 0);
+    background.setDisplaySize(this.scale.width, this.scale.height);
+    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
   createPlayer() {
     this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+    this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
   }
 
   createTrack() {
@@ -80,8 +87,6 @@ export default class GameScene extends Phaser.Scene {
 
   createHud() {
     this.hud = new HUD(this, this.car);
-    this.car.decrease_score(100);
-    this.car.increase_score(50);
   }
 
   // road objects are obstacles and coins
@@ -98,15 +103,18 @@ export default class GameScene extends Phaser.Scene {
 
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
+        roadObject.body.setOffset(0, 5);
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
+        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
       }
 
       this.roadObjects.push(roadObject);
     }
 
-    const delay = Phaser.Math.Between(500, 3000);
+    const delay = Phaser.Math.Between(500, 2000);
     this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
 
@@ -130,19 +138,25 @@ export default class GameScene extends Phaser.Scene {
     car.increase_score(coin.value);
   }
 
+  // Handle game over when the player collides with an enemy car
+  gameOver() {
+    this.scene.start('StartScene'); // Change to DeathScene once there is one
+  }
+
   // Update the game state every frame
   update(_, delta) {
+    this.elapsedTime += delta;
     this.car.move();
 
     this.roadObjects = this.roadObjects.filter((roadObject) => {
-      roadObject.move(delta);
+      roadObject.move(this.elapsedTime, delta);
       return roadObject.active;
     });
 
-    this.car.update_meters();
-    const targetTrackSpeed = Math.min(1500, 600 + this.car.meters * 0.1);
+    const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
+    this.car.update_meters(targetTrackSpeed, delta);
 
     for (const wall of this.walls) {
       wall.speed = targetTrackSpeed;

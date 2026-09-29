@@ -10,9 +10,10 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/Sybit Kart Player car 1.png');
-    this.load.image('track', 'sprites/Race Track Assets/road.png');
-    this.load.image('border', 'sprites/Race Track Assets/border.png');
+    this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
+    this.load.image('track', 'sprites/road.png');
+    this.load.image('border', 'sprites/border.png');
+    this.load.image('background', 'sprites/Hintergrund.png');
   }
 
   create() {
@@ -34,6 +35,13 @@ export default class StartScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
+    this.setBackground('background');
+  }
+
+  setBackground(img) {
+    const background = this.add.image(0, 0, img).setOrigin(0, 0);
+    background.setDisplaySize(this.scale.width, this.scale.height);
+    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
   createPlayer() {
