@@ -53,11 +53,11 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive();
-    
+
     const twoPlayerButton = this.add
       .text(this.scale.width / 1.5, this.scale.height / 1.6, '2 Player')
       .setOrigin(0.5)
-      .setScale(0.27)
+      .setScale(3)
       .setInteractive();
 
     this.add
@@ -82,18 +82,16 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
-    
-    
 
     play_button.on('pointerdown', () => {
-      this.scene.start('LoadingScene');
+      this.scene.start('LoadingScene', { isMultiplayer: false });
     });
 
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
     });
-    
-     twoPlayerButton.button.on('pointerdown', () => {
+
+    twoPlayerButton.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
       //logik um multiplayer zu starten
     });

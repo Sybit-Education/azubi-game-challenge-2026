@@ -21,7 +21,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-    const button = this.add
+    const skipButton = this.add
       .text(1300, 600, 'Skip', {
         fontSize: '32px',
         backgroundColor: '#000000',
@@ -33,8 +33,10 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive();
 
-    button.on('pointerdown', () => {
-      this.scene.start('GameScene');
+    skipButton.on('pointerdown', () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     });
     this.createPlayer();
     this.createTrack();
@@ -102,11 +104,9 @@ export default class StartScene extends Phaser.Scene {
 
   update() {
     if (this.car.y <= -300) {
-      if (this.isMultiplayer) {
-        this.scene.start('GameScene', { isMultiplayer: true });
-      } else {
-        this.scene.start('GameScene');
-      }
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     }
   }
 }

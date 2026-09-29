@@ -48,7 +48,7 @@ export default class LoadingScene extends Phaser.Scene {
         if (this.isMultiplayer) {
           this.scene.start('StartScene', { isMultiplayer: true });
         } else {
-          this.scene.start('StartScene');
+          this.scene.start('StartScene', { isMultiplayer: false });
         }
       },
     });
@@ -57,7 +57,7 @@ export default class LoadingScene extends Phaser.Scene {
       if (this.isMultiplayer) {
         this.scene.start('StartScene', { isMultiplayer: true });
       } else {
-        this.scene.start('StartScene');
+        this.scene.start('StartScene', { isMultiplayer: false });
       }
     });
 

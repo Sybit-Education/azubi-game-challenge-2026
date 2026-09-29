@@ -178,6 +178,7 @@ export default class GameScene extends Phaser.Scene {
     this.scene.start('GameoverScene', {
       distance: this.car.calculate_km(),
       score: this.car.score,
+      isMultiplayer: this.isMultiplayer,
     }); // Change to DeathScene once there is one
   }
 
