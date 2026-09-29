@@ -73,6 +73,7 @@ export default class MenuScene extends Phaser.Scene {
     const playButton = createButton(centerX, centerY - spacing * 1, "START")
     const settingsButton = createButton(centerX, centerY * 1.05, "SETTINGS")
     const creditsButton = createButton(centerX, centerY + spacing * 1.3, "CREDITS")
+    const twoPlayerButton = createButton(centerX + 300, centerY + 20, "SONION")
 
    // const buttons = [
     //  playButton,
@@ -84,6 +85,7 @@ export default class MenuScene extends Phaser.Scene {
     const playButtonY = playButton.button.y;
     const settingsButtonY = settingsButton.button.y;
     const creditsButtonY = creditsButton.button.y;
+    const twoPlayerButtonY = twoPlayerButton.button.y;
 
     // Navigation with TAB
     this.input.keyboard.on("keydown-TAB" , () => {
@@ -140,9 +142,30 @@ export default class MenuScene extends Phaser.Scene {
       })
     });
 
+    twoPlayerButton.button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButton.button.y - 5,
+        duration: 100
+      });
+    });
+
+    twoPlayerButton.button.on('pointerout', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButtonY,
+        duration: 100
+      })
+    });
+
     // Click events 
     playButton.button.on('pointerdown', () => {
       this.scene.start('LoadingScene');
+    });
+
+    twoPlayerButton.button.on('pointerdown', () => {
+      this.scene.start('GameScene', {isMultiplayer: true});
+      //logik um multiplayer zu starten
     });
 
     settingsButton.button.on('pointerdown', () => {

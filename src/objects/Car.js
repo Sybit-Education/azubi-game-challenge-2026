@@ -1,13 +1,13 @@
 /* global Phaser */
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, controls = 'A,D') {
     super(scene, x, y, 'car');
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    this.keys = scene.input.keyboard.addKeys('A,D');
+    this.keys = scene.input.keyboard.addKeys(controls);
     this.score = 0;
     this.value = 10;
     this.meters = 0;
