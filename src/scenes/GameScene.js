@@ -12,6 +12,10 @@ export default class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   //Bilder laden
   preload() {
     this.load.image('car', 'sprites/Entities/Player Skins/sybit-kart.png');
@@ -59,8 +63,24 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-    this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+    if (this.isMultiplayer) {
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+
+      this.secondCar = new Car(
+        this,
+        this.scale.width / 2 + 90,
+        this.scale.height / 1.25,
+        'LEFT,RIGHT',
+      );
+      this.secondCar.body.setSize(
+        this.secondCar.displayWidth * 1.25,
+        this.secondCar.displayHeight * 1.25,
+      );
+    } else {
+      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+    }
   }
 
   createTrack() {
@@ -89,6 +109,9 @@ export default class GameScene extends Phaser.Scene {
     this.walls = [wall1, wall2, wall3, wall4];
 
     this.physics.add.collider(this.car, this.walls);
+    if (this.secondCar) {
+      this.physics.add.collider(this.secondCar, this.walls);
+    }
   }
 
   createHud() {
@@ -111,10 +134,16 @@ export default class GameScene extends Phaser.Scene {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
         roadObject.body.setOffset(0, 5);
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+        if (this.secondCar) {
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+        }
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
         roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
         this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
+        if (this.secondCar) {
+          this.physics.add.collider(this.secondCar, roadObject, this.gameOver, undefined, this);
+        }
       }
 
       this.roadObjects.push(roadObject);
@@ -156,6 +185,9 @@ export default class GameScene extends Phaser.Scene {
   update(_, delta) {
     this.elapsedTime += delta;
     this.car.move();
+    if (this.secondCar) {
+      this.secondCar.move();
+    }
 
     this.roadObjects = this.roadObjects.filter((roadObject) => {
       roadObject.move(this.elapsedTime, delta);
@@ -166,6 +198,9 @@ export default class GameScene extends Phaser.Scene {
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
     this.car.update_meters(targetTrackSpeed, delta);
+    if (this.secondCar) {
+      this.secondCar.update_meters(targetTrackSpeed, delta);
+    }
 
     for (const wall of this.walls) {
       wall.speed = targetTrackSpeed;

@@ -53,6 +53,12 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive();
+    
+    const twoPlayerButton = this.add
+      .text(this.scale.width / 1.5, this.scale.height / 1.6, '2 Player')
+      .setOrigin(0.5)
+      .setScale(0.27)
+      .setInteractive();
 
     this.add
       .image(this.scale.width / 2.1, this.scale.height / 1.1, 'homepage-line')
@@ -76,6 +82,8 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+    
+    
 
     play_button.on('pointerdown', () => {
       this.scene.start('LoadingScene');
@@ -83,6 +91,11 @@ export default class MenuScene extends Phaser.Scene {
 
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
+    });
+    
+     twoPlayerButton.button.on('pointerdown', () => {
+      this.scene.start('LoadingScene', { isMultiplayer: true });
+      //logik um multiplayer zu starten
     });
 
     //Den Rest hier lasse ich Erstmal, weil ich nichts gelesen habe und vielleicht braucht man was davon später (Beim Optimieren kann man eventuell den Rest löschen)
@@ -118,9 +131,13 @@ export default class MenuScene extends Phaser.Scene {
   
 
     // SYBIT KART Logo placeholder
- 
-
-    
+    this.add
+      .text(centerX, height * 0.1, 'SYBIT KART', {
+        fontFamily: 'Tiny5',
+        fontSize: `${175 * uiScale}px`,
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
 
     // Version tracker
     this.add
@@ -140,13 +157,19 @@ export default class MenuScene extends Phaser.Scene {
     const playButton = createButton(centerX, centerY - spacing * 1, 'START');
     const settingsButton = createButton(centerX, centerY * 1.05, 'SETTINGS');
     const creditsButton = createButton(centerX, centerY + spacing * 1.3, 'CREDITS');
+    const twoPlayerButton = createButton(centerX + 300, centerY + 20, '2 PLAYER');
 
-    //const buttons = [playButton, settingsButton, createButton];
+    // const buttons = [
+    //  playButton,
+    // settingsButton,
+    //  createButton
+    // ];
 
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
     const settingsButtonY = settingsButton.button.y;
     const creditsButtonY = creditsButton.button.y;
+    const twoPlayerButtonY = twoPlayerButton.button.y;
 
     // Navigation with TAB
     this.input.keyboard.on('keydown-TAB', () => {});
@@ -200,10 +223,28 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
+    twoPlayerButton.button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButton.button.y - 5,
+        duration: 100,
+      });
+    });
+
+    twoPlayerButton.button.on('pointerout', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButtonY,
+        duration: 100,
+      });
+    });
+
     // Click events
     playButton.button.on('pointerdown', () => {
       this.scene.start('LoadingScene');
     });
+
+   
 
     settingsButton.button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');

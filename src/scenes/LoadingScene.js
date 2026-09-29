@@ -5,6 +5,10 @@ export default class LoadingScene extends Phaser.Scene {
     super('LoadingScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   preload() {}
 
   create() {
@@ -30,7 +34,7 @@ export default class LoadingScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     // Loading bar
-    //const barBg = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff);
+    // const barBg = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff)
     const fillBar = this.add
       .rectangle(centerX - barWidth / 2, centerY - spacing, 0, barHeight - 4, 0xcbfc2a)
       .setOrigin(0.0, 0.5);
@@ -41,12 +45,20 @@ export default class LoadingScene extends Phaser.Scene {
       duration: 3000,
 
       onComplete: () => {
-        this.scene.start('StartScene');
+        if (this.isMultiplayer) {
+          this.scene.start('StartScene', { isMultiplayer: true });
+        } else {
+          this.scene.start('StartScene');
+        }
       },
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('StartScene');
+      if (this.isMultiplayer) {
+        this.scene.start('StartScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('StartScene');
+      }
     });
 
     this.add
