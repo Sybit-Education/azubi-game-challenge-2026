@@ -18,15 +18,29 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'sprites/sybit-kart.png');
-    this.load.image('track', 'sprites/road.png');
-    this.load.image('border', 'sprites/border.png');
+    this.load.image('car', 'sprites/Entities/Player Skins/sybit-kart.png');
+    this.load.image('track', 'sprites/Race Track Assets/road.png');
+    this.load.image('border', 'sprites/Race Track Assets/border.png');
 
-    this.load.image('enemy-car1', 'sprites/enemy-car1.png');
-    this.load.image('enemy-car2', 'sprites/enemy-car2.png');
-    this.load.image('enemy-car3', 'sprites/enemy-car3.png');
-    this.load.image('coin', 'sprites/coin.png');
-    this.load.image('background', 'sprites/Hintergrund.png');
+    this.load.image('enemy-car1', 'sprites/Entities/Obstacles/enemy-car1.png');
+    this.load.image('enemy-car2', 'sprites/Entities/Obstacles/enemy-car2.png');
+    this.load.image('enemy-car3', 'sprites/Entities/Obstacles/enemy-car3.png');
+
+    this.load.image('coin', 'sprites/Entities/coin.png');
+
+    this.load.image('gameover-title', 'sprites/Gameover Scene Assets/GAME OVER.png');
+    this.load.image('gameover-play-again', 'sprites/Gameover Scene Assets/Nochmal spielen.png');
+    this.load.image('gameover-menu-btn', 'sprites/Gameover Scene Assets/Hauptmenu.png');
+    this.load.image('gameover-score-text', 'sprites/Gameover Scene Assets/score_.png');
+    this.load.image('gameover-distance-text', 'sprites/Gameover Scene Assets/Distanz_.png');
+    this.load.image(
+      'gameover-hintergrund',
+      'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
+    );
+
+    this.load.image('homepage-hintergrund', 'sprites/Homepage/backgroundMenu.png');
+
+    this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -161,7 +175,11 @@ export default class GameScene extends Phaser.Scene {
 
   // Handle game over when the player collides with an enemy car
   gameOver() {
-    this.scene.start('StartScene'); // Change to DeathScene once there is one
+    this.scene.start('GameoverScene', {
+      distance: this.car.calculate_km(),
+      score: this.car.score,
+      isMultiplayer: this.isMultiplayer,
+    }); // Change to DeathScene once there is one
   }
 
   // Update the game state every frame

@@ -14,14 +14,14 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'sprites/Sybit Kart Player car 1.png');
-    this.load.image('track', 'sprites/road.png');
-    this.load.image('border', 'sprites/border.png');
-    this.load.image('background', 'sprites/Hintergrund.png');
+    this.load.image('car', 'sprites/Entities/Player Skins/Sybit Kart Player car 1.png');
+    this.load.image('track', 'sprites/Race Track Assets/road.png');
+    this.load.image('border', 'sprites/Race Track Assets/border.png');
+    this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
   }
 
   create() {
-    const button = this.add
+    const skipButton = this.add
       .text(1300, 600, 'Skip', {
         fontSize: '32px',
         backgroundColor: '#000000',
@@ -33,8 +33,10 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive();
 
-    button.on('pointerdown', () => {
-      this.scene.start('GameScene');
+    skipButton.on('pointerdown', () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     });
     this.createPlayer();
     this.createTrack();
@@ -102,11 +104,9 @@ export default class StartScene extends Phaser.Scene {
 
   update() {
     if (this.car.y <= -300) {
-      if (this.isMultiplayer) {
-        this.scene.start('GameScene', { isMultiplayer: true });
-      } else {
-        this.scene.start('GameScene');
-      }
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     }
   }
 }

@@ -4,6 +4,7 @@ import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
 import PopUpScene from './scenes/PopUpScene.js';
 import StartScene from './scenes/StartScene.js';
+import GameoverScene from './scenes/GameoverScene.js';
 
 // Global phaser config
 const config = {
@@ -19,7 +20,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene],
+  scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene, GameoverScene],
 };
 
 // Create game
