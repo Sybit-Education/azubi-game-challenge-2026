@@ -17,22 +17,7 @@ export default class GameoverScene extends Phaser.Scene {
       .image(this.width / 2, this.height / 2, 'gameover-hintergrund')
       .setDisplaySize(this.width, this.height);
 
-    const buttonStyle = {
-      fontSize: '32px',
-      color: '#ffffff',
-      padding: {
-        x: 10,
-        y: 5,
-      },
-    };
-
-    const gameOverStyle = {
-      ...buttonStyle,
-      fontSize: '130px',
-    };
-
     const statsStyle = {
-      ...buttonStyle,
       fontSize: '30px',
     };
 
