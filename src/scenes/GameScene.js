@@ -23,6 +23,13 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'sprites/enemy-car3.png');
 
     this.load.image('coin', 'sprites/coin.png');
+
+    this.load.image('gameover-hintergrund', 'sprites/GAME OVER Hintergrund.png');
+    this.load.image('gameover-title', 'sprites/GAME OVER.png');
+    this.load.image('gameover-play-again', 'sprites/Nochmal spielen.png');
+    this.load.image('gameover-menu-btn', 'sprites/Hauptmenu.png');
+    this.load.image('gameover-score-text', 'sprites/score_.png');
+    this.load.image('gameover-distance-text', 'sprites/Distanz_.png');
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -142,5 +149,12 @@ export default class GameScene extends Phaser.Scene {
     this.track1.move(delta);
     this.track2.move(delta);
     this.hud.update();
+
+    if (this.car.calculate_km() == 0.5) {
+      this.scene.start('GameoverScene', {
+        distance: this.car.calculate_km(),
+        score: this.car.score,
+      });
+    }
   }
 }
