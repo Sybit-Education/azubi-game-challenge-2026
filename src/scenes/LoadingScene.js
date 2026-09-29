@@ -41,12 +41,12 @@ export default class LoadingScene extends Phaser.Scene {
       duration: 3000,
 
       onComplete: () => {
-        this.scene.start('GameScene');
+        this.scene.start('StartScene');
       },
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('GameScene');
+      this.scene.start('StartScene');
     });
 
     this.add

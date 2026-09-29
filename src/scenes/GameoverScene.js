@@ -14,8 +14,8 @@ export default class GameoverScene extends Phaser.Scene {
     this.height = this.scale.height;
 
     this.add
-      .image(this.width / 2, this.height / 2, 'gameover-hintergrund')
-      .setDisplaySize(this.width, this.height);
+      .image(this.width / 2, this.height / 2, 'homepage-hintergrund')
+      .setDisplaySize(this.scale.width, this.scale.height);
 
     const statsStyle = {
       fontSize: '30px',
