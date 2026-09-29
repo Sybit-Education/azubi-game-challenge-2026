@@ -144,7 +144,10 @@ export default class GameScene extends Phaser.Scene {
 
   // Handle game over when the player collides with an enemy car
   gameOver() {
-    this.scene.start('StartScene'); // Change to DeathScene once there is one
+    this.scene.start('GameoverScene', {
+      distance: this.car.calculate_km(),
+      score: this.car.score,
+    }); // Change to DeathScene once there is one
   }
 
   // Update the game state every frame
@@ -170,12 +173,5 @@ export default class GameScene extends Phaser.Scene {
     this.track1.move(delta);
     this.track2.move(delta);
     this.hud.update();
-
-    if (this.car.calculate_km() == 0.05) {
-      this.scene.start('GameoverScene', {
-        distance: this.car.calculate_km(),
-        score: this.car.score,
-      });
-    }
   }
 }
