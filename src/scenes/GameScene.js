@@ -50,12 +50,20 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-       this.car = new Car(this, this.scale.width / 2 -90, this.scale.height / 1.25);
-       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
-       this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25, 'LEFT,RIGHT');
-       this.secondCar.body.setSize(this.secondCar.displayWidth * 1.25, this.secondCar.displayHeight * 1.25);
-    }else{
+      this.secondCar = new Car(
+        this,
+        this.scale.width / 2 + 90,
+        this.scale.height / 1.25,
+        'LEFT,RIGHT',
+      );
+      this.secondCar.body.setSize(
+        this.secondCar.displayWidth * 1.25,
+        this.secondCar.displayHeight * 1.25,
+      );
+    } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
     }

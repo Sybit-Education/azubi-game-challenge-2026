@@ -1,7 +1,8 @@
 /* global Phaser */
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, controls = 'A,D') { //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
+  constructor(scene, x, y, controls = 'A,D') {
+    //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
     super(scene, x, y, 'car');
 
     scene.add.existing(this);
@@ -25,7 +26,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setVelocityX(0);
     this.setAngle(0);
 
-    if (this.keys[this.leftKey]?.isDown) { //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
+    if (this.keys[this.leftKey]?.isDown) {
+      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       this.setVelocityX(-500);
       this.setAngle(-3);
     }
