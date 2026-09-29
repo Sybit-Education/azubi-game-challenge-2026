@@ -38,7 +38,7 @@ export default class MenuScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     const uiScale = Math.min(width / 1920, height / 1080);
     const spacing = 180 * uiScale;
-    let selectedIndex = 0;
+    //let selectedIndex = 0;
 
     // Sets background color
     this.cameras.main.setBackgroundColor('#6f3198');
@@ -71,7 +71,7 @@ export default class MenuScene extends Phaser.Scene {
     const settingsButton = createButton(centerX, centerY * 1.05, 'SETTINGS');
     const creditsButton = createButton(centerX, centerY + spacing * 1.3, 'CREDITS');
 
-    const buttons = [playButton, settingsButton, createButton];
+    //const buttons = [playButton, settingsButton, createButton];
 
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
