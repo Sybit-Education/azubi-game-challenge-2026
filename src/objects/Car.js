@@ -8,11 +8,12 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     scene.physics.add.existing(this);
 
     this.keys = scene.input.keyboard.addKeys('A,D');
-    this.score = 1000000; //Score = 100000 Als Beispiel (Beim Start des Spiels ist Score = 0)dd
+    this.score = 0;
     this.value = 10;
     this.meters = 0;
     this.setScale(0.5);
     this.body.setSize(this.displayWidth, this.displayHeight);
+    this.setDepth(10); // Set depth to 10 to ensure it is above other objects
   }
 
   move() {
@@ -68,8 +69,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   }
 
   //increase meters while the game is running
-  update_meters() {
-    this.meters += 1;
+  update_meters(currentSpeed, delta) {
+    this.meters += (currentSpeed * delta) / 30000;
   }
 
   calculate_km() {
