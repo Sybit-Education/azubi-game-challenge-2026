@@ -138,9 +138,5 @@ export default class MenuScene extends Phaser.Scene {
     settingsButton.button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
     });
-
-
-
-    
   }
 }
