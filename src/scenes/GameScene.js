@@ -34,6 +34,8 @@ export default class GameScene extends Phaser.Scene {
       'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
     );
 
+    this.load.image('homepage-hintergrund', 'sprites/Homepage/backgroundMenu.png');
+
     this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
   }
 
