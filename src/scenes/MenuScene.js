@@ -145,7 +145,8 @@ export default class MenuScene extends Phaser.Scene {
 
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
-      //logik um multiplayer zu starten
+    });
+    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
