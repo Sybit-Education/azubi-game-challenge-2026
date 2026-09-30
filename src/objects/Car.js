@@ -48,6 +48,25 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (this.keys[this.downKey]?.isDown) {
       this.setVelocityY(500);
     }
+
+    //constraint the cars downward and upward movement to not go out of bounds
+    const maxY = this.scene.scale.height + this.displayHeight / 4;
+    const maxX = this.displayHeight / 2 - this.displayHeight / 4;
+
+    this.x = Phaser.Math.Clamp(
+      this.x,
+      this.displayWidth / 2,
+      this.scene.scale.width - this.displayWidth / 2,
+    );
+    this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
+
+    //damit wenn die bounds berührt werden, nicht weiter das auto bewegt wird
+    if (
+      (this.y <= maxX && this.body.velocity.y < 0) ||
+      (this.y >= maxY && this.body.velocity.y > 0)
+    ) {
+      this.setVelocityY(0);
+    }
   }
 
   startAnim() {
