@@ -20,13 +20,15 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-car', 'sprites/Homepage/Group 25.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Group 28.png');
     this.load.image('homepage-barrierefreiheit', 'sprites/Homepage/Group 29.png');
+    this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
   }
 
   // Create scene
   create() {
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height);
+      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDepth(-100);
 
     this.add
       .image(this.scale.width / 6.7, this.scale.height / 10, 'homepage-logo')
@@ -55,11 +57,59 @@ export default class MenuScene extends Phaser.Scene {
       .setInteractive();
 
     const twoPlayerButton = this.add
-      .text(this.scale.width / 1.5, this.scale.height / 1.6, '2 Player')
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
       .setOrigin(0.5)
-      .setScale(3)
+      .setScale(0.23)
+      .setDepth(-1);
+
+    const hitAreaPadding = 12;
+    const hitboxVisual = this.add
+      .rectangle(
+        twoPlayerButton.x,
+        twoPlayerButton.y,
+        twoPlayerButton.displayWidth + hitAreaPadding * 2,
+        twoPlayerButton.displayHeight + hitAreaPadding * 2,
+        0xff0000,
+        0,
+      )
+      .setOrigin(0.5)
+      .setDepth(-2)
       .setInteractive();
 
+    play_button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: play_button.x + 290,
+        duration: 150,
+      });
+    });
+
+    let isTwoPlayerHovered = false;
+
+    hitboxVisual.on('pointerover', () => {
+      isTwoPlayerHovered = true;
+    });
+
+    hitboxVisual.on('pointerout', () => {
+      isTwoPlayerHovered = false;
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: this.scale.width / 5.7,
+        duration: 150,
+      });
+    });
+
+    play_button.on('pointerout', () => {
+      this.time.delayedCall(0, () => {
+        if (!isTwoPlayerHovered) {
+          this.tweens.add({
+            targets: [twoPlayerButton, hitboxVisual],
+            x: this.scale.width / 5.7,
+            duration: 150,
+          });
+        }
+      });
+    });
     this.add
       .image(this.scale.width / 2.1, this.scale.height / 1.1, 'homepage-line')
       .setOrigin(0.5)
@@ -91,7 +141,7 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.launch('PopUpScene');
     });
 
-    twoPlayerButton.on('pointerdown', () => {
+    hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
       //logik um multiplayer zu starten
     });
