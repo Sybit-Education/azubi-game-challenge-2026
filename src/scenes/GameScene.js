@@ -50,7 +50,7 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
-    //this.createRoadObject('obstacle');
+    this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createHud();
     this.setBackground('background');
