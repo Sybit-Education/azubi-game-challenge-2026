@@ -53,7 +53,7 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive();
-    
+
     const creditsButton = this.add
       .image(this.scale.width / 1.15, this.scale.height / 1.15, 'homepage-credits')
       .setOrigin(0.5)
@@ -86,7 +86,7 @@ export default class MenuScene extends Phaser.Scene {
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
     });
-    
+
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
@@ -214,4 +214,6 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.launch('PopUpScene');
     });
   }
-}*/}}
+}*/
+  }
+}
