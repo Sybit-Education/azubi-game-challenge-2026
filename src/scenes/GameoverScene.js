@@ -30,13 +30,17 @@ export default class GameoverScene extends Phaser.Scene {
       .image(this.width / 1.9, this.height / 2.2, 'gameover-distance-text')
       .setOrigin(0.5)
       .setScale(0.4);
-    this.add.text(this.width / 1.67, this.height / 2.2, ` ${1000000}`, statsStyle).setOrigin(0.5);
+    this.add
+      .text(this.width / 1.67, this.height / 2.2, ` ${this.distance} Km`, statsStyle)
+      .setOrigin(0.5);
 
     this.add
       .image(this.width / 2.7, this.height / 2.2, 'gameover-score-text')
       .setOrigin(0.5)
       .setScale(0.4);
-    this.add.text(this.width / 2.31, this.height / 2.2, `${this.score}`, statsStyle).setOrigin(0.5);
+    this.add
+      .text(this.width / 2.31, this.height / 2.2, `${this.score} Pts`, statsStyle)
+      .setOrigin(0.5);
 
     const playAgainButton = this.add
       .image(this.width / 2, this.height / 1.8, 'gameover-play-again')
