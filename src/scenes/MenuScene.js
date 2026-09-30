@@ -54,6 +54,12 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.27)
       .setInteractive();
 
+    const creditsButton = this.add
+      .image(this.scale.width / 1.15, this.scale.height / 1.15, 'homepage-credits')
+      .setOrigin(0.5)
+      .setScale(0.27)
+      .setInteractive();
+
     this.add
       .image(this.scale.width / 2.1, this.scale.height / 1.1, 'homepage-line')
       .setOrigin(0.5)
@@ -61,10 +67,6 @@ export default class MenuScene extends Phaser.Scene {
 
     this.add
       .image(this.scale.width / 5.8, this.scale.height / 1.15, 'homepage-anleitung')
-      .setOrigin(0.5)
-      .setScale(0.3);
-    this.add
-      .image(this.scale.width / 1.15, this.scale.height / 1.15, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.3);
 
@@ -83,6 +85,10 @@ export default class MenuScene extends Phaser.Scene {
 
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
+    });
+
+    creditsButton.on('pointerdown', () => {
+      this.scene.start('CreditsScene');
     });
 
     //Den Rest hier lasse ich Erstmal, weil ich nichts gelesen habe und vielleicht braucht man was davon später (Beim Optimieren kann man eventuell den Rest löschen)
@@ -146,7 +152,6 @@ export default class MenuScene extends Phaser.Scene {
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
     const settingsButtonY = settingsButton.button.y;
-    const creditsButtonY = creditsButton.button.y;
 
     // Navigation with TAB
     this.input.keyboard.on('keydown-TAB', () => {});
@@ -208,7 +213,7 @@ export default class MenuScene extends Phaser.Scene {
     settingsButton.button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
     });
-
-    */
+  }
+}*/
   }
 }
