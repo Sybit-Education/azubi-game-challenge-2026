@@ -1,17 +1,19 @@
 /* global Phaser */
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, controls = 'A,D') {
+  constructor(scene, x, y, controls = 'W,A,S,D') {
     //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
     super(scene, x, y, 'car');
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    const [leftKey, rightKey] = controls.split(','); //splits the string "A,D" and if player 2 "LEFT, RIGHT" to two seperate strings
+    const [upKey, leftKey, downKey, rightKey] = controls.split(','); //splits the string "A,D" and if player 2 "LEFT, RIGHT" to two seperate strings
 
     this.leftKey = leftKey;
     this.rightKey = rightKey;
+    this.upKey = upKey;
+    this.downKey = downKey;
     this.keys = scene.input.keyboard.addKeys(controls);
 
     this.score = 0;
@@ -24,6 +26,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   move() {
     this.setVelocityX(0);
+    this.setVelocityY(0);
     this.setAngle(0);
 
     if (this.keys[this.leftKey]?.isDown) {
@@ -35,6 +38,15 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (this.keys[this.rightKey]?.isDown) {
       this.setVelocityX(500);
       this.setAngle(3);
+    }
+
+    if (this.keys[this.upKey]?.isDown) {
+      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
+      this.setVelocityY(-300);
+    }
+
+    if (this.keys[this.downKey]?.isDown) {
+      this.setVelocityY(500);
     }
   }
 
