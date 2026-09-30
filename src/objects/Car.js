@@ -41,7 +41,6 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     }
 
     if (this.keys[this.upKey]?.isDown) {
-      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       this.setVelocityY(-300);
     }
 
@@ -52,15 +51,21 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     //constraint the cars downward and upward movement to not go out of bounds
     const maxY = this.scene.scale.height + this.displayHeight / 4;
     const maxX = this.displayHeight / 2 - this.displayHeight / 4;
+    const leftLimit =
+      this.scene.walls[0].x + this.scene.walls[0].displayWidth / 2 + this.displayWidth / 2 - 20;
+    const rightLimit =
+      this.scene.walls[1].x - this.scene.walls[1].displayWidth / 2 - this.displayWidth / 2 + 20;
 
-    this.x = Phaser.Math.Clamp(
-      this.x,
-      this.displayWidth / 2,
-      this.scene.scale.width - this.displayWidth / 2,
-    );
+    this.x = Phaser.Math.Clamp(this.x, leftLimit, rightLimit);
     this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
 
-    //damit wenn die bounds berührt werden, nicht weiter das auto bewegt wird
+    if (
+      (this.x <= leftLimit && this.body.velocity.x < 0) ||
+      (this.x >= rightLimit && this.body.velocity.x > 0)
+    ) {
+      this.setVelocityX(0);
+    }
+
     if (
       (this.y <= maxX && this.body.velocity.y < 0) ||
       (this.y >= maxY && this.body.velocity.y > 0)

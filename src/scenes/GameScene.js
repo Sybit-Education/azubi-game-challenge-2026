@@ -50,16 +50,59 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
-    this.createRoadObject('obstacle');
+    //this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createHud();
     this.setBackground('background');
+    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
   }
 
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
+  }
+
+  separateOverlappingCars() {
+    if (!this.secondCar) return;
+
+    const firstBody = this.car.body;
+    const secondBody = this.secondCar.body;
+
+    const overlapX =
+      Math.min(firstBody.right, secondBody.right) - Math.max(firstBody.left, secondBody.left);
+    const overlapY =
+      Math.min(firstBody.bottom, secondBody.bottom) - Math.max(firstBody.top, secondBody.top);
+
+    if (overlapX <= 0 || overlapY <= 0) return;
+
+    const firstIsLeft = firstBody.center.x < secondBody.center.x;
+    const firstMovesIntoSecond = firstIsLeft
+      ? this.car.intendedXVelocity > 0
+      : this.car.intendedXVelocity < 0;
+    const secondMovesIntoFirst = firstIsLeft
+      ? this.secondCar.intendedXVelocity < 0
+      : this.secondCar.intendedXVelocity > 0;
+
+    if (firstMovesIntoSecond && secondMovesIntoFirst) {
+      this.car.x += firstIsLeft ? -overlapX / 2 : overlapX / 2;
+      this.secondCar.x += firstIsLeft ? overlapX / 2 : -overlapX / 2;
+      this.car.body.updateFromGameObject();
+      this.secondCar.body.updateFromGameObject();
+    } else {
+      const carToMove = firstMovesIntoSecond
+        ? this.car
+        : secondMovesIntoFirst
+          ? this.secondCar
+          : null;
+
+      if (!carToMove) return;
+
+      const direction = carToMove === this.car ? (firstIsLeft ? -1 : 1) : firstIsLeft ? 1 : -1;
+
+      carToMove.x += direction * (overlapX + 1);
+      carToMove.body.updateFromGameObject();
+    }
   }
 
   createPlayer() {
@@ -187,8 +230,10 @@ export default class GameScene extends Phaser.Scene {
   update(_, delta) {
     this.elapsedTime += delta;
     this.car.move();
+    this.car.intendedXVelocity = this.car.body.velocity.x;
     if (this.secondCar) {
       this.secondCar.move();
+      this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
     }
 
     this.roadObjects = this.roadObjects.filter((roadObject) => {
