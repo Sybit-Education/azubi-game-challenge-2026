@@ -142,6 +142,5 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.button.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
-
   }
 }

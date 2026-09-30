@@ -4,7 +4,6 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   create() {
-
     let creditText = `
       SYBIT KART
 
@@ -57,16 +56,18 @@ export default class CreditsScene extends Phaser.Scene {
     // color: '#FEFEFE'
     // });
 
-    const text = this.add.text(this.width / 2, this.height * 0.95, creditText, {
-    fontSize: '34px',
-    color: '#FEFEFE'
-    }).setOrigin(0.5, 0);
+    const text = this.add
+      .text(this.width / 2, this.height * 0.95, creditText, {
+        fontSize: '34px',
+        color: '#FEFEFE',
+      })
+      .setOrigin(0.5, 0);
 
     this.tweens.add({
-    targets: text,
-    y: -(text.height * 2),
-    duration: 30000,
-    ease: 'Linear'
+      targets: text,
+      y: -(text.height * 2),
+      duration: 30000,
+      ease: 'Linear',
     });
-    }
+  }
 }
