@@ -75,7 +75,7 @@ export default class MenuScene extends Phaser.Scene {
     play_button.on('pointerover', () => {
       this.tweens.add({
         targets: [twoPlayerButton, hitboxVisual],
-        x: play_button.x * 2.4,
+        x: play_button.x + 350,
         duration: 150,
       });
     });
