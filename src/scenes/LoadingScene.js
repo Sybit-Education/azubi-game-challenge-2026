@@ -55,7 +55,7 @@ export default class LoadingScene extends Phaser.Scene {
       barHeight
   );
    
-  maskShape.setOrigin(0, 0.5);
+  maskShape.setO
    
   const mask = maskShape.createGeometryMask();
   fillBar.setMask(mask);
@@ -65,7 +65,7 @@ export default class LoadingScene extends Phaser.Scene {
     width: barWidth,
     duration: 3000
     });
-    
+
     this.input.keyboard.on('keydown-SPACE', () => {
       this.scene.start('StartScene');
     });
