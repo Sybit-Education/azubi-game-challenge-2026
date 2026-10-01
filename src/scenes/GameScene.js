@@ -63,12 +63,14 @@ export default class GameScene extends Phaser.Scene {
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
+  //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
   separateOverlappingCars() {
     if (!this.secondCar) return;
 
     const firstBody = this.car.body;
     const secondBody = this.secondCar.body;
 
+    //sehr viel mathe ig checke selber nicht aber es klappt halbwegs
     const overlapX =
       Math.min(firstBody.right, secondBody.right) - Math.max(firstBody.left, secondBody.left);
     const overlapY =
