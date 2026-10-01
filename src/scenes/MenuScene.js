@@ -55,7 +55,7 @@ export default class MenuScene extends Phaser.Scene {
     const twoPlayerButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
       .setOrigin(0.5)
-      .setScale(0.23)
+      .setScale(0.278)
       .setDepth(-1);
 
     const hitAreaPadding = 12;
@@ -75,7 +75,7 @@ export default class MenuScene extends Phaser.Scene {
     play_button.on('pointerover', () => {
       this.tweens.add({
         targets: [twoPlayerButton, hitboxVisual],
-        x: play_button.x + 290,
+        x: play_button.x * 2.4,
         duration: 150,
       });
     });
@@ -111,6 +111,8 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive();
+
+    creditsButton.setDepth(3);
 
     this.add
       .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
