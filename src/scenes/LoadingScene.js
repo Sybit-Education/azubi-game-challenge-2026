@@ -5,7 +5,9 @@ export default class LoadingScene extends Phaser.Scene {
     super('LoadingScene');
   }
 
-  preload() {}
+  preload() {
+    this.load.image('SYBIT KART', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
+  }
 
   create() {
     this.cameras.main.setBackgroundColor('#6f3198');
@@ -18,33 +20,52 @@ export default class LoadingScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     const barHeight = 45;
     const spacing = height * 0.15;
-    const uiScale = Math.min(width / 1920, height / 1080);
+    const uiScale = Math.min(width / 195, height / 1080);
+
+    // Background image
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
+      .setDisplaySize(this.scale.width, this.scale.height);
 
     // SYBIT KART Logo placeholder
     this.add
-      .text(centerX, height * 0.1, 'SYBIT KART', {
-        fontFamily: 'Tiny5',
-        fontSize: `${175 * uiScale}px`,
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
+      .image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
+      .setOrigin(0.5)
+      .setScale(0.5);
 
     // Loading bar
-    //const barBg = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0xffffff);
-    const fillBar = this.add
-      .rectangle(centerX - barWidth / 2, centerY - spacing, 0, barHeight - 4, 0xcbfc2a)
-      .setOrigin(0.0, 0.5);
+
+    const loadingBar = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0x000000);
+    loadingBar.setRounded(40);
+
+    const fillBar = this.add.rectangle(
+    centerX - barWidth / 2,
+    centerY - spacing,
+    barWidth,
+    barHeight - 4,
+    0xcbfc2a
+    );
+    fillBar.setOrigin(0, 0.5);
+    fillBar.setRounded(20);
+    
+    const maskShape = this.add.rectangle(
+      centerX - barWidth / 2,
+      centerY - spacing,
+      0,
+      barHeight
+  );
+   
+  maskShape.setOrigin(0, 0.5);
+   
+  const mask = maskShape.createGeometryMask();
+  fillBar.setMask(mask);
 
     this.tweens.add({
-      targets: fillBar,
-      width: barWidth,
-      duration: 3000,
-
-      onComplete: () => {
-        this.scene.start('StartScene');
-      },
+    targets: maskShape,
+    width: barWidth,
+    duration: 3000
     });
-
+    
     this.input.keyboard.on('keydown-SPACE', () => {
       this.scene.start('StartScene');
     });
