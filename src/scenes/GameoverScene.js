@@ -9,6 +9,18 @@ export default class GameoverScene extends Phaser.Scene {
     this.distance = data.distance;
     this.score = data.score;
   }
+
+  preload() {
+    this.load.image('gameover-title', 'sprites/Gameover Scene Assets/GAME OVER.png');
+    this.load.image('gameover-play-again', 'sprites/Gameover Scene Assets/Nochmal spielen.png');
+    this.load.image('gameover-menu-btn', 'sprites/Gameover Scene Assets/Hauptmenü 1.png');
+    this.load.image('gameover-score-text', 'sprites/Gameover Scene Assets/score_.png');
+    this.load.image('gameover-distance-text', 'sprites/Gameover Scene Assets/Distanz_.png');
+    this.load.image(
+      'gameover-hintergrund',
+      'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
+    );
+  }
   create() {
     this.width = this.scale.width;
     this.height = this.scale.height;
