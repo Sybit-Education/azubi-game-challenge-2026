@@ -34,7 +34,7 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height)
       .setDepth(-100);
-      
+
     this.add
       .image(this.scale.width / 2, footer_btn_y * 1.1, 'homepage-resonanz-label')
       .setOrigin(0.5)
