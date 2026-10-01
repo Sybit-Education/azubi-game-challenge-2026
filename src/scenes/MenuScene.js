@@ -20,13 +20,15 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-car', 'sprites/Homepage/Group 25.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Group 28.png');
     this.load.image('homepage-barrierefreiheit', 'sprites/Homepage/Group 29.png');
+    this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
   }
 
   // Create scene
   create() {
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height);
+      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDepth(-100);
 
     this.add
       .image(this.scale.width / 6.7, this.scale.height / 10, 'homepage-logo')
@@ -54,6 +56,60 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.27)
       .setInteractive();
 
+    const twoPlayerButton = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
+      .setOrigin(0.5)
+      .setScale(0.23)
+      .setDepth(-1);
+
+    const hitAreaPadding = 12;
+    const hitboxVisual = this.add
+      .rectangle(
+        twoPlayerButton.x,
+        twoPlayerButton.y,
+        twoPlayerButton.displayWidth + hitAreaPadding * 2,
+        twoPlayerButton.displayHeight + hitAreaPadding * 2,
+        0xff0000,
+        0,
+      )
+      .setOrigin(0.5)
+      .setDepth(-2)
+      .setInteractive();
+
+    play_button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: play_button.x + 290,
+        duration: 150,
+      });
+    });
+
+    let isTwoPlayerHovered = false;
+
+    hitboxVisual.on('pointerover', () => {
+      isTwoPlayerHovered = true;
+    });
+
+    hitboxVisual.on('pointerout', () => {
+      isTwoPlayerHovered = false;
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: this.scale.width / 5.7,
+        duration: 150,
+      });
+    });
+
+    play_button.on('pointerout', () => {
+      this.time.delayedCall(0, () => {
+        if (!isTwoPlayerHovered) {
+          this.tweens.add({
+            targets: [twoPlayerButton, hitboxVisual],
+            x: this.scale.width / 5.7,
+            duration: 150,
+          });
+        }
+      });
+    });
     const creditsButton = this.add
       .image(this.scale.width / 1.15, this.scale.height / 1.15, 'homepage-credits')
       .setOrigin(0.5)
@@ -80,13 +136,17 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.3);
 
     play_button.on('pointerdown', () => {
-      this.scene.start('LoadingScene');
+      this.scene.start('LoadingScene', { isMultiplayer: false });
     });
 
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
     });
 
+    hitboxVisual.on('pointerdown', () => {
+      this.scene.start('LoadingScene', { isMultiplayer: true });
+    });
+    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
@@ -124,9 +184,13 @@ export default class MenuScene extends Phaser.Scene {
   
 
     // SYBIT KART Logo placeholder
- 
-
-    
+    this.add
+      .text(centerX, height * 0.1, 'SYBIT KART', {
+        fontFamily: 'Tiny5',
+        fontSize: `${175 * uiScale}px`,
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
 
     // Version tracker
     this.add
@@ -146,8 +210,13 @@ export default class MenuScene extends Phaser.Scene {
     const playButton = createButton(centerX, centerY - spacing * 1, 'START');
     const settingsButton = createButton(centerX, centerY * 1.05, 'SETTINGS');
     const creditsButton = createButton(centerX, centerY + spacing * 1.3, 'CREDITS');
+    const twoPlayerButton = createButton(centerX + 300, centerY + 20, '2 PLAYER');
 
-    //const buttons = [playButton, settingsButton, createButton];
+    // const buttons = [
+    //  playButton,
+    // settingsButton,
+    //  createButton
+    // ];
 
     // List of useful button-specific variables
     const playButtonY = playButton.button.y;
@@ -205,10 +274,28 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
+    twoPlayerButton.button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButton.button.y - 5,
+        duration: 100,
+      });
+    });
+
+    twoPlayerButton.button.on('pointerout', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton.button, twoPlayerButton.text],
+        y: twoPlayerButtonY,
+        duration: 100,
+      });
+    });
+
     // Click events
     playButton.button.on('pointerdown', () => {
       this.scene.start('LoadingScene');
     });
+
+   
 
     settingsButton.button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');

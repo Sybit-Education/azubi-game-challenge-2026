@@ -8,6 +8,7 @@ export default class GameoverScene extends Phaser.Scene {
   init(data) {
     this.distance = data.distance;
     this.score = data.score;
+    this.isMultiplayer = data?.isMultiplayer ?? false;
   }
   create() {
     this.width = this.scale.width;
@@ -55,7 +56,9 @@ export default class GameoverScene extends Phaser.Scene {
       .setScale(0.4);
 
     playAgainButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     });
 
     lobbyButton.on('pointerdown', () => {
