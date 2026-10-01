@@ -29,18 +29,6 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('coin', 'sprites/Entities/coin.png');
     this.load.image('boundary-particle', 'sprites/Particles/image001.png');
 
-    this.load.image('gameover-title', 'sprites/Gameover Scene Assets/GAME OVER.png');
-    this.load.image('gameover-play-again', 'sprites/Gameover Scene Assets/Nochmal spielen.png');
-    this.load.image('gameover-menu-btn', 'sprites/Gameover Scene Assets/Hauptmenu.png');
-    this.load.image('gameover-score-text', 'sprites/Gameover Scene Assets/score_.png');
-    this.load.image('gameover-distance-text', 'sprites/Gameover Scene Assets/Distanz_.png');
-    this.load.image(
-      'gameover-hintergrund',
-      'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
-    );
-
-    this.load.image('homepage-hintergrund', 'sprites/Homepage/backgroundMenu.png');
-
     this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
   }
 
