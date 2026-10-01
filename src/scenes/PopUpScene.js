@@ -5,102 +5,82 @@ export default class PopUpScene extends Phaser.Scene {
     super('PopUpScene');
   }
 
+  preload() {
+    this.load.image('settingsBackground', 'sprites/Homepage/Settings Menu/Background.png');
+    this.load.image('settingsLabel', 'sprites/Homepage/Settings Menu/SETTINGS.png');
+    this.load.image('xButton', 'sprites/Homepage/Settings Menu/x.png');
+    this.load.image('Accessibility Mode', 'sprites/Homepage/Settings Menu/Accessibility mode.png');
+    this.load.image('Game Mode', 'sprites/Homepage/Settings Menu/GameModeLabel.png');
+    this.load.image(
+      'AccessibilitySwitchOff',
+      'sprites/Homepage/Settings Menu/AccessibilitySwitchOff.png',
+    );
+    this.load.image('StandardModeButton', 'sprites/Homepage/Settings Menu/StandardModeButton.png');
+    this.load.image('closeLabel', 'sprites/Homepage/Settings Menu/closeLabel.png');
+  }
   create() {
     const { width, height } = this.scale;
-    const panelWidth = Math.min(width * 0.44, 560);
-    const panelX = width - panelWidth;
-    const padding = Math.max(24, Math.min(width, height) * 0.04);
-    const uiScale = Math.min(width / 1280, height / 720, 1.3);
-    const purple = 0x6f3198;
-    const white = '#ffffff';
+    const padding = Math.max(24, Math.min(width, height) * 0.06);
+
+    const background = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
+    background.displayWidth = width / 2.5;
+
+    const closeButton = this.add
+      .image(background.x * 1.225, height * 0.05, 'xButton')
+      .setScale(0.4)
+      .setOrigin(1, 0)
+      .setInteractive({ useHandCursor: true });
+    closeButton.setDepth(9999);
+    closeButton.on('pointerdown', () => this.scene.stop());
 
     // Dim the game behind the settings panel.
     this.add.rectangle(0, 0, width, height, 0x000000, 0.48).setOrigin(0).setInteractive();
 
     this.add
-      .rectangle(panelX, 0, panelWidth, height, purple)
-      .setOrigin(0)
-      .setStrokeStyle(3, 0xffffff, 0.18);
+      .image(background.x, background.y * -1 + padding, 'settingsLabel')
+      .setScale(0.3)
+      .setOrigin(0.5);
 
-    this.add.text(panelX + padding, padding, 'SETTINGS', {
-      fontFamily: 'Tiny5',
-      fontSize: `${Math.max(28, 48 * uiScale)}px`,
-      color: white,
-    });
-
-    const closeButton = this.add
-      .text(width - padding, padding, 'X', {
-        fontFamily: 'Tiny5',
-        fontSize: `${Math.max(24, 38 * uiScale)}px`,
-        color: white,
-        backgroundColor: '#542474',
-        padding: { x: 12, y: 6 },
-      })
-      .setOrigin(1, 0)
-      .setInteractive({ useHandCursor: true });
-
-    closeButton.on('pointerdown', () => this.scene.stop());
-
-    const labelStyle = {
-      fontFamily: 'Tiny5',
-      fontSize: `${Math.max(19, 27 * uiScale)}px`,
-      color: white,
-    };
-    const rowX = panelX + padding;
-    let rowY = Math.min(height * 0.25, 200);
-    const rowWidth = panelWidth - padding * 2;
-
-    this.add.text(rowX, rowY, 'Accessibility Mode', labelStyle);
-    rowY += Math.max(48, 58 * uiScale);
+    this.add
+      .image(background.x / 1.2, height * 0.2, 'Accessibility Mode')
+      .setScale(0.35)
+      .setOrigin(0);
+    //rowY += Math.max(48, 58 * uiScale);
 
     // Static switch mockup: settings are visual only for now.
-    this.add
-      .rectangle(rowX + rowWidth, rowY, 72 * uiScale, 34 * uiScale, 0x542474)
-      .setOrigin(1, 0.5)
-      .setStrokeStyle(2, 0xffffff, 0.7);
-    this.add.circle(rowX + rowWidth - 17 * uiScale, rowY, 11 * uiScale, 0xffffff);
-    this.add
-      .text(rowX, rowY, 'OFF', {
-        ...labelStyle,
-        fontSize: `${Math.max(15, 19 * uiScale)}px`,
-      })
-      .setOrigin(0, 0.5);
+    const AccessibilitySwitch = this.add
+      .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
+      .setScale(0.3)
+      .setOrigin(0);
 
-    rowY += Math.max(90, 112 * uiScale);
-    this.add.text(rowX, rowY, 'Game Mode', labelStyle);
-    rowY += Math.max(48, 58 * uiScale);
+    let button_state = 0;
+    function switch_button_state() {
+      if (button_state) {
+        button_state = 0;
+      } else if (!button_state) {
+        button_state = 1;
+      }
+    }
 
+    AccessibilitySwitch.on('pointerdown', () => switch_button_state());
+    //rowY += Math.max(90, 112 * uiScale);
+    const gamemodeLabel = this.add
+      .image(background.x * 0.79 + padding, AccessibilitySwitch.y / 0.66, 'Game Mode')
+      .setScale(0.35)
+      .setOrigin(0);
+
+    //rowY += Math.max(48, 58 * uiScale);
     // Static dropdown mockup: choosing a mode has no effect yet.
-    this.add
-      .rectangle(rowX + rowWidth / 2, rowY + 24 * uiScale, rowWidth, 52 * uiScale, 0x542474)
-      .setStrokeStyle(2, 0xffffff, 0.7);
-    this.add
-      .text(rowX + 18 * uiScale, rowY + 24 * uiScale, 'Standard Mode', {
-        ...labelStyle,
-        fontSize: `${Math.max(17, 22 * uiScale)}px`,
-      })
-      .setOrigin(0, 0.5);
-    this.add
-      .text(rowX + rowWidth - 18 * uiScale, rowY + 24 * uiScale, '▼', {
-        ...labelStyle,
-        fontSize: `${Math.max(14, 18 * uiScale)}px`,
-      })
-      .setOrigin(1, 0.5);
-    this.add.text(rowX, rowY + 74 * uiScale, 'Options: Standard Mode / Christmas Mode', {
-      ...labelStyle,
-      fontSize: `${Math.max(13, 17 * uiScale)}px`,
-      color: '#eadcf4',
-      wordWrap: { width: rowWidth },
-    });
 
     this.add
-      .text(rowX, height - padding, 'Press M or select X to close', {
-        fontFamily: 'Tiny5',
-        fontSize: `${Math.max(14, 18 * uiScale)}px`,
-        color: '#eadcf4',
-        wordWrap: { width: rowWidth },
-      })
-      .setOrigin(0, 1);
+      .image(gamemodeLabel.x * 1.2, gamemodeLabel.y * 0.97, 'StandardModeButton')
+      .setScale(0.3)
+      .setOrigin(0);
+
+    this.add
+      .image(background.x, height - padding, 'closeLabel')
+      .setScale(0.66)
+      .setOrigin(0.5);
 
     this.input.keyboard.once('keydown-M', () => this.scene.stop());
     this.input.keyboard.once('keydown-ESC', () => this.scene.stop());

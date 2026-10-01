@@ -8,23 +8,28 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('playButton', 'sprites/buttonTemplate.png');
-    this.load.image('homepage-hintergrund', 'sprites/Homepage/hINTERGRUND 2.png');
-    this.load.image('homepage-logo', 'sprites/Homepage/LOGO 2.png');
-    this.load.image('homepage-resonanz-label', 'sprites/Homepage/Resonanz im Spiel 2.png');
-    this.load.image('homepage-title', 'sprites/Homepage/SYBIT KART.png');
-    this.load.image('homepage-play-btn', 'sprites/Homepage/Frame 1.png');
-    this.load.image('homepage-settings', 'sprites/Homepage/Frame 2.png');
-    this.load.image('homepage-line', 'sprites/Homepage/Group 17.png');
-    this.load.image('homepage-anleitung', 'sprites/Homepage/Group 27.png');
-    this.load.image('homepage-car', 'sprites/Homepage/Group 25.png');
-    this.load.image('homepage-credits', 'sprites/Homepage/Group 28.png');
-    this.load.image('homepage-barrierefreiheit', 'sprites/Homepage/Group 29.png');
     this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
+    //this.load.image('playButton', 'sprites/buttonTemplate.png');
+    this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
+    this.load.image(
+      'homepage-resonanz-label',
+      'sprites/Homepage/Default Homepage/Resonanz im Spiel 2.png',
+    );
+    this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
+    this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
+    this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
+    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
+    this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
+    this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
+    this.load.image(
+      'homepage-barrierefreiheit',
+      'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+    );
   }
 
   // Create scene
   create() {
+    const footer_btn_y = this.scale.height / 1.17;
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height)
@@ -42,18 +47,18 @@ export default class MenuScene extends Phaser.Scene {
     this.add
       .image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(0.5);
 
     const play_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
       .setOrigin(0.5)
-      .setScale(0.27)
+      .setScale(0.33)
       .setInteractive();
 
     const settings_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.6, 'homepage-settings')
+      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
       .setOrigin(0.5)
-      .setScale(0.27)
+      .setScale(0.33)
       .setInteractive();
 
     const twoPlayerButton = this.add
@@ -111,23 +116,18 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
     const creditsButton = this.add
-      .image(this.scale.width / 1.15, this.scale.height / 1.15, 'homepage-credits')
+      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive();
 
     this.add
-      .image(this.scale.width / 2.1, this.scale.height / 1.1, 'homepage-line')
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
       .setOrigin(0.5)
       .setScale(0.3);
 
     this.add
-      .image(this.scale.width / 5.8, this.scale.height / 1.15, 'homepage-anleitung')
-      .setOrigin(0.5)
-      .setScale(0.3);
-
-    this.add
-      .image(this.scale.width / 2, this.scale.height / 1.15, 'homepage-barrierefreiheit')
+      .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.3);
     this.add
