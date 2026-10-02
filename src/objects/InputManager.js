@@ -1,3 +1,5 @@
+/* global Phaser */
+
 export default class InputManager {
   constructor(scene) {
     this.scene = scene;
