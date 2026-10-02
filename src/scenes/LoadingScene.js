@@ -7,6 +7,13 @@ export default class LoadingScene extends Phaser.Scene {
 
   preload() {
     this.load.image('SYBIT KART', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
+    this.load.image("Message1", "sprites/LoadingPage/Message1.png");
+    this.load.image("Message2", "sprites/LoadingPage/Message2.png");
+    this.load.image("Message3", "sprites/LoadingPage/Message3.png");
+    this.load.image("Message4", "sprites/LoadingPage/Message4.png");
+    this.load.image("LoadingText", "sprites/LoadingPage/Loading....png");
+    this.load.image("Press SPACE to skip", "sprites/LoadingPage/Press ‘SPACE’ to skip.png");
+    this.load.image("WeCreateCXChampions", "sprites/Homepage/Default Homepage/WeCreateCXChampions.png");
   }
 
   create() {
@@ -35,35 +42,30 @@ export default class LoadingScene extends Phaser.Scene {
 
     // Loading bar
 
-    const loadingBar = this.add.rectangle(centerX, centerY - spacing, barWidth, barHeight, 0x000000);
-    loadingBar.setRounded(40);
+    const loadingText = this.add
+      .image(centerX, centerY - spacing / 4, 'LoadingText')
+      .setOrigin(0.5)
+      .setScale(0.3);
+
+    const loadingBar = this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
 
     const fillBar = this.add.rectangle(
     centerX - barWidth / 2,
-    centerY - spacing,
-    barWidth,
+    centerY + spacing / 4,
+    1,
     barHeight - 4,
     0xcbfc2a
-    );
+    ); 
     fillBar.setOrigin(0, 0.5);
-    fillBar.setRounded(20);
-    
-    const maskShape = this.add.rectangle(
-      centerX - barWidth / 2,
-      centerY - spacing,
-      0,
-      barHeight
-  );
-   
-  maskShape.setO
-   
-  const mask = maskShape.createGeometryMask();
-  fillBar.setMask(mask);
 
     this.tweens.add({
-    targets: maskShape,
-    width: barWidth,
-    duration: 3000
+      targets: fillBar,
+      width: barWidth,
+      duration: 3000,
+
+      onComplete: () => {
+        this.scene.start('GameScene');
+      }
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
@@ -71,20 +73,27 @@ export default class LoadingScene extends Phaser.Scene {
     });
 
     this.add
-      .text(centerX, centerY + spacing * 2, 'Press SPACE to skip', {
-        fontFamily: 'Tiny5',
-        fontSize: `${32 * uiScale}px`,
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
+      .image(centerX, centerY + spacing * 2, 'Press SPACE to skip')
+      .setOrigin(0.5)
+      .setScale(0.5);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.08, 'WeCreateCXChampions')
+      .setOrigin(0.5)
+      .setScale(0.3);
 
     // Funny comment, randomly selected
+    const funnyComments = [
+      'Message1',
+      'Message2',
+      'Message3',
+      'Message4'
+    ];
+    const randomComment = funnyComments[Math.floor(Math.random() * funnyComments.length)];
+
     this.add
-      .text(centerX, centerY + spacing, 'Preparing SyCity for high speeds...', {
-        fontFamily: 'Tiny5',
-        fontSize: '72px',
-        color: '#ffffff',
-      })
+      .image(centerX, centerY + spacing * 1.4, randomComment,)
+      .setScale(0.8)
       .setOrigin(0.5);
   }
 }

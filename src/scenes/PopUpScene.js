@@ -51,7 +51,8 @@ export default class PopUpScene extends Phaser.Scene {
     const AccessibilitySwitch = this.add
       .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
 
     let button_state = 0;
     function switch_button_state() {
@@ -72,10 +73,11 @@ export default class PopUpScene extends Phaser.Scene {
     //rowY += Math.max(48, 58 * uiScale);
     // Static dropdown mockup: choosing a mode has no effect yet.
 
-    this.add
+    const StandardModeButton = this.add
       .image(gamemodeLabel.x * 1.2, gamemodeLabel.y * 0.97, 'StandardModeButton')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
 
     this.add
       .image(background.x, height - padding, 'closeLabel')
@@ -84,5 +86,58 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.input.keyboard.once('keydown-M', () => this.scene.stop());
     this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+
+    // Hover-effects for the buttons
+
+    closeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.45,
+        scaleY: 0.45,
+        duration: 100
+      });
+    });
+    closeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.4,
+        scaleY: 0.4,
+        duration: 100
+      });
+    });
+
+    AccessibilitySwitch.on('pointerover', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100
+      });
+    });
+    AccessibilitySwitch.on('pointerout', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100
+      });
+    });
+    StandardModeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: StandardModeButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100
+      });
+    });
+
+    StandardModeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: StandardModeButton,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100
+      });
+    });
   }
 }

@@ -10,7 +10,7 @@ export default class MenuScene extends Phaser.Scene {
   preload() {
     //this.load.image('playButton', 'sprites/buttonTemplate.png');
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
-    this.load.image('homepage-resonanz-label','sprites/Homepage/Default Homepage/Resonanz im Spiel 2.png');
+    this.load.image('WeCreateCXChampions','sprites/Homepage/Default Homepage/WeCreateCXChampions.png');
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
     this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
@@ -23,6 +23,8 @@ export default class MenuScene extends Phaser.Scene {
   // Create scene
   create() {
 
+    console.log("PHASER.VERSION: " + Phaser.VERSION);
+
     const footer_btn_y = this.scale.height / 1.17;
 
     this.add
@@ -30,7 +32,7 @@ export default class MenuScene extends Phaser.Scene {
       .setDisplaySize(this.scale.width, this.scale.height);
 
     this.add
-      .image(this.scale.width / 2, this.scale.height / 10, 'homepage-resonanz-label')
+      .image(this.scale.width / 2, this.scale.height / 1.08, 'WeCreateCXChampions')
       .setOrigin(0.5)
       .setScale(0.3);
 
@@ -40,36 +42,133 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.5);
 
     const play_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
+      .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-play-btn')
       .setOrigin(0.5)
-      .setScale(0.33)
-      .setInteractive();
+      .setScale(0.30)
+      .setInteractive({ useHandCursor: true });
 
     const settings_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
+      .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
       .setOrigin(0.5)
-      .setScale(0.33)
-      .setInteractive();
+      .setScale(0.30)
+      .setInteractive({ useHandCursor: true });
 
     const creditsButton = this.add
       .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
       .setOrigin(0.5)
-      .setScale(0.27)
-      .setInteractive();
+      .setScale(0.30)
+      .setInteractive({ useHandCursor: true });
 
-    this.add
+    const AnleitungsButton = this.add
       .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(0.30)
+      .setInteractive({ useHandCursor: true });
 
-    this.add
-      .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
-      .setOrigin(0.5)
-      .setScale(0.3);
     this.add
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+
+    const playOriginalY = play_button.y;
+    const settingsOriginalY = settings_button.y;
+    const creditsOriginalY = creditsButton.y;
+    const AnleitungsOriginalY = AnleitungsButton.y;
+
+    play_button.on("pointerover", () => {
+      this.tweens.add({
+        targets: play_button,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: playOriginalY - 5,
+        duration: 100
+      });
+    });
+
+    settings_button.on("pointerover", () => {
+      this.tweens.add({
+        targets: settings_button,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: settingsOriginalY - 5,
+        duration: 100
+      });
+    });
+
+   creditsButton.on("pointerover", () => {
+      this.tweens.add({
+        targets: creditsButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: creditsOriginalY - 5,
+        duration: 100
+      });
+    });
+
+    play_button.on("pointerout", () => {
+      this.tweens.add({
+        targets: play_button,
+        scaleX: 0.30,
+        scaleY: 0.30,
+        y: playOriginalY,
+        duration: 100
+      });
+    });
+
+    settings_button.on("pointerout", () => {
+      this.tweens.add({
+        targets: settings_button,
+        scaleX: 0.30,
+        scaleY: 0.30,
+        y: settingsOriginalY,
+        duration: 100
+      });
+    });
+
+   creditsButton.on("pointerout", () => {
+      this.tweens.add({
+        targets: creditsButton,
+        scaleX: 0.30,
+        scaleY: 0.30,
+        y: creditsOriginalY,
+        duration: 100
+      });
+    });
+
+    AnleitungsButton.on("pointerover", () => {
+      this.tweens.add({
+        targets: AnleitungsButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: AnleitungsOriginalY - 5,
+        duration: 100
+      });
+    });
+
+    AnleitungsButton.on("pointerout", () => {
+      this.tweens.add({
+        targets: AnleitungsButton,
+        scaleX: 0.30,
+        scaleY: 0.30,
+        duration: 100,
+        y: AnleitungsOriginalY
+      });
+    });
+
+    // Click events
+
+    play_button.on('pointerdown', () => {
+      this.scene.start('LoadingScene');
+    });
+
+    settings_button.on('pointerdown', () => {
+      this.scene.launch('PopUpScene');
+    });
+
+    creditsButton.on('pointerdown', () => {
+      this.scene.start('CreditsScene');
+    });
+
 
     play_button.on('pointerdown', () => {
       this.scene.start('LoadingScene');
