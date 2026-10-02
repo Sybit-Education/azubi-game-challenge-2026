@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>SybitKart</title>
@@ -11,6 +11,30 @@
   </head>
   <!-- Body -->
   <body style="margin: 0">
+<main id="accessible-ui" class="sr-only">
+    <h1>Sybit Kart</h1>
+  <button id="start-game" type="button">play</button>
+  <button id="settings-btn" type="button">Settings</button>
+</main>
+<section id="settings-section">
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <h2 id="settings-title">Settings</h2>
+
+  <label for="accessible-toggle">accessibility mode</label>
+  <input id="accessible-toggle" type="checkbox">
+
+<label for="game-mode-menu">game mode</label> 
+<select id="game-mode-menu">
+<option>standard</option>
+<option>Christmas mode</option>
+</select>
+<p>press m or escape to close the settings dialog.</p>
+  <button id="close-settings" type="button" autofocus>
+    Close
+  </button>
+</dialog>
+</section>
+
     <!-- Start script -->
     <script type="module" src="src/main.js"></script>
   </body>
@@ -19,5 +43,18 @@
     canvas {
       display: block;
     }
+
+    .sr-only:not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
   </style>
 </html>

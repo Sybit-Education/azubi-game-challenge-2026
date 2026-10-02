@@ -29,6 +29,28 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   create() {
+    const playBtn = document.getElementById('start-game');
+    const settingsBtn = document.getElementById('settings-btn');
+    const menu = document.getElementById('accessible-ui');
+    menu.hidden = false;
+
+    const startGame = () => {
+      this.scene.start('LoadingScene', { isMultiplayer: false });
+    };
+
+    const openSettings = () => {
+      this.scene.launch('PopUpScene');
+    };
+
+    playBtn.addEventListener('click', startGame);
+    settingsBtn.addEventListener('click', openSettings);
+
+    this.events.once('shutdown', () => {
+      playBtn.removeEventListener('click', startGame);
+      settingsBtn.removeEventListener('click', openSettings);
+      menu.hidden = true;
+    });
+
     const footer_btn_y = this.scale.height / 1.17;
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
@@ -133,13 +155,9 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3);
 
-    play_button.on('pointerdown', () => {
-      this.scene.start('LoadingScene', { isMultiplayer: false });
-    });
+    play_button.on('pointerdown', startGame);
 
-    settings_button.on('pointerdown', () => {
-      this.scene.launch('PopUpScene');
-    });
+    settings_button.on('pointerdown', openSettings);
 
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });

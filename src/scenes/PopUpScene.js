@@ -83,6 +83,31 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.input.keyboard.once('keydown-M', () => this.scene.stop());
-    this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+
+    const closeWindows = () => {
+      this.scene.stop('PopUpScene');
+    };
+
+    closeSettingsBtn.addEventListener('click', closeWindows);
+
+    const handleCancel = (event) => {
+      event.preventDefault();
+      closeWindows();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+
+    this.events.once('shutdown', () => {
+      closeSettingsBtn.removeEventListener('click', closeWindows);
+      dialog.removeEventListener('cancel', handleCancel);
+      dialog.close();
+      settingsBtn.focus();
+    });
+
+    dialog.showModal();
   }
 }
