@@ -68,20 +68,20 @@ export default class CreditsScene extends Phaser.Scene {
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
-    this.scene.start('MenuScene');
+      this.scene.start('MenuScene');
     });
 
-    const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {  
+    const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {
       fontSize: '24px',
       color: '#FEFEFE',
     });
-    
+
     this.tweens.add({
-    targets: skipTextElement,
-    alpha: 0.2,
-    duration: 850, 
-    yoyo: true,
-    repeat: -1,
+      targets: skipTextElement,
+      alpha: 0.2,
+      duration: 850,
+      yoyo: true,
+      repeat: -1,
     });
-    }
+  }
 }
