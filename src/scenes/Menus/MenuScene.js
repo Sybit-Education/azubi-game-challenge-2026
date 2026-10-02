@@ -11,7 +11,6 @@ export default class MenuScene extends Phaser.Scene {
   // Pre load images
   preload() {
     this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
-    //this.load.image('playButton', 'sprites/buttonTemplate.png');
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
     this.load.image('WeCreateCXChampions','sprites/Homepage/Default Homepage/WeCreateCXChampions.png');
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
@@ -19,6 +18,7 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
+    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
     this.load.image('homepage-barrierefreiheit','sprites/Homepage/Default Homepage/barrierefreiheitButton.png');
   }
 
@@ -57,7 +57,8 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
       .setOrigin(0.5)
       .setScale(0.278)
-      .setDepth(-1);
+      .setDepth(-1)
+      .setInteractive({ useHandCursor: true });
 
     const hitAreaPadding = 12;
     const hitboxVisual = this.add
@@ -70,7 +71,7 @@ export default class MenuScene extends Phaser.Scene {
         0,
       )
       .setOrigin(0.5)
-      .setDepth(-2)
+      .setDepth(999)
       .setInteractive();
 
     play_button.on('pointerover', () => {
@@ -85,6 +86,7 @@ export default class MenuScene extends Phaser.Scene {
 
     hitboxVisual.on('pointerover', () => {
       isTwoPlayerHovered = true;
+      console.log("HITBOX OVER");
     });
 
     hitboxVisual.on('pointerout', () => {
@@ -243,5 +245,20 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
+    play_button.on('pointerover', () => {
+console.log("play hover");
+});
+ 
+play_button.on('pointerout', () => {
+console.log("play out");
+});
+ 
+hitboxVisual.on('pointerover', () => {
+console.log("hitbox hover");
+});
+ 
+hitboxVisual.on('pointerout', () => {
+console.log("hitbox out");
+});
   }
 }
