@@ -54,7 +54,7 @@ export default class MenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
       const twoPlayerButton = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
+      .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-2player')
       .setOrigin(0.5)
       .setScale(0.278)
       .setDepth(-1)
@@ -68,10 +68,11 @@ export default class MenuScene extends Phaser.Scene {
         twoPlayerButton.displayWidth + hitAreaPadding * 2,
         twoPlayerButton.displayHeight + hitAreaPadding * 2,
         0xff0000,
-        0,
+        0.5,
       )
+      .setFillStyle(0xff0000, 0.5)
       .setOrigin(0.5)
-      .setDepth(999)
+      .setDepth(-2)
       .setInteractive();
 
     play_button.on('pointerover', () => {
