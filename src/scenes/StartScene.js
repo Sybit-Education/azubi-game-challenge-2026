@@ -3,6 +3,7 @@
 import Car from '../objects/Car.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
+import StartingLine from '../objects/StartingLine.js';
 
 export default class StartScene extends Phaser.Scene {
   constructor() {
@@ -18,11 +19,22 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
     this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
+    this.load.image('startingline', 'sprites/Race Track Assets/starting_line.png');
+
+    this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
+    this.load.image('start-count-2', 'sprites/Race Track Assets/countdown2.png');
+    this.load.image('start-count-1', 'sprites/Race Track Assets/countdown1.png');
+    this.load.image('start-go', 'sprites/Race Track Assets/goLabel.png');
+    this.load.audio('countdown', 'audio/sfx/countdown.mp3');
   }
 
   create() {
+    this.leaving = false;
+    this.secondCar = null;
+    this.number = null;
+
     const skipButton = this.add
-      .text(1300, 600, 'Skip', {
+      .text(this.scale.width - 80, this.scale.height - 50, 'Skip', {
         fontSize: '32px',
         backgroundColor: '#000000',
         padding: {
@@ -31,17 +43,31 @@ export default class StartScene extends Phaser.Scene {
         },
       })
       .setOrigin(0.5)
+      .setDepth(30)
       .setInteractive();
 
     skipButton.on('pointerdown', () => {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
+      this.goToGame();
     });
     this.createPlayer();
     this.createTrack();
     this.createWalls();
     this.setBackground('background');
+    this.spawnStartingline();
+
+    //countdown
+    this.showNumber('start-count-3');
+    this.sound.play('countdown');
+    this.time.delayedCall(900, () => this.showNumber('start-count-2'));
+    this.time.delayedCall(1800, () => this.showNumber('start-count-1'));
+    this.time.delayedCall(2700, () => {
+      this.showNumber('start-go');
+      this.car.startAnim();
+      if (this.secondCar) {
+        this.secondCar.startAnim();
+      }
+    });
+    this.time.delayedCall(4000, () => this.number.destroy());
   }
 
   setBackground(img) {
@@ -65,18 +91,25 @@ export default class StartScene extends Phaser.Scene {
         this.secondCar.displayWidth * 1.25,
         this.secondCar.displayHeight * 1.25,
       );
-      this.car.startAnim();
-      this.secondCar.startAnim();
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
-      this.car.startAnim();
     }
   }
 
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+  }
+
+  spawnStartingline() {
+    const startingLine = new StartingLine(
+      this,
+      this.track1.x,
+      this.track1.y + this.track1.displayHeight / 2 + 120,
+    );
+    startingLine.setScale(0.75);
+    startingLine.setDepth(21);
   }
 
   createWalls() {
@@ -100,11 +133,28 @@ export default class StartScene extends Phaser.Scene {
     this.walls = [wall1, wall2, wall3, wall4];
   }
 
+  showNumber(key) {
+    if (this.number) {
+      this.number.destroy();
+    }
+    this.number = this.add.image(this.scale.width / 2, this.scale.height * 0.4, key);
+    this.number.setScale(0.8);
+    this.number.setDepth(22);
+  }
+
+  goToGame() {
+    if (this.leaving) {
+      return;
+    }
+    this.leaving = true;
+    this.scene.start('GameScene', {
+      isMultiplayer: this.isMultiplayer,
+    });
+  }
+
   update() {
     if (this.car.y <= -300) {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
+      this.goToGame();
     }
   }
 }
