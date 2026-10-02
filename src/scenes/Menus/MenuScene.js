@@ -53,6 +53,61 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.30)
       .setInteractive({ useHandCursor: true });
 
+      const twoPlayerButton = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
+      .setOrigin(0.5)
+      .setScale(0.278)
+      .setDepth(-1);
+
+    const hitAreaPadding = 12;
+    const hitboxVisual = this.add
+      .rectangle(
+        twoPlayerButton.x,
+        twoPlayerButton.y,
+        twoPlayerButton.displayWidth + hitAreaPadding * 2,
+        twoPlayerButton.displayHeight + hitAreaPadding * 2,
+        0xff0000,
+        0,
+      )
+      .setOrigin(0.5)
+      .setDepth(-2)
+      .setInteractive();
+
+    play_button.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: play_button.x + 350,
+        duration: 150,
+      });
+    });
+
+    let isTwoPlayerHovered = false;
+
+    hitboxVisual.on('pointerover', () => {
+      isTwoPlayerHovered = true;
+    });
+
+    hitboxVisual.on('pointerout', () => {
+      isTwoPlayerHovered = false;
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: this.scale.width / 5.7,
+        duration: 150,
+      });
+    });
+
+    play_button.on('pointerout', () => {
+      this.time.delayedCall(0, () => {
+        if (!isTwoPlayerHovered) {
+          this.tweens.add({
+            targets: [twoPlayerButton, hitboxVisual],
+            x: this.scale.width / 5.7,
+            duration: 150,
+          });
+        }
+      });
+    });
+
     const settings_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
       .setOrigin(0.5)
