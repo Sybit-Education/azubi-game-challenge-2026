@@ -1,11 +1,12 @@
 /* global Phaser */
-import MenuScene from './scenes/MenuScene.js';
+import MenuScene from './scenes/Menus/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
-import PopUpScene from './scenes/PopUpScene.js';
+import PopUpScene from './scenes/Menus/PopUpScene.js';
 import StartScene from './scenes/StartScene.js';
 import GameoverScene from './scenes/GameoverScene.js';
 import CreditsScene from './scenes/CreditsScene.js';
+import ChristmasScene from './scenes/Menus/ChristmasScene.js';
 
 // Global phaser config
 const config = {
@@ -21,10 +22,21 @@ const config = {
       debug: false,
     },
   },
+
   input: {
     gamepad: true,
   },
-  scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene, GameoverScene, CreditsScene],
+
+  scene: [
+    MenuScene,
+    LoadingScene,
+    StartScene,
+    GameScene,
+    PopUpScene,
+    GameoverScene,
+    CreditsScene,
+    ChristmasScene,
+  ],
 };
 
 // Create game
