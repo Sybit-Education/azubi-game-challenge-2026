@@ -86,30 +86,25 @@ export default class PopUpScene extends Phaser.Scene {
     const settingsBtn = document.getElementById('settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings');
     const dialog = document.getElementById('settings-dialog');
-const accessibilityToggle = document.getElementById("accessible-toggle")
-accessibilityToggle.checked = this.registry.get("accessibility enabled") ?? false;
-const gameModeMenu = document.getElementById("game-mode-menu")
-gameModeMenu.value =  this.registry.get('gameMode')?? 'standard';
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    const gameModeMenu = document.getElementById('game-mode-menu');
+    gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
-// a function to close the window.
+    this.input.keyboard.once('keydown-M', () => this.scene.stop());
     const closeWindows = () => {
       this.scene.stop('PopUpScene');
     };
 
-    // a function to cktivate or deactivate Accessibility toggle.
     const handleAccessibilityChange = () => {
-      this.registry.set("accessibility enabled", accessibilityToggle.checked);
-      console.log(accessibilityToggle.checked)
-      
-    }
-accessibilityToggle.addEventListener("change", handleAccessibilityChange)
+      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+    };
+    accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
-// a function that safes the value off gamemode.
-const handleGameModeChange = () => {
-this.registry.set('gameMode', gameModeMenu.value)
-}
-gameModeMenu.addEventListener('change', handleGameModeChange);
-
+    const handleGameModeChange = () => {
+      this.registry.set('gameMode', gameModeMenu.value);
+    };
+    gameModeMenu.addEventListener('change', handleGameModeChange);
     closeSettingsBtn.addEventListener('click', closeWindows);
 
     const handleCancel = (event) => {
@@ -122,17 +117,12 @@ gameModeMenu.addEventListener('change', handleGameModeChange);
     this.events.once('shutdown', () => {
       closeSettingsBtn.removeEventListener('click', closeWindows);
       dialog.removeEventListener('cancel', handleCancel);
-      accessibilityToggle.removeEventListener("change", handleAccessibilityChange)
+      accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
       gameModeMenu.removeEventListener('change', handleGameModeChange);
       dialog.close();
       settingsBtn.focus();
     });
 
     dialog.showModal();
-
-
-
-      
   }
-
 }

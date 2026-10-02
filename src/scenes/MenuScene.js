@@ -34,7 +34,6 @@ export default class MenuScene extends Phaser.Scene {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
-
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
     const menu = document.getElementById('accessible-ui');
