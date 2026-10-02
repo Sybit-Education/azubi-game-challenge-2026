@@ -105,11 +105,7 @@ export default class GameScene extends Phaser.Scene {
       this.car.body.setSize(this.car.displayWidth * 1.1, this.car.displayHeight * 1.1);
       this.car.body.setOffset(this.car.body.offset.x, 40);
 
-      this.secondCar = new Car(
-        this,
-        this.scale.width / 2 + 90,
-        this.scale.height / 1.25,
-      );
+      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25);
       this.secondCar.body.setSize(
         this.secondCar.displayWidth * 1.1,
         this.secondCar.displayHeight * 1.1,
