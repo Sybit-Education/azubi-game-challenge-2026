@@ -10,6 +10,9 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('settingsLabel', 'sprites/Homepage/Settings Menu/SETTINGS.png');
     this.load.image('xButton', 'sprites/Homepage/Settings Menu/x.png');
     this.load.image('Accessibility Mode', 'sprites/Homepage/Settings Menu/Accessibility mode.png');
+    this.load.image('switchOn', 'sprites/Homepage/Settings Menu/SwitchOn.png');
+    this.load.image('switchOff', 'sprites/Homepage/Settings Menu/switchOff.png');
+    this.load.image('switchCircle', 'sprites/Homepage/Settings Menu/switchCircle.png');
     this.load.image('Game Mode', 'sprites/Homepage/Settings Menu/GameModeLabel.png');
     this.load.image(
       'AccessibilitySwitchOff',
@@ -52,14 +55,21 @@ export default class PopUpScene extends Phaser.Scene {
     //rowY += Math.max(48, 58 * uiScale);
 
     // Static switch mockup: settings are visual only for now.
-    const AccessibilitySwitch = this.add
-      .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
+    const accessibilitySwitch = this.add
+      .image(background.x * 1.06 + padding, height * 0.195, 'switchOff')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive();
+
+    const Accessibilitycircle = this.add
+      .image(background.x * 1.06 + padding, height * 0.196, 'switchCircle')
+      .setScale(0.35)
+      .setOrigin(0)
+      .setInteractive();
 
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
-      .image(background.x * 0.79 + padding, AccessibilitySwitch.y / 0.66, 'Game Mode')
+      .image(background.x * 0.79 + padding, accessibilitySwitch.y / 0.66, 'Game Mode')
       .setScale(0.35)
       .setOrigin(0);
 
@@ -126,6 +136,31 @@ export default class PopUpScene extends Phaser.Scene {
       this.scene.stop('PopUpScene');
       this.scene.start('MenuScene');
     });
+
+    //defining switch status, "origin x" and "goal x"
+    let accessibilityEnabled = false;
+    const leftX = Accessibilitycircle.x;
+    const rightX = leftX * 1.035;
+
+    //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
+    //tween für den kreisanimation
+
+    const toggleAccessibility = () => {
+      accessibilityEnabled = !accessibilityEnabled;
+
+      this.registry.set('accessibilityMode', accessibilityEnabled);
+
+      accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
+      this.tweens.add({
+        targets: Accessibilitycircle,
+        x: accessibilityEnabled ? rightX : leftX,
+        duration: 150,
+        ease: 'Power2',
+      });
+    };
+
+    accessibilitySwitch.on('pointerdown', toggleAccessibility);
+    Accessibilitycircle.on('pointerdown', toggleAccessibility);
 
     this.add
       .image(background.x, height - padding, 'closeLabel')
