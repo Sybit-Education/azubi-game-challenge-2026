@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import InputManager from '../../objects/InputManager.js';
+
 export default class MenuScene extends Phaser.Scene {
   // Constructor
   constructor() {
@@ -11,14 +13,10 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
     //this.load.image('playButton', 'sprites/buttonTemplate.png');
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
-    this.load.image(
-      'homepage-resonanz-label',
-      'sprites/Homepage/Default Homepage/Resonanz im Spiel 2.png',
-    );
+    this.load.image('homepage-resonanz', 'sprites/Homepage/Default Homepage/Resonanz.png');
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
     this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
-    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
     this.load.image(
@@ -29,6 +27,10 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   create() {
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     const footer_btn_y = this.scale.height / 1.17;
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
@@ -36,7 +38,7 @@ export default class MenuScene extends Phaser.Scene {
       .setDepth(-100);
 
     this.add
-      .image(this.scale.width / 2, footer_btn_y * 1.1, 'homepage-resonanz-label')
+      .image(this.scale.width / 2, footer_btn_y * 1.1, 'homepage-resonanz')
       .setOrigin(0.5)
       .setScale(0.3);
 
@@ -45,14 +47,14 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.5);
 
-    const play_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
+    const settings_button = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
       .setOrigin(0.5)
       .setScale(0.33)
       .setInteractive();
 
-    const settings_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
+    const play_button = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.33)
       .setInteractive();
@@ -120,20 +122,17 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.setDepth(3);
 
     this.add
-      .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.3);
 
-    this.add
-      .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
-      .setOrigin(0.5)
-      .setScale(0.3);
     this.add
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
 
     play_button.on('pointerdown', () => {
+      this.registry.set('gameMode', 'standard');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     });
 
@@ -300,5 +299,33 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 }*/
+  }
+
+  update() {
+    this.InputManager.update();
+    if (this.InputManager.getControlsP1.button1) {
+      console.log('P1 Button 1 pressed');
+    }
+    if (this.InputManager.getControlsP1.button2) {
+      console.log('P1 Button 2 pressed');
+    }
+    if (this.InputManager.getControlsP1.button3) {
+      console.log('P1 Button 3 pressed');
+    }
+    if (this.InputManager.getControlsP1.button4) {
+      console.log('P1 Button 4 pressed');
+    }
+    if (this.InputManager.getControlsP1.left) {
+      console.log('P1 turning left');
+    }
+    if (this.InputManager.getControlsP1.right) {
+      console.log('P1 turning right');
+    }
+    if (this.InputManager.getControlsP1.accelerate) {
+      console.log('P1 accelerating');
+    }
+    if (this.InputManager.getControlsP1.brake) {
+      console.log('P1 braking');
+    }
   }
 }
