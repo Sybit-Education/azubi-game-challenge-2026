@@ -8,14 +8,6 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    const [upKey, leftKey, downKey, rightKey] = controls.split(','); //splits the string "A,D" and if player 2 "LEFT, RIGHT" to two seperate strings
-
-    this.leftKey = leftKey;
-    this.rightKey = rightKey;
-    this.upKey = upKey;
-    this.downKey = downKey;
-    this.keys = scene.input.keyboard.addKeys(controls);
-
     this.score = 0;
     this.value = 10;
     this.meters = 0;
@@ -40,7 +32,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
   }
 
-  move() {
+  move(controls) {
     this.setVelocityX(0);
     this.setVelocityY(0);
     this.setAngle(0);
@@ -54,26 +46,26 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.x = Phaser.Math.Clamp(this.x, this.leftLimit, this.rightLimit);
     this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
 
-    if (this.keys[this.leftKey]?.isDown) {
+    if (controls.left) {
       //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       this.setVelocityX(-500);
-      if (this.x !== this.leftLimit && !this.keys[this.rightKey]?.isDown) {
+      if (this.x !== this.leftLimit && !controls.right) {
         this.setAngle(-3);
       }
     }
 
-    if (this.keys[this.rightKey]?.isDown) {
+    if (controls.right) {
       this.setVelocityX(500);
-      if (this.x !== this.rightLimit && !this.keys[this.leftKey]?.isDown) {
+      if (this.x !== this.rightLimit && !controls.left) {
         this.setAngle(3);
       }
     }
 
-    if (this.keys[this.upKey]?.isDown) {
+    if (controls.accelerate) {
       this.setVelocityY(-300);
     }
 
-    if (this.keys[this.downKey]?.isDown) {
+    if (controls.brake) {
       this.setVelocityY(500);
     }
 

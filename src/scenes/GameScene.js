@@ -6,6 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
+import InputManager from '../objects/InputManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -34,6 +35,8 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
@@ -214,12 +217,13 @@ export default class GameScene extends Phaser.Scene {
 
   // Update the game state every frame
   update(_, delta) {
+    this.InputManager.update();
     this.elapsedTime += delta;
-    this.car.move();
+    this.car.move(this.InputManager.getControlsP1);
     this.car.update_boundary_particles();
     this.car.intendedXVelocity = this.car.body.velocity.x;
     if (this.secondCar) {
-      this.secondCar.move();
+      this.secondCar.move(this.InputManager.getControlsP2);
       this.secondCar.update_boundary_particles();
       this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
     }
