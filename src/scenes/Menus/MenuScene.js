@@ -1,6 +1,6 @@
 /* global Phaser */
 
-import InputManager from '../objects/InputManager.js';
+import InputManager from '../../objects/InputManager.js';
 
 export default class MenuScene extends Phaser.Scene {
   // Constructor
@@ -17,7 +17,6 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
     this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
-    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
     this.load.image('homepage-barrierefreiheit','sprites/Homepage/Default Homepage/barrierefreiheitButton.png');
@@ -165,7 +164,8 @@ export default class MenuScene extends Phaser.Scene {
     // Click events
 
     play_button.on('pointerdown', () => {
-      this.scene.start('LoadingScene');
+      this.registry.set('gameMode', 'standard');
+      this.scene.start('LoadingScene', { isMultiplayer: false });
     });
 
     settings_button.on('pointerdown', () => {
