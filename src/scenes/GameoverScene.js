@@ -74,7 +74,13 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     lobbyButton.on('pointerdown', () => {
-      this.scene.start('MenuScene');
+      const gameMode = this.registry.get('gameMode');
+
+      if (gameMode === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
     });
   }
 }
