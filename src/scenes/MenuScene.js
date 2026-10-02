@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import InputManager from '../objects/InputManager.js';
+
 export default class MenuScene extends Phaser.Scene {
   // Constructor
   constructor() {
@@ -29,6 +31,10 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   create() {
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     const footer_btn_y = this.scale.height / 1.17;
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
@@ -300,5 +306,33 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 }*/
+  }
+
+  update() {
+    this.InputManager.update();
+    if (this.InputManager.getControlsP1.button1) {
+      console.log('P1 Button 1 pressed');
+    }
+    if (this.InputManager.getControlsP1.button2) {
+      console.log('P1 Button 2 pressed');
+    }
+    if (this.InputManager.getControlsP1.button3) {
+      console.log('P1 Button 3 pressed');
+    }
+    if (this.InputManager.getControlsP1.button4) {
+      console.log('P1 Button 4 pressed');
+    }
+    if (this.InputManager.getControlsP1.left) {
+      console.log('P1 turning left');
+    }
+    if (this.InputManager.getControlsP1.right) {
+      console.log('P1 turning right');
+    }
+    if (this.InputManager.getControlsP1.accelerate) {
+      console.log('P1 accelerating');
+    }
+    if (this.InputManager.getControlsP1.brake) {
+      console.log('P1 braking');
+    }
   }
 }
