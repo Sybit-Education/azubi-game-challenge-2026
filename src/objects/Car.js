@@ -1,7 +1,7 @@
 /* global Phaser */
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, controls = 'W,A,S,D') {
+  constructor(scene, x, y) {
     //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
     super(scene, x, y, 'car');
 

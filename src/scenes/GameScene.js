@@ -102,22 +102,25 @@ export default class GameScene extends Phaser.Scene {
   createPlayer() {
     if (this.isMultiplayer) {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.1, this.car.displayHeight * 1.1);
+      this.car.body.setOffset(this.car.body.offset.x, 40);
 
       this.secondCar = new Car(
         this,
         this.scale.width / 2 + 90,
         this.scale.height / 1.25,
-        'UP,LEFT,DOWN,RIGHT',
       );
       this.secondCar.body.setSize(
-        this.secondCar.displayWidth * 1.25,
-        this.secondCar.displayHeight * 1.25,
+        this.secondCar.displayWidth * 1.1,
+        this.secondCar.displayHeight * 1.1,
       );
+      this.secondCar.body.setOffset(this.secondCar.body.offset.x, 40);
       this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.1, this.car.displayHeight * 1.1);
+      const offsetX = this.car.body.offset.x;
+      this.car.body.setOffset(offsetX, 40);
     }
   }
 
@@ -172,7 +175,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.displayWidth * 0.75, roadObject.displayHeight);
         this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
           this.physics.add.collider(this.secondCar, roadObject, this.gameOver, undefined, this);
@@ -182,7 +185,7 @@ export default class GameScene extends Phaser.Scene {
       this.roadObjects.push(roadObject);
     }
 
-    const delay = Phaser.Math.Between(500, 2000);
+    const delay = Phaser.Math.Between(500, 3000);
     this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
 
