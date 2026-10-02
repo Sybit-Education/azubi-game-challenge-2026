@@ -5,6 +5,10 @@ export default class LoadingScene extends Phaser.Scene {
     super('LoadingScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   preload() {
     this.load.image('SYBIT KART', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
     this.load.image("Message1", "sprites/LoadingPage/Message1.png");
@@ -64,12 +68,20 @@ export default class LoadingScene extends Phaser.Scene {
       duration: 3000,
 
       onComplete: () => {
-        this.scene.start('GameScene');
-      }
+        if (this.isMultiplayer) {
+          this.scene.start('StartScene', { isMultiplayer: true });
+        } else {
+          this.scene.start('StartScene', { isMultiplayer: false });
+        }
+      },
     });
 
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('StartScene');
+      if (this.isMultiplayer) {
+        this.scene.start('StartScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('StartScene', { isMultiplayer: false });
+      }
     });
 
     this.add

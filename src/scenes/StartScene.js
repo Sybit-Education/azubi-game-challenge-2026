@@ -9,6 +9,10 @@ export default class StartScene extends Phaser.Scene {
     super('StartScene');
   }
 
+  init(data) {
+    this.isMultiplayer = data?.isMultiplayer ?? false;
+  }
+
   preload() {
     this.load.image('car', 'sprites/Entities/Player Skins/Sybit Kart Player car 1.png');
     this.load.image('track', 'sprites/Race Track Assets/road.png');
@@ -17,7 +21,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-    const button = this.add
+    const skipButton = this.add
       .text(1300, 600, 'Skip', {
         fontSize: '32px',
         backgroundColor: '#000000',
@@ -29,8 +33,10 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive();
 
-    button.on('pointerdown', () => {
-      this.scene.start('GameScene');
+    skipButton.on('pointerdown', () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     });
     this.createPlayer();
     this.createTrack();
@@ -45,8 +51,27 @@ export default class StartScene extends Phaser.Scene {
   }
 
   createPlayer() {
-    this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-    this.car.startAnim();
+    if (this.isMultiplayer) {
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+
+      this.secondCar = new Car(
+        this,
+        this.scale.width / 2 + 90,
+        this.scale.height / 1.25,
+        'LEFT,RIGHT',
+      );
+      this.secondCar.body.setSize(
+        this.secondCar.displayWidth * 1.25,
+        this.secondCar.displayHeight * 1.25,
+      );
+      this.car.startAnim();
+      this.secondCar.startAnim();
+    } else {
+      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.startAnim();
+    }
   }
 
   createTrack() {
@@ -73,13 +98,13 @@ export default class StartScene extends Phaser.Scene {
     wall4.setFlipX(true);
 
     this.walls = [wall1, wall2, wall3, wall4];
-
-    this.physics.add.collider(this.car, this.walls);
   }
 
   update() {
     if (this.car.y <= -300) {
-      this.scene.start('GameScene');
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
     }
   }
 }

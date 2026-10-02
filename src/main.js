@@ -18,8 +18,11 @@ const config = {
   physics: {
     default: 'arcade',
     arcade: {
-      debug: false,
+      debug: true,
     },
+  },
+  input: {
+    gamepad: true,
   },
   scene: [MenuScene, LoadingScene, StartScene, GameScene, PopUpScene, GameoverScene, CreditsScene],
 };

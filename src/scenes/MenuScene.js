@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import InputManager from '../objects/InputManager.js';
+
 export default class MenuScene extends Phaser.Scene {
   // Constructor
   constructor() {
@@ -8,6 +10,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
+    this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
     //this.load.image('playButton', 'sprites/buttonTemplate.png');
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
     this.load.image('WeCreateCXChampions','sprites/Homepage/Default Homepage/WeCreateCXChampions.png');
@@ -24,6 +27,10 @@ export default class MenuScene extends Phaser.Scene {
   create() {
 
     console.log("PHASER.VERSION: " + Phaser.VERSION);
+
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     const footer_btn_y = this.scale.height / 1.17;
 

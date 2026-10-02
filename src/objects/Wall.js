@@ -1,18 +1,14 @@
 /* global Phaser */
 
-export default class Border extends Phaser.Physics.Arcade.Image {
+export default class Border extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {
     super(scene, x, y, 'border');
 
     scene.add.existing(this);
-    scene.physics.add.existing(this);
-    this.scale = this.scene.scale.height / this.height;
     this.speed = 5;
-    this.setScale(this.scale);
+    this.setScale(scene.scale.height / this.height);
     this.setDepth(-1);
     this.setOrigin(0.5, 0);
-
-    this.setImmovable(true);
   }
 
   move(delta) {
