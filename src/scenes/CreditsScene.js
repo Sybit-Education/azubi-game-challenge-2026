@@ -12,7 +12,7 @@ export default class CreditsScene extends Phaser.Scene {
 
     Development
 
-    Hans Clement Solon
+    Hans Solon
     Davyd Mozghov
     Berat Dalgic
     Agwad Alsayed
@@ -47,17 +47,13 @@ export default class CreditsScene extends Phaser.Scene {
 
     Thanks for playing!
     `;
+    let skipText = 'Press SPACE to skip';
 
     this.width = this.scale.width;
     this.height = this.scale.height;
     this.cameras.main.setBackgroundColor('#3E0191');
 
-    // const headline = this.add.text(this.width / 2, this.height * 0.9, 'Credits', {
-    // fontSize: '72px',
-    // color: '#FEFEFE'
-    // });
-
-    const text = this.add
+    const textElement = this.add
       .text(this.width / 2, this.height * 0.95, creditText, {
         fontSize: '34px',
         color: '#FEFEFE',
@@ -65,10 +61,27 @@ export default class CreditsScene extends Phaser.Scene {
       .setOrigin(0.5, 0);
 
     this.tweens.add({
-      targets: text,
-      y: -(text.height * 2),
+      targets: textElement,
+      y: -(textElement.height * 2),
       duration: 30000,
       ease: 'Linear',
     });
-  }
+
+    this.input.keyboard.on('keydown-SPACE', () => {
+    this.scene.start('MenuScene');
+    });
+
+    const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {  
+      fontSize: '24px',
+      color: '#FEFEFE',
+    });
+    
+    this.tweens.add({
+    targets: skipTextElement,
+    alpha: 0.2,
+    duration: 850, 
+    yoyo: true,
+    repeat: -1,
+    });
+    }
 }
