@@ -1,6 +1,7 @@
 /* global Phaser */
 
 import InputManager from '../../objects/InputManager.js';
+import CreditsScene from '../CreditsScene.js';
 
 export default class MenuScene extends Phaser.Scene {
   // Constructor
@@ -15,6 +16,7 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
     this.load.image('homepage-resonanz', 'sprites/Homepage/Default Homepage/Resonanz.png');
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
+    this.load.image('homepage-leaderboard-btn','sprites/Gameover Scene Assets/Leaderboard placeholder button.png');
     this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
@@ -147,6 +149,20 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
+    //meine funkotion AJHDJSHD LEADERBOARD BUTTON//
+ const leaderboardButton = this.add
+    .image(
+      this.scale.width / 2,  //xachse//
+      this.scale.height / 1.14,
+      'homepage-leaderboard-btn'
+    )
+    .setScale(2)
+    .setOrigin(0.5)
+    .setInteractive();
+
+  leaderboardButton.on('pointerdown', () => {
+    this.scene.start('LeaderboardScene')
+  });
 
     //Den Rest hier lasse ich Erstmal, weil ich nichts gelesen habe und vielleicht braucht man was davon später (Beim Optimieren kann man eventuell den Rest löschen)
     /*
