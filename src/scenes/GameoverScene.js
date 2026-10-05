@@ -23,6 +23,17 @@ export default class GameoverScene extends Phaser.Scene {
     );
   }
   create() {
+    const leaderboard = JSON.parse(
+      localStorage.getItem('leaderboard')
+    );
+    leaderboard.push(this.distance);
+
+    leaderboard.sort((a, b) => b -a);
+
+    localStorage.setItem(
+      'leaderboard',
+      JSON.stringify(leaderboard.slice(0, 10))
+    );
     this.width = this.scale.width;
     this.height = this.scale.height;
 

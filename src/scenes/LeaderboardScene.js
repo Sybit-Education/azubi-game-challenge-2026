@@ -6,6 +6,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   create() {
 
+    const leaderboard = JSON.parse(
+      localStorage.getItem('leaderboard') || '[]'
+    );
+
     // Hintergrund
     this.add
       .image(
@@ -22,7 +26,16 @@ export default class LeaderboardScene extends Phaser.Scene {
       'Leaderboard'
     ).setOrigin(0.5);
 
-    // Button zurück zum Hauptmenu
+    // Einträge anzeigen
+    leaderboard.forEach((distance, index) => {
+      this.add.text(
+        this.scale.width / 2,
+        200 + index * 50,
+        `${index + 1}. ${distance} km`
+      ).setOrigin(0.5);
+    });
+
+    // Back Button
     const backButton = this.add
       .image(
         this.scale.width / 2,
@@ -34,9 +47,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setInteractive();
 
     backButton.on('pointerdown', () => {
-      console.log('BACK');
       this.scene.start('MenuScene');
     });
-
   }
 }
