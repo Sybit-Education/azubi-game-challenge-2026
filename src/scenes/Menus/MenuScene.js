@@ -28,6 +28,7 @@ export default class MenuScene extends Phaser.Scene {
     console.log("PHASER.VERSION: " + Phaser.VERSION);
 
     // Create InputManager instance and initialize it
+    // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
@@ -38,17 +39,20 @@ export default class MenuScene extends Phaser.Scene {
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height);
+      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDepth(-2);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 1.08, 'WeCreateCXChampions')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(0.3)
+      .setDepth(-1);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
       .setOrigin(0.5)
-      .setScale(0.5);
+      .setScale(0.5)
+      .setDepth(-1);
 
     const play_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-play-btn')
@@ -132,7 +136,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
-        x: play_button.x + 375,
+        x: play_button.x + 325,
         y: play_button.y - 3,
         duration: 150,
       });
@@ -147,8 +151,9 @@ export default class MenuScene extends Phaser.Scene {
         scaleY: 0.32,
         y: playOriginalY - 5,
         duration: 50
+        });
+
       });
-    });
 
     play_button.on("pointerout", () => {
       isPlayHovered = false;
@@ -159,18 +164,38 @@ export default class MenuScene extends Phaser.Scene {
         y: playOriginalY,
         duration: 50
       });
-        
+
       scheduleHide();
     });
 
     twoPlayerButton.on("pointerover", () => {
       isTwoPlayerHovered = true;
+      twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
+      if (!isPlayHovered && isTwoPlayerHovered) {
+        this.tweens.add({
+        targets: play_button,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: playOriginalY - 5,
+        duration: 50
+        });
+      }
     });
 
     twoPlayerButton.on("pointerout", () => {
       isTwoPlayerHovered = false;
+      twoPlayerButton.setDepth(0);
       scheduleHide();
+      if (!isPlayHovered && isTwoPlayerHovered) {
+        this.tweens.add({
+        targets: play_button,
+        scaleX: 0.30,
+        scaleY: 0.30,
+        y: playOriginalY,
+        duration: 50
+        });
+      }
     });
 
     settings_button.on("pointerover", () => {
