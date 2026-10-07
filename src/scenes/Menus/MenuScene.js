@@ -67,10 +67,8 @@ export default class MenuScene extends Phaser.Scene {
         twoPlayerButton.y,
         twoPlayerButton.displayWidth + hitAreaPadding * 2,
         twoPlayerButton.displayHeight + hitAreaPadding * 2,
-        0xff0000,
         0.5,
       )
-      .setFillStyle(0xff0000, 0.5)
       .setOrigin(0.5)
       .setDepth(-2)
       .setInteractive();
@@ -80,6 +78,7 @@ export default class MenuScene extends Phaser.Scene {
         targets: [twoPlayerButton, hitboxVisual],
         x: play_button.x + 350,
         duration: 150,
+        depth: 1,
       });
     });
 
@@ -96,6 +95,7 @@ export default class MenuScene extends Phaser.Scene {
         targets: [twoPlayerButton, hitboxVisual],
         x: this.scale.width / 5.7,
         duration: 150,
+        depth: -1
       });
     });
 
