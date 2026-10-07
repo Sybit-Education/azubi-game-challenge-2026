@@ -262,7 +262,5 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
-
-    multiplayerButton.on('pointerdown', () => {
   }
 }
