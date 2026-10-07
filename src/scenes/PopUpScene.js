@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../accessibility/positionControls.js';
+
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
     super('PopUpScene');
@@ -73,7 +75,7 @@ export default class PopUpScene extends Phaser.Scene {
     //rowY += Math.max(48, 58 * uiScale);
     // Static dropdown mockup: choosing a mode has no effect yet.
 
-    this.add
+    const gameModeImage = this.add
       .image(gamemodeLabel.x * 1.2, gamemodeLabel.y * 0.97, 'StandardModeButton')
       .setScale(0.3)
       .setOrigin(0);
@@ -123,6 +125,11 @@ export default class PopUpScene extends Phaser.Scene {
       settingsBtn.focus();
     });
 
+    positionAccessibleControls(this, [
+      [closeSettingsBtn, closeButton],
+      [accessibilityToggle, AccessibilitySwitch],
+      [gameModeMenu, gameModeImage],
+    ]);
     dialog.showModal();
   }
 }

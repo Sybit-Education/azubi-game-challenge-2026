@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../accessibility/positionControls.js';
+
 import InputManager from '../objects/InputManager.js';
 
 export default class MenuScene extends Phaser.Scene {
@@ -48,6 +50,7 @@ export default class MenuScene extends Phaser.Scene {
     };
 
     playBtn.addEventListener('click', startGame);
+    playBtn.focus();
     settingsBtn.addEventListener('click', openSettings);
 
     this.events.once('shutdown', () => {
@@ -159,6 +162,8 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+
+    positionAccessibleControls(this, [[playBtn, play_button], [settingsBtn, settings_button]]);
 
     play_button.on('pointerdown', startGame);
 
