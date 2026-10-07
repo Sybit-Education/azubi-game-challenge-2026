@@ -55,7 +55,8 @@ export default class PopUpScene extends Phaser.Scene {
     const AccessibilitySwitch = this.add
       .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
 
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
@@ -134,5 +135,58 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.input.keyboard.once('keydown-M', () => this.scene.stop());
     this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+
+    // Hover-effects for the buttons
+
+    closeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.45,
+        scaleY: 0.45,
+        duration: 100
+      });
+    });
+    closeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.4,
+        scaleY: 0.4,
+        duration: 100
+      });
+    });
+
+    AccessibilitySwitch.on('pointerover', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100
+      });
+    });
+    AccessibilitySwitch.on('pointerout', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100
+      });
+    });
+    StandardModeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: StandardModeButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100
+      });
+    });
+
+    StandardModeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: StandardModeButton,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100
+      });
+    });
   }
 }
