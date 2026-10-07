@@ -135,8 +135,6 @@ export default class MenuScene extends Phaser.Scene {
         x: play_button.x + 375,
         y: play_button.y - 3,
         duration: 150,
-        scaleX: 0.30,
-        scaleY: 0.30,
       });
     };
 
