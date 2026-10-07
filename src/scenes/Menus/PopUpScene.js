@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
     super('PopUpScene');
@@ -133,8 +135,55 @@ export default class PopUpScene extends Phaser.Scene {
       .setScale(0.66)
       .setOrigin(0.5);
 
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    const gameModeMenu = document.getElementById('game-mode-menu');
+    gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
+
     this.input.keyboard.once('keydown-M', () => this.scene.stop());
-    this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+    const closeWindows = () => {
+      this.scene.stop('PopUpScene');
+    };
+
+    const handleAccessibilityChange = () => {
+      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+    };
+    accessibilityToggle.addEventListener('change', handleAccessibilityChange);
+
+    const handleGameModeChange = () => {
+      this.registry.set('gameMode', gameModeMenu.value);
+      this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
+    };
+    gameModeMenu.addEventListener('change', handleGameModeChange);
+    closeSettingsBtn.addEventListener('click', closeWindows);
+
+    const handleCancel = (event) => {
+      event.preventDefault();
+      closeWindows();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+
+    this.events.once('shutdown', () => {
+      closeSettingsBtn.removeEventListener('click', closeWindows);
+      dialog.removeEventListener('cancel', handleCancel);
+      accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
+      gameModeMenu.removeEventListener('change', handleGameModeChange);
+      dialog.close();
+      settingsBtn.focus();
+    });
+
+    positionAccessibleControls(this, [
+      [closeSettingsBtn, closeButton],
+      [accessibilityToggle, AccessibilitySwitch],
+      [gameModeMenu, standardModeButton],
+    ]);
+    dialog.showModal();
 
     // Hover-effects for the buttons
 
@@ -143,7 +192,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.45,
         scaleY: 0.45,
-        duration: 100
+        duration: 100,
       });
     });
     closeButton.on('pointerout', () => {
@@ -151,7 +200,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.4,
         scaleY: 0.4,
-        duration: 100
+        duration: 100,
       });
     });
 
@@ -160,7 +209,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
     AccessibilitySwitch.on('pointerout', () => {
@@ -168,24 +217,24 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
-    StandardModeButton.on('pointerover', () => {
+    standardModeButton.on('pointerover', () => {
       this.tweens.add({
-        targets: StandardModeButton,
+        targets: standardModeButton,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
 
-    StandardModeButton.on('pointerout', () => {
+    standardModeButton.on('pointerout', () => {
       this.tweens.add({
-        targets: StandardModeButton,
+        targets: standardModeButton,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
   }
