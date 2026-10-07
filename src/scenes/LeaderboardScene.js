@@ -1,16 +1,26 @@
 /* global Phaser*/
+
+import { GameData } from
+ './Menus/GameDate.js';
+
 export default class LeaderboardScene extends Phaser.Scene {
   constructor() {
     super('LeaderboardScene');
   }
-
   create() {
-
     const leaderboard = JSON.parse(
-      localStorage.getItem('leaderboard') || '[]'
-    );
+  localStorage.getItem('leaderboard') || '[]'
+).map(entry => {
+  if (typeof entry === 'string') {
+    return {
+      name: 'Unbekannt',
+      distance: entry,
+    };
+  }
+  return entry;
+});
 
-    // Hintergrund
+    // Hintergrund bild
     this.add
       .image(
         this.scale.width / 2,
@@ -19,30 +29,41 @@ export default class LeaderboardScene extends Phaser.Scene {
       )
       .setDisplaySize(this.scale.width, this.scale.height);
 
-    // Titel
+    // Titel Überschrifft "Leaderboard"
     this.add.text(
-      this.scale.width / 2,
-      100,
-      'Leaderboard'
-    ).setOrigin(0.5);
+  this.scale.width / 2,
+  this.scale.height / 12,
+  'Leaderboard',
+  {
+    fontFamily: 'Tiny5',
+    fontSize: '90px',
+    color: '#ffffff'
+  }
+)
+.setOrigin(0.5);
 
-    // Einträge anzeigen
-    leaderboard.forEach((distance, index) => {
-      this.add.text(
-        this.scale.width / 2,
-        200 + index * 50,
-        `${index + 1}. ${distance} km`
-      ).setOrigin(0.5);
-    });
+    // Einträge anzeigen für die gefahrende strecke km
+   console.log(leaderboard);
 
-    // Back Button
+    leaderboard.forEach((entry, index) => {
+        const name = entry.name || 'Unbekannt';
+        const distance = entry.distance|| entry;
+
+  this.add.text(
+    this.scale.width / 2,
+    200 + index * 50,
+    `${index + 1}. ${entry.name} - ${entry.distance} km`
+  ).setOrigin(0.5);
+});
+
+    // Back Button- schickt zurück ins Hauptmenü
     const backButton = this.add
       .image(
         this.scale.width / 2,
-        this.scale.height / 1.14,
-        'homepage-leaderboard-btn'
+        this.scale.height / 1.3,
+        'leaderboard-homepage-btn'
       )
-      .setScale(2)
+      .setScale(0.5)
       .setOrigin(0.5)
       .setInteractive();
 

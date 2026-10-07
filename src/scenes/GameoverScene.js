@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { GameData } from './Menus/GameDate.js';
+
 export default class GameoverScene extends Phaser.Scene {
   constructor() {
     super('GameoverScene');
@@ -22,20 +24,43 @@ export default class GameoverScene extends Phaser.Scene {
       'sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
     );
   }
-  create() {
-    const leaderboard = JSON.parse(
-      localStorage.getItem('leaderboard')
-    );
-    leaderboard.push(this.distance);
+  //distance shit hier irgendwo
+create() {
+  console.log('GameoverScene gestartet');
 
-    leaderboard.sort((a, b) => b -a);
+  const leaderboard = JSON.parse(
+    localStorage.getItem('leaderboard') || '[]'
+  ).map(entry => {
+    if (typeof entry === 'string') {
+      return {
+        name: 'Unbekannt',
+        distance: Number(entry)
+      };
+    }
 
-    localStorage.setItem(
-      'leaderboard',
-      JSON.stringify(leaderboard.slice(0, 10))
-    );
-    this.width = this.scale.width;
-    this.height = this.scale.height;
+    return {
+      name: entry.name,
+      distance: Number(entry.distance)
+    };
+  });
+
+  leaderboard.push({
+    name: GameData.playerName,
+    distance: Number(this.distance),
+  });
+
+  leaderboard.sort((a, b) => b.distance - a.distance);
+
+  localStorage.setItem(
+    'leaderboard',
+    JSON.stringify(leaderboard.slice(0, 10))
+  );
+
+  console.log(leaderboard);
+
+  this.width = this.scale.width;
+  this.height = this.scale.height;
+
 
     this.add
       .image(this.width / 2, this.height / 2, 'homepage-hintergrund')

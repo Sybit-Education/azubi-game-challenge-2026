@@ -2,6 +2,7 @@
 
 import InputManager from '../../objects/InputManager.js';
 import CreditsScene from '../CreditsScene.js';
+import { GameData } from './GameDate.js';
 
 export default class MenuScene extends Phaser.Scene {
   // Constructor
@@ -21,6 +22,7 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
+    this.load.image('leaderboard-homepage-btn','sprites/Gameover Scene Assets/Hauptmenü 1.png')
     this.load.image(
       'homepage-barrierefreiheit',
       'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
@@ -133,7 +135,10 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3);
 
+      //Playbutton test
     play_button.on('pointerdown', () => {
+      GameData.playerName ='bob'; 
+      //Testname
       this.registry.set('gameMode', 'standard');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     });
@@ -149,14 +154,14 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
-    //meine funkotion AJHDJSHD LEADERBOARD BUTTON//
+    //Leaderboard Button auf dem hauptmenu
  const leaderboardButton = this.add
     .image(
       this.scale.width / 2,  //xachse//
-      this.scale.height / 1.14,
+      this.scale.height / 1.17,//Yachse//
       'homepage-leaderboard-btn'
     )
-    .setScale(2)
+    .setScale(0.24)
     .setOrigin(0.5)
     .setInteractive();
 
