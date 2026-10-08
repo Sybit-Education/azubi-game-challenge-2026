@@ -30,7 +30,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
 
     this.load.image('coin', 'sprites/Entities/coin.png');
-    this.load.image('item', 'sprites/Entities/item.png');    
+    this.load.image('item', 'sprites/Entities/item.png');
     this.load.image('boundary-particle', 'sprites/Particles/image001.png');
 
     this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
@@ -177,25 +177,46 @@ export default class GameScene extends Phaser.Scene {
         if (this.secondCar) {
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
-
-      }
-      else if (type === 'item') {
+      } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
-        this.physics.add.overlap(this.car, roadObject, this.ItemManager.itemShieldCar1, undefined, this.ItemManager);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.itemShieldCar1,
+          undefined,
+          this.ItemManager,
+        );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
-          if (this.secondCar) {
-            this.physics.add.overlap(this.secondCar, roadObject, this.ItemManager.itemRandom2, undefined, this.ItemManager);
-            this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
-          }
-      } 
-      else if (type === 'obstacle') {
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.itemRandom2,
+            undefined,
+            this.ItemManager,
+          );
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+        }
+      } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight); 
+        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
         roadObject.body.setImmovable(true);
-        this.physics.add.collider(this.car, roadObject, this.ItemManager.lebenCheckCar1, undefined, this.ItemManager);
+        this.physics.add.collider(
+          this.car,
+          roadObject,
+          this.ItemManager.lebenCheckCar1,
+          undefined,
+          this.ItemManager,
+        );
 
         if (this.secondCar) {
-          this.physics.add.collider(this.secondCar, roadObject, this.ItemManager.lebenCheckCar2, undefined, this.ItemManager);
+          this.physics.add.collider(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.lebenCheckCar2,
+            undefined,
+            this.ItemManager,
+          );
         }
       }
 
@@ -204,18 +225,17 @@ export default class GameScene extends Phaser.Scene {
 
     // Spawnrate
     let delay;
-    
+
     if (type === 'coin') {
-    delay = Phaser.Math.Between(500, 2000);
+      delay = Phaser.Math.Between(500, 2000);
     } else if (type === 'item') {
-    delay = Phaser.Math.Between(5000, 10000);
+      delay = Phaser.Math.Between(5000, 10000);
     } else if (type === 'obstacle') {
-    delay = Phaser.Math.Between(2000, 4000);
+      delay = Phaser.Math.Between(2000, 4000);
     }
-    
+
     this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
-  
 
   // Checks if the lane is free for spawning a new road object
   positionFree(lane, spawnY) {
