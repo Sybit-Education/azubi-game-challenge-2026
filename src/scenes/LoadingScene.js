@@ -54,6 +54,7 @@ export default class LoadingScene extends Phaser.Scene {
       .setScale(0.3);
 
     this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
+    this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
 
     const fillBar = this.add.rectangle(
       centerX - barWidth / 2,

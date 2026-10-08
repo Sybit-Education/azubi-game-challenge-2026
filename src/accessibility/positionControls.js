@@ -8,7 +8,8 @@ export function positionAccessibleControls(scene, controls) {
 
     for (const [element, object] of controls) {
       const bounds = object.getBounds();
-      const left = canvas.left + (camera.x + (bounds.x - camera.worldView.x) * camera.zoom) * scaleX;
+      const left =
+        canvas.left + (camera.x + (bounds.x - camera.worldView.x) * camera.zoom) * scaleX;
       const top = canvas.top + (camera.y + (bounds.y - camera.worldView.y) * camera.zoom) * scaleY;
       Object.assign(element.style, {
         left: `${left}px`,

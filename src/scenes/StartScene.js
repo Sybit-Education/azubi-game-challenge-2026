@@ -23,27 +23,23 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-const startUi = document.getElementById("start-ui")
-const skipIntroBtn = document.getElementById("skip-intro")
-startUi.hidden = false
+    const startUi = document.getElementById('start-ui');
+    const skipIntroBtn = document.getElementById('skip-intro');
+    startUi.hidden = false;
 
+    const skipIntro = () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
+    };
 
+    skipIntroBtn.addEventListener('click', skipIntro);
+    skipIntroBtn.focus();
 
-const skipIntro = () => {
-  this.scene.start('GameScene', {
-    isMultiplayer: this.isMultiplayer
-  })
-}
-
-skipIntroBtn.addEventListener("click", skipIntro)
-skipIntroBtn.focus();
-
-this.events.once('shutdown', () => {
-    skipIntroBtn.removeEventListener('click', skipIntro);
-  startUi.hidden = true;
-})
-
-
+    this.events.once('shutdown', () => {
+      skipIntroBtn.removeEventListener('click', skipIntro);
+      startUi.hidden = true;
+    });
 
     const skipButton = this.add
       .text(1300, 600, 'Skip Intro!', {
