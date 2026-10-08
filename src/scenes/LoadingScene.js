@@ -34,7 +34,6 @@ export default class LoadingScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     const barHeight = 45;
     const spacing = height * 0.15;
-    const uiScale = Math.min(width / 195, height / 1080);
 
     // Background image
     this.add
