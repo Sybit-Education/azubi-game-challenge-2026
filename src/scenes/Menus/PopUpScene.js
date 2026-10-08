@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
     super('PopUpScene');
@@ -179,6 +181,53 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.input.keyboard.once('keydown-M', close);
     this.input.keyboard.once('keydown-ESC', close);
+
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    const gameModeMenu = document.getElementById('game-mode-menu');
+    gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
+
+    const closeWindows = close;
+
+    const handleAccessibilityChange = () => {
+      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+    };
+    accessibilityToggle.addEventListener('change', handleAccessibilityChange);
+
+    const handleGameModeChange = () => {
+      this.registry.set('gameMode', gameModeMenu.value);
+      this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
+    };
+    gameModeMenu.addEventListener('change', handleGameModeChange);
+    closeSettingsBtn.addEventListener('click', closeWindows);
+
+    const handleCancel = (event) => {
+      event.preventDefault();
+      closeWindows();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+
+    this.events.once('shutdown', () => {
+      closeSettingsBtn.removeEventListener('click', closeWindows);
+      dialog.removeEventListener('cancel', handleCancel);
+      accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
+      gameModeMenu.removeEventListener('change', handleGameModeChange);
+      dialog.close();
+      settingsBtn.focus();
+    });
+
+    positionAccessibleControls(this, [
+      [closeSettingsBtn, closeButton],
+      [accessibilityToggle, AccessibilitySwitch],
+      [gameModeMenu, standardModeButton],
+    ]);
+    dialog.showModal();
 
     // Hover-effects for the buttons
 

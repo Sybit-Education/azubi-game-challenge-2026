@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+
 import InputManager from '../../objects/InputManager.js';
 
 export default class MenuScene extends Phaser.Scene {
@@ -36,6 +38,29 @@ export default class MenuScene extends Phaser.Scene {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+    const playBtn = document.getElementById('start-game');
+    const settingsBtn = document.getElementById('settings-btn');
+    const menu = document.getElementById('accessible-ui');
+    menu.hidden = false;
+
+    const startGame = () => {
+      this.registry.set('gameMode', 'standard');
+      this.scene.start('LoadingScene', { isMultiplayer: false });
+    };
+
+    const openSettings = () => {
+      this.scene.launch('PopUpScene');
+    };
+
+    playBtn.addEventListener('click', startGame);
+    playBtn.focus();
+    settingsBtn.addEventListener('click', openSettings);
+
+    this.events.once('shutdown', () => {
+      playBtn.removeEventListener('click', startGame);
+      settingsBtn.removeEventListener('click', openSettings);
+      menu.hidden = true;
+    });
 
     // Interface for our lovely Sybit Kart Game
 
@@ -263,26 +288,22 @@ export default class MenuScene extends Phaser.Scene {
 
     // Click events
 
-    play_button.on('pointerdown', () => {
-      this.registry.set('gameMode', 'standard');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
-    });
+    positionAccessibleControls(this, [
+      [playBtn, play_button],
+      [settingsBtn, settings_button],
+    ]);
+
+    play_button.on('pointerdown', startGame);
 
     twoPlayerButton.on('pointerdown', () => {
       this.registry.set('gameMode', 'multiplayer');
       this.scene.start('LoadingScene', { isMultiplayer: true });
     });
 
-    settings_button.on('pointerdown', () => {
-      this.scene.launch('PopUpScene');
-    });
+    settings_button.on('pointerdown', openSettings);
 
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
-    });
-
-    settings_button.on('pointerdown', () => {
-      this.scene.launch('PopUpScene');
     });
 
     creditsButton.on('pointerdown', () => {
