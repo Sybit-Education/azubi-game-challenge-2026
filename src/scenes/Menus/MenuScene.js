@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { tutorial } from '../../tutorial/Tutorial.js';
 
 import InputManager from '../../objects/InputManager.js';
 
@@ -63,6 +64,7 @@ export default class MenuScene extends Phaser.Scene {
     const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const creditBtn = document.getElementById('credit-btn');
+    const tutorialBtn = document.getElementById('tutorial-btn');
     const menu = document.getElementById('accessible-ui');
     menu.hidden = false;
 
@@ -105,6 +107,7 @@ export default class MenuScene extends Phaser.Scene {
       multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
       creditBtn.removeEventListener('click', openCredits);
+      tutorialBtn.removeEventListener('click', openTutorial);
       menu.hidden = true;
     });
 
@@ -407,11 +410,23 @@ export default class MenuScene extends Phaser.Scene {
     };
 
     // Click events
+    const openTutorial = () => {
+      playMenuClick(this);
+      tutorial.open(
+        this,
+        { play: this.play_button, settings: settings_button, tutorial: howToPlayButton },
+        startGame,
+      );
+    };
+    tutorialBtn.addEventListener('click', openTutorial);
+    howToPlayButton.on('pointerdown', openTutorial);
+
     positionAccessibleControls(this, [
       [playBtn, this.play_button],
       [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
       [creditBtn, creditsButton],
+      [tutorialBtn, howToPlayButton],
     ]);
 
     this.play_button.on('pointerdown', startGame);
@@ -423,13 +438,24 @@ export default class MenuScene extends Phaser.Scene {
     settings_button.on('pointerdown', openSettings);
 
     creditsButton.on('pointerdown', openCredits);
-    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
+    bindMenuFocusSounds(this, [
+      'start-game',
+      'multiplayer-btn',
+      'settings-btn',
+      'credit-btn',
+      'tutorial-btn',
+    ]);
 
     // Menu button array and selected index
     this.menuButtons = [
       { button: this.play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
-      { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
+      {
+        button: howToPlayButton,
+        y: howToPlayOriginalY,
+        scale: howToPlayScale,
+        action: openTutorial,
+      },
       {
         button: leaderboardButton,
         y: footer_btn_y,

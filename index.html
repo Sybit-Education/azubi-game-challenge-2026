@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SybitKart</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,6 +23,7 @@
       <button id="multiplayer-btn" type="button">multiplayer</button>
       <button id="settings-btn" type="button">Settings</button>
       <button id="credit-btn" type="button">credits</button>
+      <button id="tutorial-btn" type="button" lang="de">Anleitung</button>
     </main>
 
     <script type="importmap">
@@ -70,6 +72,67 @@
         <button id="close-settings" type="button" autofocus>Close</button>
       </dialog>
     </section>
+
+    <dialog
+      id="tutorial-dialog"
+      lang="de"
+      aria-labelledby="tutorial-title"
+      aria-describedby="tutorial-description"
+    >
+      <div id="tutorial-highlight" aria-hidden="true" hidden></div>
+      <section class="tutorial-panel">
+        <div class="tutorial-header">
+          <p id="tutorial-progress"></p>
+          <button id="tutorial-close" type="button" aria-label="Tutorial schließen">
+            Schließen <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <progress
+          id="tutorial-progress-bar"
+          aria-label="Tutorial-Fortschritt"
+          value="1"
+          max="8"
+        ></progress>
+        <div class="tutorial-content">
+          <h2
+            id="tutorial-title"
+            tabindex="-1"
+            aria-describedby="tutorial-progress tutorial-description tutorial-location"
+            autofocus
+          ></h2>
+          <p id="tutorial-description"></p>
+          <p id="tutorial-location" class="tutorial-location"></p>
+          <div id="tutorial-practice" hidden>
+            <p id="tutorial-practice-help">W/A/S/D, Pfeiltasten oder diese Buttons:</p>
+            <div
+              class="tutorial-controls"
+              role="group"
+              aria-label="Übungssteuerung"
+              aria-describedby="tutorial-practice-help"
+            >
+              <button type="button" data-direction="up" aria-label="Nach vorne fahren">
+                <span aria-hidden="true">↑</span> W
+              </button>
+              <button type="button" data-direction="left" aria-label="Nach links lenken">
+                <span aria-hidden="true">←</span> A
+              </button>
+              <button type="button" data-direction="down" aria-label="Nach hinten fahren">
+                <span aria-hidden="true">↓</span> S
+              </button>
+              <button type="button" data-direction="right" aria-label="Nach rechts lenken">
+                <span aria-hidden="true">→</span> D
+              </button>
+            </div>
+          </div>
+          <p id="tutorial-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+        <nav class="tutorial-navigation" aria-label="Tutorial-Schritte">
+          <button id="tutorial-back" type="button">Zurück</button>
+          <button id="tutorial-next" type="button">Weiter</button>
+        </nav>
+        <p class="tutorial-hint">Tab: Buttons auswählen · Enter: bestätigen · Esc: schließen</p>
+      </section>
+    </dialog>
 
     <!-- Start script -->
     <script type="module" src="src/main.js"></script>

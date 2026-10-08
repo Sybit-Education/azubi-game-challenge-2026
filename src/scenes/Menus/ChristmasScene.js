@@ -4,6 +4,7 @@ import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { tutorial } from '../../tutorial/Tutorial.js';
 
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
@@ -67,6 +68,7 @@ export default class ChristmasScene extends Phaser.Scene {
     const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const creditBtn = document.getElementById('credit-btn');
+    const tutorialBtn = document.getElementById('tutorial-btn');
 
     const startGame = () => {
       playMenuClick(this);
@@ -460,11 +462,23 @@ export default class ChristmasScene extends Phaser.Scene {
     twoPlayerButton.on('pointerdown', () => {
       startMultiplayer();
     });
+    const openTutorial = () => {
+      playMenuClick(this);
+      tutorial.open(
+        this,
+        { play: play_button, settings: settings_button, tutorial: howToPlayButton },
+        startGame,
+      );
+    };
+    tutorialBtn.addEventListener('click', openTutorial);
+    howToPlayButton.on('pointerdown', openTutorial);
+
     positionAccessibleControls(this, [
       [playBtn, play_button],
       [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
       [creditBtn, creditsButton],
+      [tutorialBtn, howToPlayButton],
     ]);
 
     play_button.on('pointerdown', startGame);
@@ -480,9 +494,16 @@ export default class ChristmasScene extends Phaser.Scene {
       multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
       creditBtn.removeEventListener('click', openCredits);
+      tutorialBtn.removeEventListener('click', openTutorial);
       menu.hidden = true;
     });
-    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
+    bindMenuFocusSounds(this, [
+      'start-game',
+      'multiplayer-btn',
+      'settings-btn',
+      'credit-btn',
+      'tutorial-btn',
+    ]);
 
     this.menuButtons = [
       { button: play_button, y: playOriginalY, action: startSinglePlayer },
@@ -494,7 +515,12 @@ export default class ChristmasScene extends Phaser.Scene {
           this.scene.bringToTop('PopUpScene');
         },
       },
-      { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
+      {
+        button: howToPlayButton,
+        y: howToPlayOriginalY,
+        scale: howToPlayScale,
+        action: openTutorial,
+      },
       {
         button: leaderboardButton,
         y: footer_btn_y,
