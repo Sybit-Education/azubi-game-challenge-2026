@@ -48,7 +48,7 @@ export default class LoadingScene extends Phaser.Scene {
 
     // Loading bar
 
-    const loadingText = this.add
+    const loadingText = this.add;
     this.add
       .image(centerX, centerY - spacing / 4, 'LoadingText')
       .setOrigin(0.5)
