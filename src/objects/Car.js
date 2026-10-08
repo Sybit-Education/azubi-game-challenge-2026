@@ -116,10 +116,10 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       this.setVelocityY(speed);
 
       if (speed <= -800) {
-        //wenn die geschwidnigkeit -500 erreicht wird, bleibt sie konstant
+        //wenn die geschwidnigkeit -800 erreicht wird, bleibt sie konstant
         return;
       }
-      //speed variable wird um 25 gesenkt
+      //speed variable wird um 30 gesenkt
       speed = speed - 30;
       this.scene.time.delayedCall(50, accelerate);
     };
