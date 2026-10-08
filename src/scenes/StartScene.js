@@ -23,8 +23,8 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('border', 'sprites/Race Track Assets/border.png');
     this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
     this.load.image('starting_Banner', 'sprites/Race Track Assets/starting_banner.png');
-    this.load.image('startingLine', 'sprites/Race Track Assets/startingAndFinishLine.png') *
-      this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
+    this.load.image('startingLine', 'sprites/Race Track Assets/startingAndFinishLine.png');
+    this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
     this.load.image('start-count-2', 'sprites/Race Track Assets/countdown2.png');
     this.load.image('start-count-1', 'sprites/Race Track Assets/countdown1.png');
     this.load.image('start-go', 'sprites/Race Track Assets/goLabel.png');
@@ -36,16 +36,12 @@ export default class StartScene extends Phaser.Scene {
     this.secondCar = null;
     this.number = null;
 
-    const skipButton = this.add
-      .text(this.scale.width - 80, this.scale.height - 50, 'Skip', {
     const startUi = document.getElementById('start-ui');
     const skipIntroBtn = document.getElementById('skip-intro');
     startUi.hidden = false;
 
     const skipIntro = () => {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
+      this.goToGame();
     };
 
     skipIntroBtn.addEventListener('click', skipIntro);
