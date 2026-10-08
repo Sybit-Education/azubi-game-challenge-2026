@@ -143,7 +143,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.45,
         scaleY: 0.45,
-        duration: 100
+        duration: 100,
       });
     });
     closeButton.on('pointerout', () => {
@@ -151,7 +151,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.4,
         scaleY: 0.4,
-        duration: 100
+        duration: 100,
       });
     });
 
@@ -160,7 +160,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
     AccessibilitySwitch.on('pointerout', () => {
@@ -168,7 +168,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
     StandardModeButton.on('pointerover', () => {
@@ -176,7 +176,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: StandardModeButton,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
 
@@ -185,7 +185,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: StandardModeButton,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
   }

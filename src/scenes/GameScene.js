@@ -105,7 +105,7 @@ export default class GameScene extends Phaser.Scene {
         this,
         this.scale.width / 2 + 90,
         this.scale.height / 1.25,
-        'UP,LEFT,DOWN,RIGHT'
+        'UP,LEFT,DOWN,RIGHT',
       );
       this.secondCar.body.setSize(
         this.secondCar.displayWidth * 1.25,
