@@ -35,17 +35,20 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
     closeButton.setDepth(9999);
-    closeButton.on('pointerdown', () => this.scene.stop());
 
     // Dim the game behind the settings panel.
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.48).setOrigin(0).setInteractive();
+    const dim = this.add
+      .rectangle(0, 0, width, height, 0x000000, 0.48)
+      .setOrigin(0)
+      .setInteractive()
+      .setAlpha(0);
 
-    this.add
+    const settingsLabel = this.add
       .image(background.x, background.y * -1 + padding, 'settingsLabel')
       .setScale(0.3)
       .setOrigin(0.5);
 
-    this.add
+    const accessibilityLabel = this.add
       .image(background.x / 1.2, height * 0.2, 'Accessibility Mode')
       .setScale(0.35)
       .setOrigin(0);
@@ -128,13 +131,54 @@ export default class PopUpScene extends Phaser.Scene {
       this.scene.start('MenuScene');
     });
 
-    this.add
+    const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
       .setScale(0.66)
       .setOrigin(0.5);
 
-    this.input.keyboard.once('keydown-M', () => this.scene.stop());
-    this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+    // Slide the panel in from the right edge. The dim overlay stays in place.
+    //added an array of all the elements. add element here, to animate
+    const panel = [
+      background,
+      closeButton,
+      settingsLabel,
+      accessibilityLabel,
+      AccessibilitySwitch,
+      gamemodeLabel,
+      standardModeButton,
+      christmasModeButton,
+      closeLabel,
+    ];
+
+    //fades the dimming in slowly
+    this.tweens.add({ targets: dim, alpha: 1, duration: 200 });
+
+    //animates each panel to move
+    panel.forEach((obj) => (obj.x += width));
+    this.tweens.add({
+      targets: panel,
+      x: `-=${width}`,
+      duration: 200,
+      ease: 'Cubic.easeOut',
+    });
+
+    let closing = false;
+    const close = () => {
+      if (closing) return; // ignore double clicks
+      closing = true;
+      this.tweens.add({ targets: panel, x: `+=${width}`, duration: 200, ease: 'Cubic.easeIn' });
+      this.tweens.add({
+        targets: dim,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => this.scene.stop(),
+      });
+    };
+
+    closeButton.on('pointerdown', close);
+
+    this.input.keyboard.once('keydown-M', close);
+    this.input.keyboard.once('keydown-ESC', close);
 
     // Hover-effects for the buttons
 
@@ -143,7 +187,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.45,
         scaleY: 0.45,
-        duration: 100
+        duration: 100,
       });
     });
     closeButton.on('pointerout', () => {
@@ -151,7 +195,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: closeButton,
         scaleX: 0.4,
         scaleY: 0.4,
-        duration: 100
+        duration: 100,
       });
     });
 
@@ -160,7 +204,7 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
     AccessibilitySwitch.on('pointerout', () => {
@@ -168,24 +212,24 @@ export default class PopUpScene extends Phaser.Scene {
         targets: AccessibilitySwitch,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
-    StandardModeButton.on('pointerover', () => {
+    standardModeButton.on('pointerover', () => {
       this.tweens.add({
-        targets: StandardModeButton,
+        targets: standardModeButton,
         scaleX: 0.32,
         scaleY: 0.32,
-        duration: 100
+        duration: 100,
       });
     });
 
-    StandardModeButton.on('pointerout', () => {
+    standardModeButton.on('pointerout', () => {
       this.tweens.add({
-        targets: StandardModeButton,
+        targets: standardModeButton,
         scaleX: 0.3,
         scaleY: 0.3,
-        duration: 100
+        duration: 100,
       });
     });
   }

@@ -11,13 +11,16 @@ export default class LoadingScene extends Phaser.Scene {
 
   preload() {
     this.load.image('SYBIT KART', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image("Message1", "sprites/LoadingPage/Message1.png");
-    this.load.image("Message2", "sprites/LoadingPage/Message2.png");
-    this.load.image("Message3", "sprites/LoadingPage/Message3.png");
-    this.load.image("Message4", "sprites/LoadingPage/Message4.png");
-    this.load.image("LoadingText", "sprites/LoadingPage/Loading....png");
-    this.load.image("Press SPACE to skip", "sprites/LoadingPage/Press ‘SPACE’ to skip.png");
-    this.load.image("WeCreateCXChampions", "sprites/Homepage/Default Homepage/WeCreateCXChampions.png");
+    this.load.image('Message1', 'sprites/LoadingPage/Message1.png');
+    this.load.image('Message2', 'sprites/LoadingPage/Message2.png');
+    this.load.image('Message3', 'sprites/LoadingPage/Message3.png');
+    this.load.image('Message4', 'sprites/LoadingPage/Message4.png');
+    this.load.image('LoadingText', 'sprites/LoadingPage/Loading....png');
+    this.load.image('Press SPACE to skip', 'sprites/LoadingPage/Press ‘SPACE’ to skip.png');
+    this.load.image(
+      'WeCreateCXChampions',
+      'sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
+    );
   }
 
   create() {
@@ -31,7 +34,6 @@ export default class LoadingScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     const barHeight = 45;
     const spacing = height * 0.15;
-    const uiScale = Math.min(width / 195, height / 1080);
 
     // Background image
     this.add
@@ -46,20 +48,20 @@ export default class LoadingScene extends Phaser.Scene {
 
     // Loading bar
 
-    const loadingText = this.add
+    this.add
       .image(centerX, centerY - spacing / 4, 'LoadingText')
       .setOrigin(0.5)
       .setScale(0.3);
 
-    const loadingBar = this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
+    this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
 
     const fillBar = this.add.rectangle(
-    centerX - barWidth / 2,
-    centerY + spacing / 4,
-    1,
-    barHeight - 4,
-    0xcbfc2a
-    ); 
+      centerX - barWidth / 2,
+      centerY + spacing / 4,
+      1,
+      barHeight - 4,
+      0xcbfc2a,
+    );
     fillBar.setOrigin(0, 0.5);
 
     this.tweens.add({
@@ -95,16 +97,11 @@ export default class LoadingScene extends Phaser.Scene {
       .setScale(0.3);
 
     // Funny comment, randomly selected
-    const funnyComments = [
-      'Message1',
-      'Message2',
-      'Message3',
-      'Message4'
-    ];
+    const funnyComments = ['Message1', 'Message2', 'Message3', 'Message4'];
     const randomComment = funnyComments[Math.floor(Math.random() * funnyComments.length)];
 
     this.add
-      .image(centerX, centerY + spacing * 1.4, randomComment,)
+      .image(centerX, centerY + spacing * 1.4, randomComment)
       .setScale(0.8)
       .setOrigin(0.5);
   }
