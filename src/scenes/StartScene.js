@@ -3,6 +3,7 @@
 import Car from '../objects/Car.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
+import StartingBanner from '../objects/StartingBanner.js';
 import StartingLine from '../objects/StartingLine.js';
 
 export default class StartScene extends Phaser.Scene {
@@ -19,8 +20,9 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
     this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
-    this.load.image('startingline', 'sprites/Race Track Assets/starting_line.png');
-
+    this.load.image('starting_Banner', 'sprites/Race Track Assets/starting_banner.png');
+    this.load.image('startingLine','sprites/Race Track Assets/startingAndFinishLine.png')
+*
     this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
     this.load.image('start-count-2', 'sprites/Race Track Assets/countdown2.png');
     this.load.image('start-count-1', 'sprites/Race Track Assets/countdown1.png');
@@ -53,7 +55,7 @@ export default class StartScene extends Phaser.Scene {
     this.createTrack();
     this.createWalls();
     this.setBackground('background');
-    this.spawnStartingline();
+    this.spawnStartingBanner();
 
     //countdown
     this.showNumber('start-count-3');
@@ -78,13 +80,13 @@ export default class StartScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
       this.secondCar = new Car(
         this,
         this.scale.width / 2 + 90,
-        this.scale.height / 1.25,
+        this.scale.height / 1.2,
         'LEFT,RIGHT',
       );
       this.secondCar.body.setSize(
@@ -92,7 +94,7 @@ export default class StartScene extends Phaser.Scene {
         this.secondCar.displayHeight * 1.25,
       );
     } else {
-      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.2);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
     }
   }
@@ -102,14 +104,23 @@ export default class StartScene extends Phaser.Scene {
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
   }
 
-  spawnStartingline() {
-    const startingLine = new StartingLine(
+  spawnStartingBanner() {
+    const startingLine = new StartingBanner(
       this,
       this.track1.x,
-      this.track1.y + this.track1.displayHeight / 2 + 120,
+      this.track1.y + this.track1.displayHeight / 2 - 20,
     );
     startingLine.setScale(0.75);
     startingLine.setDepth(21);
+
+    //checkerboard auf dem boden, unter dem auto (depth 10) aber über der straße (depth -1)
+    const checkerboard = new StartingLine(
+      this,
+      this.track1.x,
+      this.track1.y + this.track1.displayHeight / 2 + 166,
+    );
+    checkerboard.setScale(3.8, 1.5); // breite, höhe
+    checkerboard.setDepth(5);
   }
 
   createWalls() {
@@ -137,7 +148,7 @@ export default class StartScene extends Phaser.Scene {
     if (this.number) {
       this.number.destroy();
     }
-    this.number = this.add.image(this.scale.width / 2, this.scale.height * 0.4, key);
+    this.number = this.add.image(this.scale.width / 2, this.scale.height * 0.2, key);
     this.number.setScale(0.8);
     this.number.setDepth(22);
   }
