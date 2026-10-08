@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../accessibility/positionControls.js';
+
 import Car from '../objects/Car.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
@@ -16,7 +18,7 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/Sybit Kart Player car 1.png');
+    this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
     this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
@@ -36,6 +38,26 @@ export default class StartScene extends Phaser.Scene {
 
     const skipButton = this.add
       .text(this.scale.width - 80, this.scale.height - 50, 'Skip', {
+    const startUi = document.getElementById('start-ui');
+    const skipIntroBtn = document.getElementById('skip-intro');
+    startUi.hidden = false;
+
+    const skipIntro = () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
+    };
+
+    skipIntroBtn.addEventListener('click', skipIntro);
+    skipIntroBtn.focus();
+
+    this.events.once('shutdown', () => {
+      skipIntroBtn.removeEventListener('click', skipIntro);
+      startUi.hidden = true;
+    });
+
+    const skipButton = this.add
+      .text(1300, 600, 'Skip Intro!', {
         fontSize: '32px',
         backgroundColor: '#000000',
         padding: {
@@ -46,6 +68,8 @@ export default class StartScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(30)
       .setInteractive();
+
+    positionAccessibleControls(this, [[skipIntroBtn, skipButton]]);
 
     skipButton.on('pointerdown', () => {
       this.goToGame();
