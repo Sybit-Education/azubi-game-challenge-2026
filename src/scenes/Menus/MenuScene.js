@@ -48,7 +48,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   // Create scene
-  async create() {
+  async create(data) {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
@@ -58,6 +58,7 @@ export default class MenuScene extends Phaser.Scene {
 
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
+    const creditBtn = document.getElementById('credit-btn');
     const menu = document.getElementById('accessible-ui');
     menu.hidden = false;
 
@@ -78,13 +79,21 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.launch('PopUpScene');
     };
 
+    const openCredits = () => {
+      this.scene.start('CreditsScene');
+    };
+
     playBtn.addEventListener('click', startGame);
-    playBtn.focus();
+    const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
+    focusTarget.focus();
+
     settingsBtn.addEventListener('click', openSettings);
+    creditBtn.addEventListener('click', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
       settingsBtn.removeEventListener('click', openSettings);
+      creditBtn.removeEventListener('click', openCredits);
       menu.hidden = true;
     });
 
@@ -381,6 +390,7 @@ export default class MenuScene extends Phaser.Scene {
     positionAccessibleControls(this, [
       [playBtn, this.play_button],
       [settingsBtn, settings_button],
+      [creditBtn, creditsButton],
     ]);
 
     this.play_button.on('pointerdown', startGame);
