@@ -108,11 +108,11 @@ export default class GameScene extends Phaser.Scene {
         this.scale.height / 1.25,
         'UP,LEFT,DOWN,RIGHT',
       );
-      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9);//scale fix
+      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9);//scale fix
+      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
 
@@ -167,7 +167,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.width, roadObject.height);//scal- you know the drill
+        roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
         this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
           this.physics.add.collider(this.secondCar, roadObject, this.gameOver, undefined, this);
