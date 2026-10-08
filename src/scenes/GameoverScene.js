@@ -177,11 +177,12 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     // Click events
-    playAgainButton.on('pointerdown', () => {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
-    });
+   playAgainButton.on('pointerdown', () => {
+  this.scene.start('NameInputScene', {
+    isMultiplayer: this.isMultiplayer,
+  });
+});
+
 
     lobbyButton.on('pointerdown', () => {
       const gameMode = this.registry.get('gameMode');
@@ -194,5 +195,5 @@ export default class GameoverScene extends Phaser.Scene {
     });
   }
 }
-  }
+  
 
