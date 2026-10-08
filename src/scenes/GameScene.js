@@ -14,6 +14,8 @@ export default class GameScene extends Phaser.Scene {
 
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
+    this.isTutorial = data?.isTutorial ?? false;
+    this.secondCar = null;
   }
 
   //Bilder laden
@@ -39,11 +41,140 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
-    this.createRoadObject('obstacle');
-    this.createRoadObject('coin');
+    if (!this.isTutorial) {
+      this.createRoadObject('obstacle');
+      this.createRoadObject('coin');
+    }
     this.createHud();
     this.setBackground('background');
+    if (this.isTutorial) {
+      this.createTutorial();
+      return;
+    }
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+  }
+
+  createTutorial() {
+    // A still practice scene: no timers, collisions, distance progression or game over.
+    this.physics.pause();
+    if (this.physics.world.debugGraphic) this.physics.world.debugGraphic.setVisible(false);
+    this.input.enabled = false;
+    this.tutorialCoin = new Coin(this, 0, 0, 0);
+    this.tutorialEnemy = new EnemyCar(this, 0, 0, 0);
+    this.tutorialTargets = {
+      car: this.car,
+      coin: this.tutorialCoin,
+      enemy: this.tutorialEnemy,
+      hud: {
+        active: true,
+        getBounds: () => {
+          const distance = this.hud.distanceText.getBounds();
+          const score = this.hud.scoreText.getBounds();
+          const x = Math.min(distance.x, score.x);
+          const y = Math.min(distance.y, score.y);
+          return {
+            x,
+            y,
+            width: Math.max(distance.right, score.right) - x,
+            height: Math.max(distance.bottom, score.bottom) - y,
+          };
+        },
+      },
+    };
+    this.tutorialScore = 0;
+    this.layoutTutorial = this.layoutTutorial.bind(this);
+    this.layoutTutorial();
+    this.scale.on('resize', this.layoutTutorial);
+    this.events.once('shutdown', () => this.scale.off('resize', this.layoutTutorial));
+    this.game.events.emit('tutorial-ready', this);
+  }
+
+  layoutTutorial() {
+    const { width, height } = this.scale;
+    const compact = width < 800 || height <= 540;
+    const roadWidth = Math.min(640, width * 0.85);
+    this.track1.setPosition(width / 2, 0).setDisplaySize(roadWidth, height);
+    this.track2.setPosition(width / 2, -height).setDisplaySize(roadWidth, height);
+    for (const [index, wall] of this.walls.entries()) {
+      const side = index % 2 === 0 ? -1 : 1;
+      wall.x = width / 2 + side * (roadWidth / 2 + wall.displayWidth / 2);
+      wall.y = index < 2 ? 0 : -height;
+    }
+    const carHeight = Math.min(140, height * (compact ? 0.14 : 0.2));
+    const aspectRatio =
+      this.car.texture.getSourceImage().width / this.car.texture.getSourceImage().height;
+    this.car.setDisplaySize(carHeight * aspectRatio, carHeight);
+    this.tutorialEnemy.setDisplaySize(this.car.displayWidth, carHeight);
+    this.tutorialCoin.setDisplaySize(32, 32);
+    this.hud.scoreText.setFontSize(compact ? 20 : 30).setPosition(width - 16, 16);
+    this.hud.distanceText
+      .setFontSize(compact ? 20 : 30)
+      .setPosition(width - (compact ? 130 : 240), 16);
+    this.prepareTutorial(this.tutorialTask);
+  }
+
+  prepareTutorial(task) {
+    this.tutorialTask = task;
+    const { width, height } = this.scale;
+    const compact = width < 800 || height <= 540;
+    this.car.setPosition(
+      width / 2,
+      Math.max(70 + this.car.displayHeight / 2, height * (compact ? 0.3 : 0.72)),
+    );
+    this.car.body.updateFromGameObject();
+    this.car.score = this.tutorialScore;
+    this.hud.update();
+    this.tutorialCoin
+      .setPosition(this.car.x, Math.max(65, this.car.y - this.car.displayHeight / 2 - 55))
+      .setVisible(task === 'coin');
+    this.tutorialEnemy
+      .setPosition(
+        this.car.x,
+        Math.max(65 + this.car.displayHeight / 2, this.car.y - this.car.displayHeight - 20),
+      )
+      .setVisible(task === 'obstacle');
+    this.tutorialTargets.coin = task === 'coin' ? this.tutorialCoin : null;
+    this.tutorialTargets.enemy = task === 'obstacle' ? this.tutorialEnemy : null;
+  }
+
+  moveTutorial(direction, task) {
+    const halfRoad = this.track1.displayWidth / 2;
+    const halfCar = this.car.displayWidth / 2;
+    const step = Math.max(18, this.car.displayHeight / 4);
+    const dx = direction === 'left' ? -step : direction === 'right' ? step : 0;
+    const dy = direction === 'up' ? -step : direction === 'down' ? step : 0;
+    const compact = this.scale.width < 800 || this.scale.height <= 540;
+    this.car.x = Phaser.Math.Clamp(
+      this.car.x + dx,
+      this.scale.width / 2 - halfRoad + halfCar,
+      this.scale.width / 2 + halfRoad - halfCar,
+    );
+    this.car.y = Phaser.Math.Clamp(
+      this.car.y + dy,
+      65 + this.car.displayHeight / 2,
+      this.scale.height * (compact ? 0.43 : 0.95) - this.car.displayHeight / 2,
+    );
+    this.car.body.updateFromGameObject();
+    if (
+      task === 'coin' &&
+      this.tutorialCoin.visible &&
+      Math.abs(this.car.x - this.tutorialCoin.x) < halfCar + this.tutorialCoin.displayWidth / 2 &&
+      Math.abs(this.car.y - this.tutorialCoin.y) <
+        this.car.displayHeight / 2 + this.tutorialCoin.displayHeight / 2
+    ) {
+      this.tutorialCoin.setVisible(false);
+      this.tutorialTargets.coin = this.car;
+      this.tutorialScore += this.tutorialCoin.value;
+      this.car.score = this.tutorialScore;
+      this.hud.update();
+      return 'collected';
+    }
+    if (
+      task === 'obstacle' &&
+      Math.abs(this.car.x - this.tutorialEnemy.x) > halfCar + this.tutorialEnemy.displayWidth / 2
+    )
+      return 'avoided';
+    return 'moved';
   }
 
   setBackground(img) {
@@ -214,6 +345,7 @@ export default class GameScene extends Phaser.Scene {
 
   // Update the game state every frame
   update(_, delta) {
+    if (this.isTutorial) return;
     this.elapsedTime += delta;
     this.car.move();
     this.car.update_boundary_particles();

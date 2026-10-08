@@ -35,6 +35,19 @@ npm install
 npm run dev
 ```
 
+Das Sybit-Kart-Tutorial öffnet ihr über **Anleitung** unten links im Hauptmenü
+(auch im Weihnachtsmodus). Acht Schritte erklären Menü, Einstellungen, Steuerung,
+Münzen, Hindernisse und die Punkte-/Streckenanzeige. Auf einer sicheren Übungsstrecke
+könnt ihr mit **W/A/S/D**, Pfeiltasten oder den HTML-Buttons üben. Übungen lassen sich
+überspringen; **Zurück** wiederholt einen Schritt und **Escape** schließt die Anleitung.
+**Rennen starten** beginnt anschließend ein neues Einzelspieler-Rennen.
+
+Die Tutorial-Texte und Schritte stehen in `src/tutorial/steps.js`, die Darstellung in
+`src/tutorial/tutorial.css`. Das native HTML-Dialogfenster hält den Tastaturfokus im
+Tutorial, beschreibt markierte Spielobjekte auch als Text und meldet Übungsergebnisse
+über eine Live-Region. Die Übungsstrecke erzeugt weder Hindernis-Timer noch Kollisionen
+und verändert keinen echten Spielstand.
+
 <a id="entwicklungsumgebung-einrichten"></a>
 
 ## Entwicklungsumgebung einrichten

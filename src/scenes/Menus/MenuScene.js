@@ -3,6 +3,7 @@
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 import InputManager from '../../objects/InputManager.js';
+import { tutorial } from '../../tutorial/Tutorial.js';
 
 export default class MenuScene extends Phaser.Scene {
   // Constructor
@@ -40,6 +41,7 @@ export default class MenuScene extends Phaser.Scene {
     this.InputManager.create();
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
+    const tutorialBtn = document.getElementById('tutorial-btn');
     const menu = document.getElementById('accessible-ui');
     menu.hidden = false;
 
@@ -59,6 +61,7 @@ export default class MenuScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
       settingsBtn.removeEventListener('click', openSettings);
+      tutorialBtn.removeEventListener('click', openTutorial);
       menu.hidden = true;
     });
 
@@ -288,9 +291,19 @@ export default class MenuScene extends Phaser.Scene {
 
     // Click events
 
+    const openTutorial = () =>
+      tutorial.open(
+        this,
+        { play: play_button, settings: settings_button, tutorial: AnleitungsButton },
+        startGame,
+      );
+    tutorialBtn.addEventListener('click', openTutorial);
+    AnleitungsButton.on('pointerdown', openTutorial);
+
     positionAccessibleControls(this, [
       [playBtn, play_button],
       [settingsBtn, settings_button],
+      [tutorialBtn, AnleitungsButton],
     ]);
 
     play_button.on('pointerdown', startGame);

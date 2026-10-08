@@ -1,5 +1,8 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { tutorial } from '../../tutorial/Tutorial.js';
+
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
   constructor() {
@@ -47,6 +50,7 @@ export default class ChristmasScene extends Phaser.Scene {
       'christmas-homepage-barrierefreiheit',
       'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
     );
+    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
   }
 
   // Create scene
@@ -140,6 +144,12 @@ export default class ChristmasScene extends Phaser.Scene {
       .setInteractive();
     creditsButton.setDepth(3);
 
+    const tutorialButton = this.add
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
+      .setOrigin(0.5)
+      .setScale(0.3)
+      .setInteractive({ useHandCursor: true });
+
     this.add
       .image(this.scale.width / 1.3, footer_btn_y * 1.1, 'christmas-homepage-resonanz')
       .setOrigin(0.5)
@@ -159,15 +169,44 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3);
 
-    play_button.on('pointerdown', () => {
+    const startGame = () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.start('LoadingScene', { isMultiplayer: false });
-    });
+    };
 
-    settings_button.on('pointerdown', () => {
+    const openSettings = () => {
       this.scene.launch('PopUpScene');
       this.scene.bringToTop('PopUpScene');
+    };
+    const openTutorial = () =>
+      tutorial.open(
+        this,
+        { play: play_button, settings: settings_button, tutorial: tutorialButton },
+        startGame,
+      );
+    const menu = document.getElementById('accessible-ui');
+    const playBtn = document.getElementById('start-game');
+    const settingsBtn = document.getElementById('settings-btn');
+    const tutorialBtn = document.getElementById('tutorial-btn');
+    menu.hidden = false;
+    playBtn.addEventListener('click', startGame);
+    settingsBtn.addEventListener('click', openSettings);
+    tutorialBtn.addEventListener('click', openTutorial);
+    this.events.once('shutdown', () => {
+      playBtn.removeEventListener('click', startGame);
+      settingsBtn.removeEventListener('click', openSettings);
+      tutorialBtn.removeEventListener('click', openTutorial);
+      menu.hidden = true;
     });
+    positionAccessibleControls(this, [
+      [playBtn, play_button],
+      [settingsBtn, settings_button],
+      [tutorialBtn, tutorialButton],
+    ]);
+    playBtn.focus();
+    play_button.on('pointerdown', startGame);
+    settings_button.on('pointerdown', openSettings);
+    tutorialButton.on('pointerdown', openTutorial);
 
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
