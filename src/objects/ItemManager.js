@@ -1,5 +1,4 @@
-import Car from './Car';
-import Item from './Item';
+/* global Phaser */
 
 export default class ItemManager {
   constructor(scene) {
