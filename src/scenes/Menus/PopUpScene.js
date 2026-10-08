@@ -37,17 +37,20 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
     closeButton.setDepth(9999);
-    closeButton.on('pointerdown', () => this.scene.stop());
 
     // Dim the game behind the settings panel.
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.48).setOrigin(0).setInteractive();
+    const dim = this.add
+      .rectangle(0, 0, width, height, 0x000000, 0.48)
+      .setOrigin(0)
+      .setInteractive()
+      .setAlpha(0);
 
-    this.add
+    const settingsLabel = this.add
       .image(background.x, background.y * -1 + padding, 'settingsLabel')
       .setScale(0.3)
       .setOrigin(0.5);
 
-    this.add
+    const accessibilityLabel = this.add
       .image(background.x / 1.2, height * 0.2, 'Accessibility Mode')
       .setScale(0.35)
       .setOrigin(0);
@@ -130,10 +133,54 @@ export default class PopUpScene extends Phaser.Scene {
       this.scene.start('MenuScene');
     });
 
-    this.add
+    const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
       .setScale(0.66)
       .setOrigin(0.5);
+
+    // Slide the panel in from the right edge. The dim overlay stays in place.
+    //added an array of all the elements. add element here, to animate
+    const panel = [
+      background,
+      closeButton,
+      settingsLabel,
+      accessibilityLabel,
+      AccessibilitySwitch,
+      gamemodeLabel,
+      standardModeButton,
+      christmasModeButton,
+      closeLabel,
+    ];
+
+    //fades the dimming in slowly
+    this.tweens.add({ targets: dim, alpha: 1, duration: 200 });
+
+    //animates each panel to move
+    panel.forEach((obj) => (obj.x += width));
+    this.tweens.add({
+      targets: panel,
+      x: `-=${width}`,
+      duration: 200,
+      ease: 'Cubic.easeOut',
+    });
+
+    let closing = false;
+    const close = () => {
+      if (closing) return; // ignore double clicks
+      closing = true;
+      this.tweens.add({ targets: panel, x: `+=${width}`, duration: 200, ease: 'Cubic.easeIn' });
+      this.tweens.add({
+        targets: dim,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => this.scene.stop(),
+      });
+    };
+
+    closeButton.on('pointerdown', close);
+
+    this.input.keyboard.once('keydown-M', close);
+    this.input.keyboard.once('keydown-ESC', close);
 
     const settingsBtn = document.getElementById('settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings');
@@ -143,10 +190,7 @@ export default class PopUpScene extends Phaser.Scene {
     const gameModeMenu = document.getElementById('game-mode-menu');
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
-    this.input.keyboard.once('keydown-M', () => this.scene.stop());
-    const closeWindows = () => {
-      this.scene.stop('PopUpScene');
-    };
+    const closeWindows = close;
 
     const handleAccessibilityChange = () => {
       this.registry.set('accessibility enabled', accessibilityToggle.checked);
