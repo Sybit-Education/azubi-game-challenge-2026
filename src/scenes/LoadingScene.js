@@ -48,19 +48,12 @@ export default class LoadingScene extends Phaser.Scene {
 
     // Loading bar
 
-    const loadingText = this.add;
     this.add
       .image(centerX, centerY - spacing / 4, 'LoadingText')
       .setOrigin(0.5)
       .setScale(0.3);
 
-    const loadingBar = this.add.rectangle(
-      centerX,
-      centerY + spacing / 4,
-      barWidth,
-      barHeight,
-      0x000000,
-    );
+    this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
     this.add.rectangle(centerX, centerY + spacing / 4, barWidth, barHeight, 0x000000);
 
     const fillBar = this.add.rectangle(
