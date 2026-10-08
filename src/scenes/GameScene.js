@@ -34,6 +34,7 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.secondCar = null;
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
