@@ -21,9 +21,8 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('border', 'sprites/Race Track Assets/border.png');
     this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
     this.load.image('starting_Banner', 'sprites/Race Track Assets/starting_banner.png');
-    this.load.image('startingLine','sprites/Race Track Assets/startingAndFinishLine.png')
-*
-    this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
+    this.load.image('startingLine', 'sprites/Race Track Assets/startingAndFinishLine.png') *
+      this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
     this.load.image('start-count-2', 'sprites/Race Track Assets/countdown2.png');
     this.load.image('start-count-1', 'sprites/Race Track Assets/countdown1.png');
     this.load.image('start-go', 'sprites/Race Track Assets/goLabel.png');
