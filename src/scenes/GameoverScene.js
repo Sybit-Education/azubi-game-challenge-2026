@@ -66,7 +66,41 @@ export default class GameoverScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .setScale(0.4);
+    // Hover state for buttons
 
+    playAgainButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: playAgainButton,
+        scale: 0.45,
+        duration: 100,
+      });
+    });
+
+    playAgainButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: playAgainButton,
+        scale: 0.4,
+        duration: 100,
+      });
+    });
+
+    lobbyButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: lobbyButton,
+        scale: 0.45,
+        duration: 100,
+      });
+    });
+
+    lobbyButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: lobbyButton,
+        scale: 0.4,
+        duration: 100,
+      });
+    });
+
+    // Click events
     playAgainButton.on('pointerdown', () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
@@ -74,7 +108,13 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     lobbyButton.on('pointerdown', () => {
-      this.scene.start('MenuScene');
+      const gameMode = this.registry.get('gameMode');
+
+      if (gameMode === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
     });
   }
 }

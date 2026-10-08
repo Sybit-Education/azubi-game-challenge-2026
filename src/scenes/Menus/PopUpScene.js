@@ -17,8 +17,12 @@ export default class PopUpScene extends Phaser.Scene {
     );
     this.load.image('StandardModeButton', 'sprites/Homepage/Settings Menu/StandardModeButton.png');
     this.load.image('closeLabel', 'sprites/Homepage/Settings Menu/closeLabel.png');
+    this.load.image('christmasmode', 'sprites/Homepage/Settings Menu/ChristmasModeButton.png');
   }
+
   create() {
+    console.log('PopUpScene create');
+    this.scene.bringToTop();
     const { width, height } = this.scale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
 
@@ -31,7 +35,6 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
     closeButton.setDepth(9999);
-    // closeButton.on('pointerdown', () => this.scene.stop()); (replaced with animated closing anim)
 
     // Dim the game behind the settings panel.
     const dim = this.add
@@ -55,31 +58,78 @@ export default class PopUpScene extends Phaser.Scene {
     const AccessibilitySwitch = this.add
       .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
 
-    let button_state = 0;
-    function switch_button_state() {
-      if (button_state) {
-        button_state = 0;
-      } else if (!button_state) {
-        button_state = 1;
-      }
-    }
-
-    AccessibilitySwitch.on('pointerdown', () => switch_button_state());
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
       .image(background.x * 0.79 + padding, AccessibilitySwitch.y / 0.66, 'Game Mode')
       .setScale(0.35)
       .setOrigin(0);
 
-    //rowY += Math.max(48, 58 * uiScale);
-    // Static dropdown mockup: choosing a mode has no effect yet.
-
     const standardModeButton = this.add
       .image(gamemodeLabel.x * 1.2, gamemodeLabel.y * 0.97, 'StandardModeButton')
       .setScale(0.3)
-      .setOrigin(0);
+      .setOrigin(0)
+      .setInteractive();
+
+    const christmasModeButton = this.add
+      .image(standardModeButton.x, standardModeButton.y, 'christmasmode')
+      .setOrigin(0)
+      .setScale(0.3)
+      .setAlpha(0)
+      .setInteractive();
+
+    let hoveringStandard = false;
+    let hoveringChristmas = false;
+
+    const closedY = standardModeButton.y;
+    const openY = standardModeButton.y + standardModeButton.displayHeight + 10;
+
+    const updateChristmasButton = () => {
+      const shouldBeOpen = hoveringStandard || hoveringChristmas;
+
+      this.tweens.killTweensOf(christmasModeButton);
+
+      this.tweens.add({
+        targets: christmasModeButton,
+        y: shouldBeOpen ? openY : closedY,
+        alpha: shouldBeOpen ? 1 : 0,
+        duration: 150,
+        ease: 'Power2',
+      });
+    };
+
+    standardModeButton.on('pointerover', () => {
+      hoveringStandard = true;
+      updateChristmasButton();
+    });
+
+    standardModeButton.on('pointerout', () => {
+      hoveringStandard = false;
+
+      this.time.delayedCall(20, () => {
+        updateChristmasButton();
+      });
+    });
+
+    christmasModeButton.on('pointerover', () => {
+      hoveringChristmas = true;
+      updateChristmasButton();
+    });
+
+    christmasModeButton.on('pointerdown', () => {
+      this.registry.set('gameMode', 'christmas');
+      this.scene.stop('MenuScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start('ChristmasScene');
+    });
+
+    standardModeButton.on('pointerdown', () => {
+      this.scene.stop('ChristmasScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start('MenuScene');
+    });
 
     const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
@@ -96,6 +146,7 @@ export default class PopUpScene extends Phaser.Scene {
       AccessibilitySwitch,
       gamemodeLabel,
       standardModeButton,
+      christmasModeButton,
       closeLabel,
     ];
 
@@ -128,5 +179,58 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.input.keyboard.once('keydown-M', close);
     this.input.keyboard.once('keydown-ESC', close);
+
+    // Hover-effects for the buttons
+
+    closeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.45,
+        scaleY: 0.45,
+        duration: 100,
+      });
+    });
+    closeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.4,
+        scaleY: 0.4,
+        duration: 100,
+      });
+    });
+
+    AccessibilitySwitch.on('pointerover', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100,
+      });
+    });
+    AccessibilitySwitch.on('pointerout', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100,
+      });
+    });
+    standardModeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: standardModeButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100,
+      });
+    });
+
+    standardModeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: standardModeButton,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100,
+      });
+    });
   }
 }
