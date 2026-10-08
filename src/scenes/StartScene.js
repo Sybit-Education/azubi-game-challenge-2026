@@ -104,21 +104,22 @@ export default class StartScene extends Phaser.Scene {
   }
 
   spawnStartingBanner() {
-    const startingLine = new StartingBanner(
-      this,
-      this.track1.x,
-      this.track1.y + this.track1.displayHeight / 2 - 20,
-    );
-    startingLine.setScale(0.75);
+    const s = this.scale.height / 900; // 900 = höhe, auf der die werte gepasst haben
+    const roadWidth = this.track1.displayWidth;
+
+    //banner so breit wie die straße (im bild sind die pfosten 1404px auseinander)
+    const bannerScale = roadWidth / 1404;
+    const bannerY = this.track1.y + this.track1.displayHeight / 2 - 20 * s;
+
+    const startingLine = new StartingBanner(this, this.track1.x, bannerY);
+    startingLine.setScale(bannerScale);
     startingLine.setDepth(21);
 
     //checkerboard auf dem boden, unter dem auto (depth 10) aber über der straße (depth -1)
-    const checkerboard = new StartingLine(
-      this,
-      this.track1.x,
-      this.track1.y + this.track1.displayHeight / 2 + 166,
-    );
-    checkerboard.setScale(3.8, 1.5); // breite, höhe
+    //der streifen im bild ist 264px breit, liegt bei den füßen vom banner
+    const lineScale = roadWidth / 264;
+    const checkerboard = new StartingLine(this, this.track1.x, bannerY + 248 * bannerScale);
+    checkerboard.setScale(lineScale, lineScale * 0.4); // breite, höhe
     checkerboard.setDepth(5);
   }
 
