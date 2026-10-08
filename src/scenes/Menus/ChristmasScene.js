@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
   constructor() {
@@ -52,7 +54,35 @@ export default class ChristmasScene extends Phaser.Scene {
   }
 
   // Create scene
-  create() {
+  create(data) {
+    //html Menus erneut für diesen Scene herholen.
+    const menu = document.getElementById('accessible-ui');
+    const playBtn = document.getElementById('start-game');
+    const settingsBtn = document.getElementById('settings-btn');
+
+    const startGame = () => {
+      this.registry.set('gameMode', 'christmas');
+      this.scene.start('LoadingScene', { isMultiplayer: false });
+    };
+
+    const openSettings = () => {
+      this.scene.launch('PopUpScene');
+      this.scene.bringToTop('PopUpScene');
+    };
+
+    playBtn.addEventListener('click', startGame);
+    settingsBtn.addEventListener('click', openSettings);
+
+    menu.hidden = false;
+    const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
+    focusTarget.focus();
+
+    this.events.once('shutdown', () => {
+      playBtn.removeEventListener('click', startGame);
+      settingsBtn.removeEventListener('click', openSettings);
+      menu.hidden = true;
+    });
+
     const footer_btn_y = this.scale.height / 1.17;
     const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'christmas-homepage-hintergrund')
@@ -198,15 +228,13 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     });
 
-    play_button.on('pointerdown', () => {
-      this.registry.set('gameMode', 'christmas');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
-    });
+    positionAccessibleControls(this, [
+      [playBtn, play_button],
+      [settingsBtn, settings_button],
+    ]);
 
-    settings_button.on('pointerdown', () => {
-      this.scene.launch('PopUpScene');
-      this.scene.bringToTop('PopUpScene');
-    });
+    play_button.on('pointerdown', startGame);
+    settings_button.on('pointerdown', openSettings);
 
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
