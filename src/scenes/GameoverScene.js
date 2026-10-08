@@ -1,6 +1,7 @@
 /* global Phaser */
 
 import { GameData } from './Menus/GameDate.js';
+import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
 export default class GameoverScene extends Phaser.Scene {
   constructor() {
@@ -25,7 +26,7 @@ export default class GameoverScene extends Phaser.Scene {
     );
   }
   //distance shit hier irgendwo
-create() {
+  create() {
   console.log('GameoverScene gestartet');
 
   const leaderboard = JSON.parse(
@@ -59,8 +60,42 @@ create() {
   console.log(leaderboard);
 
   this.width = this.scale.width;
-  this.height = this.scale.height;
+  this.height = this.scale.height; 
+ }
+  create() {
+    const gameOverUi = document.getElementById('game-over-ui');
+    const finalScore = document.getElementById('final-score');
+    const distance = document.getElementById('final-distance');
+    const retryGame = document.getElementById('retry');
+    const backToHomeScreen = document.getElementById('back-to-home');
+    gameOverUi.hidden = false;
 
+    finalScore.textContent = this.score;
+    distance.textContent = this.distance;
+    const retryFunction = () => {
+      this.scene.start('GameScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
+    };
+
+    const backToHomeFunction = () => {
+      this.scene.start(
+        this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
+      );
+    };
+
+    retryGame.addEventListener('click', retryFunction);
+    retryGame.focus();
+    backToHomeScreen.addEventListener('click', backToHomeFunction);
+
+    this.events.once('shutdown', () => {
+      retryGame.removeEventListener('click', retryFunction);
+      backToHomeScreen.removeEventListener('click', backToHomeFunction);
+      gameOverUi.hidden = true;
+    });
+
+    this.width = this.scale.width;
+    this.height = this.scale.height;
 
     this.add
       .image(this.width / 2, this.height / 2, 'homepage-hintergrund')
@@ -102,7 +137,46 @@ create() {
       .setOrigin(0.5)
       .setInteractive()
       .setScale(0.4);
+    positionAccessibleControls(this, [
+      [retryGame, playAgainButton],
+      [backToHomeScreen, lobbyButton],
+    ]);
 
+    // Hover state for buttons
+
+    playAgainButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: playAgainButton,
+        scale: 0.45,
+        duration: 100,
+      });
+    });
+
+    playAgainButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: playAgainButton,
+        scale: 0.4,
+        duration: 100,
+      });
+    });
+
+    lobbyButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: lobbyButton,
+        scale: 0.45,
+        duration: 100,
+      });
+    });
+
+    lobbyButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: lobbyButton,
+        scale: 0.4,
+        duration: 100,
+      });
+    });
+
+    // Click events
     playAgainButton.on('pointerdown', () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
@@ -120,3 +194,5 @@ create() {
     });
   }
 }
+  }
+

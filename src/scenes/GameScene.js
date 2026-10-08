@@ -18,13 +18,13 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/sybit-kart.png');
+    this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
 
-    this.load.image('enemy-car1', 'sprites/Entities/Obstacles/enemy-car1.png');
-    this.load.image('enemy-car2', 'sprites/Entities/Obstacles/enemy-car2.png');
-    this.load.image('enemy-car3', 'sprites/Entities/Obstacles/enemy-car3.png');
+    this.load.image('enemy-car1', 'sprites/Entities/Obstacles/EnemyCar1.png');
+    this.load.image('enemy-car2', 'sprites/Entities/Obstacles/EnemyCar2.png');
+    this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
 
     this.load.image('coin', 'sprites/Entities/coin.png');
     this.load.image('boundary-particle', 'sprites/Particles/image001.png');
@@ -34,6 +34,7 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.secondCar = null;
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
