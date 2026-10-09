@@ -164,6 +164,7 @@ export default class PopUpScene extends Phaser.Scene {
     // Slide the panel in from the right edge. The dim overlay stays in place.
     //added an array of all the elements. add element here, to animate
     const panel = [
+      Accessibilitycircle,
       background,
       closeButton,
       settingsLabel,
