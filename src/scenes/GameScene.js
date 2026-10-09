@@ -300,6 +300,6 @@ export default class GameScene extends Phaser.Scene {
     this.track2.move(delta);
     this.hud.update();
 
-    this.ItemManager.itemShop();
+    // this.ItemManager.itemShop();
   }
 }
