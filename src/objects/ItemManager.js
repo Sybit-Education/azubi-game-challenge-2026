@@ -27,6 +27,7 @@ export default class ItemManager {
   }
 
   itemShrinkCar2() {
+    console.log("Shrink 2");
     let carShrinkSize = 0.3;
 
     this.scene.secondCar.setScale(carShrinkSize);
@@ -164,28 +165,56 @@ export default class ItemManager {
     }
   }
 
-  coinBudgetPlus() {
-    this.coinBudget++;
-    console.log('Spieler1 ' + this.coinBudget + ' Coins');
+  coinBudgetPlus1() {
+    this.coinBudgetPlayer1 ++;
+    console.log('Spieler1 ' + this.coinBudgetPlayer1 + ' Coins');
   }
+
+  coinBudgetPlus2() {
+    this.coinBudgetPlayer2 ++;
+    console.log('Spieler2 ' + this.coinBudgetPlayer2 + ' Coins');
+  }
+
 
 
   itemShop(){
 
     // Hotkeys Player1
     this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+    this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+    // this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
 
-    if (Phaser.Input.Keyboard.JustDown(this.key1)) {
-      console.log('Spieler 1 hat "1" gedrückt');
+    if (Phaser.Input.Keyboard.JustDown(this.key1) && this.coinBudgetPlayer1 >= this.itemShieldPrize) {
+
+      this.itemRandom1();
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this.key2) && this.coinBudgetPlayer1 >= this.itemShrinkPrize) {
+      this.itemShrinkCar1();
+    }
+
+    // if (Phaser.Input.Keyboard.JustDown(this.key1)) {
+    //   this.itemShrinkCar1();
+    // }
 
     // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
-
-    if (Phaser.Input.Keyboard.JustDown(this.numpad1)) {
-      console.log('Spieler 2 hat "1" gedrückt');
+    this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
+    // this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
+    
+    if (Phaser.Input.Keyboard.JustDown(this.numpad1) && this.coinBudgetPlayer2 >= this.itemShieldPrize) {
+      this.itemShieldCar2;
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this.numpad2) && this.coinBudgetPlayer2 >= this.itemShrinkPrize) {
+      this.itemShrinkCar2();
+    }
+
+    // if (Phaser.Input.Keyboard.JustDown(this.numpad3)) {
+    //   this.itemShrinkCar3();
+    // }
   }
+
 
   
 }
