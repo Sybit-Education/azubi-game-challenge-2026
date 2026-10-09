@@ -173,16 +173,16 @@ export default class ItemManager {
   itemShop(){
 
     // Hotkeys Player1
-    this.key1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+    this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
 
-    if (key1.isDown) {
+    if (Phaser.Input.Keyboard.JustDown(this.key1)) {
       console.log('Spieler 1 hat "1" gedrückt');
     }
 
     // Hotkeys Player2
-  this.numpad1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
+    this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
 
-    if (numpad1.isDown) {
+    if (Phaser.Input.Keyboard.JustDown(this.numpad1)) {
       console.log('Spieler 2 hat "1" gedrückt');
     }
   }
