@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>SybitKart</title>
@@ -11,6 +11,43 @@
   </head>
   <!-- Body -->
   <body style="margin: 0">
+    <main id="accessible-ui" class="accessible-layer">
+      <h1 class="sr-only">Sybit Kart</h1>
+      <button id="start-game" type="button">play</button>
+      <button id="settings-btn" type="button">Settings</button>
+    </main>
+
+    <section id="start-ui" class="accessible-layer" hidden>
+      <button id="skip-intro" type="button">Skip Intro!</button>
+    </section>
+
+    <section id="game-over-ui" class="accessible-layer" hidden>
+      <h2 class="sr-only">game over</h2>
+
+      <p class="sr-only">Score: <span id="final-score"></span> Pts</p>
+      <p class="sr-only">Distance: <span id="final-distance"></span> Km</p>
+
+      <button id="retry" type="button">retry</button>
+      <button id="back-to-home" type="button">mainMenu</button>
+    </section>
+
+    <section id="settings-section">
+      <dialog id="settings-dialog" aria-labelledby="settings-title">
+        <h2 id="settings-title" class="sr-only">Settings</h2>
+
+        <label class="sr-only" for="accessible-toggle">accessibility mode</label>
+        <input id="accessible-toggle" type="checkbox" />
+
+        <label class="sr-only" for="game-mode-menu">game mode</label>
+        <select id="game-mode-menu">
+          <option value="standard">standard</option>
+          <option value="christmas">Christmas mode</option>
+        </select>
+        <p class="sr-only">press escape to close the settings dialog.</p>
+        <button id="close-settings" type="button" autofocus>Close</button>
+      </dialog>
+    </section>
+
     <!-- Start script -->
     <script type="module" src="src/main.js"></script>
   </body>
@@ -18,6 +55,76 @@
   <style>
     canvas {
       display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .accessible-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .accessible-layer button,
+    #settings-dialog button,
+    #settings-dialog input,
+    #settings-dialog select {
+      position: fixed;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: transparent;
+      appearance: none;
+      pointer-events: none;
+      font-size: 0;
+    }
+
+    .accessible-layer button:focus-visible,
+    #settings-dialog button:focus-visible,
+    #settings-dialog input:focus-visible,
+    #settings-dialog select:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px #000000;
+    }
+
+    #settings-dialog {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    #settings-dialog::backdrop {
+      background: transparent;
+      pointer-events: none;
+    }
+
+    #settings-dialog select option {
+      color: #000000;
+      background: #ffffff;
+      font-size: 16px;
     }
   </style>
 </html>

@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
     super('PopUpScene');
@@ -38,17 +40,20 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
     closeButton.setDepth(9999);
-    closeButton.on('pointerdown', () => this.scene.stop());
 
     // Dim the game behind the settings panel.
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.48).setOrigin(0).setInteractive();
+    const dim = this.add
+      .rectangle(0, 0, width, height, 0x000000, 0.48)
+      .setOrigin(0)
+      .setInteractive()
+      .setAlpha(0);
 
-    this.add
+    const settingsLabel = this.add
       .image(background.x, background.y * -1 + padding, 'settingsLabel')
       .setScale(0.3)
       .setOrigin(0.5);
 
-    this.add
+    const accessibilityLabel = this.add
       .image(background.x / 1.2, height * 0.2, 'Accessibility Mode')
       .setScale(0.35)
       .setOrigin(0);
@@ -66,6 +71,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setScale(0.35)
       .setOrigin(0)
       .setInteractive();
+      .setInteractive({ useHandCursor: true });
 
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
@@ -167,7 +173,148 @@ export default class PopUpScene extends Phaser.Scene {
       .setScale(0.66)
       .setOrigin(0.5);
 
-    this.input.keyboard.once('keydown-M', () => this.scene.stop());
-    this.input.keyboard.once('keydown-ESC', () => this.scene.stop());
+    // Slide the panel in from the right edge. The dim overlay stays in place.
+    //added an array of all the elements. add element here, to animate
+    const panel = [
+      background,
+      closeButton,
+      settingsLabel,
+      accessibilityLabel,
+      AccessibilitySwitch,
+      gamemodeLabel,
+      standardModeButton,
+      christmasModeButton,
+      closeLabel,
+    ];
+
+    //fades the dimming in slowly
+    this.tweens.add({ targets: dim, alpha: 1, duration: 200 });
+
+    //animates each panel to move
+    panel.forEach((obj) => (obj.x += width));
+    this.tweens.add({
+      targets: panel,
+      x: `-=${width}`,
+      duration: 200,
+      ease: 'Cubic.easeOut',
+    });
+
+    let closing = false;
+    const close = () => {
+      if (closing) return; // ignore double clicks
+      closing = true;
+      this.tweens.add({ targets: panel, x: `+=${width}`, duration: 200, ease: 'Cubic.easeIn' });
+      this.tweens.add({
+        targets: dim,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => this.scene.stop(),
+      });
+    };
+
+    closeButton.on('pointerdown', close);
+
+    this.input.keyboard.once('keydown-M', close);
+    this.input.keyboard.once('keydown-ESC', close);
+
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    const gameModeMenu = document.getElementById('game-mode-menu');
+    gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
+
+    const closeWindows = close;
+
+    const handleAccessibilityChange = () => {
+      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+    };
+    accessibilityToggle.addEventListener('change', handleAccessibilityChange);
+
+    const handleGameModeChange = () => {
+      this.registry.set('gameMode', gameModeMenu.value);
+      this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
+    };
+    gameModeMenu.addEventListener('change', handleGameModeChange);
+    closeSettingsBtn.addEventListener('click', closeWindows);
+
+    const handleCancel = (event) => {
+      event.preventDefault();
+      closeWindows();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+
+    this.events.once('shutdown', () => {
+      closeSettingsBtn.removeEventListener('click', closeWindows);
+      dialog.removeEventListener('cancel', handleCancel);
+      accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
+      gameModeMenu.removeEventListener('change', handleGameModeChange);
+      dialog.close();
+      settingsBtn.focus();
+    });
+
+    positionAccessibleControls(this, [
+      [closeSettingsBtn, closeButton],
+      [accessibilityToggle, AccessibilitySwitch],
+      [gameModeMenu, standardModeButton],
+    ]);
+    dialog.showModal();
+
+    // Hover-effects for the buttons
+
+    closeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.45,
+        scaleY: 0.45,
+        duration: 100,
+      });
+    });
+    closeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: closeButton,
+        scaleX: 0.4,
+        scaleY: 0.4,
+        duration: 100,
+      });
+    });
+
+    AccessibilitySwitch.on('pointerover', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100,
+      });
+    });
+    AccessibilitySwitch.on('pointerout', () => {
+      this.tweens.add({
+        targets: AccessibilitySwitch,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100,
+      });
+    });
+    standardModeButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: standardModeButton,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        duration: 100,
+      });
+    });
+
+    standardModeButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: standardModeButton,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        duration: 100,
+      });
+    });
   }
 }
