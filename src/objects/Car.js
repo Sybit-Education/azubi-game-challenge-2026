@@ -17,6 +17,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.keys = scene.input.keyboard.addKeys(controls);
 
     this.score = 0;
+    this.dead = false; //in multiplayer one car can be dead while the other keeps driving
     this.value = 10;
     this.meters = 0;
     this.boundaryParticles = scene.add
