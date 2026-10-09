@@ -111,24 +111,6 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
-    standardModeButton.on('pointerover', () => {
-      hoveringStandard = true;
-      updateChristmasButton();
-    });
-
-    standardModeButton.on('pointerout', () => {
-      hoveringStandard = false;
-
-      this.time.delayedCall(20, () => {
-        updateChristmasButton();
-      });
-    });
-
-    christmasModeButton.on('pointerover', () => {
-      hoveringChristmas = true;
-      updateChristmasButton();
-    });
-
     christmasModeButton.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.stop('MenuScene');
@@ -137,9 +119,16 @@ export default class PopUpScene extends Phaser.Scene {
     });
 
     standardModeButton.on('pointerdown', () => {
-      this.scene.stop('ChristmasScene');
-      this.scene.stop('PopUpScene');
-      this.scene.start('MenuScene');
+      //im christmas mode: zurück zu standard
+      if (this.scene.isActive('ChristmasScene')) {
+        this.registry.set('gameMode', 'standard');
+        this.scene.stop('ChristmasScene');
+        this.scene.stop('PopUpScene');
+        this.scene.start('MenuScene');
+        return;
+      }
+      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
+      updateChristmasButton();
     });
 
     //defining switch status, "origin x" and "goal x"
