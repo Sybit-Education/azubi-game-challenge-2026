@@ -185,12 +185,13 @@ export default class ItemManager {
     // this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
 
     if (Phaser.Input.Keyboard.JustDown(this.key1) && this.coinBudgetPlayer1 >= this.itemShieldPrize) {
-
-      this.itemRandom1();
+      this.itemShieldCar1();
+      this.coinBudgetPlayer1 -= this.itemShieldPrize;
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.key2) && this.coinBudgetPlayer1 >= this.itemShrinkPrize) {
       this.itemShrinkCar1();
+      this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
     // if (Phaser.Input.Keyboard.JustDown(this.key1)) {
@@ -204,10 +205,12 @@ export default class ItemManager {
     
     if (Phaser.Input.Keyboard.JustDown(this.numpad1) && this.coinBudgetPlayer2 >= this.itemShieldPrize) {
       this.itemShieldCar2;
+      this.coinBudgetPlayer2 -= this.itemShieldPrize;
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.numpad2) && this.coinBudgetPlayer2 >= this.itemShrinkPrize) {
       this.itemShrinkCar2();
+      this.coinBudgetPlayer2 -= this.itemShrinkPrize;
     }
 
     // if (Phaser.Input.Keyboard.JustDown(this.numpad3)) {
