@@ -64,7 +64,7 @@ export default class GameScene extends Phaser.Scene {
 
   //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
   separateOverlappingCars() {
-    if (!this.secondCar) return;
+    if (!this.secondCar || this.car.dead || this.secondCar.dead) return;
 
     const firstBody = this.car.body;
     const secondBody = this.secondCar.body;
@@ -152,7 +152,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createHud() {
-    this.hud = new HUD(this, this.car);
+    this.hud = new HUD(this, this.car, this.secondCar);
   }
 
   // road objects are obstacles and coins
@@ -256,10 +256,24 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // Handle game over when the player collides with an enemy car
-  gameOver() {
+  gameOver(car) {
+    if (car.dead) return; //already dead, do not run again
+
+    //only the car that got hit dies
+    car.dead = true;
+    car.boundaryParticles.emitting = false;
+    car.disableBody(true, true); //hides the dead car
+
+    //in multiplayer only game over when both are dead
+    if (this.secondCar && !(this.car.dead && this.secondCar.dead)) {
+      return;
+    }
+
     this.scene.start('GameoverScene', {
       distance: this.car.calculate_km(),
       score: this.car.score,
+      distance2: this.secondCar ? this.secondCar.calculate_km() : null,
+      score2: this.secondCar ? this.secondCar.score : null,
       isMultiplayer: this.isMultiplayer,
     }); // Change to DeathScene once there is one
   }
@@ -267,10 +281,12 @@ export default class GameScene extends Phaser.Scene {
   // Update the game state every frame
   update(_, delta) {
     this.elapsedTime += delta;
-    this.car.move();
-    this.car.update_boundary_particles();
-    this.car.intendedXVelocity = this.car.body.velocity.x;
-    if (this.secondCar) {
+    if (!this.car.dead) {
+      this.car.move();
+      this.car.update_boundary_particles();
+      this.car.intendedXVelocity = this.car.body.velocity.x;
+    }
+    if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.move();
       this.secondCar.update_boundary_particles();
       this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
@@ -284,8 +300,11 @@ export default class GameScene extends Phaser.Scene {
     const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
-    this.car.update_meters(targetTrackSpeed, delta);
-    if (this.secondCar) {
+    //dead cars do not collect distance anymore
+    if (!this.car.dead) {
+      this.car.update_meters(targetTrackSpeed, delta);
+    }
+    if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.update_meters(targetTrackSpeed, delta);
     }
 

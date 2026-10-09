@@ -10,6 +10,8 @@ export default class GameoverScene extends Phaser.Scene {
   init(data) {
     this.distance = data.distance;
     this.score = data.score;
+    this.distance2 = data.distance2; //added player 2 score and distance
+    this.score2 = data.score2;
     this.isMultiplayer = data?.isMultiplayer ?? false;
   }
 
@@ -34,6 +36,10 @@ export default class GameoverScene extends Phaser.Scene {
 
     finalScore.textContent = this.score;
     distance.textContent = this.distance;
+    if (this.isMultiplayer) {
+      finalScore.textContent = `player 1: ${this.score}, player 2: ${this.score2}`;
+      distance.textContent = `player 1: ${this.distance}, player 2: ${this.distance2}`;
+    }
     const retryFunction = () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
@@ -87,6 +93,19 @@ export default class GameoverScene extends Phaser.Scene {
     this.add
       .text(this.width / 2.31, this.height / 2.2, `${this.score} Pts`, statsStyle)
       .setOrigin(0.5);
+
+    //in multiplayer: top line is player 1, below is player 2
+    if (this.isMultiplayer) {
+      this.add.text(this.width / 4, this.height / 2.2, 'P1', statsStyle).setOrigin(0.5);
+      this.add.text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle).setOrigin(0.5);
+
+      this.add
+        .text(this.width / 2.31, this.height / 2.2 + 40, `${this.score2} Pts`, statsStyle)
+        .setOrigin(0.5);
+      this.add
+        .text(this.width / 1.67, this.height / 2.2 + 40, ` ${this.distance2} Km`, statsStyle)
+        .setOrigin(0.5);
+    }
 
     const playAgainButton = this.add
       .image(this.width / 2, this.height / 1.8, 'gameover-play-again')
