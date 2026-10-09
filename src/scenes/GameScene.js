@@ -109,7 +109,7 @@ export default class GameScene extends Phaser.Scene {
   createPlayer() {
     if (this.isMultiplayer) {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
       this.secondCar = new Car(
         this,
@@ -117,14 +117,11 @@ export default class GameScene extends Phaser.Scene {
         this.scale.height / 1.25,
         'UP,LEFT,DOWN,RIGHT',
       );
-      this.secondCar.body.setSize(
-        this.secondCar.displayWidth * 1.25,
-        this.secondCar.displayHeight * 1.25,
-      );
+      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
 
@@ -199,7 +196,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
         roadObject.body.setImmovable(true);
         this.physics.add.collider(
           this.car,
@@ -209,6 +206,8 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
 
+        
+        //this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
           this.physics.add.collider(
             this.secondCar,
