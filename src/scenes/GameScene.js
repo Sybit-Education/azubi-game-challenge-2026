@@ -206,7 +206,6 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
 
-        
         //this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
           this.physics.add.collider(
