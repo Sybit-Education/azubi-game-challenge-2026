@@ -199,7 +199,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.displayWidth, roadObject.displayHeight);
         roadObject.body.setImmovable(true);
         this.physics.add.collider(
           this.car,
