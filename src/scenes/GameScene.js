@@ -21,7 +21,7 @@ export default class GameScene extends Phaser.Scene {
   //Bilder laden
   preload() {
     this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
-    this.load.image('car2', 'sprites/Entities/Player Skins/Sybit Kart Player car 2.png');
+    this.load.image('car2', 'sprites/Entities/Player Skins/Sybit KartPlayercar2.png');
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
 
@@ -299,5 +299,7 @@ export default class GameScene extends Phaser.Scene {
     this.track1.move(delta);
     this.track2.move(delta);
     this.hud.update();
+
+    this.ItemManager.itemShop();
   }
 }

@@ -168,4 +168,24 @@ export default class ItemManager {
     this.coinBudget++;
     console.log('Spieler1 ' + this.coinBudget + ' Coins');
   }
+
+
+  itemShop(){
+
+    // Hotkeys Player1
+    this.key1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+
+    if (key1.isDown) {
+      console.log('Spieler 1 hat "1" gedrückt');
+    }
+
+    // Hotkeys Player2
+  this.numpad1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
+
+    if (numpad1.isDown) {
+      console.log('Spieler 2 hat "1" gedrückt');
+    }
+  }
+
+  
 }
