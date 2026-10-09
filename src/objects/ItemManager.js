@@ -7,8 +7,8 @@ export default class ItemManager {
     this.coinBudgetPlayer1 = 0;
     this.coinBudgetPlayer2 = 0;
 
-    this.itemShieldPrize = 10;
-    this.itemShrinkPrize = 5;
+    this.itemShieldPrize = 20;
+    this.itemShrinkPrize = 15;
 
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
