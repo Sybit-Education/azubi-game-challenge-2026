@@ -6,6 +6,8 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
+import Item from '../objects/Item.js';
+import ItemManager from '../objects/ItemManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -19,6 +21,7 @@ export default class GameScene extends Phaser.Scene {
   //Bilder laden
   preload() {
     this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
+    this.load.image('car2', 'sprites/Entities/Player Skins/SybitKartPlayer2.png');
     this.load.image('track', 'sprites/Race Track Assets/road.png');
     this.load.image('border', 'sprites/Race Track Assets/border.png');
 
@@ -27,13 +30,18 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
 
     this.load.image('coin', 'sprites/Entities/coin.png');
+    this.load.image('item', 'sprites/Entities/item.png');
     this.load.image('boundary-particle', 'sprites/Particles/image001.png');
 
     this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
+
+    this.load.image('carShield', 'sprites/Entities/Player Skins/carShield.png');
+    this.load.image('carShield2', 'sprites/Entities/Player Skins/carShield2.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
     this.roadObjects = [];
@@ -42,6 +50,7 @@ export default class GameScene extends Phaser.Scene {
     this.createWalls();
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
+    this.createRoadObject('item');
     this.createHud();
     this.setBackground('background');
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
@@ -165,19 +174,64 @@ export default class GameScene extends Phaser.Scene {
         if (this.secondCar) {
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
-      } else {
+      } else if (type === 'item') {
+        roadObject = new Item(this, roadObjectX, spawnY, lane);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.itemShieldCar1,
+          undefined,
+          this.ItemManager,
+        );
+        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.itemRandom2,
+            undefined,
+            this.ItemManager,
+          );
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+        }
+      } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
         roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
-        this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
+        roadObject.body.setImmovable(true);
+        this.physics.add.collider(
+          this.car,
+          roadObject,
+          this.ItemManager.lebenCheckCar1,
+          undefined,
+          this.ItemManager,
+        );
+
+        //this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
-          this.physics.add.collider(this.secondCar, roadObject, this.gameOver, undefined, this);
+          this.physics.add.collider(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.lebenCheckCar2,
+            undefined,
+            this.ItemManager,
+          );
         }
       }
 
       this.roadObjects.push(roadObject);
     }
 
-    const delay = Phaser.Math.Between(500, 2000);
+    // Spawnrate
+    let delay;
+
+    if (type === 'coin') {
+      delay = Phaser.Math.Between(500, 2000);
+    } else if (type === 'item') {
+      delay = Phaser.Math.Between(5000, 10000);
+    } else if (type === 'obstacle') {
+      delay = Phaser.Math.Between(2000, 4000);
+    }
+
     this.time.delayedCall(delay, () => this.createRoadObject(type));
   }
 
