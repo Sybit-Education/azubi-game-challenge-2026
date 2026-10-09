@@ -70,7 +70,6 @@ export default class PopUpScene extends Phaser.Scene {
       .image(background.x * 1.06 + padding, height * 0.196, 'switchCircle')
       .setScale(0.35)
       .setOrigin(0)
-      .setInteractive();
       .setInteractive({ useHandCursor: true });
 
     //rowY += Math.max(90, 112 * uiScale);
@@ -168,7 +167,7 @@ export default class PopUpScene extends Phaser.Scene {
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
     Accessibilitycircle.on('pointerdown', toggleAccessibility);
 
-    this.add
+    const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
       .setScale(0.66)
       .setOrigin(0.5);
@@ -180,7 +179,7 @@ export default class PopUpScene extends Phaser.Scene {
       closeButton,
       settingsLabel,
       accessibilityLabel,
-      AccessibilitySwitch,
+      accessibilitySwitch,
       gamemodeLabel,
       standardModeButton,
       christmasModeButton,
@@ -259,7 +258,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     positionAccessibleControls(this, [
       [closeSettingsBtn, closeButton],
-      [accessibilityToggle, AccessibilitySwitch],
+      [accessibilityToggle, accessibilitySwitch],
       [gameModeMenu, standardModeButton],
     ]);
     dialog.showModal();
@@ -283,17 +282,17 @@ export default class PopUpScene extends Phaser.Scene {
       });
     });
 
-    AccessibilitySwitch.on('pointerover', () => {
+    accessibilitySwitch.on('pointerover', () => {
       this.tweens.add({
-        targets: AccessibilitySwitch,
+        targets: accessibilitySwitch,
         scaleX: 0.32,
         scaleY: 0.32,
         duration: 100,
       });
     });
-    AccessibilitySwitch.on('pointerout', () => {
+    accessibilitySwitch.on('pointerout', () => {
       this.tweens.add({
-        targets: AccessibilitySwitch,
+        targets: accessibilitySwitch,
         scaleX: 0.3,
         scaleY: 0.3,
         duration: 100,
