@@ -6,6 +6,6 @@ export default class Obstacle extends RoadObject {
   constructor(scene, x, y, texture, lane) {
     super(scene, x, y, texture, lane);
 
-    this.setScale(0.66);
+    this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
   }
 }
