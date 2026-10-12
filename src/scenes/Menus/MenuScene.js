@@ -275,7 +275,7 @@ export default class MenuScene extends Phaser.Scene {
         duration: 50,
       });
     };
-    
+
     // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
@@ -299,15 +299,18 @@ export default class MenuScene extends Phaser.Scene {
       { button: play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
       { button: AnleitungsButton, y: AnleitungsOriginalY },
-      { button: creditsButton, y: creditsOriginalY, action: () => this.scene.start('CreditsScene'), }
+      {
+        button: creditsButton,
+        y: creditsOriginalY,
+        action: () => this.scene.start('CreditsScene'),
+      },
     ];
 
     this.selectedIndex = 0;
     this.previousHorizontalInput = { left: false, right: false };
     this.hasReadHorizontalInput = false;
 
-    this.selectButton( this.menuButtons[0].button, this.menuButtons[0].y);
-
+    this.selectButton(this.menuButtons[0].button, this.menuButtons[0].y);
   }
 
   update() {
@@ -331,7 +334,7 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y
+        this.menuButtons[this.selectedIndex].y,
       );
 
       this.selectedIndex--;
@@ -342,14 +345,14 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y
+        this.menuButtons[this.selectedIndex].y,
       );
     }
     if (controls.button3) {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y
+        this.menuButtons[this.selectedIndex].y,
       );
 
       this.selectedIndex++;
@@ -360,7 +363,7 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y
+        this.menuButtons[this.selectedIndex].y,
       );
     }
     if (controls.button2) {

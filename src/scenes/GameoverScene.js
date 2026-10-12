@@ -162,13 +162,13 @@ export default class GameoverScene extends Phaser.Scene {
       }
     });
 
-    this.selectButton = (button) =>  {
+    this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
         scale: 0.45,
         duration: 100,
       });
-    }
+    };
 
     this.deselectButton = (button) => {
       this.tweens.add({
@@ -176,32 +176,37 @@ export default class GameoverScene extends Phaser.Scene {
         scale: 0.4,
         duration: 100,
       });
-    }
+    };
 
     // Menu button array and selected index
     this.Buttons = [
-      { button: playAgainButton, action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }) },
-      { button: lobbyButton, action: () => {
-        const gameMode = this.registry.get('gameMode');
-        if (gameMode === 'christmas') {
-          this.scene.start('ChristmasScene');
-        } else {
-          this.scene.start('MenuScene');
-        }
-      } },
+      {
+        button: playAgainButton,
+        action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
+      },
+      {
+        button: lobbyButton,
+        action: () => {
+          const gameMode = this.registry.get('gameMode');
+          if (gameMode === 'christmas') {
+            this.scene.start('ChristmasScene');
+          } else {
+            this.scene.start('MenuScene');
+          }
+        },
+      },
     ];
 
     this.selectedIndex = 0;
 
-    this.selectButton( this.Buttons[0].button);
-
+    this.selectButton(this.Buttons[0].button);
   }
   update() {
     this.InputManager.update();
-        if (this.InputManager.getControlsP1.button1) {
+    if (this.InputManager.getControlsP1.button1) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y
+        this.Buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex--;
@@ -212,13 +217,13 @@ export default class GameoverScene extends Phaser.Scene {
 
       this.selectButton(
         this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y
+        this.Buttons[this.selectedIndex].y,
       );
     }
     if (this.InputManager.getControlsP1.button3) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y
+        this.Buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex++;
@@ -229,7 +234,7 @@ export default class GameoverScene extends Phaser.Scene {
 
       this.selectButton(
         this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y
+        this.Buttons[this.selectedIndex].y,
       );
     }
     if (this.InputManager.getControlsP1.button2) {
