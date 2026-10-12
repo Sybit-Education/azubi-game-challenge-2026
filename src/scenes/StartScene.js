@@ -29,7 +29,7 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('start-count-2', 'assets/sprites/Race Track Assets/countdown2.png');
     this.load.image('start-count-1', 'assets/sprites/Race Track Assets/countdown1.png');
     this.load.image('start-go', 'assets/sprites/Race Track Assets/goLabel.png');
-    this.load.audio('countdown', 'assets/audio/sfx/countdown.mp3');
+    this.load.audio('countdown', 'audio/sfx/countdown.mp3');
   }
 
   create() {
