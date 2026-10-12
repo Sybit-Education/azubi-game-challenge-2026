@@ -1,10 +1,16 @@
 /* global Phaser */
+import InputManager from '../objects/InputManager.js';
+
 export default class CreditsScene extends Phaser.Scene {
   constructor() {
     super('CreditsScene');
   }
 
   create() {
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     let creditText = `
       SYBIT KART
 
@@ -83,5 +89,13 @@ export default class CreditsScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1,
     });
+  }
+
+  update() {
+    this.InputManager.update();
+
+    if (this.InputManager.getControlsP1.button4) {
+      this.scene.start('MenuScene');
+    }
   }
 }

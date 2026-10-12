@@ -174,25 +174,12 @@ export default class MenuScene extends Phaser.Scene {
     play_button.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      this.tweens.add({
-        targets: play_button,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: playOriginalY - 5,
-        duration: 50,
-      });
+      selectButton(play_button, playOriginalY);
     });
 
     play_button.on('pointerout', () => {
       isPlayHovered = false;
-      this.tweens.add({
-        targets: play_button,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: playOriginalY,
-        duration: 50,
-      });
-
+      deselectButton(play_button, playOriginalY);
       scheduleHide();
     });
 
@@ -201,93 +188,74 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.tweens.add({
-          targets: play_button,
-          scaleX: 0.32,
-          scaleY: 0.32,
-          y: playOriginalY - 5,
-          duration: 50,
-        });
+        selectButton(play_button, playOriginalY);
       }
     });
 
     twoPlayerButton.on('pointerout', () => {
       isTwoPlayerHovered = false;
+      isPlayHovered = false;
       twoPlayerButton.setDepth(0);
       scheduleHide();
-      if (!isPlayHovered && isTwoPlayerHovered) {
-        this.tweens.add({
-          targets: play_button,
-          scaleX: 0.3,
-          scaleY: 0.3,
-          y: playOriginalY - 5,
-          duration: 50,
-        });
+      if (!isPlayHovered && !isTwoPlayerHovered) {
+        deselectButton(play_button, playOriginalY);
       }
     });
 
     settings_button.on('pointerover', () => {
-      this.tweens.add({
-        targets: settings_button,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: settingsOriginalY - 5,
-        duration: 50,
-      });
-    });
-
-    creditsButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: creditsButton,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: creditsOriginalY - 5,
-        duration: 50,
-      });
+      selectButton(settings_button, settingsOriginalY);
     });
 
     settings_button.on('pointerout', () => {
-      this.tweens.add({
-        targets: settings_button,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: settingsOriginalY,
-        duration: 100,
-      });
+      deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerover', () => {
+      selectButton(creditsButton, creditsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: creditsButton,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: creditsOriginalY,
-        duration: 100,
-      });
+      deselectButton(creditsButton, creditsOriginalY);
+    });
+
+    settings_button.on('pointerout', () => {
+      deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerout', () => {
+      deselectButton(creditsButton, creditsOriginalY);
     });
 
     AnleitungsButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: AnleitungsButton,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: AnleitungsOriginalY - 5,
-        duration: 100,
-      });
+      selectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
     AnleitungsButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: AnleitungsButton,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        duration: 100,
-        y: AnleitungsOriginalY,
-      });
+      deselectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
-    // Click events
+    // Helper functions for button animations
+    this.selectButton = (button, originalY) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: originalY - 5,
+        duration: 50,
+      });
+    };
 
+    this.deselectButton = (button, originalY) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        y: originalY,
+        duration: 50,
+      });
+    };
+    
+    // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
       [settingsBtn, settings_button],
@@ -305,11 +273,60 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
+
+    // Menu button array and selected index
+    this.menuButtons = [
+      { button: play_button, y: playOriginalY, action: startGame },
+      { button: settings_button, y: settingsOriginalY, action: openSettings },
+      { button: AnleitungsButton, y: AnleitungsOriginalY, action: () => this.scene.start('StartScene'), },
+      { button: creditsButton, y: creditsOriginalY, action: () => this.scene.start('CreditsScene'), }
+    ];
+
+    this.selectedIndex = 0;
+
+    this.selectButton( this.menuButtons[0].button, this.menuButtons[0].y);
+
   }
+
   update() {
     this.InputManager.update();
+
     if (this.InputManager.getControlsP1.button1) {
-      console.log('Button 1 pressed');
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y
+      );
+
+      this.selectedIndex--;
+
+      if (this.selectedIndex < 0) {
+        this.selectedIndex = this.menuButtons.length - 1;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y
+      );
+    }
+    if (this.InputManager.getControlsP1.button3) {
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y
+      );
+
+      this.selectedIndex++;
+
+      if (this.selectedIndex >= this.menuButtons.length) {
+        this.selectedIndex = 0;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y
+      );
+    }
+    if (this.InputManager.getControlsP1.button2) {
+      this.menuButtons[this.selectedIndex].action();
     }
   }
 }
