@@ -12,33 +12,33 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('homepage-2player', 'assets/sprites/Homepage/2Multiplayer.png');
+    this.load.image('homepage-2player', 'assets/sprites/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
-      'assets/sprites/Homepage/Default Homepage/background.png',
+      'assets/sprites/homepage/default-homepage/background.png',
     );
     this.load.image(
       'WeCreateCXChampions',
-      'assets/sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
+      'assets/sprites/homepage/default-homepage/we-create-cx-champions.png',
     );
-    this.load.image('homepage-title', 'assets/sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image('homepage-play-btn', 'assets/sprites/Homepage/Default Homepage/playButton.png');
+    this.load.image('homepage-title', 'assets/sprites/homepage/default-homepage/sybit-kart.png');
+    this.load.image('homepage-play-btn', 'assets/sprites/homepage/default-homepage/play-button.png');
     this.load.image(
       'homepage-settings',
-      'assets/sprites/Homepage/Default Homepage/settingsButton.png',
+      'assets/sprites/homepage/default-homepage/settings-button.png',
     );
-    this.load.image('homepage-car', 'assets/sprites/Homepage/Default Homepage/car.png');
+    this.load.image('homepage-car', 'assets/sprites/homepage/default-homepage/car.png');
     this.load.image(
       'homepage-credits',
-      'assets/sprites/Homepage/Default Homepage/creditsButton.png',
+      'assets/sprites/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
       'homepage-anleitung',
-      'assets/sprites/Homepage/Default Homepage/anleitungButton.png',
+      'assets/sprites/homepage/default-homepage/anleitung-button.png',
     );
     this.load.image(
       'homepage-barrierefreiheit',
-      'assets/sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+      'assets/sprites/homepage/default-homepage/barrierefreiheit-button.png',
     );
   }
 
