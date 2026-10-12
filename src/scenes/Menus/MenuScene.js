@@ -13,17 +13,29 @@ export default class MenuScene extends Phaser.Scene {
   // Pre load images
   preload() {
     this.load.image('homepage-2player', 'assets/sprites/Homepage/2Multiplayer.png');
-    this.load.image('homepage-hintergrund', 'assets/sprites/Homepage/Default Homepage/background.png');
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/sprites/Homepage/Default Homepage/background.png',
+    );
     this.load.image(
       'WeCreateCXChampions',
       'assets/sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
     );
     this.load.image('homepage-title', 'assets/sprites/Homepage/Default Homepage/SYBIT KART.png');
     this.load.image('homepage-play-btn', 'assets/sprites/Homepage/Default Homepage/playButton.png');
-    this.load.image('homepage-settings', 'assets/sprites/Homepage/Default Homepage/settingsButton.png');
+    this.load.image(
+      'homepage-settings',
+      'assets/sprites/Homepage/Default Homepage/settingsButton.png',
+    );
     this.load.image('homepage-car', 'assets/sprites/Homepage/Default Homepage/car.png');
-    this.load.image('homepage-credits', 'assets/sprites/Homepage/Default Homepage/creditsButton.png');
-    this.load.image('homepage-anleitung', 'assets/sprites/Homepage/Default Homepage/anleitungButton.png');
+    this.load.image(
+      'homepage-credits',
+      'assets/sprites/Homepage/Default Homepage/creditsButton.png',
+    );
+    this.load.image(
+      'homepage-anleitung',
+      'assets/sprites/Homepage/Default Homepage/anleitungButton.png',
+    );
     this.load.image(
       'homepage-barrierefreiheit',
       'assets/sprites/Homepage/Default Homepage/barrierefreiheitButton.png',

@@ -11,7 +11,10 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('settingsBackground', 'assets/sprites/Homepage/Settings Menu/Background.png');
     this.load.image('settingsLabel', 'assets/sprites/Homepage/Settings Menu/SETTINGS.png');
     this.load.image('xButton', 'assets/sprites/Homepage/Settings Menu/x.png');
-    this.load.image('Accessibility Mode', 'assets/sprites/Homepage/Settings Menu/Accessibility mode.png');
+    this.load.image(
+      'Accessibility Mode',
+      'assets/sprites/Homepage/Settings Menu/Accessibility mode.png',
+    );
     this.load.image('switchOn', 'assets/sprites/Homepage/Settings Menu/SwitchOn.png');
     this.load.image('switchOff', 'assets/sprites/Homepage/Settings Menu/switchOff.png');
     this.load.image('switchCircle', 'assets/sprites/Homepage/Settings Menu/switchCircle.png');
@@ -20,9 +23,15 @@ export default class PopUpScene extends Phaser.Scene {
       'AccessibilitySwitchOff',
       'assets/sprites/Homepage/Settings Menu/AccessibilitySwitchOff.png',
     );
-    this.load.image('StandardModeButton', 'assets/sprites/Homepage/Settings Menu/StandardModeButton.png');
+    this.load.image(
+      'StandardModeButton',
+      'assets/sprites/Homepage/Settings Menu/StandardModeButton.png',
+    );
     this.load.image('closeLabel', 'assets/sprites/Homepage/Settings Menu/closeLabel.png');
-    this.load.image('christmasmode', 'assets/sprites/Homepage/Settings Menu/ChristmasModeButton.png');
+    this.load.image(
+      'christmasmode',
+      'assets/sprites/Homepage/Settings Menu/ChristmasModeButton.png',
+    );
   }
 
   create() {
