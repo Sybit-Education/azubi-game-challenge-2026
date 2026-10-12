@@ -8,6 +8,7 @@ import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
 import ItemManager from '../objects/ItemManager.js';
+import InputManager from '../objects/InputManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -20,27 +21,29 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
-    this.load.image('car2', 'sprites/Entities/Player Skins/SybitKartPlayer2.png');
-    this.load.image('track', 'sprites/Race Track Assets/road.png');
-    this.load.image('border', 'sprites/Race Track Assets/border.png');
+    this.load.image('car', 'assets/sprites/Entities/Player Skins/SybitKartPlayer1.png');
+    this.load.image('car2', 'assets/sprites/Entities/Player Skins/SybitKartPlayer2.png');
+    this.load.image('track', 'assets/sprites/Race Track Assets/road.png');
+    this.load.image('border', 'assets/sprites/Race Track Assets/border.png');
 
-    this.load.image('enemy-car1', 'sprites/Entities/Obstacles/EnemyCar1.png');
-    this.load.image('enemy-car2', 'sprites/Entities/Obstacles/EnemyCar2.png');
-    this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
+    this.load.image('enemy-car1', 'assets/sprites/Entities/Obstacles/EnemyCar1.png');
+    this.load.image('enemy-car2', 'assets/sprites/Entities/Obstacles/EnemyCar2.png');
+    this.load.image('enemy-car3', 'assets/sprites/Entities/Obstacles/EnemyCar3.png');
 
-    this.load.image('coin', 'sprites/Entities/coin.png');
-    this.load.image('item', 'sprites/Entities/item.png');
-    this.load.image('boundary-particle', 'sprites/Particles/image001.png');
+    this.load.image('coin', 'assets/sprites/Entities/coin.png');
+    this.load.image('item', 'assets/sprites/Entities/item.png');
+    this.load.image('boundary-particle', 'assets/sprites/Particles/image001.png');
 
-    this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
+    this.load.image('background', 'assets/sprites/Map Skins/Background Sybit-City.png');
 
-    this.load.image('carShield', 'sprites/Entities/Player Skins/carShield.png');
-    this.load.image('carShield2', 'sprites/Entities/Player Skins/carShield2.png');
+    this.load.image('carShield', 'assets/sprites/Entities/Player Skins/carShield.png');
+    this.load.image('carShield2', 'assets/sprites/Entities/Player Skins/carShield2.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
     this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
@@ -280,14 +283,16 @@ export default class GameScene extends Phaser.Scene {
 
   // Update the game state every frame
   update(_, delta) {
+    this.InputManager.update();
+
     this.elapsedTime += delta;
     if (!this.car.dead) {
-      this.car.move();
+      this.car.move(this.InputManager.getControlsP1);
       this.car.update_boundary_particles();
       this.car.intendedXVelocity = this.car.body.velocity.x;
     }
     if (this.secondCar && !this.secondCar.dead) {
-      this.secondCar.move();
+      this.secondCar.move(this.InputManager.getControlsP2);
       this.secondCar.update_boundary_particles();
       this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
     }
