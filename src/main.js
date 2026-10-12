@@ -37,6 +37,10 @@ const config = {
     CreditsScene,
     ChristmasScene,
   ],
+
+  loader: {
+    baseURL: window.location.pathname,
+  },
 };
 
 // Create game
