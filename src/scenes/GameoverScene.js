@@ -3,6 +3,7 @@
 import { GameData } from './Menus/GameData.js';
 import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
+import { parseLeaderboard } from './LeaderboardScene.js';
 
 export default class GameoverScene extends Phaser.Scene {
   constructor() {
@@ -38,21 +39,7 @@ export default class GameoverScene extends Phaser.Scene {
     console.log('GameoverScene gestartet');
 
     // Parse leaderboard
-    const leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
-      // String only entries are counted as scores
-      if (typeof entry === 'string') {
-        return {
-          name: 'Unbekannt',
-          distance: Number(entry),
-        };
-      }
-
-      // Parses entity
-      return {
-        name: entry.name,
-        distance: Number(entry.distance),
-      };
-    });
+    const leaderboard = parseLeaderboard()
 
     // Adds to list
     leaderboard.push({
