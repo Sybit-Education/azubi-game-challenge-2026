@@ -8,6 +8,24 @@ import GameoverScene from './scenes/GameoverScene.js';
 import CreditsScene from './scenes/CreditsScene.js';
 import ChristmasScene from './scenes/Menus/ChristmasScene.js';
 
+// Phaser 3's stopListeners assumes the gamepad array has no empty slots.
+const stopGamepadListeners = Phaser.Input.Gamepad.GamepadPlugin.prototype.stopListeners;
+Phaser.Input.Gamepad.GamepadPlugin.prototype.stopListeners = function () {
+  const gamepads = this.gamepads;
+  const connectedGamepads = gamepads.filter(Boolean);
+
+  if (connectedGamepads.length === gamepads.length) {
+    return stopGamepadListeners.call(this);
+  }
+
+  this.gamepads = connectedGamepads;
+  try {
+    return stopGamepadListeners.call(this);
+  } finally {
+    this.gamepads = gamepads;
+  }
+};
+
 // Global phaser config
 const config = {
   type: Phaser.AUTO,

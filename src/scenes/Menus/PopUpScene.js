@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import InputManager from '../../objects/InputManager.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 export default class PopUpScene extends Phaser.Scene {
@@ -35,7 +36,14 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('PopUpScene create');
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
+    this.parentSceneKeys = ['MenuScene', 'ChristmasScene'].filter((key) =>
+      this.scene.isActive(key),
+    );
+    this.parentSceneKeys.forEach((key) => this.scene.pause(key));
+
     this.scene.bringToTop();
     const { width, height } = this.scale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
@@ -120,16 +128,16 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
-    christmasModeButton.on('pointerdown', () => {
+    const chooseChristmasMode = () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
       this.scene.start('ChristmasScene');
-    });
+    };
 
-    standardModeButton.on('pointerdown', () => {
+    const chooseStandardMode = () => {
       //im christmas mode: zurück zu standard
-      if (this.scene.isActive('ChristmasScene')) {
+      if (this.parentSceneKeys.includes('ChristmasScene')) {
         this.registry.set('gameMode', 'standard');
         this.scene.stop('ChristmasScene');
         this.scene.stop('PopUpScene');
@@ -138,7 +146,10 @@ export default class PopUpScene extends Phaser.Scene {
       }
       hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
       updateChristmasButton();
-    });
+    };
+
+    christmasModeButton.on('pointerdown', chooseChristmasMode);
+    standardModeButton.on('pointerdown', chooseStandardMode);
 
     //defining switch status, "origin x" and "goal x"
     let accessibilityEnabled = false;
@@ -206,7 +217,14 @@ export default class PopUpScene extends Phaser.Scene {
         targets: dim,
         alpha: 0,
         duration: 200,
-        onComplete: () => this.scene.stop(),
+        onComplete: () => {
+          this.scene.stop();
+          this.parentSceneKeys.forEach((key) => {
+            const parentScene = this.scene.get(key);
+            parentScene.InputManager?.resetButtonStates();
+            this.scene.resume(key);
+          });
+        },
       });
     };
 
@@ -262,6 +280,22 @@ export default class PopUpScene extends Phaser.Scene {
     ]);
     dialog.showModal();
 
+    this.navigationItems = () => {
+      const items = [
+        { button: closeButton, action: close, scale: 0.4 },
+        { button: accessibilitySwitch, action: toggleAccessibility, scale: 0.3 },
+        { button: standardModeButton, action: chooseStandardMode, scale: 0.3 },
+      ];
+
+      if (hoveringStandard) {
+        items.push({ button: christmasModeButton, action: chooseChristmasMode, scale: 0.3 });
+      }
+
+      return items;
+    };
+    this.selectedIndex = 0;
+    this.updateGamepadSelection();
+
     // Hover-effects for the buttons
 
     closeButton.on('pointerover', () => {
@@ -314,5 +348,37 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 100,
       });
     });
+  }
+
+  updateGamepadSelection() {
+    const items = this.navigationItems();
+    this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex, 0, items.length);
+
+    items.forEach((item, index) => {
+      this.tweens.add({
+        targets: item.button,
+        scale: index === this.selectedIndex ? item.scale * 1.12 : item.scale,
+        duration: 100,
+      });
+    });
+  }
+
+  update() {
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
+    const items = this.navigationItems();
+
+    if (controls.button1 || controls.accelerate) {
+      this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
+      this.updateGamepadSelection();
+    } else if (controls.button3 || controls.brake) {
+      this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
+      this.updateGamepadSelection();
+    } else if (controls.button2) {
+      this.navigationItems()[this.selectedIndex].action();
+      this.updateGamepadSelection();
+    } else if (controls.button4) {
+      this.navigationItems()[0].action();
+    }
   }
 }

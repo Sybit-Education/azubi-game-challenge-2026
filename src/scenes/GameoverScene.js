@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
 export default class GameoverScene extends Phaser.Scene {
@@ -30,6 +31,9 @@ export default class GameoverScene extends Phaser.Scene {
     );
   }
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     const gameOverUi = document.getElementById('game-over-ui');
     const finalScore = document.getElementById('final-score');
     const distance = document.getElementById('final-distance');
@@ -129,35 +133,19 @@ export default class GameoverScene extends Phaser.Scene {
     // Hover state for buttons
 
     playAgainButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: playAgainButton,
-        scale: 0.45,
-        duration: 100,
-      });
+      this.selectButton(playAgainButton);
     });
 
     playAgainButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: playAgainButton,
-        scale: 0.4,
-        duration: 100,
-      });
+      this.deselectButton(playAgainButton);
     });
 
     lobbyButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: lobbyButton,
-        scale: 0.45,
-        duration: 100,
-      });
+      this.selectButton(lobbyButton);
     });
 
     lobbyButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: lobbyButton,
-        scale: 0.4,
-        duration: 100,
-      });
+      this.deselectButton(lobbyButton);
     });
 
     // Click events
@@ -176,5 +164,84 @@ export default class GameoverScene extends Phaser.Scene {
         this.scene.start('MenuScene');
       }
     });
+
+    this.selectButton = (button) => {
+      this.tweens.add({
+        targets: button,
+        scale: 0.45,
+        duration: 100,
+      });
+    };
+
+    this.deselectButton = (button) => {
+      this.tweens.add({
+        targets: button,
+        scale: 0.4,
+        duration: 100,
+      });
+    };
+
+    // Menu button array and selected index
+    this.Buttons = [
+      {
+        button: playAgainButton,
+        action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
+      },
+      {
+        button: lobbyButton,
+        action: () => {
+          const gameMode = this.registry.get('gameMode');
+          if (gameMode === 'christmas') {
+            this.scene.start('ChristmasScene');
+          } else {
+            this.scene.start('MenuScene');
+          }
+        },
+      },
+    ];
+
+    this.selectedIndex = 0;
+
+    this.selectButton(this.Buttons[0].button);
+  }
+  update() {
+    this.InputManager.update();
+    if (this.InputManager.getControlsP1.button1) {
+      this.deselectButton(
+        this.Buttons[this.selectedIndex].button,
+        this.Buttons[this.selectedIndex].y,
+      );
+
+      this.selectedIndex--;
+
+      if (this.selectedIndex < 0) {
+        this.selectedIndex = this.Buttons.length - 1;
+      }
+
+      this.selectButton(
+        this.Buttons[this.selectedIndex].button,
+        this.Buttons[this.selectedIndex].y,
+      );
+    }
+    if (this.InputManager.getControlsP1.button3) {
+      this.deselectButton(
+        this.Buttons[this.selectedIndex].button,
+        this.Buttons[this.selectedIndex].y,
+      );
+
+      this.selectedIndex++;
+
+      if (this.selectedIndex >= this.Buttons.length) {
+        this.selectedIndex = 0;
+      }
+
+      this.selectButton(
+        this.Buttons[this.selectedIndex].button,
+        this.Buttons[this.selectedIndex].y,
+      );
+    }
+    if (this.InputManager.getControlsP1.button2) {
+      this.Buttons[this.selectedIndex].action?.();
+    }
   }
 }

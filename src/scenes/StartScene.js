@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
 import Car from '../objects/Car.js';
@@ -32,6 +33,9 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     this.leaving = false;
     this.secondCar = null;
     this.number = null;
@@ -185,6 +189,15 @@ export default class StartScene extends Phaser.Scene {
 
   update() {
     if (this.car.y <= -300) {
+      this.goToGame();
+    }
+    this.InputManager.update();
+    if (
+      this.InputManager.getControlsP1.button4 ||
+      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP2.button4 ||
+      this.InputManager.getControlsP2.button2
+    ) {
       this.goToGame();
     }
   }
