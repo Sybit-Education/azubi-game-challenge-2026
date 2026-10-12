@@ -7,6 +7,9 @@ Lizenz: CC0 1.0; Lizenzangaben des Herausgebers siehe unten.
 Menüklick: vorhandene Projektdatei src/audio/menuclick.mp3.
 Quelle/Lizenz dieser vorhandenen Datei wurden vom Nutzer nicht angegeben.
 
+Münzsound: vorhandene Projektdatei src/audio/collect-coin.mp3.
+Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+
 Lizenzangaben des Herausgebers (Kenney)
 
 Interface Sounds (1.0)

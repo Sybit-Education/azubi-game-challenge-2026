@@ -6,6 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
+import { preloadGameplaySounds } from '../audio/menuSounds.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';
@@ -23,6 +24,7 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
+    preloadGameplaySounds(this);
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
     this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
     this.load.image('track', 'assets/images/race-track-assets/road.png');
@@ -211,24 +213,9 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.itemRandom1,
-          undefined,
-          this.ItemManager,
-        );
-        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
-
+        this.physics.add.overlap(this.car, roadObject, this.collectItem, undefined, this);
         if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.itemRandom2,
-            undefined,
-            this.ItemManager,
-          );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectItem, undefined, this);
         }
       } else if (type === 'enemy-car') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
@@ -327,10 +314,23 @@ export default class GameScene extends Phaser.Scene {
   }
 
   collectCoin(car, coin) {
-    if (!coin.active) return; // Prevent collecting the same coin multiple times
+    if (!coin.active) return;
 
-    car.increase_score(coin.value);
+    const value = coin.value;
+    this.sound.play('collect-coin', { volume: 0.3 });
     coin.destroy();
+    car.increase_score(value);
+  }
+
+  collectItem(car, item) {
+    if (!item.active) return;
+
+    item.destroy();
+    if (car === this.car) {
+      this.ItemManager.itemRandom1();
+    } else if (car === this.secondCar) {
+      this.ItemManager.itemRandom2();
+    }
   }
 
   // Handle game over when the player collides with an enemy car
