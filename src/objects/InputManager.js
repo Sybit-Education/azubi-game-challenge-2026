@@ -6,6 +6,7 @@ export default class InputManager {
     // Track previous frame states for edge-triggering buttons
     this.previousButtonP1 = [false, false, false, false];
     this.previousButtonP2 = [false, false, false, false];
+    this.hasUpdated = false;
   }
 
   create() {
@@ -20,6 +21,12 @@ export default class InputManager {
       rightP2: Phaser.Input.Keyboard.KeyCodes.D,
       select: Phaser.Input.Keyboard.KeyCodes.ENTER,
     });
+  }
+
+  resetButtonStates() {
+    this.previousButtonP1.fill(false);
+    this.previousButtonP2.fill(false);
+    this.hasUpdated = false;
   }
 
   update() {
@@ -59,15 +66,15 @@ export default class InputManager {
     const deadzone = 0.2;
 
     // Determine "just pressed" states (true only on the exact frame the button goes down)
-    const button1P1isDown = button1P1 && !this.previousButtonP1[0];
-    const button2P1isDown = button2P1 && !this.previousButtonP1[1];
-    const button3P1isDown = button3P1 && !this.previousButtonP1[2];
-    const button4P1isDown = button4P1 && !this.previousButtonP1[3];
+    const button1P1isDown = this.hasUpdated && button1P1 && !this.previousButtonP1[0];
+    const button2P1isDown = this.hasUpdated && button2P1 && !this.previousButtonP1[1];
+    const button3P1isDown = this.hasUpdated && button3P1 && !this.previousButtonP1[2];
+    const button4P1isDown = this.hasUpdated && button4P1 && !this.previousButtonP1[3];
 
-    const button1P2isDown = button1P2 && !this.previousButtonP2[0];
-    const button2P2isDown = button2P2 && !this.previousButtonP2[1];
-    const button3P2isDown = button3P2 && !this.previousButtonP2[2];
-    const button4P2isDown = button4P2 && !this.previousButtonP2[3];
+    const button1P2isDown = this.hasUpdated && button1P2 && !this.previousButtonP2[0];
+    const button2P2isDown = this.hasUpdated && button2P2 && !this.previousButtonP2[1];
+    const button3P2isDown = this.hasUpdated && button3P2 && !this.previousButtonP2[2];
+    const button4P2isDown = this.hasUpdated && button4P2 && !this.previousButtonP2[3];
 
     this.getControlsP1 = {
       left: this.keys.leftP1.isDown || axisX1 < -deadzone,
@@ -101,5 +108,6 @@ export default class InputManager {
     this.previousButtonP2[1] = button2P2;
     this.previousButtonP2[2] = button3P2;
     this.previousButtonP2[3] = button4P2;
+    this.hasUpdated = true;
   }
 }

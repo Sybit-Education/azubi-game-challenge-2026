@@ -9,6 +9,7 @@ export default class MenuScene extends Phaser.Scene {
     super('MenuScene');
   }
 
+  // Constructor
   preload() {
     this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');

@@ -1,4 +1,5 @@
 /* global Phaser */
+import InputManager from '../objects/InputManager.js';
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -10,13 +11,13 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('SYBIT KART', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image('Message1', 'sprites/LoadingPage/Message1.png');
-    this.load.image('Message2', 'sprites/LoadingPage/Message2.png');
-    this.load.image('Message3', 'sprites/LoadingPage/Message3.png');
-    this.load.image('Message4', 'sprites/LoadingPage/Message4.png');
-    this.load.image('LoadingText', 'sprites/LoadingPage/Loading....png');
-    this.load.image('Press SPACE to skip', 'sprites/LoadingPage/Press ‘SPACE’ to skip.png');
+    this.load.image('SYBIT KART', 'assets/sprites/Homepage/Default Homepage/SYBIT KART.png');
+    this.load.image('Message1', 'assets/sprites/LoadingPage/Message1.png');
+    this.load.image('Message2', 'assets/sprites/LoadingPage/Message2.png');
+    this.load.image('Message3', 'assets/sprites/LoadingPage/Message3.png');
+    this.load.image('Message4', 'assets/sprites/LoadingPage/Message4.png');
+    this.load.image('LoadingText', 'assets/sprites/LoadingPage/Loading....png');
+    this.load.image('Press SPACE to skip', 'assets/sprites/LoadingPage/Press ‘SPACE’ to skip.png');
     this.load.image(
       'WeCreateCXChampions',
       'sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
@@ -24,6 +25,9 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     this.cameras.main.setBackgroundColor('#6f3198');
 
     // Navigation, orientation, progress and scaling variables
@@ -105,5 +109,21 @@ export default class LoadingScene extends Phaser.Scene {
       .image(centerX, centerY + spacing * 1.4, randomComment)
       .setScale(0.8)
       .setOrigin(0.5);
+  }
+
+  update() {
+    this.InputManager.update();
+    if (
+      this.InputManager.getControlsP1.button4 ||
+      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP2.button4 ||
+      this.InputManager.getControlsP2.button2
+    ) {
+      if (this.isMultiplayer) {
+        this.scene.start('StartScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('StartScene', { isMultiplayer: false });
+      }
+    }
   }
 }
