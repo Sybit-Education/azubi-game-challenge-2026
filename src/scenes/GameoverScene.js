@@ -1,6 +1,6 @@
 /* global Phaser */
 
-import { GameData } from './Menus/GameDate.js';
+import { GameData } from './Menus/GameData.js';
 import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
@@ -17,6 +17,7 @@ export default class GameoverScene extends Phaser.Scene {
     this.isMultiplayer = data?.isMultiplayer ?? false;
   }
 
+  // Pre load scene
   preload() {
     this.load.image('gameover-title', 'assets/sprites/Gameover Scene Assets/GAME OVER.png');
     this.load.image(
@@ -31,11 +32,14 @@ export default class GameoverScene extends Phaser.Scene {
       'assets/sprites/Gameover Scene Assets/GAME OVER Hintergrund.png',
     );
   }
-  //distance shit hier irgendwo
+
+  // On create
   create() {
     console.log('GameoverScene gestartet');
 
+    // Parse leaderboard
     const leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
+      // String only entries are counted as scores
       if (typeof entry === 'string') {
         return {
           name: 'Unbekannt',
@@ -43,37 +47,48 @@ export default class GameoverScene extends Phaser.Scene {
         };
       }
 
+      // Parses entity
       return {
         name: entry.name,
         distance: Number(entry.distance),
       };
     });
 
+    // Adds to list
     leaderboard.push({
       name: GameData.playerName,
       distance: Number(this.distance),
     });
 
+    // Sorts leaderboard
     leaderboard.sort((a, b) => b.distance - a.distance);
 
+    // Saves top 10 entries to leaderboard
     localStorage.setItem('leaderboard', JSON.stringify(leaderboard.slice(0, 10)));
 
-    console.log(leaderboard);
+    // Debug log leader
+    console.debug(leaderboard);
 
     this.width = this.scale.width;
     this.height = this.scale.height;
-  }
-  create() {
+
+    // Create input manager
     this.InputManager = new InputManager(this);
+
+    // Setup input manager
     this.InputManager.create();
 
+    // Gets elements by id
     const gameOverUi = document.getElementById('game-over-ui');
     const finalScore = document.getElementById('final-score');
     const distance = document.getElementById('final-distance');
     const retryGame = document.getElementById('retry');
     const backToHomeScreen = document.getElementById('back-to-home');
+
+    // Makes ui visable
     gameOverUi.hidden = false;
 
+    // Fill in data
     finalScore.textContent = this.score;
     distance.textContent = this.distance;
     if (this.isMultiplayer) {
@@ -86,16 +101,21 @@ export default class GameoverScene extends Phaser.Scene {
       });
     };
 
+    // Back to home function
     const backToHomeFunction = () => {
       this.scene.start(
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
       );
     };
 
+    // Register listener
     retryGame.addEventListener('click', retryFunction);
-    retryGame.focus();
     backToHomeScreen.addEventListener('click', backToHomeFunction);
 
+    // Auto focus retry button
+    retryGame.focus();
+
+    // Shutdown listener
     this.events.once('shutdown', () => {
       retryGame.removeEventListener('click', retryFunction);
       backToHomeScreen.removeEventListener('click', backToHomeFunction);

@@ -1,3 +1,3 @@
 export const GameData = {
-  playerName: '',
+  name: '',
 };
