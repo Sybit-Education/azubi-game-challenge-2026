@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../audio/menuSounds.js';
+
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 export default class ChristmasScene extends Phaser.Scene {
@@ -10,6 +12,7 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
+    preloadMenuSounds(this);
     this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
@@ -58,41 +61,41 @@ export default class ChristmasScene extends Phaser.Scene {
     //html Menus erneut für diesen Scene herholen.
     const menu = document.getElementById('accessible-ui');
     const playBtn = document.getElementById('start-game');
-    const multiplayerBtn = document.getElementById("multiplayer-btn")
+    const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const creditBtn = document.getElementById('credit-btn');
 
     const startGame = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'christmas');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     };
 
-
-
     const startMultiplayer = () => {
-    this.registry.set('gameMode', 'christmas')
-    this.scene.start('LoadingScene', { isMultiplayer: true });
-    }
+      playMenuClick(this);
+      this.registry.set('gameMode', 'christmas');
+      this.scene.start('LoadingScene', { isMultiplayer: true });
+    };
 
     const openSettings = () => {
+      playMenuClick(this);
       this.scene.launch('PopUpScene');
       this.scene.bringToTop('PopUpScene');
     };
 
     playBtn.addEventListener('click', startGame);
     const openCredits = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'christmas');
       this.scene.start('CreditsScene');
     };
     creditBtn.addEventListener('click', openCredits);
-    multiplayerBtn.addEventListener('click', startMultiplayer)
-settingsBtn.addEventListener('click', openSettings);
+    multiplayerBtn.addEventListener('click', startMultiplayer);
+    settingsBtn.addEventListener('click', openSettings);
 
     menu.hidden = false;
     const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
     focusTarget.focus();
-
-    
 
     const footer_btn_y = this.scale.height / 1.17;
     const background = this.add
@@ -248,18 +251,18 @@ settingsBtn.addEventListener('click', openSettings);
     play_button.on('pointerdown', startGame);
     settings_button.on('pointerdown', openSettings);
 
-    hitboxVisual.on('pointerdown', startMultiplayer)
+    hitboxVisual.on('pointerdown', startMultiplayer);
 
-
-          //logik um multiplayer zu starten
+    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
-      multiplayerBtn.removeEventListener("click", startMultiplayer)
+      multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
       creditBtn.removeEventListener('click', openCredits);
       menu.hidden = true;
     });
+    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
   }
 }

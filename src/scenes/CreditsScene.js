@@ -1,9 +1,15 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 
+
+import { preloadMenuSounds, playMenuClick } from '../audio/menuSounds.js';
 export default class CreditsScene extends Phaser.Scene {
   constructor() {
     super('CreditsScene');
+  }
+
+  preload() {
+    preloadMenuSounds(this);
   }
 
   create() {
@@ -81,6 +87,7 @@ export default class CreditsScene extends Phaser.Scene {
     });
 
     const returnToMenu = () => {
+      playMenuClick(this);
       const menuScene =
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
 
