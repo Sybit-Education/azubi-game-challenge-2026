@@ -1,7 +1,12 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
-import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../audio/menuSounds.js';
+import {
+  preloadMenuSounds,
+  preloadGameplaySounds,
+  playMenuClick,
+  bindMenuFocusSounds,
+} from '../audio/menuSounds.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
@@ -24,6 +29,7 @@ export default class GameoverScene extends Phaser.Scene {
   // Pre load scene
   preload() {
     preloadMenuSounds(this);
+    preloadGameplaySounds(this);
     this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
       'gameover-play-again',
@@ -101,6 +107,35 @@ export default class GameoverScene extends Phaser.Scene {
     if (this.isMultiplayer) {
       finalScore.textContent = `player 1: ${this.score}, player 2: ${this.score2}`;
       distance.textContent = `player 1: ${this.distance}, player 2: ${this.distance2}`;
+    }
+
+    const totalScore = (this.score ?? 0) + (this.isMultiplayer ? (this.score2 ?? 0) : 0);
+
+    const coinCount = Math.floor(totalScore / 50);
+
+    if (coinCount > 0) {
+      const countingSound = this.sound.add('collect-coin', {
+        volume: 0.3,
+        rate: 10,
+      });
+
+      let remainingCoins = coinCount;
+
+      const playNextCoin = () => {
+        if (remainingCoins === 0) return;
+
+        remainingCoins -= 1;
+        countingSound.play();
+      };
+
+      countingSound.on('complete', playNextCoin);
+
+      this.events.once('shutdown', () => {
+        countingSound.off('complete', playNextCoin);
+        countingSound.destroy();
+      });
+
+      playNextCoin();
     }
 
     // Retry function
