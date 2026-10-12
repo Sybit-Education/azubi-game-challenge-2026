@@ -79,7 +79,23 @@ export default class GameScene extends Phaser.Scene {
       this.registry.get('gameMode') === 'ChristmasScene' ? 'background-winter' : 'background',
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+
+const canvas = this.game.canvas;
+const accessibilityEnabled = this.registry.get('accessibility enabled') ?? false;
+canvas.setAttribute('tabindex', '0');
+
+if(accessibilityEnabled) {
+  canvas.setAttribute('role', 'application');
+}
+canvas.focus();
+
+this.events.once('shutdown', () => {
+  canvas.removeAttribute('role');
+  canvas.removeAttribute('aria-label');
+  canvas.removeAttribute('tabindex');
+})
   }
+
 
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
