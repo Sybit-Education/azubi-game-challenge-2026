@@ -35,9 +35,9 @@ export default class MenuScene extends Phaser.Scene {
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it
-    // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
     const menu = document.getElementById('accessible-ui');
@@ -305,9 +305,11 @@ export default class MenuScene extends Phaser.Scene {
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
-
-    creditsButton.on('pointerdown', () => {
-      this.scene.start('CreditsScene');
-    });
+  }
+  update() {
+    this.InputManager.update();
+    if (this.InputManager.getControlsP1.button1) {
+      console.log('Button 1 pressed');
+    }
   }
 }
