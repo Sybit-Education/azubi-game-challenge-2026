@@ -6,7 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
-import { preloadGameplaySounds } from '../audio/menuSounds.js';
+import { preloadGameplaySounds } from '../../audio/menuSounds.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';

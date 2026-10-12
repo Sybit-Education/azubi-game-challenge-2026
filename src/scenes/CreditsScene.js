@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 
 
-import { preloadMenuSounds, playMenuClick } from '../audio/menuSounds.js';
+import { preloadMenuSounds, playMenuClick } from '../../audio/menuSounds.js';
 export default class CreditsScene extends Phaser.Scene {
   constructor() {
     super('CreditsScene');

@@ -6,7 +6,7 @@ import {
   preloadGameplaySounds,
   playMenuClick,
   bindMenuFocusSounds,
-} from '../audio/menuSounds.js';
+} from '../../audio/menuSounds.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
