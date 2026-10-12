@@ -22,10 +22,7 @@ export default class MenuScene extends Phaser.Scene {
       'assets/images/homepage/default-homepage/we-create-cx-champions.png',
     );
     this.load.image('homepage-title', 'assets/images/homepage/default-homepage/sybit-kart.png');
-    this.load.image(
-      'homepage-play-btn',
-      'assets/images/homepage/default-homepage/play-button.png',
-    );
+    this.load.image('homepage-play-btn', 'assets/images/homepage/default-homepage/play-button.png');
     this.load.image(
       'homepage-settings',
       'assets/images/homepage/default-homepage/settings-button.png',
