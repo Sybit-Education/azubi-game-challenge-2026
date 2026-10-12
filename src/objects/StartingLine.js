@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class StartingLine extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {

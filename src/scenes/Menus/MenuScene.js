@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 

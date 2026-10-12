@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 
 export default class LoadingScene extends Phaser.Scene {

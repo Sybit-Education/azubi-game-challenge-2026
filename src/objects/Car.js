@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class Car extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y) {
