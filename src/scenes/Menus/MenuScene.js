@@ -12,36 +12,36 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('homepage-2player', 'assets/sprites/homepage/2-multiplayer.png');
+    this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
-      'assets/sprites/homepage/default-homepage/background.png',
+      'assets/images/homepage/default-homepage/background.png',
     );
     this.load.image(
       'WeCreateCXChampions',
-      'assets/sprites/homepage/default-homepage/we-create-cx-champions.png',
+      'assets/images/homepage/default-homepage/we-create-cx-champions.png',
     );
-    this.load.image('homepage-title', 'assets/sprites/homepage/default-homepage/sybit-kart.png');
+    this.load.image('homepage-title', 'assets/images/homepage/default-homepage/sybit-kart.png');
     this.load.image(
       'homepage-play-btn',
-      'assets/sprites/homepage/default-homepage/play-button.png',
+      'assets/images/homepage/default-homepage/play-button.png',
     );
     this.load.image(
       'homepage-settings',
-      'assets/sprites/homepage/default-homepage/settings-button.png',
+      'assets/images/homepage/default-homepage/settings-button.png',
     );
-    this.load.image('homepage-car', 'assets/sprites/homepage/default-homepage/car.png');
+    this.load.image('homepage-car', 'assets/images/homepage/default-homepage/car.png');
     this.load.image(
       'homepage-credits',
-      'assets/sprites/homepage/default-homepage/credits-button.png',
+      'assets/images/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
       'homepage-anleitung',
-      'assets/sprites/homepage/default-homepage/anleitung-button.png',
+      'assets/images/homepage/default-homepage/anleitung-button.png',
     );
     this.load.image(
       'homepage-barrierefreiheit',
-      'assets/sprites/homepage/default-homepage/barrierefreiheit-button.png',
+      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
   }
 

@@ -9,29 +9,29 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('settingsBackground', 'assets/sprites/homepage/settings-menu/background.png');
-    this.load.image('settingsLabel', 'assets/sprites/homepage/settings-menu/settings.png');
-    this.load.image('xButton', 'assets/sprites/homepage/settings-menu/x.png');
+    this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
+    this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
+    this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
     this.load.image(
       'Accessibility Mode',
-      'assets/sprites/homepage/settings-menu/accessibility-mode.png',
+      'assets/images/homepage/settings-menu/accessibility-mode.png',
     );
-    this.load.image('switchOn', 'assets/sprites/homepage/settings-menu/switch-on.png');
-    this.load.image('switchOff', 'assets/sprites/homepage/settings-menu/switch-off.png');
-    this.load.image('switchCircle', 'assets/sprites/homepage/settings-menu/switch-circle.png');
-    this.load.image('Game Mode', 'assets/sprites/homepage/settings-menu/game-mode-label.png');
+    this.load.image('switchOn', 'assets/images/homepage/settings-menu/switch-on.png');
+    this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
+    this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
+    this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
     this.load.image(
       'AccessibilitySwitchOff',
-      'assets/sprites/homepage/settings-menu/accessibility-switch-off.png',
+      'assets/images/homepage/settings-menu/accessibility-switch-off.png',
     );
     this.load.image(
       'StandardModeButton',
-      'assets/sprites/homepage/settings-menu/standard-mode-button.png',
+      'assets/images/homepage/settings-menu/standard-mode-button.png',
     );
-    this.load.image('closeLabel', 'assets/sprites/homepage/settings-menu/close-label.png');
+    this.load.image('closeLabel', 'assets/images/homepage/settings-menu/close-label.png');
     this.load.image(
       'christmasmode',
-      'assets/sprites/homepage/settings-menu/christmas-mode-button.png',
+      'assets/images/homepage/settings-menu/christmas-mode-button.png',
     );
   }
 

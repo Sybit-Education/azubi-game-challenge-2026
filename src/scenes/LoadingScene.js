@@ -11,16 +11,16 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('SYBIT KART', 'assets/sprites/homepage/default-homepage/sybit-kart.png');
-    this.load.image('Message1', 'assets/sprites/loading-page/message-1.png');
-    this.load.image('Message2', 'assets/sprites/loading-page/message-2.png');
-    this.load.image('Message3', 'assets/sprites/loading-page/message-3.png');
-    this.load.image('Message4', 'assets/sprites/loading-page/message-4.png');
-    this.load.image('LoadingText', 'assets/sprites/loading-page/loading.png');
-    this.load.image('Press SPACE to skip', 'assets/sprites/loading-page/press-space-to-skip.png');
+    this.load.image('SYBIT KART', 'assets/images/homepage/default-homepage/sybit-kart.png');
+    this.load.image('Message1', 'assets/images/loading-page/message-1.png');
+    this.load.image('Message2', 'assets/images/loading-page/message-2.png');
+    this.load.image('Message3', 'assets/images/loading-page/message-3.png');
+    this.load.image('Message4', 'assets/images/loading-page/message-4.png');
+    this.load.image('LoadingText', 'assets/images/loading-page/loading.png');
+    this.load.image('Press SPACE to skip', 'assets/images/loading-page/press-space-to-skip.png');
     this.load.image(
       'WeCreateCXChampions',
-      'assets/sprites/homepage/default-homepage/we-create-cx-champions.png',
+      'assets/images/homepage/default-homepage/we-create-cx-champions.png',
     );
   }
 

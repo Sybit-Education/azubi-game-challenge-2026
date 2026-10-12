@@ -17,17 +17,17 @@ export default class GameoverScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('gameover-title', 'assets/sprites/gameover-scene-assets/game-over.png');
+    this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
       'gameover-play-again',
-      'assets/sprites/gameover-scene-assets/nochmal-spielen.png',
+      'assets/images/gameover-scene-assets/nochmal-spielen.png',
     );
-    this.load.image('gameover-menu-btn', 'assets/sprites/gameover-scene-assets/hauptmenu-1.png');
-    this.load.image('gameover-score-text', 'assets/sprites/gameover-scene-assets/score.png');
-    this.load.image('gameover-distance-text', 'assets/sprites/gameover-scene-assets/distanz.png');
+    this.load.image('gameover-menu-btn', 'assets/images/gameover-scene-assets/hauptmenu-1.png');
+    this.load.image('gameover-score-text', 'assets/images/gameover-scene-assets/score.png');
+    this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distanz.png');
     this.load.image(
       'gameover-hintergrund',
-      'assets/sprites/gameover-scene-assets/game-over-hintergrund.png',
+      'assets/images/gameover-scene-assets/game-over-hintergrund.png',
     );
   }
   create() {

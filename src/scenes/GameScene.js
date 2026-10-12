@@ -21,23 +21,23 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'assets/sprites/entities/player-skins/sybit-kart-player-1.png');
-    this.load.image('car2', 'assets/sprites/entities/player-skins/sybit-kart-player-2.png');
-    this.load.image('track', 'assets/sprites/race-track-assets/road.png');
-    this.load.image('border', 'assets/sprites/race-track-assets/border.png');
+    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
+    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
+    this.load.image('track', 'assets/images/race-track-assets/road.png');
+    this.load.image('border', 'assets/images/race-track-assets/border.png');
 
-    this.load.image('enemy-car1', 'assets/sprites/entities/obstacles/enemy-car-1.png');
-    this.load.image('enemy-car2', 'assets/sprites/entities/obstacles/enemy-car-2.png');
-    this.load.image('enemy-car3', 'assets/sprites/entities/obstacles/enemy-car-3.png');
+    this.load.image('enemy-car1', 'assets/images/entities/obstacles/enemy-car-1.png');
+    this.load.image('enemy-car2', 'assets/images/entities/obstacles/enemy-car-2.png');
+    this.load.image('enemy-car3', 'assets/images/entities/obstacles/enemy-car-3.png');
 
-    this.load.image('coin', 'assets/sprites/entities/coin.png');
-    this.load.image('item', 'assets/sprites/entities/item.png');
-    this.load.image('boundary-particle', 'assets/sprites/particles/image-001.png');
+    this.load.image('coin', 'assets/images/entities/coin.png');
+    this.load.image('item', 'assets/images/entities/item.png');
+    this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
-    this.load.image('background', 'assets/sprites/map-skins/background-sybit-city.png');
+    this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
 
-    this.load.image('carShield', 'assets/sprites/entities/player-skins/car-shield.png');
-    this.load.image('carShield2', 'assets/sprites/entities/player-skins/car-shield-2.png');
+    this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
+    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
   }
 
   //Alle Objekte in der Szene initialisieren

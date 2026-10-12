@@ -19,19 +19,19 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'assets/sprites/entities/player-skins/sybit-kart-player-1.png');
-    this.load.image('track', 'assets/sprites/race-track-assets/road.png');
-    this.load.image('border', 'assets/sprites/race-track-assets/border.png');
-    this.load.image('background', 'assets/sprites/map-skins/hintergrund.png');
-    this.load.image('starting_Banner', 'assets/sprites/race-track-assets/starting-banner.png');
+    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
+    this.load.image('track', 'assets/images/race-track-assets/road.png');
+    this.load.image('border', 'assets/images/race-track-assets/border.png');
+    this.load.image('background', 'assets/images/map-skins/hintergrund.png');
+    this.load.image('starting_Banner', 'assets/images/race-track-assets/starting-banner.png');
     this.load.image(
       'startingLine',
-      'assets/sprites/race-track-assets/starting-and-finish-line.png',
+      'assets/images/race-track-assets/starting-and-finish-line.png',
     );
-    this.load.image('start-count-3', 'assets/sprites/race-track-assets/countdown-3.png');
-    this.load.image('start-count-2', 'assets/sprites/race-track-assets/countdown-2.png');
-    this.load.image('start-count-1', 'assets/sprites/race-track-assets/countdown-1.png');
-    this.load.image('start-go', 'assets/sprites/race-track-assets/go-label.png');
+    this.load.image('start-count-3', 'assets/images/race-track-assets/countdown-3.png');
+    this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
+    this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
+    this.load.image('start-go', 'assets/images/race-track-assets/go-label.png');
     this.load.audio('countdown', 'assets/audio/sfx/countdown.mp3');
   }
 
