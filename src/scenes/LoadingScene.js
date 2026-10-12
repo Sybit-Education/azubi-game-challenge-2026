@@ -1,4 +1,5 @@
 /* global Phaser */
+import InputManager from '../objects/InputManager.js';
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -24,6 +25,9 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     this.cameras.main.setBackgroundColor('#6f3198');
 
     // Navigation, orientation, progress and scaling variables
@@ -105,5 +109,16 @@ export default class LoadingScene extends Phaser.Scene {
       .image(centerX, centerY + spacing * 1.4, randomComment)
       .setScale(0.8)
       .setOrigin(0.5);
+  }
+
+  update() {
+    this.InputManager.update();
+    if (this.InputManager.getControlsP1.button4 || this.InputManager.getControlsP1.button2 || this.InputManager.getControlsP2.button4 || this.InputManager.getControlsP2.button2) {
+      if (this.isMultiplayer) {
+        this.scene.start('StartScene', { isMultiplayer: true });
+      } else {
+        this.scene.start('StartScene', { isMultiplayer: false });
+      }
+    }
   }
 }

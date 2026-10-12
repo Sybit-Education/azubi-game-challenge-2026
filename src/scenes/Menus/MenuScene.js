@@ -174,12 +174,12 @@ export default class MenuScene extends Phaser.Scene {
     play_button.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      selectButton(play_button, playOriginalY);
+      this.selectButton(play_button, playOriginalY);
     });
 
     play_button.on('pointerout', () => {
       isPlayHovered = false;
-      deselectButton(play_button, playOriginalY);
+      this.deselectButton(play_button, playOriginalY);
       scheduleHide();
     });
 
@@ -188,7 +188,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        selectButton(play_button, playOriginalY);
+        this.selectButton(play_button, playOriginalY);
       }
     });
 
@@ -198,40 +198,40 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(0);
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
-        deselectButton(play_button, playOriginalY);
+        this.deselectButton(play_button, playOriginalY);
       }
     });
 
     settings_button.on('pointerover', () => {
-      selectButton(settings_button, settingsOriginalY);
+      this.selectButton(settings_button, settingsOriginalY);
     });
 
     settings_button.on('pointerout', () => {
-      deselectButton(settings_button, settingsOriginalY);
+      this.deselectButton(settings_button, settingsOriginalY);
     });
 
     creditsButton.on('pointerover', () => {
-      selectButton(creditsButton, creditsOriginalY);
+      this.selectButton(creditsButton, creditsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
-      deselectButton(creditsButton, creditsOriginalY);
+      this.deselectButton(creditsButton, creditsOriginalY);
     });
 
     settings_button.on('pointerout', () => {
-      deselectButton(settings_button, settingsOriginalY);
+      this.deselectButton(settings_button, settingsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
-      deselectButton(creditsButton, creditsOriginalY);
+      this.deselectButton(creditsButton, creditsOriginalY);
     });
 
     AnleitungsButton.on('pointerover', () => {
-      selectButton(AnleitungsButton, AnleitungsOriginalY);
+      this.selectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
     AnleitungsButton.on('pointerout', () => {
-      deselectButton(AnleitungsButton, AnleitungsOriginalY);
+      this.deselectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
     // Helper functions for button animations
@@ -278,7 +278,7 @@ export default class MenuScene extends Phaser.Scene {
     this.menuButtons = [
       { button: play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
-      { button: AnleitungsButton, y: AnleitungsOriginalY, action: () => this.scene.start('StartScene'), },
+      { button: AnleitungsButton, y: AnleitungsOriginalY },
       { button: creditsButton, y: creditsOriginalY, action: () => this.scene.start('CreditsScene'), }
     ];
 
@@ -326,7 +326,7 @@ export default class MenuScene extends Phaser.Scene {
       );
     }
     if (this.InputManager.getControlsP1.button2) {
-      this.menuButtons[this.selectedIndex].action();
+      this.menuButtons[this.selectedIndex].action?.();
     }
   }
 }
