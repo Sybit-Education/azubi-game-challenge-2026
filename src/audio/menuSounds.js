@@ -1,11 +1,12 @@
-import menuClickUrl from '../oudio/menuclick.mp3?url';
+import menuClickUrl from './menuclick.mp3?url';
+import menuFocusUrl from './menu-focus.ogg?url';
 
 export function preloadMenuSounds(scene) {
   if (!scene.cache.audio.exists('menu-click')) {
     scene.load.audio('menu-click', menuClickUrl);
   }
   if (!scene.cache.audio.exists('menu-focus')) {
-    scene.load.audio('menu-focus', '/audio/test-sounds/menu-focus.ogg');
+    scene.load.audio('menu-focus', menuFocusUrl);
   }
 }
 
