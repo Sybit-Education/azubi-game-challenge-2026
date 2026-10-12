@@ -4,6 +4,19 @@
 **Scope:** Phaser bootstrap, scenes, input, Arcade Physics, responsive layout, and game-object lifecycle.  
 **Guideline basis:** The local Phaser 3 Game Development guide (version 1.3.0) and its scene, physics, performance, and project-setup guides. These files are present only in the working environment and are not included in this PR.
 
+## Prioritized TODO List
+
+Work from top to bottom. P1 items affect runtime consistency or make the game unplayable on touch-only devices; P2 items fix concrete gameplay or performance defects; P3 items are larger guideline-alignment improvements.
+
+- [ ] **P1: Align the Phaser runtime and dependency.** Choose Phaser 3 or 4, use one pinned version for both the Vite bundle and browser runtime, and remove or replace the Phaser 3 prototype patch.
+- [ ] **P1: Add visible touch controls for gameplay.** Support steering and acceleration on touch-only devices and verify the controls on a real mobile viewport.
+- [ ] **P2: Dispose of dynamic Arcade colliders.** Retain and destroy collider handles when road objects are collected or despawn, or use persistent group colliders with pooled objects.
+- [ ] **P2: Handle viewport resizing.** Recalculate scene geometry and UI in response to resize events, then verify the play area at portrait and landscape sizes.
+- [ ] **P2: Restore each car's base scale after power-ups.** Capture the initial scale and use it when timed effects expire; verify at different viewport heights.
+- [ ] **P3: Centralize game state, events, and tuning values.** Introduce the guide's `GameState`, `EventBus`, and `Constants` incrementally, with restart and event-cleanup tests.
+- [ ] **P3: Consolidate asset loading and frequent object creation.** Move shared assets to a preloader, then evaluate atlases and pooling for spawned road objects.
+- [ ] **P3: Plan a TypeScript migration.** Add compiler/typecheck coverage once the runtime dependency is aligned.
+
 ## Findings
 
 ### [P1] Use one pinned Phaser runtime and dependency
