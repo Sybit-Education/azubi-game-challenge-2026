@@ -1,0 +1,8 @@
+Testbranch: test-sounds
+
+menu-focus.ogg: Kenney, Interface Sounds, tick_001.ogg (unverändert)
+Quelle: https://kenney.nl/assets/interface-sounds
+Lizenz: CC0 1.0; beiliegende interface-license.txt
+
+Menüklick: vorhandene Projektdatei src/oudio/menuclick.mp3.
+Quelle/Lizenz dieser vorhandenen Datei wurden vom Nutzer nicht angegeben.

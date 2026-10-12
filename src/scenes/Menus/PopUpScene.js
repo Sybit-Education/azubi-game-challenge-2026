@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../audio/menuSounds.js';
+
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 export default class PopUpScene extends Phaser.Scene {
@@ -9,6 +11,7 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   preload() {
+    preloadMenuSounds(this);
     this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
     this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
     this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
@@ -142,6 +145,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     const chooseChristmasMode = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
@@ -149,6 +153,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     const chooseStandardMode = () => {
+      playMenuClick(this);
       //im christmas mode: zurück zu standard
       if (this.parentSceneKeys.includes('ChristmasScene')) {
         this.registry.set('gameMode', 'standard');
@@ -184,6 +189,7 @@ export default class PopUpScene extends Phaser.Scene {
     //tween für den kreisanimation
 
     const toggleAccessibility = () => {
+      playMenuClick(this);
       accessibilityEnabled = !accessibilityEnabled;
 
       this.registry.set('accessibilityMode', accessibilityEnabled);
@@ -235,6 +241,7 @@ export default class PopUpScene extends Phaser.Scene {
     let closing = false;
     const close = () => {
       if (closing) return; // ignore double clicks
+      playMenuClick(this);
       closing = true;
       this.tweens.add({ targets: panel, x: `+=${width}`, duration: 200, ease: 'Cubic.easeIn' });
       this.tweens.add({
@@ -268,11 +275,13 @@ export default class PopUpScene extends Phaser.Scene {
     const closeWindows = close;
 
     const handleAccessibilityChange = () => {
+      playMenuClick(this);
       this.registry.set('accessibility enabled', accessibilityToggle.checked);
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
     const handleGameModeChange = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', gameModeMenu.value);
       this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
       this.scene.stop('PopUpScene');
@@ -360,6 +369,7 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 100,
       });
     });
+    bindMenuFocusSounds(this, ['close-settings', 'accessible-toggle', 'game-mode-menu']);
   }
   updateGamepadSelection() {
     const items = this.navigationItems();

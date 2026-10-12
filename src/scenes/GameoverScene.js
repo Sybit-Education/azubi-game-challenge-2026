@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../audio/menuSounds.js';
+
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
 
@@ -21,6 +23,7 @@ export default class GameoverScene extends Phaser.Scene {
 
   // Pre load scene
   preload() {
+    preloadMenuSounds(this);
     this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
       'gameover-play-again',
@@ -102,6 +105,7 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Retry function
     const retryFunction = () => {
+      playMenuClick(this);
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
       });
@@ -109,6 +113,7 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Back to home function
     const backToHomeFunction = () => {
+      playMenuClick(this);
       this.scene.start(
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
       );
@@ -258,23 +263,10 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     // Click events
-    this.playAgainButton.on('pointerdown', () => {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
-    });
-
-    this.lobbyButton.on('pointerdown', () => {
-      const gameMode = this.registry.get('gameMode');
-
-      if (gameMode === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
-    });
-
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+    this.playAgainButton.on('pointerdown', retryFunction);
+    this.lobbyButton.on('pointerdown', backToHomeFunction);
+    bindMenuFocusSounds(this, ['retry', 'back-to-home']);
     this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
@@ -295,18 +287,11 @@ export default class GameoverScene extends Phaser.Scene {
     this.Buttons = [
       {
         button: this.playAgainButton,
-        action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
+        action: retryFunction,
       },
       {
         button: this.lobbyButton,
-        action: () => {
-          const gameMode = this.registry.get('gameMode');
-          if (gameMode === 'christmas') {
-            this.scene.start('ChristmasScene');
-          } else {
-            this.scene.start('MenuScene');
-          }
-        },
+        action: backToHomeFunction,
       },
     ];
 
