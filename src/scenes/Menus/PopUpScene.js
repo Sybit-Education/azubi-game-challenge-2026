@@ -8,21 +8,21 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('settingsBackground', 'sprites/Homepage/Settings Menu/Background.png');
-    this.load.image('settingsLabel', 'sprites/Homepage/Settings Menu/SETTINGS.png');
-    this.load.image('xButton', 'sprites/Homepage/Settings Menu/x.png');
-    this.load.image('Accessibility Mode', 'sprites/Homepage/Settings Menu/Accessibility mode.png');
-    this.load.image('switchOn', 'sprites/Homepage/Settings Menu/SwitchOn.png');
-    this.load.image('switchOff', 'sprites/Homepage/Settings Menu/switchOff.png');
-    this.load.image('switchCircle', 'sprites/Homepage/Settings Menu/switchCircle.png');
-    this.load.image('Game Mode', 'sprites/Homepage/Settings Menu/GameModeLabel.png');
+    this.load.image('settingsBackground', 'assets/sprites/Homepage/Settings Menu/Background.png');
+    this.load.image('settingsLabel', 'assets/sprites/Homepage/Settings Menu/SETTINGS.png');
+    this.load.image('xButton', 'assets/sprites/Homepage/Settings Menu/x.png');
+    this.load.image('Accessibility Mode', 'assets/sprites/Homepage/Settings Menu/Accessibility mode.png');
+    this.load.image('switchOn', 'assets/sprites/Homepage/Settings Menu/SwitchOn.png');
+    this.load.image('switchOff', 'assets/sprites/Homepage/Settings Menu/switchOff.png');
+    this.load.image('switchCircle', 'assets/sprites/Homepage/Settings Menu/switchCircle.png');
+    this.load.image('Game Mode', 'assets/sprites/Homepage/Settings Menu/GameModeLabel.png');
     this.load.image(
       'AccessibilitySwitchOff',
-      'sprites/Homepage/Settings Menu/AccessibilitySwitchOff.png',
+      'assets/sprites/Homepage/Settings Menu/AccessibilitySwitchOff.png',
     );
-    this.load.image('StandardModeButton', 'sprites/Homepage/Settings Menu/StandardModeButton.png');
-    this.load.image('closeLabel', 'sprites/Homepage/Settings Menu/closeLabel.png');
-    this.load.image('christmasmode', 'sprites/Homepage/Settings Menu/ChristmasModeButton.png');
+    this.load.image('StandardModeButton', 'assets/sprites/Homepage/Settings Menu/StandardModeButton.png');
+    this.load.image('closeLabel', 'assets/sprites/Homepage/Settings Menu/closeLabel.png');
+    this.load.image('christmasmode', 'assets/sprites/Homepage/Settings Menu/ChristmasModeButton.png');
   }
 
   create() {
