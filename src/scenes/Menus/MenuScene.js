@@ -61,6 +61,7 @@ export default class MenuScene extends Phaser.Scene {
     this.InputManager.create();
 
     const playBtn = document.getElementById('start-game');
+    const multiplayerBtn = document.getElementById('multiplayer-btn')
     const settingsBtn = document.getElementById('settings-btn');
     const creditBtn = document.getElementById('credit-btn');
     const menu = document.getElementById('accessible-ui');
@@ -89,11 +90,14 @@ export default class MenuScene extends Phaser.Scene {
     const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
     focusTarget.focus();
 
+multiplayerBtn.addEventListener('click', startMultiplayer)
+
     settingsBtn.addEventListener('click', openSettings);
     creditBtn.addEventListener('click', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
+      multiplayerBtn.removeEventListener('click', startMultiplayer)
       settingsBtn.removeEventListener('click', openSettings);
       creditBtn.removeEventListener('click', openCredits);
       menu.hidden = true;
@@ -231,7 +235,7 @@ export default class MenuScene extends Phaser.Scene {
       cancelScheduledHide();
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
+        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected || document.activeElement === multiplayerBtn) {
           return;
         }
 
@@ -241,7 +245,7 @@ export default class MenuScene extends Phaser.Scene {
           x: play_button.x,
           duration: 150,
           onComplete: () => {
-            if (!isPlayHovered && !isTwoPlayerHovered) {
+            if (!isPlayHovered && !isTwoPlayerHovered && document.activeElement !== multiplayerBtn) {
               twoPlayerButton.setVisible(false);
             }
           },
@@ -274,6 +278,12 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(twoPlayerButton, playOriginalY - 3);
       scheduleHide();
     };
+    multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
+    multiplayerBtn.addEventListener('blur', scheduleHide);
+    this.events.once('shutdown', () => {
+      multiplayerBtn.removeEventListener('focus', revealTwoPlayerButton);
+      multiplayerBtn.removeEventListener('blur', scheduleHide);
+    });
 
     play_button.on('pointerover', () => {
       isPlayHovered = true;
@@ -362,6 +372,7 @@ export default class MenuScene extends Phaser.Scene {
     // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
+      [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
       [creditBtn, creditsButton],
     ]);
