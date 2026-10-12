@@ -17,6 +17,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.keys = scene.input.keyboard.addKeys(controls);
 
     this.score = 0;
+    this.dead = false; //in multiplayer one car can be dead while the other keeps driving
     this.value = 10;
     this.meters = 0;
     this.boundaryParticles = scene.add
@@ -35,8 +36,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         quantity: 5,
       })
       .setDepth(11);
-    this.setScale(0.66);
-    this.body.setSize(this.displayWidth, this.displayHeight);
+    this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
+    this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
   }
 
