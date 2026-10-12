@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';

@@ -8,7 +8,7 @@
 
 Work from top to bottom. P1 items affect runtime consistency or make the game unplayable on touch-only devices; P2 items fix concrete gameplay or performance defects; P3 items are larger guideline-alignment improvements.
 
-- [ ] **P1: Align the Phaser runtime and dependency.** Choose Phaser 3 or 4, use one pinned version for both the Vite bundle and browser runtime, and remove or replace the Phaser 3 prototype patch.
+- [x] **P1: Align the Phaser runtime and dependency.** The app now bundles the exact Phaser 4.2.1 npm dependency through Vite and no longer uses the Phaser 3 CDN global or prototype patch.
 - [ ] **P1: Add visible touch controls for gameplay.** Support steering and acceleration on touch-only devices and verify the controls on a real mobile viewport.
 - [ ] **P2: Dispose of dynamic Arcade colliders.** Retain and destroy collider handles when road objects are collected or despawn, or use persistent group colliders with pooled objects.
 - [ ] **P2: Handle viewport resizing.** Recalculate scene geometry and UI in response to resize events, then verify the play area at portrait and landscape sizes.
@@ -19,17 +19,15 @@ Work from top to bottom. P1 items affect runtime consistency or make the game un
 
 ## Findings
 
-### [P1] Use one pinned Phaser runtime and dependency
+### [P1] Use one pinned Phaser runtime and dependency (resolved in this branch)
 
-[`index.html`](../index.html#L6) loads Phaser 3 from jsDelivr, while [`package.json`](../package.json#L15-L17) declares Phaser `^4.2.1`. [`src/main.js`](../src/main.js#L11-L27) also patches a Phaser 3 prototype and consumes the global `Phaser` object. Vite therefore builds the game code without bundling the Phaser package that `npm ci` installs; the browser instead runs a separately versioned CDN dependency.
+The baseline loaded Phaser 3 from jsDelivr while declaring Phaser `^4.2.1` in `package.json`, and patched a Phaser 3 prototype. This branch now pins Phaser `4.2.1`, imports the npm ESM package from every module that uses Phaser, removes the CDN script, and removes the Phaser 3 gamepad patch. The gamepad input reader now safely handles missing axes and buttons in the Phaser 4 wrapper.
 
-This makes the lockfile and CI dependency version a poor description of the runtime, permits the CDN's Phaser 3 release to move independently, and makes the game unavailable when the CDN cannot be reached. It also leaves Phaser 4 migration work untested.
-
-**Recommendation:** Choose the intended Phaser major, import it from the npm dependency through Vite, and pin the runtime to the same version. Remove or replace the Phaser 3 prototype patch with a fix supported by that version.
+**Verification:** The npm registry reports `4.2.1` as latest, and the browser reports `PHASER.VERSION: 4.2.1` with a rendered canvas and no menu runtime errors.
 
 ### [P1] Add visible touch controls for gameplay
 
-[`src/objects/InputManager.js`](../src/objects/InputManager.js#L12-L23) binds gameplay movement to keyboard keys; its control state combines those keys with gamepad input ([lines 79-99](../src/objects/InputManager.js#L79-L99)). The HTML controls cover menu and dialog actions, but there are no touch controls for steering or accelerating during a race.
+[`src/objects/InputManager.js`](../src/objects/InputManager.js#L12-L23) binds gameplay movement to keyboard keys; its control state combines those keys with gamepad input ([lines 67-87](../src/objects/InputManager.js#L67-L87)). The HTML controls cover menu and dialog actions, but there are no touch controls for steering or accelerating during a race.
 
 On touch-only devices the player cannot control the game, contrary to the guide's requirement that games work on mobile and show touch controls rather than relying on invisible touch zones.
 
@@ -71,8 +69,10 @@ A gradual migration is preferable to introducing all of these abstractions in on
 
 ## Verification
 
-- `npx eslint src`: passed.
-- `npm run build -- --outDir /tmp/azubi-phaser-review-dist`: passed; Vite emitted a warning that the configured `base` should start with `/`.
-- `npm run lint`: failed on 38 `Phaser is not defined` errors in the existing generated `dist` bundle; source-only lint passed.
-- `npm run format:check`: reported 55 files in untracked local Phaser-guideline mirrors as unformatted. Those files were not changed or included in this PR.
-- No automated gameplay, touch-device, or resize tests are present, so those behaviors were assessed from the source rather than browser interaction.
+- `npx eslint src`: passed after the Phaser 4 import and gamepad updates.
+- `npx prettier --check` on all changed source/config/review files: passed.
+- `npm ls phaser --depth=0`: confirms the exact `phaser@4.2.1` dependency.
+- `npm run build -- --outDir /tmp/azubi-phaser4-final-dist`: passed; Vite warns about the existing `base` value and the Phaser bundle exceeding 500 kB.
+- Browser smoke test: Phaser 4.2.1 creates the menu canvas and runs without menu errors. Starting the intro is blocked because `StartScene` references `assets/audio/sfx/countdown.mp3`, which is absent and not tracked in this branch; gameplay beyond that point could not be verified.
+- `npm run format:check` reports formatting warnings in untracked local Phaser-guideline mirrors. Those files are not changed or included in this PR.
+- No automated gameplay, touch-device, or resize tests are present.
