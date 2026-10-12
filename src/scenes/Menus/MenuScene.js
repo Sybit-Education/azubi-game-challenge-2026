@@ -14,13 +14,19 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
     this.load.image('homepage-resonanz', 'sprites/Homepage/Default Homepage/Resonanz.png');
     this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image('homepage-leaderboard-btn','sprites/Gameover Scene Assets/Leaderboard placeholder button.png');
+    this.load.image(
+      'homepage-leaderboard-btn',
+      'sprites/Gameover Scene Assets/Leaderboard placeholder button.png',
+    );
     this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
     this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
     this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
     this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
-    this.load.image('leaderboard-homepage-btn','sprites/Gameover Scene Assets/Hauptmenü 1.png');
-    this.load.image('homepage-barrierefreiheit','sprites/Homepage/Default Homepage/barrierefreiheitButton.png');
+    this.load.image('leaderboard-homepage-btn', 'sprites/Gameover Scene Assets/Hauptmenü 1.png');
+    this.load.image(
+      'homepage-barrierefreiheit',
+      'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+    );
   }
 
   create() {
@@ -29,42 +35,49 @@ export default class MenuScene extends Phaser.Scene {
 
     const footer_btn_y = this.scale.height / 1.17;
 
-    this.add.image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height)
       .setDepth(-100);
 
-    this.add.image(this.scale.width / 2, footer_btn_y * 1.1, 'homepage-resonanz')
+    this.add
+      .image(this.scale.width / 2, footer_btn_y * 1.1, 'homepage-resonanz')
       .setOrigin(0.5)
       .setScale(0.3);
 
-    this.add.image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
       .setOrigin(0.5)
       .setScale(0.5);
 
-    const settings_button = this.add.image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
+    const settings_button = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
       .setOrigin(0.5)
       .setScale(0.33)
       .setInteractive();
 
-    const play_button = this.add.image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
+    const play_button = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.33)
       .setInteractive();
 
-    const twoPlayerButton = this.add.image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
+    const twoPlayerButton = this.add
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
       .setOrigin(0.5)
       .setScale(0.278)
       .setDepth(-1);
 
     const hitAreaPadding = 12;
-    const hitboxVisual = this.add.rectangle(
-      twoPlayerButton.x,
-      twoPlayerButton.y,
-      twoPlayerButton.displayWidth + hitAreaPadding * 2,
-      twoPlayerButton.displayHeight + hitAreaPadding * 2,
-      0xff0000,
-      0
-    )
+    const hitboxVisual = this.add
+      .rectangle(
+        twoPlayerButton.x,
+        twoPlayerButton.y,
+        twoPlayerButton.displayWidth + hitAreaPadding * 2,
+        twoPlayerButton.displayHeight + hitAreaPadding * 2,
+        0xff0000,
+        0,
+      )
       .setOrigin(0.5)
       .setDepth(-2)
       .setInteractive();
@@ -104,17 +117,20 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
-    const creditsButton = this.add.image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
+    const creditsButton = this.add
+      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.27)
       .setInteractive()
       .setDepth(3);
 
-    this.add.image(this.scale.width / 8, footer_btn_y, 'homepage-barrierefreiheit')
+    this.add
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.3);
 
-    this.add.image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
 
@@ -136,11 +152,8 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.start('CreditsScene');
     });
 
-    const leaderboardButton = this.add.image(
-      this.scale.width / 2,
-      this.scale.height / 1.17,
-      'homepage-leaderboard-btn'
-    )
+    const leaderboardButton = this.add
+      .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
       .setScale(0.24)
       .setOrigin(0.5)
       .setInteractive();

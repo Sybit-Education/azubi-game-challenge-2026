@@ -29,41 +29,36 @@ export default class GameoverScene extends Phaser.Scene {
   }
   //distance shit hier irgendwo
   create() {
-  console.log('GameoverScene gestartet');
+    console.log('GameoverScene gestartet');
 
-  const leaderboard = JSON.parse(
-    localStorage.getItem('leaderboard') || '[]'
-  ).map(entry => {
-    if (typeof entry === 'string') {
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
+      if (typeof entry === 'string') {
+        return {
+          name: 'Unbekannt',
+          distance: Number(entry),
+        };
+      }
+
       return {
-        name: 'Unbekannt',
-        distance: Number(entry)
+        name: entry.name,
+        distance: Number(entry.distance),
       };
-    }
+    });
 
-    return {
-      name: entry.name,
-      distance: Number(entry.distance)
-    };
-  });
+    leaderboard.push({
+      name: GameData.playerName,
+      distance: Number(this.distance),
+    });
 
-  leaderboard.push({
-    name: GameData.playerName,
-    distance: Number(this.distance),
-  });
+    leaderboard.sort((a, b) => b.distance - a.distance);
 
-  leaderboard.sort((a, b) => b.distance - a.distance);
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard.slice(0, 10)));
 
-  localStorage.setItem(
-    'leaderboard',
-    JSON.stringify(leaderboard.slice(0, 10))
-  );
+    console.log(leaderboard);
 
-  console.log(leaderboard);
-
-  this.width = this.scale.width;
-  this.height = this.scale.height; 
- }
+    this.width = this.scale.width;
+    this.height = this.scale.height;
+  }
   create() {
     const gameOverUi = document.getElementById('game-over-ui');
     const finalScore = document.getElementById('final-score');
@@ -196,12 +191,11 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     // Click events
-   playAgainButton.on('pointerdown', () => {
-  this.scene.start('NameInputScene', {
-    isMultiplayer: this.isMultiplayer,
-  });
-});
-
+    playAgainButton.on('pointerdown', () => {
+      this.scene.start('NameInputScene', {
+        isMultiplayer: this.isMultiplayer,
+      });
+    });
 
     lobbyButton.on('pointerdown', () => {
       const gameMode = this.registry.get('gameMode');
@@ -214,5 +208,3 @@ export default class GameoverScene extends Phaser.Scene {
     });
   }
 }
-  
-
