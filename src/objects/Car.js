@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import { ROAD_LATERAL_SCALE } from './PerspectiveRoad.js';
 import { REAR_ASPECT } from './RearVehicleSprites.js';
 
+// Highest point the car may drive to, as a share of the screen height; keeps it clear of the horizon.
+const FORWARD_LIMIT_SHARE = 0.65;
+
 export default class Car extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y) {
     //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
@@ -57,14 +60,14 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setVelocityY(0);
     this.setAngle(0);
     const maxY = this.scene.scale.height + this.displayHeight / 4;
-    const maxX = this.displayHeight / 2 - this.displayHeight / 4;
+    const minY = this.scene.scale.height * FORWARD_LIMIT_SHARE;
     const roadLeft = this.scene.scale.width / 2 - this.scene.track1.displayWidth / 2;
     const roadRight = this.scene.scale.width / 2 + this.scene.track1.displayWidth / 2;
     this.leftLimit = roadLeft + this.displayWidth / 2 - 27.5;
     this.rightLimit = roadRight - this.displayWidth / 2 + 27.5;
 
     this.x = Phaser.Math.Clamp(this.x, this.leftLimit, this.rightLimit);
-    this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
+    this.y = Phaser.Math.Clamp(this.y, minY, maxY);
 
     if (controls.left) {
       //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
@@ -102,7 +105,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     }
 
     if (
-      (this.y <= maxX && this.body.velocity.y < 0) ||
+      (this.y <= minY && this.body.velocity.y < 0) ||
       (this.y >= maxY && this.body.velocity.y > 0)
     ) {
       this.setVelocityY(0);

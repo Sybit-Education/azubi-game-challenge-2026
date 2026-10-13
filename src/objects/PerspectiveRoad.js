@@ -1,4 +1,12 @@
-import { createRearVehicleTextures, REAR_ASPECT, REAR_VEHICLE_KEYS } from './RearVehicleSprites.js';
+import {
+  createRearVehicleTextures,
+  drawWheelTread,
+  REAR_ASPECT,
+  REAR_HEIGHT,
+  REAR_VEHICLE_KEYS,
+  REAR_WIDTH,
+  rearTurnKey,
+} from './RearVehicleSprites.js';
 
 export const ROAD_VANISHING_POINT_Y = 0.384;
 const ROAD_FAR_SCALE = 0.14;
@@ -11,6 +19,10 @@ const SPRITE_MIN_SQUASH = 0.3;
 const LEAN_SKEW = 0.12;
 // Share of the car width the top edge shifts when the car sits at a road edge.
 const LANE_SKEW = 0.14;
+// Steering lean at which the player car switches to the three-quarter side view.
+const TURN_VIEW_LEAN = 0.5;
+// Tread texels scrolled per world pixel the road moves.
+const TREAD_SCROLL_RATE = 0.02;
 
 export function projectRoadPoint(x, y, width, height) {
   const depth = Math.max(0, (y + 200) / (height + 200));
@@ -33,6 +45,7 @@ export function unprojectRoadY(y, height) {
 export default class PerspectiveRoad {
   constructor(scene) {
     this.scene = scene;
+    this.wheelRoll = 0;
     this.textureKey = `${scene.sys.settings.key}-perspective-road`;
     this.texture = scene.textures.createCanvas(this.textureKey, 768, 768);
     this.context = this.texture.getContext();
@@ -80,7 +93,11 @@ export default class PerspectiveRoad {
   }
 
   drawRearVehicle(object, key, width, height) {
-    const source = this.scene.textures.get(key).getSourceImage();
+    const isPlayer = object === this.scene.car || object === this.scene.secondCar;
+    const lean = object.lean ?? 0;
+    const turn = isPlayer && Math.abs(lean) >= TURN_VIEW_LEAN ? Math.sign(lean) : 0;
+    const viewKey = turn ? rearTurnKey(key, lean) : key;
+    const source = this.scene.textures.get(viewKey).getSourceImage();
     const { x, y, drawWidth, drawHeight } = this.rearFootprint(object, width, height);
     const skew = (object.lean ?? 0) * LEAN_SKEW - (object.lanePosition ?? 0) * LANE_SKEW;
 
@@ -115,6 +132,18 @@ export default class PerspectiveRoad {
           sliceHeight + 0.5,
         );
       }
+    }
+    if (isPlayer) {
+      const shear = (skew * drawWidth) / REAR_HEIGHT;
+      this.context.transform(
+        drawWidth / REAR_WIDTH,
+        0,
+        -shear,
+        drawHeight / REAR_HEIGHT,
+        -drawWidth / 2 + skew * drawWidth,
+        -drawHeight / 2,
+      );
+      drawWheelTread(this.context, turn, this.wheelRoll);
     }
     this.context.restore();
   }
@@ -158,6 +187,7 @@ export default class PerspectiveRoad {
     const { scene, context, texture } = this;
     const { width, height } = scene.scale;
     this.image.setDisplaySize(width, height);
+    this.wheelRoll += (scene.track1.speed * scene.game.loop.delta * TREAD_SCROLL_RATE) / 1000;
     context.clearRect(0, 0, texture.width, texture.height);
     context.save();
     context.scale(texture.width / width, texture.height / height);
