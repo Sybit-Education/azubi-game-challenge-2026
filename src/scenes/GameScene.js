@@ -7,6 +7,7 @@ import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
+import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
 
@@ -32,6 +33,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('item', 'assets/images/entities/item.png');
+    this.load.image('ice', 'sprites/Entities/Obstacles/ice.png');
+
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
@@ -54,6 +57,7 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createRoadObject('item');
+    this.createRoadObject('ice');
     this.createHud();
     this.setBackground('background');
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
@@ -173,8 +177,22 @@ export default class GameScene extends Phaser.Scene {
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
         roadObject.body.setOffset(0, 5);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.coinBudgetPlus1,
+          undefined,
+          this.ItemManager,
+        );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
         if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.coinBudgetPlus2,
+            undefined,
+            this.ItemManager,
+          );
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'item') {
@@ -187,6 +205,7 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
@@ -219,20 +238,39 @@ export default class GameScene extends Phaser.Scene {
             this.ItemManager,
           );
         }
+      } else if (type === 'ice') {
+        roadObject = new Ice(this, roadObjectX, spawnY, lane);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
       }
 
+      if (this.secondCar) {
+        this.physics.add.overlap(
+          this.secondCar,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
+      }
       this.roadObjects.push(roadObject);
     }
 
     // Spawnrate
     let delay;
-
     if (type === 'coin') {
       delay = Phaser.Math.Between(500, 2000);
     } else if (type === 'item') {
       delay = Phaser.Math.Between(5000, 10000);
     } else if (type === 'obstacle') {
       delay = Phaser.Math.Between(2000, 4000);
+    } else if (type === 'ice') {
+      delay = Phaser.Math.Between(6000, 12000);
     }
 
     this.time.delayedCall(delay, () => this.createRoadObject(type));
@@ -321,5 +359,7 @@ export default class GameScene extends Phaser.Scene {
     this.track1.move(delta);
     this.track2.move(delta);
     this.hud.update();
+
+    this.ItemManager.itemShop();
   }
 }
