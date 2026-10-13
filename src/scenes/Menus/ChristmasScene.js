@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
@@ -8,44 +8,44 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('christmas-homepage-2player', 'sprites/Homepage/2Multiplayer.png');
-    //this.load.image('playButton', 'sprites/buttonTemplate.png');
+    this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
+    //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
       'christmas-homepage-hintergrund',
-      'sprites/Homepage/Default Homepage/background.png',
+      'assets/images/homepage/default-homepage/background.png',
     );
     this.load.image(
       'christmas-homepage-resonanz',
-      'sprites/Homepage/Default Homepage/Resonanz.png',
+      'assets/images/homepage/default-homepage/resonanz.png',
     );
     this.load.image(
       'christmas-homepage-title',
-      'sprites/Homepage/Weihnachts Homepage/Sybit Kart Weihnachtsthema.png',
+      'assets/images/homepage/weihnachts-homepage/sybit-kart-weihnachtsthema.png',
     );
     this.load.image(
       'christmas-homepage-lights',
-      'sprites/Homepage/Weihnachts Homepage/Die Lichterkette.png',
+      'assets/images/homepage/weihnachts-homepage/die-lichterkette.png',
     );
     this.load.image(
       'christmas-homepage-play-btn',
-      'sprites/Homepage/Default Homepage/playButton.png',
+      'assets/images/homepage/default-homepage/play-button.png',
     );
     this.load.image(
       'christmas-homepage-settings',
-      'sprites/Homepage/Default Homepage/settingsButton.png',
+      'assets/images/homepage/default-homepage/settings-button.png',
     );
     this.load.image(
       'christmas-homepage-trees',
-      'sprites/Homepage/Weihnachts Homepage/biggerTrees.png',
+      'assets/images/homepage/weihnachts-homepage/bigger-trees.png',
     );
-    this.load.image('christmas-homepage-car', 'sprites/Homepage/Default Homepage/car.png');
+    this.load.image('christmas-homepage-car', 'assets/images/homepage/default-homepage/car.png');
     this.load.image(
       'christmas-homepage-credits',
-      'sprites/Homepage/Default Homepage/creditsButton.png',
+      'assets/images/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
       'christmas-homepage-barrierefreiheit',
-      'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
   }
 

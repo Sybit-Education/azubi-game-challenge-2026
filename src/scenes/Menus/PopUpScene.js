@@ -1,5 +1,6 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
+import InputManager from '../../objects/InputManager.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 export default class PopUpScene extends Phaser.Scene {
@@ -8,22 +9,41 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('settingsBackground', 'sprites/Homepage/Settings Menu/Background.png');
-    this.load.image('settingsLabel', 'sprites/Homepage/Settings Menu/SETTINGS.png');
-    this.load.image('xButton', 'sprites/Homepage/Settings Menu/x.png');
-    this.load.image('Accessibility Mode', 'sprites/Homepage/Settings Menu/Accessibility mode.png');
-    this.load.image('Game Mode', 'sprites/Homepage/Settings Menu/GameModeLabel.png');
+    this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
+    this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
+    this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
+    this.load.image(
+      'Accessibility Mode',
+      'assets/images/homepage/settings-menu/accessibility-mode.png',
+    );
+    this.load.image('switchOn', 'assets/images/homepage/settings-menu/switch-on.png');
+    this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
+    this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
+    this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
     this.load.image(
       'AccessibilitySwitchOff',
-      'sprites/Homepage/Settings Menu/AccessibilitySwitchOff.png',
+      'assets/images/homepage/settings-menu/accessibility-switch-off.png',
     );
-    this.load.image('StandardModeButton', 'sprites/Homepage/Settings Menu/StandardModeButton.png');
-    this.load.image('closeLabel', 'sprites/Homepage/Settings Menu/closeLabel.png');
-    this.load.image('christmasmode', 'sprites/Homepage/Settings Menu/ChristmasModeButton.png');
+    this.load.image(
+      'StandardModeButton',
+      'assets/images/homepage/settings-menu/standard-mode-button.png',
+    );
+    this.load.image('closeLabel', 'assets/images/homepage/settings-menu/close-label.png');
+    this.load.image(
+      'christmasmode',
+      'assets/images/homepage/settings-menu/christmas-mode-button.png',
+    );
   }
 
   create() {
-    console.log('PopUpScene create');
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
+    this.parentSceneKeys = ['MenuScene', 'ChristmasScene'].filter((key) =>
+      this.scene.isActive(key),
+    );
+    this.parentSceneKeys.forEach((key) => this.scene.pause(key));
+
     this.scene.bringToTop();
     const { width, height } = this.scale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
@@ -57,15 +77,21 @@ export default class PopUpScene extends Phaser.Scene {
     //rowY += Math.max(48, 58 * uiScale);
 
     // Static switch mockup: settings are visual only for now.
-    const AccessibilitySwitch = this.add
-      .image(background.x * 1.06 + padding, height * 0.195, 'AccessibilitySwitchOff')
+    const accessibilitySwitch = this.add
+      .image(background.x * 1.06 + padding, height * 0.195, 'switchOff')
       .setScale(0.3)
+      .setOrigin(0)
+      .setInteractive();
+
+    const Accessibilitycircle = this.add
+      .image(background.x * 1.06 + padding, height * 0.196, 'switchCircle')
+      .setScale(0.35)
       .setOrigin(0)
       .setInteractive({ useHandCursor: true });
 
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
-      .image(background.x * 0.79 + padding, AccessibilitySwitch.y / 0.66, 'Game Mode')
+      .image(background.x * 0.79 + padding, accessibilitySwitch.y / 0.66, 'Game Mode')
       .setScale(0.35)
       .setOrigin(0);
 
@@ -102,36 +128,53 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
-    standardModeButton.on('pointerover', () => {
-      hoveringStandard = true;
-      updateChristmasButton();
-    });
-
-    standardModeButton.on('pointerout', () => {
-      hoveringStandard = false;
-
-      this.time.delayedCall(20, () => {
-        updateChristmasButton();
-      });
-    });
-
-    christmasModeButton.on('pointerover', () => {
-      hoveringChristmas = true;
-      updateChristmasButton();
-    });
-
-    christmasModeButton.on('pointerdown', () => {
+    const chooseChristmasMode = () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
       this.scene.start('ChristmasScene');
-    });
+    };
 
-    standardModeButton.on('pointerdown', () => {
-      this.scene.stop('ChristmasScene');
-      this.scene.stop('PopUpScene');
-      this.scene.start('MenuScene');
-    });
+    const chooseStandardMode = () => {
+      //im christmas mode: zurück zu standard
+      if (this.parentSceneKeys.includes('ChristmasScene')) {
+        this.registry.set('gameMode', 'standard');
+        this.scene.stop('ChristmasScene');
+        this.scene.stop('PopUpScene');
+        this.scene.start('MenuScene');
+        return;
+      }
+      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
+      updateChristmasButton();
+    };
+
+    christmasModeButton.on('pointerdown', chooseChristmasMode);
+    standardModeButton.on('pointerdown', chooseStandardMode);
+
+    //defining switch status, "origin x" and "goal x"
+    let accessibilityEnabled = false;
+    const leftX = Accessibilitycircle.x;
+    const rightX = leftX * 1.035;
+
+    //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
+    //tween für den kreisanimation
+
+    const toggleAccessibility = () => {
+      accessibilityEnabled = !accessibilityEnabled;
+
+      this.registry.set('accessibilityMode', accessibilityEnabled);
+
+      accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
+      this.tweens.add({
+        targets: Accessibilitycircle,
+        x: accessibilityEnabled ? rightX : leftX,
+        duration: 150,
+        ease: 'Power2',
+      });
+    };
+
+    accessibilitySwitch.on('pointerdown', toggleAccessibility);
+    Accessibilitycircle.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
@@ -141,11 +184,12 @@ export default class PopUpScene extends Phaser.Scene {
     // Slide the panel in from the right edge. The dim overlay stays in place.
     //added an array of all the elements. add element here, to animate
     const panel = [
+      Accessibilitycircle,
       background,
       closeButton,
       settingsLabel,
       accessibilityLabel,
-      AccessibilitySwitch,
+      accessibilitySwitch,
       gamemodeLabel,
       standardModeButton,
       christmasModeButton,
@@ -173,7 +217,14 @@ export default class PopUpScene extends Phaser.Scene {
         targets: dim,
         alpha: 0,
         duration: 200,
-        onComplete: () => this.scene.stop(),
+        onComplete: () => {
+          this.scene.stop();
+          this.parentSceneKeys.forEach((key) => {
+            const parentScene = this.scene.get(key);
+            parentScene.InputManager?.resetButtonStates();
+            this.scene.resume(key);
+          });
+        },
       });
     };
 
@@ -224,10 +275,26 @@ export default class PopUpScene extends Phaser.Scene {
 
     positionAccessibleControls(this, [
       [closeSettingsBtn, closeButton],
-      [accessibilityToggle, AccessibilitySwitch],
+      [accessibilityToggle, accessibilitySwitch],
       [gameModeMenu, standardModeButton],
     ]);
     dialog.showModal();
+
+    this.navigationItems = () => {
+      const items = [
+        { button: closeButton, action: close, scale: 0.4 },
+        { button: accessibilitySwitch, action: toggleAccessibility, scale: 0.3 },
+        { button: standardModeButton, action: chooseStandardMode, scale: 0.3 },
+      ];
+
+      if (hoveringStandard) {
+        items.push({ button: christmasModeButton, action: chooseChristmasMode, scale: 0.3 });
+      }
+
+      return items;
+    };
+    this.selectedIndex = 0;
+    this.updateGamepadSelection();
 
     // Hover-effects for the buttons
 
@@ -248,17 +315,17 @@ export default class PopUpScene extends Phaser.Scene {
       });
     });
 
-    AccessibilitySwitch.on('pointerover', () => {
+    accessibilitySwitch.on('pointerover', () => {
       this.tweens.add({
-        targets: AccessibilitySwitch,
+        targets: accessibilitySwitch,
         scaleX: 0.32,
         scaleY: 0.32,
         duration: 100,
       });
     });
-    AccessibilitySwitch.on('pointerout', () => {
+    accessibilitySwitch.on('pointerout', () => {
       this.tweens.add({
-        targets: AccessibilitySwitch,
+        targets: accessibilitySwitch,
         scaleX: 0.3,
         scaleY: 0.3,
         duration: 100,
@@ -281,5 +348,37 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 100,
       });
     });
+  }
+
+  updateGamepadSelection() {
+    const items = this.navigationItems();
+    this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex, 0, items.length);
+
+    items.forEach((item, index) => {
+      this.tweens.add({
+        targets: item.button,
+        scale: index === this.selectedIndex ? item.scale * 1.12 : item.scale,
+        duration: 100,
+      });
+    });
+  }
+
+  update() {
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
+    const items = this.navigationItems();
+
+    if (controls.button1 || controls.accelerate) {
+      this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
+      this.updateGamepadSelection();
+    } else if (controls.button3 || controls.brake) {
+      this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
+      this.updateGamepadSelection();
+    } else if (controls.button2) {
+      this.navigationItems()[this.selectedIndex].action();
+      this.updateGamepadSelection();
+    } else if (controls.button4) {
+      this.navigationItems()[0].action();
+    }
   }
 }

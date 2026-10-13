@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
@@ -12,21 +12,33 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('homepage-2player', 'sprites/Homepage/2Multiplayer.png');
-    this.load.image('homepage-hintergrund', 'sprites/Homepage/Default Homepage/background.png');
+    this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/images/homepage/default-homepage/background.png',
+    );
     this.load.image(
       'WeCreateCXChampions',
-      'sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
+      'assets/images/homepage/default-homepage/we-create-cx-champions.png',
     );
-    this.load.image('homepage-title', 'sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image('homepage-play-btn', 'sprites/Homepage/Default Homepage/playButton.png');
-    this.load.image('homepage-settings', 'sprites/Homepage/Default Homepage/settingsButton.png');
-    this.load.image('homepage-car', 'sprites/Homepage/Default Homepage/car.png');
-    this.load.image('homepage-credits', 'sprites/Homepage/Default Homepage/creditsButton.png');
-    this.load.image('homepage-anleitung', 'sprites/Homepage/Default Homepage/anleitungButton.png');
+    this.load.image('homepage-title', 'assets/images/homepage/default-homepage/sybit-kart.png');
+    this.load.image('homepage-play-btn', 'assets/images/homepage/default-homepage/play-button.png');
+    this.load.image(
+      'homepage-settings',
+      'assets/images/homepage/default-homepage/settings-button.png',
+    );
+    this.load.image('homepage-car', 'assets/images/homepage/default-homepage/car.png');
+    this.load.image(
+      'homepage-credits',
+      'assets/images/homepage/default-homepage/credits-button.png',
+    );
+    this.load.image(
+      'homepage-anleitung',
+      'assets/images/homepage/default-homepage/anleitung-button.png',
+    );
     this.load.image(
       'homepage-barrierefreiheit',
-      'sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
   }
 
@@ -35,9 +47,9 @@ export default class MenuScene extends Phaser.Scene {
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it
-    // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
     const menu = document.getElementById('accessible-ui');
@@ -47,6 +59,12 @@ export default class MenuScene extends Phaser.Scene {
       this.registry.set('gameMode', 'standard');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     };
+
+    const startMultiplayer = () => {
+      this.registry.set('gameMode', 'multiplayer');
+      this.scene.start('LoadingScene', { isMultiplayer: true });
+    };
+    this.startMultiplayer = startMultiplayer;
 
     const openSettings = () => {
       this.scene.launch('PopUpScene');
@@ -122,6 +140,7 @@ export default class MenuScene extends Phaser.Scene {
     // Some variables to keep track of the button states
     let isPlayHovered = false;
     let isTwoPlayerHovered = false;
+    this.isMultiplayerSelected = false;
     let hideSubmenuEvent;
     const playOriginalY = play_button.y;
     const settingsOriginalY = settings_button.y;
@@ -141,7 +160,7 @@ export default class MenuScene extends Phaser.Scene {
       cancelScheduledHide();
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-        if (isPlayHovered || isTwoPlayerHovered) {
+        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
           return;
         }
 
@@ -171,28 +190,29 @@ export default class MenuScene extends Phaser.Scene {
       });
     };
 
+    this.selectMultiplayerOption = () => {
+      this.isMultiplayerSelected = true;
+      revealTwoPlayerButton();
+      twoPlayerButton.setDepth(1);
+      this.selectButton(twoPlayerButton, playOriginalY - 3);
+    };
+
+    this.clearMultiplayerOption = () => {
+      this.isMultiplayerSelected = false;
+      twoPlayerButton.setDepth(0);
+      this.deselectButton(twoPlayerButton, playOriginalY - 3);
+      scheduleHide();
+    };
+
     play_button.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      this.tweens.add({
-        targets: play_button,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: playOriginalY - 5,
-        duration: 50,
-      });
+      this.selectButton(play_button, playOriginalY);
     });
 
     play_button.on('pointerout', () => {
       isPlayHovered = false;
-      this.tweens.add({
-        targets: play_button,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: playOriginalY,
-        duration: 50,
-      });
-
+      this.deselectButton(play_button, playOriginalY);
       scheduleHide();
     });
 
@@ -201,93 +221,74 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.tweens.add({
-          targets: play_button,
-          scaleX: 0.32,
-          scaleY: 0.32,
-          y: playOriginalY - 5,
-          duration: 50,
-        });
+        this.selectButton(play_button, playOriginalY);
       }
     });
 
     twoPlayerButton.on('pointerout', () => {
       isTwoPlayerHovered = false;
+      isPlayHovered = false;
       twoPlayerButton.setDepth(0);
       scheduleHide();
-      if (!isPlayHovered && isTwoPlayerHovered) {
-        this.tweens.add({
-          targets: play_button,
-          scaleX: 0.3,
-          scaleY: 0.3,
-          y: playOriginalY - 5,
-          duration: 50,
-        });
+      if (!isPlayHovered && !isTwoPlayerHovered) {
+        this.deselectButton(play_button, playOriginalY);
       }
     });
 
     settings_button.on('pointerover', () => {
-      this.tweens.add({
-        targets: settings_button,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: settingsOriginalY - 5,
-        duration: 50,
-      });
-    });
-
-    creditsButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: creditsButton,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: creditsOriginalY - 5,
-        duration: 50,
-      });
+      this.selectButton(settings_button, settingsOriginalY);
     });
 
     settings_button.on('pointerout', () => {
-      this.tweens.add({
-        targets: settings_button,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: settingsOriginalY,
-        duration: 100,
-      });
+      this.deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerover', () => {
+      this.selectButton(creditsButton, creditsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: creditsButton,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        y: creditsOriginalY,
-        duration: 100,
-      });
+      this.deselectButton(creditsButton, creditsOriginalY);
+    });
+
+    settings_button.on('pointerout', () => {
+      this.deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerout', () => {
+      this.deselectButton(creditsButton, creditsOriginalY);
     });
 
     AnleitungsButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: AnleitungsButton,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        y: AnleitungsOriginalY - 5,
-        duration: 100,
-      });
+      this.selectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
     AnleitungsButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: AnleitungsButton,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        duration: 100,
-        y: AnleitungsOriginalY,
-      });
+      this.deselectButton(AnleitungsButton, AnleitungsOriginalY);
     });
 
-    // Click events
+    // Helper functions for button animations
+    this.selectButton = (button, originalY) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: 0.32,
+        scaleY: 0.32,
+        y: originalY - 5,
+        duration: 50,
+      });
+    };
 
+    this.deselectButton = (button, originalY) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: 0.3,
+        scaleY: 0.3,
+        y: originalY,
+        duration: 50,
+      });
+    };
+
+    // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
       [settingsBtn, settings_button],
@@ -296,8 +297,7 @@ export default class MenuScene extends Phaser.Scene {
     play_button.on('pointerdown', startGame);
 
     twoPlayerButton.on('pointerdown', () => {
-      this.registry.set('gameMode', 'multiplayer');
-      this.scene.start('LoadingScene', { isMultiplayer: true });
+      startMultiplayer();
     });
 
     settings_button.on('pointerdown', openSettings);
@@ -306,8 +306,84 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.start('CreditsScene');
     });
 
-    creditsButton.on('pointerdown', () => {
-      this.scene.start('CreditsScene');
-    });
+    // Menu button array and selected index
+    this.menuButtons = [
+      { button: play_button, y: playOriginalY, action: startGame },
+      { button: settings_button, y: settingsOriginalY, action: openSettings },
+      { button: AnleitungsButton, y: AnleitungsOriginalY },
+      {
+        button: creditsButton,
+        y: creditsOriginalY,
+        action: () => this.scene.start('CreditsScene'),
+      },
+    ];
+
+    this.selectedIndex = 0;
+    this.previousHorizontalInput = { left: false, right: false };
+    this.hasReadHorizontalInput = false;
+
+    this.selectButton(this.menuButtons[0].button, this.menuButtons[0].y);
+  }
+
+  update() {
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
+    const rightPressed =
+      controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
+    const leftPressed =
+      controls.left && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
+    this.previousHorizontalInput.left = controls.left;
+    this.previousHorizontalInput.right = controls.right;
+    this.hasReadHorizontalInput = true;
+
+    if (rightPressed && this.selectedIndex === 0) {
+      this.selectMultiplayerOption();
+    } else if (leftPressed && this.isMultiplayerSelected) {
+      this.clearMultiplayerOption();
+    }
+
+    if (controls.button1) {
+      this.clearMultiplayerOption();
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+      );
+
+      this.selectedIndex--;
+
+      if (this.selectedIndex < 0) {
+        this.selectedIndex = this.menuButtons.length - 1;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+      );
+    }
+    if (controls.button3) {
+      this.clearMultiplayerOption();
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+      );
+
+      this.selectedIndex++;
+
+      if (this.selectedIndex >= this.menuButtons.length) {
+        this.selectedIndex = 0;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+      );
+    }
+    if (controls.button2) {
+      if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
+        this.startMultiplayer();
+      } else {
+        this.menuButtons[this.selectedIndex].action?.();
+      }
+    }
   }
 }

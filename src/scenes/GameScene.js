@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
@@ -9,6 +9,7 @@ import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';
+import InputManager from '../objects/InputManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -21,14 +22,14 @@ export default class GameScene extends Phaser.Scene {
 
   //Bilder laden
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
-    this.load.image('car2', 'sprites/Entities/Player Skins/SybitKartPlayer2.png');
-    this.load.image('track', 'sprites/Race Track Assets/road.png');
-    this.load.image('border', 'sprites/Race Track Assets/border.png');
+    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
+    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
+    this.load.image('track', 'assets/images/race-track-assets/road.png');
+    this.load.image('border', 'assets/images/race-track-assets/border.png');
 
-    this.load.image('enemy-car1', 'sprites/Entities/Obstacles/EnemyCar1.png');
-    this.load.image('enemy-car2', 'sprites/Entities/Obstacles/EnemyCar2.png');
-    this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
+    this.load.image('enemy-car1', 'assets/images/entities/obstacles/enemy-car-1.png');
+    this.load.image('enemy-car2', 'assets/images/entities/obstacles/enemy-car-2.png');
+    this.load.image('enemy-car3', 'assets/images/entities/obstacles/enemy-car-3.png');
 
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('item', 'assets/images/entities/item.png');
@@ -36,14 +37,16 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
-    this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
+    this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
 
-    this.load.image('carShield', 'sprites/Entities/Player Skins/carShield.png');
-    this.load.image('carShield2', 'sprites/Entities/Player Skins/carShield2.png');
+    this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
+    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
   }
 
   //Alle Objekte in der Szene initialisieren
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
     this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
@@ -68,7 +71,7 @@ export default class GameScene extends Phaser.Scene {
 
   //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
   separateOverlappingCars() {
-    if (!this.secondCar) return;
+    if (!this.secondCar || this.car.dead || this.secondCar.dead) return;
 
     const firstBody = this.car.body;
     const secondBody = this.secondCar.body;
@@ -113,7 +116,7 @@ export default class GameScene extends Phaser.Scene {
   createPlayer() {
     if (this.isMultiplayer) {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
       this.secondCar = new Car(
         this,
@@ -121,14 +124,11 @@ export default class GameScene extends Phaser.Scene {
         this.scale.height / 1.25,
         'UP,LEFT,DOWN,RIGHT',
       );
-      this.secondCar.body.setSize(
-        this.secondCar.displayWidth * 1.25,
-        this.secondCar.displayHeight * 1.25,
-      );
+      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
+      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
 
@@ -159,7 +159,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createHud() {
-    this.hud = new HUD(this, this.car);
+    this.hud = new HUD(this, this.car, this.secondCar);
   }
 
   // road objects are obstacles and coins
@@ -200,7 +200,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(
           this.car,
           roadObject,
-          this.ItemManager.itemShieldCar1,
+          this.ItemManager.itemRandom1,
           undefined,
           this.ItemManager,
         );
@@ -218,7 +218,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.displayWidth * 1.25, roadObject.displayHeight);
+        roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
         roadObject.body.setImmovable(true);
         this.physics.add.collider(
           this.car,
@@ -228,6 +228,7 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
 
+        //this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
         if (this.secondCar) {
           this.physics.add.collider(
             this.secondCar,
@@ -296,22 +297,40 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // Handle game over when the player collides with an enemy car
-  gameOver() {
+  gameOver(car) {
+    if (car.dead) return; //already dead, do not run again
+
+    //only the car that got hit dies
+    car.dead = true;
+    car.boundaryParticles.emitting = false;
+    car.disableBody(true, true); //hides the dead car
+
+    //in multiplayer only game over when both are dead
+    if (this.secondCar && !(this.car.dead && this.secondCar.dead)) {
+      return;
+    }
+
     this.scene.start('GameoverScene', {
       distance: this.car.calculate_km(),
       score: this.car.score,
+      distance2: this.secondCar ? this.secondCar.calculate_km() : null,
+      score2: this.secondCar ? this.secondCar.score : null,
       isMultiplayer: this.isMultiplayer,
     }); // Change to DeathScene once there is one
   }
 
   // Update the game state every frame
   update(_, delta) {
+    this.InputManager.update();
+
     this.elapsedTime += delta;
-    this.car.move();
-    this.car.update_boundary_particles();
-    this.car.intendedXVelocity = this.car.body.velocity.x;
-    if (this.secondCar) {
-      this.secondCar.move();
+    if (!this.car.dead) {
+      this.car.move(this.InputManager.getControlsP1);
+      this.car.update_boundary_particles();
+      this.car.intendedXVelocity = this.car.body.velocity.x;
+    }
+    if (this.secondCar && !this.secondCar.dead) {
+      this.secondCar.move(this.InputManager.getControlsP2);
       this.secondCar.update_boundary_particles();
       this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
     }
@@ -324,8 +343,11 @@ export default class GameScene extends Phaser.Scene {
     const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
-    this.car.update_meters(targetTrackSpeed, delta);
-    if (this.secondCar) {
+    //dead cars do not collect distance anymore
+    if (!this.car.dead) {
+      this.car.update_meters(targetTrackSpeed, delta);
+    }
+    if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.update_meters(targetTrackSpeed, delta);
     }
 

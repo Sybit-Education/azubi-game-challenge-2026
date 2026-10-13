@@ -1,5 +1,6 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
+import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
 import Car from '../objects/Car.js';
@@ -18,20 +19,23 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('car', 'sprites/Entities/Player Skins/SybitKartPlayer1.png');
-    this.load.image('track', 'sprites/Race Track Assets/road.png');
-    this.load.image('border', 'sprites/Race Track Assets/border.png');
-    this.load.image('background', 'sprites/Map Skins/Hintergrund.png');
-    this.load.image('starting_Banner', 'sprites/Race Track Assets/starting_banner.png');
-    this.load.image('startingLine', 'sprites/Race Track Assets/startingAndFinishLine.png');
-    this.load.image('start-count-3', 'sprites/Race Track Assets/countdown3.png');
-    this.load.image('start-count-2', 'sprites/Race Track Assets/countdown2.png');
-    this.load.image('start-count-1', 'sprites/Race Track Assets/countdown1.png');
-    this.load.image('start-go', 'sprites/Race Track Assets/goLabel.png');
-    this.load.audio('countdown', 'audio/sfx/countdown.mp3');
+    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
+    this.load.image('track', 'assets/images/race-track-assets/road.png');
+    this.load.image('border', 'assets/images/race-track-assets/border.png');
+    this.load.image('background', 'assets/images/map-skins/hintergrund.png');
+    this.load.image('starting_Banner', 'assets/images/race-track-assets/starting-banner.png');
+    this.load.image('startingLine', 'assets/images/race-track-assets/starting-and-finish-line.png');
+    this.load.image('start-count-3', 'assets/images/race-track-assets/countdown-3.png');
+    this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
+    this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
+    this.load.image('start-go', 'assets/images/race-track-assets/go-label.png');
+    this.load.audio('countdown', 'assets/audio/sfx/countdown.mp3');
   }
 
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     this.leaving = false;
     this.secondCar = null;
     this.number = null;
@@ -185,6 +189,15 @@ export default class StartScene extends Phaser.Scene {
 
   update() {
     if (this.car.y <= -300) {
+      this.goToGame();
+    }
+    this.InputManager.update();
+    if (
+      this.InputManager.getControlsP1.button4 ||
+      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP2.button4 ||
+      this.InputManager.getControlsP2.button2
+    ) {
       this.goToGame();
     }
   }

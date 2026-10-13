@@ -1,22 +1,15 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, controls = 'W,A,S,D') {
+  constructor(scene, x, y) {
     //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
     super(scene, x, y, 'car');
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    const [upKey, leftKey, downKey, rightKey] = controls.split(','); //splits the string "A,D" and if player 2 "LEFT, RIGHT" to two seperate strings
-
-    this.leftKey = leftKey;
-    this.rightKey = rightKey;
-    this.upKey = upKey;
-    this.downKey = downKey;
-    this.keys = scene.input.keyboard.addKeys(controls);
-
     this.score = 0;
+    this.dead = false; //in multiplayer one car can be dead while the other keeps driving
     this.value = 10;
     this.meters = 0;
     this.boundaryParticles = scene.add
@@ -35,12 +28,12 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         quantity: 5,
       })
       .setDepth(11);
-    this.setScale(0.66);
-    this.body.setSize(this.displayWidth, this.displayHeight);
+    this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
+    this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
   }
 
-  move() {
+  move(controls) {
     this.setVelocityX(0);
     this.setVelocityY(0);
     this.setAngle(0);
@@ -54,26 +47,26 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.x = Phaser.Math.Clamp(this.x, this.leftLimit, this.rightLimit);
     this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
 
-    if (this.keys[this.leftKey]?.isDown) {
+    if (controls.left) {
       //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       this.setVelocityX(-500);
-      if (this.x !== this.leftLimit && !this.keys[this.rightKey]?.isDown) {
+      if (this.x !== this.leftLimit && !controls.right) {
         this.setAngle(-3);
       }
     }
 
-    if (this.keys[this.rightKey]?.isDown) {
+    if (controls.right) {
       this.setVelocityX(500);
-      if (this.x !== this.rightLimit && !this.keys[this.leftKey]?.isDown) {
+      if (this.x !== this.rightLimit && !controls.left) {
         this.setAngle(3);
       }
     }
 
-    if (this.keys[this.upKey]?.isDown) {
+    if (controls.accelerate) {
       this.setVelocityY(-300);
     }
 
-    if (this.keys[this.downKey]?.isDown) {
+    if (controls.brake) {
       this.setVelocityY(500);
     }
 

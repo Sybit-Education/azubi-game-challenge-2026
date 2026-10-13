@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 import MenuScene from './scenes/Menus/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
@@ -37,6 +37,10 @@ const config = {
     CreditsScene,
     ChristmasScene,
   ],
+
+  loader: {
+    baseURL: window.location.pathname,
+  },
 };
 
 // Create game
