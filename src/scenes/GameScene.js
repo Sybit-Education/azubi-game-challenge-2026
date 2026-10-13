@@ -47,11 +47,11 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
-    this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
+    this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
     this.createRoadObject('obstacle');

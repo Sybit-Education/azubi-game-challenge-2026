@@ -14,50 +14,50 @@ export default class ItemManager {
     this.schildAktivCar2 = false;
 
     this.iceTriggered = false;
+    this.originScale = this.scene.car.scale;
   }
 
   itemShrinkCar1() {
     console.log('shrink');
-
-    let carShrinkSize = 0.3;
+    let carShrinkSize = 0.5;
 
     this.scene.car.setScale(carShrinkSize);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(0.66);
+      this.scene.car.setScale(this.originScale);
     });
   }
 
   itemShrinkCar2() {
     console.log('Shrink 2');
-    let carShrinkSize = 0.3;
+    let carShrinkSize = 0.5;
 
     this.scene.secondCar.setScale(carShrinkSize);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(0.66);
+      this.scene.secondCar.setScale(this.originScale);
     });
   }
 
   itemGrowCar1() {
     console.log('grow');
-
-    let carGrowSize = 0.85;
+    let carGrowSize = 1;
 
     this.scene.car.setScale(carGrowSize);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(0.66);
+      this.scene.car.setScale(this.originScale);
     });
   }
 
   itemGrowCar2() {
-    let carGrowSize = 0.85;
+    console.log('grow 2');
+    let carGrowSize = 1;
 
     this.scene.secondCar.setScale(carGrowSize);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(0.66);
+      this.scene.secondCar.setScale(this.originScale);
     });
   }
 
