@@ -68,6 +68,11 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+    this.onEscape = (event) => {
+      if (event.key === 'Escape') this.openPause();
+    };
+    window.addEventListener('keydown', this.onEscape);
+    this.events.once('shutdown', () => window.removeEventListener('keydown', this.onEscape));
     this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
@@ -393,6 +398,12 @@ export default class GameScene extends Phaser.Scene {
   collectCoin(car, coin) {
     coin.destroy();
     car.increase_score(coin.value);
+  }
+
+  openPause() {
+    if (this.scene.isPaused()) return;
+    this.scene.pause();
+    this.scene.launch('PauseScene');
   }
 
   // Handle game over when the player collides with an enemy car

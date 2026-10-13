@@ -3,6 +3,7 @@ import MenuScene from './scenes/Menus/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import LoadingScene from './scenes/LoadingScene.js';
 import PopUpScene from './scenes/Menus/PopUpScene.js';
+import PauseScene from './scenes/PauseScene.js';
 import StartScene from './scenes/StartScene.js';
 import GameoverScene from './scenes/GameoverScene.js';
 import CreditsScene from './scenes/CreditsScene.js';
@@ -33,6 +34,7 @@ const config = {
     StartScene,
     GameScene,
     PopUpScene,
+    PauseScene,
     GameoverScene,
     CreditsScene,
     ChristmasScene,
