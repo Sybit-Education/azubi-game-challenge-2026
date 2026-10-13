@@ -125,7 +125,11 @@ function paintSideFlank(ctx, body, turn) {
   ctx.restore();
 }
 
-function paintRearVehicle(ctx, body, logo, turn = 0) {
+const PLATE = { x: 76, y: 138, width: 64, height: 18 };
+const PLATE_FILL = '#1b1f2e';
+const PLATE_LOGO_WIDTH = 50;
+
+function paintRearVehicle(ctx, body, logo, plate, turn = 0) {
   ctx.clearRect(0, 0, REAR_WIDTH, REAR_HEIGHT);
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
@@ -178,7 +182,17 @@ function paintRearVehicle(ctx, body, logo, turn = 0) {
   ctx.fillRect(50, 113, 22, 4);
   ctx.fillRect(144, 113, 22, 4);
 
-  fillRoundedRect(ctx, 90, 142, 36, 12, 3, '#e9e9ec');
+  fillRoundedRect(ctx, PLATE.x, PLATE.y, PLATE.width, PLATE.height, 3, PLATE_FILL);
+  if (plate) {
+    const plateLogoHeight = (plate.height * PLATE_LOGO_WIDTH) / plate.width;
+    ctx.drawImage(
+      plate,
+      108 - PLATE_LOGO_WIDTH / 2,
+      PLATE.y + (PLATE.height - plateLogoHeight) / 2,
+      PLATE_LOGO_WIDTH,
+      plateLogoHeight,
+    );
+  }
 
   fillRoundedRect(ctx, 34, 160, 148, 22, 10, shade(body, -0.6));
   for (const x of [70, 146]) {
@@ -226,23 +240,24 @@ export function drawWheelTread(ctx, turn, roll) {
   }
 }
 
-function paintRearTexture(textures, key, body, logo, turn) {
+function paintRearTexture(textures, key, body, logo, plate, turn) {
   const texture = textures.createCanvas(key, REAR_WIDTH, REAR_HEIGHT);
-  paintRearVehicle(texture.getContext(), body, logo, turn);
+  paintRearVehicle(texture.getContext(), body, logo, plate, turn);
   texture.refresh();
 }
 
 export function createRearVehicleTextures(textures) {
   const logo = extractLogo(textures.get('car').getSourceImage());
+  const plate = textures.get('sybit-plate-logo').getSourceImage();
   for (const [key, body] of Object.entries(REAR_PALETTES)) {
     const isPlayer = PLAYER_REAR_KEYS.has(key);
     if (!textures.exists(key)) {
-      paintRearTexture(textures, key, body, isPlayer ? logo : null, 0);
+      paintRearTexture(textures, key, body, isPlayer ? logo : null, plate, 0);
     }
     if (!isPlayer) continue;
     for (const lean of [-1, 1]) {
       const turnKey = rearTurnKey(key, lean);
-      if (!textures.exists(turnKey)) paintRearTexture(textures, turnKey, body, logo, lean);
+      if (!textures.exists(turnKey)) paintRearTexture(textures, turnKey, body, logo, plate, lean);
     }
   }
 }

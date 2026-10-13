@@ -2,8 +2,8 @@ import PerspectiveRoad, { ROAD_HORIZON, ROAD_LATERAL_SCALE } from './Perspective
 
 // Screen line where the 2D physics road width maps 1:1 (car spawn height).
 const REFERENCE_Y_RATIO = 1 / 1.25;
-// Minimum drawn size; applied to size only so positions stay on the perspective line.
-const MIN_OBJECT_SCALE = 0.25;
+// Road objects spawn this far below the horizon, as a share of the reach.
+const SPAWN_DEPTH = 0.1;
 
 export default class SegmentRoad extends PerspectiveRoad {
   camDepth = 0;
@@ -17,7 +17,14 @@ export default class SegmentRoad extends PerspectiveRoad {
   }
 
   get spawnY() {
-    return this.scene.scale.height * ROAD_HORIZON;
+    const { height } = this.scene.scale;
+    return height * ROAD_HORIZON + this.roadReach(height) * SPAWN_DEPTH;
+  }
+
+  // Screen speed as a share of the road speed; the road recedes toward the horizon.
+  roadSpeedScale(y, height) {
+    const depth = (y - height * ROAD_HORIZON) / this.roadReach(height);
+    return depth * depth;
   }
 
   project(x, y, width, height) {
@@ -28,7 +35,7 @@ export default class SegmentRoad extends PerspectiveRoad {
       x: width / 2 + (x - width / 2) * scale * ROAD_LATERAL_SCALE,
       y,
       scale,
-      size: Math.max(MIN_OBJECT_SCALE, scale),
+      size: scale,
     };
   }
 

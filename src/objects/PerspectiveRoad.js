@@ -8,7 +8,7 @@ import {
   rearTurnKey,
 } from './RearVehicleSprites.js';
 
-export const ROAD_VANISHING_POINT_Y = 0.384;
+export const ROAD_VANISHING_POINT_Y = 0.33;
 const ROAD_FAR_SCALE = 0.14;
 export const ROAD_HORIZON = ROAD_FAR_SCALE + (1 - ROAD_FAR_SCALE) * ROAD_VANISHING_POINT_Y;
 export const ROAD_LATERAL_SCALE = 1.7; // matches the wider street in the background art
@@ -68,6 +68,10 @@ export default class PerspectiveRoad {
 
   project(x, y, width, height) {
     return projectRoadPoint(x, y, width, height);
+  }
+
+  roadSpeedScale() {
+    return 1;
   }
 
   drawStrip(source, worldY, scrollY, tileHeight, left, top, width, height, flip = false) {

@@ -21,10 +21,15 @@ export default class RoadObject extends Phaser.GameObjects.Image {
     this.body.setSize(this.width / ROAD_LATERAL_SCALE, this.height * SPRITE_GROUND_SQUASH);
   }
 
+  speedScale() {
+    const { height } = this.gameScene.scale;
+    return this.gameScene.perspectiveRoad.roadSpeedScale(this.y, height);
+  }
+
   move(time, delta) {
     this.speed = Math.min(1500, 600 + time * 0.005);
 
-    this.y += (this.speed * delta) / 1000;
+    this.y += (this.speed * this.speedScale() * delta) / 1000;
 
     const buffer = 100;
 
