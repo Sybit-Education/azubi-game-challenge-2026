@@ -5,5 +5,5 @@ export default class Ice extends Collectable {
     super(scene, x, y, 'ice', lane, 0);
 
     this.setScale(2.5);
-  }  
+  }
 }

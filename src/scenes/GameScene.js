@@ -177,10 +177,22 @@ export default class GameScene extends Phaser.Scene {
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
         roadObject.body.setOffset(0, 5);
-        this.physics.add.overlap(this.car, roadObject, this.ItemManager.coinBudgetPlus1, undefined, this.ItemManager);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.coinBudgetPlus1,
+          undefined,
+          this.ItemManager,
+        );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
         if (this.secondCar) {
-        this.physics.add.overlap(this.secondCar, roadObject, this.ItemManager.coinBudgetPlus2, undefined, this.ItemManager);
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.coinBudgetPlus2,
+            undefined,
+            this.ItemManager,
+          );
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'item') {
@@ -193,7 +205,7 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
-        
+
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
@@ -224,23 +236,27 @@ export default class GameScene extends Phaser.Scene {
             undefined,
             this.ItemManager,
           );
-          
         }
-      }
-      else if (type === 'ice') {
+      } else if (type === 'ice') {
         roadObject = new Ice(this, roadObjectX, spawnY, lane);
-        this.physics.add.overlap(this.car, roadObject, this.ItemManager.iceEffect, undefined, this.ItemManager);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
       }
 
-       if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.iceEffect,
-            undefined,
-            this.ItemManager,
-          );
-        }
+      if (this.secondCar) {
+        this.physics.add.overlap(
+          this.secondCar,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
+      }
       this.roadObjects.push(roadObject);
     }
 
@@ -252,8 +268,7 @@ export default class GameScene extends Phaser.Scene {
       delay = Phaser.Math.Between(5000, 10000);
     } else if (type === 'obstacle') {
       delay = Phaser.Math.Between(2000, 4000);
-    }
-    else if (type === 'ice') {
+    } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
     }
 
@@ -324,6 +339,5 @@ export default class GameScene extends Phaser.Scene {
     this.hud.update();
 
     this.ItemManager.itemShop();
-
   }
 }
