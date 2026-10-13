@@ -169,34 +169,6 @@ export default class ItemManager {
     }
   }
 
-// iceEffect(car) {
-//   if (this.iceTriggered) {
-//     return;
-//   }
-//   console.log("ice!");
-//   this.iceTriggered = true;
-  
-//   const zufallszahl = Phaser.Math.Between(0, 1);
-
-//   if (zufallszahl === 1) {
-//     this.scene.tweens.add({
-//       targets: car,
-//       x: car.x + 300,
-//       duration: 1250
-//     });
-//   } else {
-//     this.scene.tweens.add({
-//       targets: car,
-//       x: car.x - 300,
-//       duration: 1250
-//     });
-//   }
-
-//   this.scene.time.delayedCall(1500, () => {
-//     this.iceTriggered = false;
-//   });
-// }
-
 iceEffect(car) {
   if (car.iceTriggered) {
     return;
@@ -257,10 +229,6 @@ iceEffect(car) {
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
-    // if (Phaser.Input.Keyboard.JustDown(this.key1)) {
-    //   this.itemShrinkCar1();
-    // }
-
     // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
@@ -275,10 +243,6 @@ iceEffect(car) {
       this.itemShrinkCar2();
       this.coinBudgetPlayer2 -= this.itemShrinkPrize;
     }
-
-    // if (Phaser.Input.Keyboard.JustDown(this.numpad3)) {
-    //   this.itemShrinkCar3();
-    // }
   }
 
 
