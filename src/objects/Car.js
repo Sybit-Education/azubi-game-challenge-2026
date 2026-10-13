@@ -149,4 +149,5 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   calculate_km() {
     return (this.meters / 1000).toFixed(2);
   }
+
 }

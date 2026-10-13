@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import Car from '../objects/Car.js';
+
 export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
@@ -12,6 +14,8 @@ export default class ItemManager {
 
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
+
+    this.iceTriggered = false;
   }
 
   itemShrinkCar1() {
@@ -165,6 +169,65 @@ export default class ItemManager {
     }
   }
 
+// iceEffect(car) {
+//   if (this.iceTriggered) {
+//     return;
+//   }
+//   console.log("ice!");
+//   this.iceTriggered = true;
+  
+//   const zufallszahl = Phaser.Math.Between(0, 1);
+
+//   if (zufallszahl === 1) {
+//     this.scene.tweens.add({
+//       targets: car,
+//       x: car.x + 300,
+//       duration: 1250
+//     });
+//   } else {
+//     this.scene.tweens.add({
+//       targets: car,
+//       x: car.x - 300,
+//       duration: 1250
+//     });
+//   }
+
+//   this.scene.time.delayedCall(1500, () => {
+//     this.iceTriggered = false;
+//   });
+// }
+
+iceEffect(car) {
+  if (car.iceTriggered) {
+    return;
+  }
+
+  car.iceTriggered = true;
+
+  console.log("ice!");
+
+  const zufallszahl = Phaser.Math.Between(0, 1);
+
+  if (zufallszahl === 1) {
+    this.scene.tweens.add({
+      targets: car,
+      x: car.x + 300,
+      duration: 1250
+    });
+  } else {
+    this.scene.tweens.add({
+      targets: car,
+      x: car.x - 300,
+      duration: 1250
+    });
+  }
+
+  this.scene.time.delayedCall(1500, () => {
+    car.iceTriggered = false;
+  });
+}
+
+
   coinBudgetPlus1() {
     this.coinBudgetPlayer1 ++;
     console.log('Spieler1 ' + this.coinBudgetPlayer1 + ' Coins');
@@ -204,7 +267,7 @@ export default class ItemManager {
     // this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
     
     if (Phaser.Input.Keyboard.JustDown(this.numpad1) && this.coinBudgetPlayer2 >= this.itemShieldPrize) {
-      this.itemShieldCar2;
+      this.itemShieldCar2();
       this.coinBudgetPlayer2 -= this.itemShieldPrize;
     }
 
