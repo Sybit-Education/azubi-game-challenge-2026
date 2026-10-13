@@ -33,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('item', 'assets/images/entities/item.png');
-    this.load.image('ice', 'sprites/Entities/Obstacles/ice.png');
+    this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
 
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 

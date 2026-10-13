@@ -39,7 +39,7 @@ const config = {
   ],
 
   loader: {
-    baseURL: window.location.pathname,
+    baseURL: './public/',
   },
 };
 
