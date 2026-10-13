@@ -30,11 +30,11 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car2', 'sprites/Entities/Obstacles/EnemyCar2.png');
     this.load.image('enemy-car3', 'sprites/Entities/Obstacles/EnemyCar3.png');
 
-    this.load.image('coin', 'sprites/Entities/coin.png');
-    this.load.image('item', 'sprites/Entities/item.png');
+    this.load.image('coin', 'assets/images/entities/coin.png');
+    this.load.image('item', 'assets/images/entities/item.png');
     this.load.image('ice', 'sprites/Entities/Obstacles/ice.png');
 
-    this.load.image('boundary-particle', 'sprites/Particles/image001.png');
+    this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
     this.load.image('background', 'sprites/Map Skins/Background Sybit-City.png');
 
