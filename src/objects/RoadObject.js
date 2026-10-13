@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { ROAD_LATERAL_SCALE, SPRITE_GROUND_SQUASH } from './PerspectiveRoad.js';
+
 export default class RoadObject extends Phaser.GameObjects.Image {
   constructor(scene, x, y, texture, lane) {
     super(scene, x, y, texture);
@@ -12,6 +14,11 @@ export default class RoadObject extends Phaser.GameObjects.Image {
     scene.physics.add.existing(this);
 
     this.setOrigin(0.5);
+  }
+
+  // Hitbox matches the drawn footprint: narrower in x, squashed in y.
+  fitHitbox() {
+    this.body.setSize(this.width / ROAD_LATERAL_SCALE, this.height * SPRITE_GROUND_SQUASH);
   }
 
   move(time, delta) {

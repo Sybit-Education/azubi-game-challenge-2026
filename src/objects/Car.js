@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { ROAD_LATERAL_SCALE } from './PerspectiveRoad.js';
+import { REAR_ASPECT } from './RearVehicleSprites.js';
 
 export default class Car extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y) {
@@ -9,6 +11,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     scene.physics.add.existing(this);
 
     this.score = 0;
+    this.lean = 0; // -1 steering left, 1 steering right, smoothed in move()
     this.dead = false; //in multiplayer one car can be dead while the other keeps driving
     this.value = 10;
     this.meters = 0;
@@ -29,8 +32,24 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       })
       .setDepth(11);
     this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
-    this.body.setSize(this.width, this.height);
+    this.fitHitbox();
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
+  }
+
+  // Hitbox follows the drawn rear-view footprint. Lanes render ROAD_LATERAL_SCALE wider, so x is narrowed to match.
+  fitHitbox() {
+    const drawnHeight = this.width * REAR_ASPECT;
+    this.body.setSize((this.width * 0.8) / ROAD_LATERAL_SCALE, drawnHeight * 0.9);
+    // The drawn car sits on its ground contact, below the physics centre.
+    this.body.offset.y += (this.height - drawnHeight) / 2;
+  }
+
+  // -1 at the left road edge, 0 at the centre, 1 at the right road edge.
+  get lanePosition() {
+    const halfRange = (this.rightLimit - this.leftLimit) / 2;
+    if (!halfRange) return 0;
+    const centre = (this.rightLimit + this.leftLimit) / 2;
+    return Phaser.Math.Clamp((this.x - centre) / halfRange, -1, 1);
   }
 
   move(controls) {
@@ -69,6 +88,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (controls.brake) {
       this.setVelocityY(500);
     }
+
+    const steer = Number(controls.right) - Number(controls.left);
+    this.lean = Phaser.Math.Linear(this.lean, steer, 0.15);
 
     //constraint the cars downward and upward movement to not go out of bounds
 

@@ -9,6 +9,29 @@ import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
+import PerspectiveRoad, { ROAD_HORIZON } from '../objects/PerspectiveRoad.js';
+import SegmentRoad from '../objects/SegmentRoad.js';
+
+// Experiment toggle: true = segment-based road, false = texture-strip road.
+const USE_SEGMENT_ROAD = true;
+// Extra scale the background zooms to around the vanishing point per cycle.
+const BACKGROUND_ZOOM = 0.5;
+// Track travel in px for one zoom cycle.
+const BACKGROUND_ZOOM_DISTANCE = 3000;
+// Smaller copies of the art toward the vanishing point fill its transparent center.
+const BACKGROUND_DISTANT_COPIES = 3;
+const BACKGROUND_DISTANT_FACTOR = 0.5;
+// Share of the art height faded in from the top so copy edges blend into the sky.
+const BACKGROUND_TOP_FEATHER = 0.25;
+// Share of the art height faded out at the bottom so it melts into the horizon haze.
+const BACKGROUND_BOTTOM_FEATHER = 0.4;
+// Sky behind the transparent background art, from the top edge down to the horizon.
+const SKY_TOP_COLOR = '#05020f';
+const SKY_HORIZON_COLOR = '#2b1245';
+// Haze that softens distant buildings into the horizon, peaking at the horizon line.
+const HAZE_COLOR = 'rgba(43, 18, 69, 0.7)';
+const HAZE_CLEAR_COLOR = 'rgba(43, 18, 69, 0)';
+const HAZE_BELOW_HORIZON_RATIO = 0.1;
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -51,18 +74,129 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
+    this.createHud();
+    this.backgroundDistance = 0;
+    this.createSky();
+    this.setBackground('background');
+    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+    const RoadRenderer = USE_SEGMENT_ROAD ? SegmentRoad : PerspectiveRoad;
+    this.perspectiveRoad = new RoadRenderer(this);
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createRoadObject('item');
-    this.createHud();
-    this.setBackground('background');
-    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
   }
 
-  setBackground(img) {
-    const background = this.add.image(0, 0, img).setOrigin(0, 0);
-    background.setDisplaySize(this.scale.width, this.scale.height);
-    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
+  createSky() {
+    const { height } = this.scale;
+    const horizon = height * ROAD_HORIZON;
+    const hazeBottom = horizon + height * HAZE_BELOW_HORIZON_RATIO;
+
+    this.addGradientImage(
+      'sky',
+      height,
+      [
+        [0, SKY_TOP_COLOR],
+        [ROAD_HORIZON, SKY_HORIZON_COLOR],
+        [1, SKY_HORIZON_COLOR],
+      ],
+      -20,
+    );
+    this.addGradientImage(
+      'haze',
+      hazeBottom,
+      [
+        [0, HAZE_CLEAR_COLOR],
+        [horizon / hazeBottom, HAZE_COLOR],
+        [1, HAZE_CLEAR_COLOR],
+      ],
+      -5,
+    );
+  }
+
+  // Stops are offsets from 0 to 1 across the filled height.
+  addGradientImage(key, fillHeight, stops, depth) {
+    const { width, height } = this.scale;
+    if (this.textures.exists(key)) this.textures.remove(key);
+
+    const canvas = this.textures.createCanvas(key, width, height);
+    const context = canvas.getContext();
+    const gradient = context.createLinearGradient(0, 0, 0, fillHeight);
+    for (const [offset, color] of stops) gradient.addColorStop(offset, color);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, fillHeight);
+    canvas.refresh();
+
+    this.add.image(0, 0, key).setOrigin(0).setDepth(depth);
+  }
+
+  // Copy of the background art with soft alpha edges at the top and bottom.
+  createFeatheredBackground(sourceKey) {
+    const key = `${sourceKey}-feathered`;
+    if (this.textures.exists(key)) this.textures.remove(key);
+
+    const source = this.textures.get(sourceKey).getSourceImage();
+    const canvas = this.textures.createCanvas(key, source.width, source.height);
+    const context = canvas.getContext();
+    context.drawImage(source, 0, 0);
+
+    // One full-height mask: destination-in would clear everything outside a partial fill.
+    const mask = context.createLinearGradient(0, 0, 0, source.height);
+    mask.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    mask.addColorStop(BACKGROUND_TOP_FEATHER, 'rgba(0, 0, 0, 1)');
+    mask.addColorStop(1 - BACKGROUND_BOTTOM_FEATHER, 'rgba(0, 0, 0, 1)');
+    mask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    context.globalCompositeOperation = 'destination-in';
+    context.fillStyle = mask;
+    context.fillRect(0, 0, source.width, source.height);
+    canvas.refresh();
+    return key;
+  }
+
+  setBackground(sourceKey) {
+    const img = this.createFeatheredBackground(sourceKey);
+    // Scale by height like the road and cars; mirrored copies fill wide windows.
+    const source = this.textures.get(img).getSourceImage();
+    const scale = this.scale.height / source.height;
+    const tileWidth = source.width * scale;
+    const tiles = Math.ceil(this.scale.width / tileWidth / 2) + 1;
+
+    this.backgroundTileWidth = tileWidth;
+    // Two layers half a zoom cycle apart crossfade into each other.
+    this.backgroundLayers = [0, 0.5].map((phaseOffset) => {
+      const layer = { phaseOffset, scale, tiles: [] };
+      for (let copy = 0; copy <= BACKGROUND_DISTANT_COPIES; copy++) {
+        const factor = BACKGROUND_DISTANT_FACTOR ** copy;
+        for (let i = -tiles; i <= tiles; i++) {
+          const baseX = this.scale.width / 2 + i * tileWidth;
+          const image = this.add
+            .image(baseX, this.scale.height / 2, img)
+            .setScale(scale)
+            .setFlipX(i % 2 !== 0)
+            .setDepth(-10 - copy); // Farther copies sit behind nearer ones
+          layer.tiles.push({ image, baseX, factor });
+        }
+      }
+      return layer;
+    });
+  }
+
+  moveBackground(distance) {
+    const { width, height } = this.scale;
+    const vanishingX = width / 2;
+    const vanishingY = height * ROAD_HORIZON;
+
+    for (const layer of this.backgroundLayers) {
+      const phase = Phaser.Math.Wrap(distance / BACKGROUND_ZOOM_DISTANCE + layer.phaseOffset, 0, 1);
+      const zoom = 1 + BACKGROUND_ZOOM * phase;
+      const alpha = Math.sin(Math.PI * phase);
+
+      for (const { image, baseX, factor } of layer.tiles) {
+        const scaleFactor = zoom * factor;
+        image.setScale(layer.scale * scaleFactor).setAlpha(alpha);
+        image.x = vanishingX + (baseX - vanishingX) * scaleFactor;
+        image.y = vanishingY + (height / 2 - vanishingY) * scaleFactor;
+      }
+    }
   }
 
   //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
@@ -112,7 +246,7 @@ export default class GameScene extends Phaser.Scene {
   createPlayer() {
     if (this.isMultiplayer) {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
+      this.car.fitHitbox(); // slightly smaller than the drawn car, to be more forgiving
 
       this.secondCar = new Car(
         this,
@@ -120,11 +254,11 @@ export default class GameScene extends Phaser.Scene {
         this.scale.height / 1.25,
         'UP,LEFT,DOWN,RIGHT',
       );
-      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
+      this.secondCar.fitHitbox();
       this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
+      this.car.fitHitbox();
     }
   }
 
@@ -165,20 +299,22 @@ export default class GameScene extends Phaser.Scene {
     const roadLeftEdge = this.scale.width / 2 - this.track1.displayWidth / 2;
     const lane = Phaser.Math.Between(0, laneCount - 1);
     const roadObjectX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
-    const spawnY = -200;
+    const spawnY = this.perspectiveRoad.spawnY;
 
     if (this.positionFree(lane, spawnY)) {
       let roadObject;
 
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
-        roadObject.body.setOffset(0, 5);
+        roadObject.fitHitbox();
+        roadObject.body.offset.y += 5;
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
         if (this.secondCar) {
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
+        roadObject.fitHitbox();
         this.physics.add.overlap(
           this.car,
           roadObject,
@@ -199,7 +335,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'obstacle') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
+        roadObject.fitHitbox();
         roadObject.body.setImmovable(true);
         this.physics.add.collider(
           this.car,
@@ -320,6 +456,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.track1.move(delta);
     this.track2.move(delta);
+    this.backgroundDistance += (targetTrackSpeed * delta) / 1000;
+    this.moveBackground(this.backgroundDistance);
     this.hud.update();
   }
 }
