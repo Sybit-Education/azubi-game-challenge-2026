@@ -1,97 +1,131 @@
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const isLiveCar = (car) => car?.active && !car.dead && car.body?.enable;
-// Each recording has its own approach length so its loudest part matches the pass.
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function isLiveCar(car) {
+  if (!car || !car.active || car.dead) return false;
+  return Boolean(car.body && car.body.enable);
+}
+
+function getVelocity(car) {
+  let y = car.body.velocity?.y ?? 0;
+  if (Number.isFinite(car.speed)) y = car.speed;
+  return { x: car.body.velocity?.x ?? 0, y };
+}
+
+// Time of the loudest point in each recording, measured from the file start.
 export const PASS_BY_VARIANTS = [
   { key: 'car-pass-by', approachSeconds: 2 },
   { key: 'car-pass-by-johnnyfarmer', approachSeconds: 1.775 },
   { key: 'car-pass-by-961-studios', approachSeconds: 1.425 },
 ];
-const velocity = (car) => ({
-  x: car.body.velocity?.x ?? 0,
-  y: Number.isFinite(car.speed) ? car.speed : (car.body.velocity?.y ?? 0),
-});
 
 export function timeUntilPass(player, other) {
-  const speed = velocity(other).y - velocity(player).y;
-  if (speed === 0) return Infinity;
-  const seconds = -(other.y - player.y) / speed;
-  return seconds >= 0 ? seconds : Infinity;
+  const relativeSpeed = getVelocity(other).y - getVelocity(player).y;
+  if (relativeSpeed === 0) return Infinity;
+
+  const distanceY = other.y - player.y;
+  const seconds = -distanceY / relativeSpeed;
+  // A negative value means the car is already moving away.
+  if (seconds < 0) return Infinity;
+  return seconds;
 }
 
 export default class CarPassBy {
   constructor(scene, players) {
     this.scene = scene;
     this.players = players;
-    this.history = new Map(players.map((player) => [player, new Map()]));
-    this.playing = new Set();
-    this.variants = new WeakMap();
+    this.encounters = []; // Each encounter pairs a player car with another car.
+    this.playing = []; // Active sounds whose position and volume need updating.
+    this.variants = new WeakMap(); // Keep the same sound variant for each car.
     this.lastVariant = null;
     scene.events.once('shutdown', () => this.destroy());
   }
 
   update(cars) {
-    const currentCars = new Set(cars.filter(isLiveCar));
+    const liveCars = cars.filter(isLiveCar);
+    this.encounters = this.encounters.filter(
+      (encounter) => liveCars.includes(encounter.player) && liveCars.includes(encounter.car),
+    );
 
     for (const player of this.players) {
-      const history = this.history.get(player);
-      if (!isLiveCar(player)) {
-        history.clear();
-        continue;
-      }
-
-      for (const car of history.keys()) {
-        if (!currentCars.has(car)) history.delete(car);
-      }
-
-      for (const car of currentCars) {
-        if (car === player) continue;
-        const x = car.x - player.x;
-        const y = car.y - player.y;
-        const previous = history.get(car);
-        const variant = this.variantFor(car);
-        const state = { x, y, started: previous?.started ?? false };
-        history.set(car, state);
-        if (state.started) continue;
-
-        const crossed = previous && ((previous.y < 0 && y >= 0) || (previous.y > 0 && y <= 0));
-        const seconds = crossed ? 0 : timeUntilPass(player, car);
-        if (seconds > variant.approachSeconds || (!crossed && seconds === 0)) continue;
-
-        // Predict the side at the upcoming pass; interpolate if a fast car
-        // already crossed the player's position between two updates.
-        const fraction = crossed ? -previous.y / (y - previous.y) : 0;
-        const crossingX = crossed
-          ? previous.x + fraction * (x - previous.x)
-          : x + (velocity(car).x - velocity(player).x) * seconds;
-        const carHalfWidths = (player.body.width + car.body.width) / 2;
-        const hearingRange = this.scene.track1.displayWidth;
-        if (Math.abs(crossingX) <= carHalfWidths || Math.abs(crossingX) >= hearingRange) {
-          continue;
-        }
-
-        // Two player cars passing each other represent one audible encounter.
-        if (this.history.get(car)?.get(player)?.started) {
-          state.started = true;
-          continue;
-        }
-        if (this.play(player, car, seconds, variant)) state.started = true;
+      if (!isLiveCar(player)) continue;
+      for (const car of liveCars) {
+        if (car !== player) this.checkPass(player, car);
       }
     }
 
-    for (const entry of [...this.playing]) {
-      if (!isLiveCar(entry.player) || !isLiveCar(entry.car)) {
-        this.remove(entry);
-        continue;
-      }
-      this.position(entry);
+    this.updatePlayingSounds();
+  }
+
+  getEncounter(player, car) {
+    let encounter = this.encounters.find((entry) => entry.player === player && entry.car === car);
+    if (!encounter) {
+      encounter = {
+        player,
+        car,
+        previousX: car.x - player.x,
+        previousY: car.y - player.y,
+        started: false,
+      };
+      this.encounters.push(encounter);
     }
+    return encounter;
+  }
+
+  checkPass(player, car) {
+    const encounter = this.getEncounter(player, car);
+    const previousX = encounter.previousX;
+    const previousY = encounter.previousY;
+    const distanceX = car.x - player.x;
+    const distanceY = car.y - player.y;
+    encounter.previousX = distanceX;
+    encounter.previousY = distanceY;
+    const variant = this.variantFor(car);
+    if (encounter.started) return;
+
+    // A sign change means the car moved from ahead of the player to behind them
+    // (or vice versa). This also detects fast cars passing between two frames.
+    const passedNow = (previousY < 0 && distanceY >= 0) || (previousY > 0 && distanceY <= 0);
+    let seconds = timeUntilPass(player, car);
+    if (passedNow) seconds = 0;
+    if (seconds > variant.approachSeconds) return;
+    if (seconds === 0 && !passedNow) return;
+
+    let sideAtPass;
+    if (passedNow) {
+      // What fraction of the last frame occurred before the cars passed?
+      const frameFraction = -previousY / (distanceY - previousY);
+      sideAtPass = previousX + frameFraction * (distanceX - previousX);
+    } else {
+      const relativeSpeedX = getVelocity(car).x - getVelocity(player).x;
+      sideAtPass = distanceX + relativeSpeedX * seconds;
+    }
+
+    const minimumSideDistance = (player.body.width + car.body.width) / 2;
+    const hearingRange = this.scene.track1.displayWidth;
+    if (Math.abs(sideAtPass) <= minimumSideDistance) return; // Collision rather than a pass-by.
+    if (Math.abs(sideAtPass) >= hearingRange) return;
+
+    // Play only one sound when two player cars pass each other.
+    const alreadyHeard = this.encounters.some(
+      (entry) => entry.player === car && entry.car === player && entry.started,
+    );
+    if (alreadyHeard) {
+      encounter.started = true;
+      return;
+    }
+
+    encounter.started = this.play(player, car, seconds, variant);
   }
 
   variantFor(car) {
     let variant = this.variants.get(car);
     if (!variant) {
+      // Exclude the previous variant so successive new cars sound different.
       const choices = PASS_BY_VARIANTS.filter((entry) => entry !== this.lastVariant);
-      variant = choices[Math.floor(Math.random() * choices.length)];
+      const randomIndex = Math.floor(Math.random() * choices.length);
+      variant = choices[randomIndex];
       this.variants.set(car, variant);
       this.lastVariant = variant;
     }
@@ -100,6 +134,7 @@ export default class CarPassBy {
 
   play(player, car, seconds, variant) {
     if (this.scene.sound.locked) return false;
+
     const sound = this.scene.sound.add(variant.key);
     const entry = {
       player,
@@ -107,35 +142,55 @@ export default class CarPassBy {
       sound,
       approachDistance: Math.hypot(car.x - player.x, car.y - player.y),
     };
-    this.playing.add(entry);
+    this.playing.push(entry);
     this.position(entry);
     sound.once('complete', () => this.remove(entry));
-    // If detection starts late, skip the corresponding part of the approach
-    // so the recording's peak still lines up with the expected pass.
-    if (
-      !sound.play({ seek: clamp(variant.approachSeconds - seconds, 0, variant.approachSeconds) })
-    ) {
+
+    // If a car is detected late, skip ahead in the recording.
+    // Example: peak at 2s, pass expected in 1s -> start playback at second 1.
+    const startAt = clamp(variant.approachSeconds - seconds, 0, variant.approachSeconds);
+    if (!sound.play({ seek: startAt })) {
       this.remove(entry);
       return false;
     }
     return true;
   }
 
-  position({ player, car, sound, approachDistance }) {
+  updatePlayingSounds() {
+    // Iterate backward because remove() deletes entries from this array.
+    for (let index = this.playing.length - 1; index >= 0; index--) {
+      const entry = this.playing[index];
+      if (!isLiveCar(entry.player) || !isLiveCar(entry.car)) {
+        this.remove(entry);
+      } else {
+        this.position(entry);
+      }
+    }
+  }
+
+  position(entry) {
     const roadWidth = this.scene.track1.displayWidth;
-    const x = car.x - player.x;
-    const distance = Math.hypot(x, car.y - player.y);
-    sound.setPan(clamp(x / (roadWidth / 2), -1, 1));
-    const hearingRange = Math.max(roadWidth * 1.5, approachDistance * 1.5);
-    sound.setVolume(0.35 * clamp(1 - distance / hearingRange, 0, 1));
+    const distanceX = entry.car.x - entry.player.x;
+    const distanceY = entry.car.y - entry.player.y;
+    const distance = Math.hypot(distanceX, distanceY);
+    const hearingRange = Math.max(roadWidth * 1.5, entry.approachDistance * 1.5);
+
+    // Distance controls volume; the side controls stereo (-1 left, +1 right).
+    const pan = clamp(distanceX / (roadWidth / 2), -1, 1);
+    const volume = 0.35 * clamp(1 - distance / hearingRange, 0, 1);
+    entry.sound.setPan(pan);
+    entry.sound.setVolume(volume);
   }
 
   remove(entry) {
-    if (this.playing.delete(entry)) entry.sound.destroy();
+    const index = this.playing.indexOf(entry);
+    if (index === -1) return;
+    this.playing.splice(index, 1);
+    entry.sound.destroy();
   }
 
   destroy() {
-    for (const entry of [...this.playing]) this.remove(entry);
-    this.history.clear();
+    while (this.playing.length > 0) this.remove(this.playing[0]);
+    this.encounters = [];
   }
 }

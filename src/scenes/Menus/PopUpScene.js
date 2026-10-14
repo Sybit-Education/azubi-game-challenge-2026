@@ -53,6 +53,14 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.scene.bringToTop();
     const { width, height } = this.scale;
+
+    // Get HTML controls first so every handler can access them.
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    const gameModeMenu = document.getElementById('game-mode-menu');
+
     const padding = Math.max(24, Math.min(width, height) * 0.06);
     const uiScale = Phaser.Math.Clamp(
       Math.min(this.scale.width / 1920, this.scale.height / 1080),
@@ -96,14 +104,14 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0);
     //rowY += Math.max(48, 58 * uiScale);
 
-    // Static switch mockup: settings are visual only for now.
+    // The visual switch and HTML checkbox share the same saved state.
     const accessibilitySwitch = this.add
       .image(rightColumn, row1Y, 'switchOff')
       .setScale(0.37 * uiScale)
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
 
-    const Accessibilitycircle = this.add
+    const accessibilityKnob = this.add
       .image(rightColumn, row1Y, 'switchCircle')
       .setScale(0.37 * uiScale)
       .setOrigin(0.5, 0.5)
@@ -158,7 +166,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     const chooseStandardMode = () => {
       playMenuClick(this);
-      //im christmas mode: zurück zu standard
+      //Return from Christmas mode to standard mode.
       if (this.parentSceneKeys.includes('ChristmasScene')) {
         this.registry.set('gameMode', 'standard');
         this.scene.stop('ChristmasScene');
@@ -166,14 +174,14 @@ export default class PopUpScene extends Phaser.Scene {
         this.scene.start('MenuScene');
         return;
       }
-      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
+      hoveringStandard = !hoveringStandard; // Toggle the dropdown on each click.
       updateChristmasButton();
     };
 
     christmasModeButton.on('pointerdown', chooseChristmasMode);
     standardModeButton.on('pointerdown', chooseStandardMode);
 
-    //defining switch status, "origin x" and "goal x"
+    // Load the saved state and remember the switch knob's two positions.
     let accessibilityEnabled =
       this.registry.get('accessibility enabled') ?? this.registry.get('accessibilityMode') ?? false;
 
@@ -188,21 +196,21 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Sets coordinates
     accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
-    Accessibilitycircle.x = accessibilityEnabled ? switchRight : switchLeft;
-    Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
+    accessibilityKnob.x = accessibilityEnabled ? switchRight : switchLeft;
+    accessibilityKnob.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
 
-    //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
-    //tween für den kreisanimation
+    // Mouse, keyboard and gamepad use the same function to change the state.
 
     const setAccessibilityEnabled = (enabled) => {
       accessibilityEnabled = enabled;
       this.registry.set('accessibility enabled', accessibilityEnabled);
+      // Other game code still uses this legacy key. Keep both keys in sync.
       this.registry.set('accessibilityMode', accessibilityEnabled);
       accessibilityToggle.checked = accessibilityEnabled;
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
-        targets: Accessibilitycircle,
+        targets: accessibilityKnob,
         x: accessibilityEnabled ? switchRight : switchLeft,
         duration: 150,
         ease: 'Power2',
@@ -215,7 +223,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
-    Accessibilitycircle.on('pointerdown', toggleAccessibility);
+    accessibilityKnob.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
       .image(background.x, row3Y * 2, 'closeLabel')
@@ -225,7 +233,7 @@ export default class PopUpScene extends Phaser.Scene {
     // Slide the panel in from the right edge. The dim overlay stays in place.
     //added an array of all the elements. add element here, to animate
     const panel = [
-      Accessibilitycircle,
+      accessibilityKnob,
       background,
       closeButton,
       settingsLabel,
@@ -275,16 +283,12 @@ export default class PopUpScene extends Phaser.Scene {
     this.input.keyboard.once('keydown-M', close);
     this.input.keyboard.once('keydown-ESC', close);
 
-    const settingsBtn = document.getElementById('settings-btn');
-    const closeSettingsBtn = document.getElementById('close-settings');
-    const dialog = document.getElementById('settings-dialog');
-    const accessibilityToggle = document.getElementById('accessible-toggle');
     accessibilityToggle.checked = accessibilityEnabled;
-    const gameModeMenu = document.getElementById('game-mode-menu');
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
-    // Phaser also listens on window. Keep native form input from triggering
-    // a second canvas action or having its keyboard defaults prevented.
+    // Phaser also listens on window. Input in the HTML dialog must not
+    // trigger the visual controls a second time. Do not use preventDefault:
+    // native checkbox and keyboard behavior must keep working.
     const nativeInputEvents = [
       'mousedown',
       'mouseup',
@@ -294,7 +298,8 @@ export default class PopUpScene extends Phaser.Scene {
       'keyup',
     ];
     const stopPhaserInput = (event) => {
-      if (event.target.closest?.('button, input, select')) event.stopPropagation();
+      const formControl = event.target.closest('button, input, select');
+      if (formControl) event.stopPropagation();
     };
     for (const eventName of nativeInputEvents) {
       dialog.addEventListener(eventName, stopPhaserInput);

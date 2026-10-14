@@ -26,7 +26,7 @@ export default class GameScene extends Phaser.Scene {
     this.isMultiplayer = data?.isMultiplayer ?? false;
   }
 
-  //Bilder laden
+  //Load images.
   preload() {
     preloadGameplaySounds(this);
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
@@ -59,7 +59,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
   }
 
-  //Alle Objekte in der Szene initialisieren
+  // Initialize the scene objects after the font is ready.
   async create() {
     await document.fonts.load('32px Tiny5');
     this.InputManager = new InputManager(this);
@@ -71,6 +71,7 @@ export default class GameScene extends Phaser.Scene {
     this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
+    // Each player car gets its own proximity sensor.
     this.carSensors = [new CarSensor(this, this.car)];
     if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
     this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
@@ -109,14 +110,14 @@ export default class GameScene extends Phaser.Scene {
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
-  //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
+  //Separate overlapping player cars after the physics update.
   separateOverlappingCars() {
     if (!this.secondCar || this.car.dead || this.secondCar.dead) return;
 
     const firstBody = this.car.body;
     const secondBody = this.secondCar.body;
 
-    //sehr viel mathe ig checke selber nicht aber es klappt halbwegs
+    //Calculate the overlap and identify which car is moving into the other.
     const overlapX =
       Math.min(firstBody.right, secondBody.right) - Math.max(firstBody.left, secondBody.left);
     const overlapY =
@@ -348,7 +349,7 @@ export default class GameScene extends Phaser.Scene {
       this.roadObjects.push(roadObject);
     }
 
-    // Spawnrate
+    // Spawn intervals.
     let delay;
     if (type === 'coin') {
       delay = Phaser.Math.Between(500, 2000);
@@ -428,7 +429,8 @@ export default class GameScene extends Phaser.Scene {
     }); // Change to DeathScene once there is one
   }
 
-  getSensorCars() {
+  getCarsForAudio() {
+    // Coins, items and ice patches do not trigger car sounds.
     return [
       ...this.roadObjects.filter((object) => object instanceof EnemyCar),
       this.car,
@@ -437,7 +439,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   getNearestCarDistance(player) {
-    return nearestCar(player, this.getSensorCars())?.distance ?? Infinity;
+    return nearestCar(player, this.getCarsForAudio())?.distance ?? Infinity;
   }
 
   // Update the game state every frame
@@ -461,9 +463,10 @@ export default class GameScene extends Phaser.Scene {
       return roadObject.active;
     });
 
-    const sensorCars = this.getSensorCars();
-    for (const sensor of this.carSensors) sensor.update(delta, sensorCars);
-    this.carPassBy.update(sensorCars);
+    // Check after movement so sounds use the current car positions.
+    const carsForAudio = this.getCarsForAudio();
+    for (const sensor of this.carSensors) sensor.update(delta, carsForAudio);
+    this.carPassBy.update(carsForAudio);
 
     const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
