@@ -1,7 +1,11 @@
 import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
-import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/menuSounds.js';
+import {
+  preloadMenuSounds,
+  playMenuClick,
+  bindMenuFocusSounds,
+} from '../../../audio/menuSounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
@@ -170,7 +174,8 @@ export default class PopUpScene extends Phaser.Scene {
     standardModeButton.on('pointerdown', chooseStandardMode);
 
     //defining switch status, "origin x" and "goal x"
-    let accessibilityEnabled = false;
+    let accessibilityEnabled =
+      this.registry.get('accessibility enabled') ?? this.registry.get('accessibilityMode') ?? false;
 
     // Left position
     const switchLeft =
@@ -182,17 +187,18 @@ export default class PopUpScene extends Phaser.Scene {
     const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
     // Sets coordinates
-    Accessibilitycircle.x = switchLeft;
+    accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
+    Accessibilitycircle.x = accessibilityEnabled ? switchRight : switchLeft;
     Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
 
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
 
-    const toggleAccessibility = () => {
-      playMenuClick(this);
-      accessibilityEnabled = !accessibilityEnabled;
-
+    const setAccessibilityEnabled = (enabled) => {
+      accessibilityEnabled = enabled;
+      this.registry.set('accessibility enabled', accessibilityEnabled);
       this.registry.set('accessibilityMode', accessibilityEnabled);
+      accessibilityToggle.checked = accessibilityEnabled;
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
@@ -201,6 +207,11 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 150,
         ease: 'Power2',
       });
+    };
+
+    const toggleAccessibility = () => {
+      playMenuClick(this);
+      setAccessibilityEnabled(!accessibilityEnabled);
     };
 
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
@@ -268,15 +279,32 @@ export default class PopUpScene extends Phaser.Scene {
     const closeSettingsBtn = document.getElementById('close-settings');
     const dialog = document.getElementById('settings-dialog');
     const accessibilityToggle = document.getElementById('accessible-toggle');
-    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    accessibilityToggle.checked = accessibilityEnabled;
     const gameModeMenu = document.getElementById('game-mode-menu');
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
+
+    // Phaser also listens on window. Keep native form input from triggering
+    // a second canvas action or having its keyboard defaults prevented.
+    const nativeInputEvents = [
+      'mousedown',
+      'mouseup',
+      'touchstart',
+      'touchend',
+      'keydown',
+      'keyup',
+    ];
+    const stopPhaserInput = (event) => {
+      if (event.target.closest?.('button, input, select')) event.stopPropagation();
+    };
+    for (const eventName of nativeInputEvents) {
+      dialog.addEventListener(eventName, stopPhaserInput);
+    }
 
     const closeWindows = close;
 
     const handleAccessibilityChange = () => {
       playMenuClick(this);
-      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+      setAccessibilityEnabled(accessibilityToggle.checked);
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
@@ -298,6 +326,9 @@ export default class PopUpScene extends Phaser.Scene {
     dialog.addEventListener('cancel', handleCancel);
 
     this.events.once('shutdown', () => {
+      for (const eventName of nativeInputEvents) {
+        dialog.removeEventListener(eventName, stopPhaserInput);
+      }
       closeSettingsBtn.removeEventListener('click', closeWindows);
       dialog.removeEventListener('cancel', handleCancel);
       accessibilityToggle.removeEventListener('change', handleAccessibilityChange);

@@ -8,6 +8,8 @@ import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import CoinMultiplier from '../objects/CoinMultiplier.js';
 import { preloadGameplaySounds } from '../../audio/menuSounds.js';
+import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
+import CarPassBy from '../../audio/CarPassBy.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ExtraLife from '../objects/ExtraLife.js';
@@ -69,6 +71,9 @@ export default class GameScene extends Phaser.Scene {
     this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
+    this.carSensors = [new CarSensor(this, this.car)];
+    if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
+    this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
     this.createRoadObject('enemy-car');
     this.createRoadObject('coin');
     this.createRoadObject('coinMultiplier');
@@ -423,6 +428,18 @@ export default class GameScene extends Phaser.Scene {
     }); // Change to DeathScene once there is one
   }
 
+  getSensorCars() {
+    return [
+      ...this.roadObjects.filter((object) => object instanceof EnemyCar),
+      this.car,
+      this.secondCar,
+    ];
+  }
+
+  getNearestCarDistance(player) {
+    return nearestCar(player, this.getSensorCars())?.distance ?? Infinity;
+  }
+
   // Update the game state every frame
   update(_, delta) {
     this.InputManager.update();
@@ -443,6 +460,10 @@ export default class GameScene extends Phaser.Scene {
       roadObject.move(this.elapsedTime, delta);
       return roadObject.active;
     });
+
+    const sensorCars = this.getSensorCars();
+    for (const sensor of this.carSensors) sensor.update(delta, sensorCars);
+    this.carPassBy.update(sensorCars);
 
     const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;

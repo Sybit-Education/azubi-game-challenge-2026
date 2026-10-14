@@ -10,6 +10,31 @@ Quelle/Lizenz dieser vorhandenen Datei wurden vom Nutzer nicht angegeben.
 Münzsound: vorhandene Projektdatei audio/collect-coin.mp3.
 Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
 
+Sensoraufnahme: audio/car-sensors.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
+Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+sensor-beep.wav: Ausschnitt von 3,90 bis 4,02 Sekunden aus car-sensors.mp3;
+in Mono umgewandelt, Lautstärke normalisiert und an den Rändern kurz ein-/ausgeblendet.
+
+Vorbeifahr-Sound: audio/car-pass-by.mp3, vom Nutzer aus Windows-Downloads bereitgestellt
+(ursprünglicher Dateiname: flutie8211-car-driving-by-left-to-right-2-535547.mp3).
+Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+car-pass-by-spatial.wav: Ausschnitt 0,35 bis 4,05 Sekunden; in Mono gemischt,
+Lautstärke normalisiert und Ränder kurz ein-/ausgeblendet. Stereo folgt dem Auto im Spiel.
+
+car-pass-by-johnnyfarmer.mp3: öffentlich verfügbare HQ-Vorschau von Freesound.
+Urheber: Johnnyfarmer
+Quelle: https://freesound.org/people/Johnnyfarmer/sounds/209767/
+Lizenz: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+car-pass-by-johnnyfarmer-spatial.wav: Ausschnitt 0 bis 3.775 Sekunden; in Mono gemischt,
+normalisiert und ein-/ausgeblendet. Ungefähre lauteste Stelle: 1.775 Sekunden.
+
+car-pass-by-961-studios.mp3: öffentlich verfügbare HQ-Vorschau von Freesound.
+Urheber: 961_Studios
+Quelle: https://freesound.org/people/961_Studios/sounds/244407/
+Lizenz: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+car-pass-by-961-studios-spatial.wav: Ausschnitt 0 bis 3.425 Sekunden; in Mono gemischt,
+normalisiert und ein-/ausgeblendet. Ungefähre lauteste Stelle: 1.425 Sekunden.
+
 Lizenzangaben des Herausgebers (Kenney)
 
 Interface Sounds (1.0)
