@@ -143,7 +143,8 @@ export default class GameoverScene extends Phaser.Scene {
 
     let winner = 0;
 
-    if (this.score > this.score2) {
+    if (this.isMultiplayer) {
+          if (this.score > this.score2) {
       winner = 1;
     }
 
@@ -158,6 +159,15 @@ export default class GameoverScene extends Phaser.Scene {
     else if (this.distance2 > this.distance) {
       winner = 2
     } 
+
+    if (winner === 1) {
+      this.load.image(this.width / 2, this.height / 3, "player-1-won.png")
+    }
+
+    else {
+      this.load.image(this.width / 2, this.height / 3, "player-2-won.png")
+    }
+ }
 
     // Distance text
     this.add
