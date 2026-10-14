@@ -147,11 +147,29 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
       .setScale(0.24)
       .setOrigin(0.5)
-      .setInteractive();
+      .setInteractive({ useHandCursor: true });
 
     // Leaderboard click listener
     leaderboardButton.on('pointerdown', () => {
       this.scene.start('LeaderboardScene');
+    });
+
+    leaderboardButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.26,
+        scaleY: 0.26,
+        duration: 100,
+      });
+    });
+
+    leaderboardButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.24,
+        scaleY: 0.24,
+        duration: 100,
+      });
     });
 
     // Some variables to keep track of the button states
