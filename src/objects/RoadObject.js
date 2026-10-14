@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class RoadObject extends Phaser.GameObjects.Image {
   constructor(scene, x, y, texture, lane) {
