@@ -176,7 +176,6 @@ export default class GameScene extends Phaser.Scene {
 
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
-        roadObject.body.setOffset(0, 5);
         this.physics.add.overlap(
           this.car,
           roadObject,
