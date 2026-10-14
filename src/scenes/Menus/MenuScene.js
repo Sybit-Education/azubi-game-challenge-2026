@@ -40,6 +40,14 @@ export default class MenuScene extends Phaser.Scene {
       'homepage-barrierefreiheit',
       'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
+    this.load.image(
+      'homepage-leaderboard-btn',
+      'assets/images/gameover-scene-assets/leaderboard-button.png',
+    );
+    this.load.image(
+      'leaderboard-homepage-btn',
+      'assets/images/gameover-scene-assets/hauptmenu-1.png',
+    );
   }
 
   // Create scene
@@ -57,12 +65,12 @@ export default class MenuScene extends Phaser.Scene {
 
     const startGame = () => {
       this.registry.set('gameMode', 'standard');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
+      this.scene.start('NameInputScene', { isMultiplayer: false });
     };
 
     const startMultiplayer = () => {
       this.registry.set('gameMode', 'multiplayer');
-      this.scene.start('LoadingScene', { isMultiplayer: true });
+      this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
 
@@ -136,6 +144,36 @@ export default class MenuScene extends Phaser.Scene {
       .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+
+    // Leaderboard button
+    const leaderboardButton = this.add
+      .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
+      .setScale(0.24)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    // Leaderboard click listener
+    leaderboardButton.on('pointerdown', () => {
+      this.scene.start('LeaderboardScene');
+    });
+
+    leaderboardButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.26,
+        scaleY: 0.26,
+        duration: 100,
+      });
+    });
+
+    leaderboardButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.24,
+        scaleY: 0.24,
+        duration: 100,
+      });
+    });
 
     // Some variables to keep track of the button states
     let isPlayHovered = false;

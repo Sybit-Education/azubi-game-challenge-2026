@@ -7,6 +7,8 @@ import StartScene from './scenes/StartScene.js';
 import GameoverScene from './scenes/GameoverScene.js';
 import CreditsScene from './scenes/CreditsScene.js';
 import ChristmasScene from './scenes/Menus/ChristmasScene.js';
+import LeaderboardScene from './scenes/LeaderboardScene.js';
+import NameInputScene from './scenes/Menus/NameInputScene.js';
 
 // Global phaser config
 const config = {
@@ -30,17 +32,15 @@ const config = {
   scene: [
     MenuScene,
     LoadingScene,
+    NameInputScene,
     StartScene,
     GameScene,
     PopUpScene,
     GameoverScene,
     CreditsScene,
     ChristmasScene,
+    LeaderboardScene,
   ],
-
-  loader: {
-    baseURL: './public/',
-  },
 };
 
 // Create game
