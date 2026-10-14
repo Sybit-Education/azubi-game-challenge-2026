@@ -62,12 +62,12 @@ export default class MenuScene extends Phaser.Scene {
 
     const startGame = () => {
       this.registry.set('gameMode', 'standard');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
+      this.scene.start('NameInputScene', { isMultiplayer: false });
     };
 
     const startMultiplayer = () => {
       this.registry.set('gameMode', 'multiplayer');
-      this.scene.start('LoadingScene', { isMultiplayer: true });
+      this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
 

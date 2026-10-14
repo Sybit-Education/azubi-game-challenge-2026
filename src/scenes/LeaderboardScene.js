@@ -83,18 +83,18 @@ export default class LeaderboardScene extends Phaser.Scene {
 // Loads and parses leaderboard
 export function parseLeaderboard() {
   return JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
-    // String only entries are counted as scores
-    if (typeof entry === 'string') {
-      return {
-        name: 'Unbekannt',
-        distance: Number(entry),
-      };
-    }
+      // String only entries are counted as scores
+      if (typeof entry === 'string') {
+        return {
+          name: 'Unbekannt',
+          distance: Number(entry),
+        };
+      }
 
-    // Parses entity
-    return {
-      name: entry.name,
-      distance: Number(entry.distance),
-    };
-  });
+      // Parses entity
+      return {
+        name: entry.name,
+        distance: Number(entry.distance),
+      };
+    }).sort((a, b) => b.distance - a.distance).slice(0, 10);
 }

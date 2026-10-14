@@ -10,7 +10,9 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   create() {
-    // Titel
+    this.playerNames = [];
+    this.activePlayer = 0;
+
     this.add
       .text(this.scale.width / 2, this.scale.height / 3, 'Gib deinen Namen ein', {
         fontFamily: 'Tiny5',
@@ -19,39 +21,59 @@ export default class NameInputScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Name speichern
-    this.playerName = '';
-
-    // Angezeigter Name
     this.nameText = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'Name: ', {
+      .text(this.scale.width / 2, this.scale.height / 2, '', {
         fontFamily: 'Tiny5',
         fontSize: '32px',
         color: '#ffffff',
       })
       .setOrigin(0.5);
 
-    // Tastatureingabe
+    this.updateNamePrompt();
+
     this.input.keyboard.on('keydown', (event) => {
+      const currentName = this.playerNames[this.activePlayer] || '';
+
       if (event.key === 'Enter') {
-        if (this.playerName.trim().length === 0) return;
+        if (currentName.trim().length === 0) return;
 
-        localStorage.setItem('Playername', this.playerName);
+        this.playerNames[this.activePlayer] = currentName.trim();
+        if (this.isMultiplayer && this.activePlayer === 0) {
+          this.activePlayer = 1;
+          this.updateNamePrompt();
+          return;
+        }
 
-        this.scene.start('GameScene', {
+        localStorage.setItem('Playername', this.playerNames[0]);
+        if (this.isMultiplayer) {
+          localStorage.setItem('Playername2', this.playerNames[1]);
+        } else {
+          localStorage.removeItem('Playername2');
+        }
+
+        this.scene.start('LoadingScene', {
           isMultiplayer: this.isMultiplayer,
         });
-
         return;
       }
 
       if (event.key === 'Backspace') {
-        this.playerName = this.playerName.slice(0, -1);
+        this.playerNames[this.activePlayer] = currentName.slice(0, -1);
       } else if (event.key.length === 1) {
-        this.playerName += event.key;
+        this.playerNames[this.activePlayer] = currentName + event.key;
       }
 
-      this.nameText.setText(`Name: ${this.playerName}`);
+      this.updateNamePrompt();
     });
+  }
+
+  updateNamePrompt() {
+    const currentName = this.playerNames[this.activePlayer] || '';
+    if (!this.isMultiplayer) {
+      this.nameText.setText(`Username: ${currentName}`);
+    } else {
+      const playerLabel = this.activePlayer === 0 ? 'Player 1' : 'Player 2';
+      this.nameText.setText(`${playerLabel}: ${currentName}`);
+    }
   }
 }

@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 
-import { GameData } from './Menus/GameData.js';
 import InputManager from '../objects/InputManager.js';
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
@@ -43,11 +42,16 @@ export default class GameoverScene extends Phaser.Scene {
     // Parse leaderboard
     const leaderboard = parseLeaderboard();
 
-    // Adds to list
     leaderboard.push({
-      name: GameData.playerName,
+      name: localStorage.getItem('Playername') || 'Unknown',
       distance: Number(this.distance),
     });
+    if (this.isMultiplayer) {
+      leaderboard.push({
+        name: localStorage.getItem('Playername2') || 'Unknown',
+        distance: Number(this.distance2),
+      });
+    }
 
     // Sorts leaderboard
     leaderboard.sort((a, b) => b.distance - a.distance);
@@ -214,7 +218,7 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Click events
     playAgainButton.on('pointerdown', () => {
-      this.scene.start('NameInputScene', {
+      this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
       });
     });
