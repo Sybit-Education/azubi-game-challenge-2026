@@ -54,11 +54,28 @@ export default class LeaderboardScene extends Phaser.Scene {
       .image(this.scale.width / 2, this.scale.height / 1.3, 'leaderboard-homepage-btn')
       .setScale(0.5)
       .setOrigin(0.5)
-      .setInteractive();
+      .setInteractive({ useHandCursor: true });
 
     // On home button listener
     backButton.on('pointerdown', () => {
       this.scene.start('MenuScene');
+    });
+    // Hover effect
+    backButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: backButton,
+        scaleX: 0.55,
+        scaleY: 0.55,
+        duration: 100,
+      });
+    });
+    backButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: backButton,
+        scaleX: 0.5,
+        scaleY: 0.5,
+        duration: 100,
+      });
     });
   }
 }

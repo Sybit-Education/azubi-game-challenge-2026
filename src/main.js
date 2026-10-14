@@ -41,10 +41,6 @@ const config = {
     ChristmasScene,
     LeaderboardScene,
   ],
-
-  loader: {
-    baseURL: './public/',
-  },
 };
 
 // Create game
