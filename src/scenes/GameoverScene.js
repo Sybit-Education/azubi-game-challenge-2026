@@ -141,17 +141,23 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Header
 
-    if (score > score2 && distance > distance2) {
-      this.add.image(this.width / 2, this.height / 3, "p1-won-logo")
-      .setOrigin(0.5)
-      .setScale(0.6);
+    let winner = 0;
+
+    if (this.score > this.score2) {
+      winner = 1;
     }
 
-    if (score2 > score && distance2 > distance2) {
-      this.add.image(this.width / 2, this.height / 3, "p2-won-logo")
-      .setOrigin(0.5)
-      .setScale(0.6);
+    else if (this.distance > this.distance2) {
+      winner = 1
+    } 
+
+    else if (this.score2 > this.score) {
+      winner = 2
     }
+
+    else if (this.distance2 > this.distance) {
+      winner = 2
+    } 
 
     // Distance text
     this.add
