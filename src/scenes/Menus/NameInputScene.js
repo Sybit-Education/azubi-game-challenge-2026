@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class NameInputScene extends Phaser.Scene {
   constructor() {
