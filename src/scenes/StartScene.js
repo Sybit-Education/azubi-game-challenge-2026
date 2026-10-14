@@ -79,8 +79,11 @@ export default class StartScene extends Phaser.Scene {
     this.createWalls();
     this.setBackground('background');
     this.spawnStartingBanner();
+    this.time.delayedCall(1500, () => this.countdown());
+  }
 
-    //countdown
+  //countdown
+  countdown() {
     this.showNumber('start-count-3');
     this.sound.play('countdown');
     this.time.delayedCall(900, () => this.showNumber('start-count-2'));
@@ -182,6 +185,7 @@ export default class StartScene extends Phaser.Scene {
       return;
     }
     this.leaving = true;
+    this.sound.stopByKey('countdown');
     this.scene.start('GameScene', {
       isMultiplayer: this.isMultiplayer,
     });

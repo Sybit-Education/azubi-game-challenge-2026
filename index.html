@@ -5,7 +5,7 @@
     <title>SybitKart</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="public/favicon.png" />
     <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet" />
   </head>
   <!-- Body -->
@@ -15,6 +15,14 @@
       <button id="start-game" type="button">play</button>
       <button id="settings-btn" type="button">Settings</button>
     </main>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "phaser": "./node_modules/phaser/dist/phaser.esm.js"
+        }
+      }
+    </script>
 
     <section id="start-ui" class="accessible-layer" hidden>
       <button id="skip-intro" type="button">Skip Intro!</button>

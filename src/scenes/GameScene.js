@@ -7,6 +7,7 @@ import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
+import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
 import PerspectiveRoad, { ROAD_HORIZON } from '../objects/PerspectiveRoad.js';
@@ -56,6 +57,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('item', 'assets/images/entities/item.png');
+    this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
+
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
@@ -73,11 +76,11 @@ export default class GameScene extends Phaser.Scene {
     };
     window.addEventListener('keydown', this.onEscape);
     this.events.once('shutdown', () => window.removeEventListener('keydown', this.onEscape));
-    this.ItemManager = new ItemManager(this);
     this.secondCar = null;
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
+    this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
     this.createHud();
@@ -90,6 +93,7 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('obstacle');
     this.createRoadObject('coin');
     this.createRoadObject('item');
+    this.createRoadObject('ice');
   }
 
   createSky() {
@@ -314,8 +318,22 @@ export default class GameScene extends Phaser.Scene {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
         roadObject.fitHitbox();
         roadObject.body.offset.y += 5;
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.coinBudgetPlus1,
+          undefined,
+          this.ItemManager,
+        );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
         if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.coinBudgetPlus2,
+            undefined,
+            this.ItemManager,
+          );
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'item') {
@@ -329,6 +347,7 @@ export default class GameScene extends Phaser.Scene {
           this.ItemManager,
         );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
@@ -361,20 +380,39 @@ export default class GameScene extends Phaser.Scene {
             this.ItemManager,
           );
         }
+      } else if (type === 'ice') {
+        roadObject = new Ice(this, roadObjectX, spawnY, lane);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
       }
 
+      if (this.secondCar) {
+        this.physics.add.overlap(
+          this.secondCar,
+          roadObject,
+          this.ItemManager.iceEffect,
+          undefined,
+          this.ItemManager,
+        );
+      }
       this.roadObjects.push(roadObject);
     }
 
     // Spawnrate
     let delay;
-
     if (type === 'coin') {
       delay = Phaser.Math.Between(500, 2000);
     } else if (type === 'item') {
       delay = Phaser.Math.Between(5000, 10000);
     } else if (type === 'obstacle') {
       delay = Phaser.Math.Between(2000, 4000);
+    } else if (type === 'ice') {
+      delay = Phaser.Math.Between(6000, 12000);
     }
 
     this.time.delayedCall(delay, () => this.createRoadObject(type));
@@ -471,5 +509,7 @@ export default class GameScene extends Phaser.Scene {
     this.backgroundDistance += (targetTrackSpeed * delta) / 1000;
     this.moveBackground(this.backgroundDistance);
     this.hud.update();
+
+    this.ItemManager.itemShop();
   }
 }
