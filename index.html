@@ -118,6 +118,13 @@
       font-size: 0;
     }
 
+    /* Modal dialogs make the canvas inert; their HTML controls handle clicks. */
+    #settings-dialog button,
+    #settings-dialog input,
+    #settings-dialog select {
+      pointer-events: auto;
+    }
+
     .accessible-layer button:focus-visible,
     #settings-dialog button:focus-visible,
     #settings-dialog input:focus-visible,
