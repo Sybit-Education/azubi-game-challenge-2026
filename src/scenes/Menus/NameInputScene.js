@@ -14,7 +14,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.activePlayer = 0;
 
     this.add
-      .text(this.scale.width / 2, this.scale.height / 3, 'Gib deinen Namen ein', {
+      .text(this.scale.width / 2, this.scale.height / 3, 'Enter your name', {
         fontFamily: 'Tiny5',
         fontSize: '48px',
         color: '#ffffff',

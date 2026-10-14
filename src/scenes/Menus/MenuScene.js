@@ -44,7 +44,10 @@ export default class MenuScene extends Phaser.Scene {
       'homepage-leaderboard-btn',
       'assets/images/gameover-scene-assets/leaderboard-button.png',
     );
-    this.load.image('leaderboard-homepage-btn', 'assets/images/gameover-scene-assets/hauptmenu-1.png');
+    this.load.image(
+      'leaderboard-homepage-btn',
+      'assets/images/gameover-scene-assets/hauptmenu-1.png',
+    );
   }
 
   // Create scene
