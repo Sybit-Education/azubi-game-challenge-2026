@@ -8,7 +8,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // On create
   create() {
-    const leaderboard = parseLeaderboard();
+    const leaderboard = parseLeaderboard().slice(0, 10);
 
     // Background image
     this.add
@@ -82,19 +82,30 @@ export default class LeaderboardScene extends Phaser.Scene {
 
 // Loads and parses leaderboard
 export function parseLeaderboard() {
-  return JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
-      // String only entries are counted as scores
-      if (typeof entry === 'string') {
-        return {
-          name: 'Unbekannt',
-          distance: Number(entry),
-        };
-      }
-
-      // Parses entity
+  const entries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
+    // String only entries are counted as scores
+    if (typeof entry === 'string') {
       return {
-        name: entry.name,
-        distance: Number(entry.distance),
+        name: 'Unbekannt',
+        distance: Number(entry),
       };
-    }).sort((a, b) => b.distance - a.distance).slice(0, 10);
+    }
+
+    // Parses entity
+    return {
+      name: entry.name,
+      distance: Number(entry.distance),
+    };
+  });
+
+  const bestByPlayer = new Map();
+  entries.forEach((entry) => {
+    const playerKey = entry.name.trim().toLowerCase();
+    const previousBest = bestByPlayer.get(playerKey);
+    if (!previousBest || entry.distance > previousBest.distance) {
+      bestByPlayer.set(playerKey, entry);
+    }
+  });
+
+  return [...bestByPlayer.values()].sort((a, b) => b.distance - a.distance);
 }

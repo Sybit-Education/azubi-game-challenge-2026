@@ -37,27 +37,32 @@ export default class GameoverScene extends Phaser.Scene {
 
   // On create
   create() {
-    console.log('GameoverScene gestartet');
-
     // Parse leaderboard
     const leaderboard = parseLeaderboard();
 
-    leaderboard.push({
-      name: localStorage.getItem('Playername') || 'Unknown',
-      distance: Number(this.distance),
-    });
+    const savePlayerBest = (name, distance) => {
+      const playerKey = name.trim();
+      const existingEntry = leaderboard.find(
+        (entry) => entry.name.trim() === playerKey,
+      );
+
+      if (existingEntry) {
+        existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
+      } else {
+        leaderboard.push({ name, distance: Number(distance) });
+      }
+    };
+
+    savePlayerBest(localStorage.getItem('Playername') || 'Unknown', this.distance);
     if (this.isMultiplayer) {
-      leaderboard.push({
-        name: localStorage.getItem('Playername2') || 'Unknown',
-        distance: Number(this.distance2),
-      });
+      savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
     }
 
     // Sorts leaderboard
     leaderboard.sort((a, b) => b.distance - a.distance);
 
-    // Saves top 10 entries to leaderboard
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard.slice(0, 10)));
+    // Saves each player's best distance; the leaderboard scene displays only the top 10.
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
 
     // Debug log leader
     console.debug(leaderboard);
