@@ -62,6 +62,7 @@ export default class CreditsScene extends Phaser.Scene {
     const textElement = this.add
       .text(this.width / 2, this.height * 0.95, creditText, {
         fontSize: '34px',
+        fontFamily: 'Tiny5',
         color: '#FEFEFE',
       })
       .setOrigin(0.5, 0);

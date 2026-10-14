@@ -7,6 +7,7 @@ import StartScene from './scenes/StartScene.js';
 import GameoverScene from './scenes/GameoverScene.js';
 import CreditsScene from './scenes/CreditsScene.js';
 import ChristmasScene from './scenes/Menus/ChristmasScene.js';
+import BootScene from './scenes/Menus/BootScene.js';
 
 // Global phaser config
 const config = {
@@ -28,6 +29,7 @@ const config = {
   },
 
   scene: [
+    BootScene,
     MenuScene,
     LoadingScene,
     StartScene,
