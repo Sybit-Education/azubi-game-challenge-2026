@@ -161,11 +161,11 @@ export default class GameoverScene extends Phaser.Scene {
     } 
 
     if (winner === 1) {
-      this.load.image(this.width / 2, this.height / 3, "player-1-won.png")
+      this.add.image(this.width / 2, this.height / 3, "player-1-won.png")
     }
 
     else {
-      this.load.image(this.width / 2, this.height / 3, "player-2-won.png")
+      this.add.image(this.width / 2, this.height / 3, "player-2-won.png")
     }
  }
 
