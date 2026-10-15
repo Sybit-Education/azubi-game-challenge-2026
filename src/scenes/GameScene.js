@@ -361,7 +361,7 @@ export default class GameScene extends Phaser.Scene {
       return roadObject.active;
     });
 
-    const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
+    const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
     //dead cars do not collect distance anymore

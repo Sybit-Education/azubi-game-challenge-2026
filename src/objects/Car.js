@@ -105,7 +105,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     let speed = 60; //auto startet bei 60, bisschen nach hinten um start zu simulieren
     const accelerate = () => {
       //funktion. die den speed variable senkt (negativ = positiv, weil -y ist oben und +y ist unten frag nicht wieso)
-      this.setVelocityY(speed);
+      this.setVelocityY(speed * (this.scene.scale.height / 1200)); // speeds are tuned for 1200px height
 
       if (speed <= -800) {
         //wenn die geschwidnigkeit -800 erreicht wird, bleibt sie konstant
