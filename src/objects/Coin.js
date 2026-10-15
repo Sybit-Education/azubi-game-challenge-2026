@@ -4,6 +4,7 @@ export default class Coin extends Collectable {
   constructor(scene, x, y, lane) {
     super(scene, x, y, 'coin', lane, 50);
 
-    this.setScale(2 * (scene.scale.height / 1200)); //scale fix
+    this.setScale(2 * (scene.scale.height / 1200));
+    this.body.setOffset(0, 5); //scale fix
   }
 }
