@@ -48,6 +48,7 @@ export default class MenuScene extends Phaser.Scene {
       'leaderboard-homepage-btn',
       'assets/images/gameover-scene-assets/back-to-menu-button.png',
     );
+    this.load.image('homepage-line', 'assets/images/homepage/default-homepage/line.png');
   }
 
   // Create scene
@@ -96,6 +97,11 @@ export default class MenuScene extends Phaser.Scene {
     const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
       .setDepth(-2);
 
     this.add
@@ -177,7 +183,7 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
-    //Background parralax effect
+    //Background parallax effect
     this.input.on('pointermove', (pointer) => {
       background.setPosition(
         this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
@@ -185,7 +191,7 @@ export default class MenuScene extends Phaser.Scene {
       );
     });
 
-    //homepage car parralax effect
+    //homepage car parallax effect
     this.input.on('pointermove', (pointer) => {
       homepageCar.setPosition(
         this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
