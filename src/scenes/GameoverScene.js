@@ -31,7 +31,7 @@ export default class GameoverScene extends Phaser.Scene {
       'assets/images/gameover-scene-assets/back-to-menu-button.png',
     );
     this.load.image('gameover-score-text', 'assets/images/gameover-scene-assets/score.png');
-    this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distanz.png');
+    this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distance.png');
     this.load.image(
       'gameover-hintergrund',
       'assets/images/gameover-scene-assets/game-over-hintergrund.png',
