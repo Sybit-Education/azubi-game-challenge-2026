@@ -7,7 +7,8 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   // On create
-  create() {
+  async create() {
+    await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
 
     // Background image

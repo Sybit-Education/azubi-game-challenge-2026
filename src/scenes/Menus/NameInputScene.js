@@ -9,7 +9,8 @@ export default class NameInputScene extends Phaser.Scene {
     this.isMultiplayer = data.isMultiplayer;
   }
 
-  create() {
+  async create() {
+    await document.fonts.load('32px Tiny5');
     this.playerNames = [];
     this.activePlayer = 0;
 
