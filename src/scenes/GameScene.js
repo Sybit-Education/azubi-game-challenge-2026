@@ -41,6 +41,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+
+    this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
+    this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -61,6 +64,32 @@ export default class GameScene extends Phaser.Scene {
     this.createHud();
     this.setBackground('background');
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+
+    // Hotbar
+    this.hotbar = this.add.image(585, 0, 'hotbar');
+    this.hotbar.setOrigin(0, 0);
+    this.hotbar.setScale(0.3);
+    this.hotbar.setDepth(1000);
+    this.hotbar.setScrollFactor(0);
+    this.hotbar.setScale(0.13);
+
+    // Coin Icon
+    this.hotbarCoin = this.add.image(380, 53, 'hotbar-coin');
+    this.hotbarCoin.setScale(0.5);
+    this.hotbarCoin.setDepth(1000);
+    this.hotbarCoin.setScrollFactor(0);
+
+    // Coin Number
+    this.coinText = this.add.text(420, 28, this.ItemManager.coinBudgetPlayer1, {
+        fontSize: '34px',
+        color: '#ffffff',
+        fontFamily: 'Silkscreen',
+        stroke: '#000000',
+        strokeThickness: '2'
+    });
+
+    this.coinText.setDepth(1000);
+    this.coinText.setScrollFactor(0);
   }
 
   setBackground(img) {
@@ -361,5 +390,6 @@ export default class GameScene extends Phaser.Scene {
     this.hud.update();
 
     this.ItemManager.itemShop();
+    this.coinText.setText(this.ItemManager.coinBudgetPlayer1);
   }
 }
