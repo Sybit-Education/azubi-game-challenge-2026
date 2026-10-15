@@ -5,12 +5,10 @@ import { positionAccessibleControls } from '../../accessibility/positionControls
 import InputManager from '../../objects/InputManager.js';
 
 export default class MenuScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('MenuScene');
   }
 
-  // Pre load images
   preload() {
     this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
@@ -50,12 +48,10 @@ export default class MenuScene extends Phaser.Scene {
     );
   }
 
-  // Create scene
   async create() {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
-    // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
@@ -88,8 +84,6 @@ export default class MenuScene extends Phaser.Scene {
       settingsBtn.removeEventListener('click', openSettings);
       menu.hidden = true;
     });
-
-    // Interface for our lovely Sybit Kart Game
 
     const footer_btn_y = this.scale.height / 1.17;
 
@@ -147,14 +141,12 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3);
 
-    // Leaderboard button
     const leaderboardButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
       .setScale(0.24)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
-    // Leaderboard click listener
     leaderboardButton.on('pointerdown', () => {
       this.scene.start('LeaderboardScene');
     });
@@ -177,7 +169,6 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
-    // Some variables to keep track of the button states
     let isPlayHovered = false;
     let isTwoPlayerHovered = false;
     this.isMultiplayerSelected = false;
@@ -186,8 +177,6 @@ export default class MenuScene extends Phaser.Scene {
     const settingsOriginalY = settings_button.y;
     const creditsOriginalY = creditsButton.y;
     const howToPlayOriginalY = howToPlayButton.y;
-
-    // Functions
 
     const cancelScheduledHide = () => {
       if (hideSubmenuEvent) {
@@ -307,7 +296,6 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
     });
 
-    // Helper functions for button animations
     this.selectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
@@ -328,7 +316,6 @@ export default class MenuScene extends Phaser.Scene {
       });
     };
 
-    // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
       [settingsBtn, settings_button],
@@ -346,7 +333,6 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.start('CreditsScene');
     });
 
-    // Menu button array and selected index
     this.menuButtons = [
       { button: play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },

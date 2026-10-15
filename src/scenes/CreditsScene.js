@@ -7,7 +7,6 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   create() {
-    // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 

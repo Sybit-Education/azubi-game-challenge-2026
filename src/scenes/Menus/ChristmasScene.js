@@ -1,15 +1,12 @@
 import Phaser from 'phaser';
 
 export default class ChristmasScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('ChristmasScene');
   }
 
-  // Pre load images
   preload() {
     this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
-    //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
       'christmas-homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -49,7 +46,6 @@ export default class ChristmasScene extends Phaser.Scene {
     );
   }
 
-  // Create scene
   create() {
     const footer_btn_y = this.scale.height / 1.17;
     this.add
@@ -172,7 +168,6 @@ export default class ChristmasScene extends Phaser.Scene {
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
     });
-    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });

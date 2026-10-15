@@ -8,7 +8,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     scene.physics.add.existing(this);
 
     this.score = 0;
-    this.dead = false; //in multiplayer one car can be dead while the other keeps driving
+    // In multiplayer, one car can be eliminated while the other continues the race
+    this.dead = false;
     this.value = 10;
     this.meters = 0;
     this.boundaryParticles = scene.add
@@ -27,7 +28,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         quantity: 5,
       })
       .setDepth(11);
-    this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
+    this.setScale(0.66 * (scene.scale.height / 1200));
     this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
   }
@@ -47,7 +48,6 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
 
     if (controls.left) {
-      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       this.setVelocityX(-500);
       if (this.x !== this.leftLimit && !controls.right) {
         this.setAngle(-3);
@@ -68,8 +68,6 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (controls.brake) {
       this.setVelocityY(500);
     }
-
-    //constraint the cars downward and upward movement to not go out of bounds
 
     if (
       (this.x <= this.leftLimit && this.body.velocity.x < 0) ||
@@ -99,25 +97,19 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   }
 
   startAnim() {
-    //hier gegebenenfalls sounds einfügen (z.b motor zündstart etc.)
-    //this.scene.time.delayedCall(1250, () => {
-    //delayed start um 2500 ms (1.25 sekunden)
-    let speed = 60; //auto startet bei 60, bisschen nach hinten um start zu simulieren
+    // Ramp up forward velocity gradually so the car appears to launch from the start line
+    let speed = 60;
     const accelerate = () => {
-      //funktion. die den speed variable senkt (negativ = positiv, weil -y ist oben und +y ist unten frag nicht wieso)
       this.setVelocityY(speed);
 
       if (speed <= -800) {
-        //wenn die geschwidnigkeit -800 erreicht wird, bleibt sie konstant
         return;
       }
-      //speed variable wird um 30 gesenkt
       speed = speed - 30;
       this.scene.time.delayedCall(50, accelerate);
     };
 
     accelerate();
-    // });
   }
 
   increase_score(points) {
@@ -128,12 +120,10 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     return (this.score -= points);
   }
 
-  //stop can be used for collisions
   stop() {
     this.setVelocityX(0);
   }
 
-  //increase meters while the game is running
   update_meters(currentSpeed, delta) {
     this.meters += (currentSpeed * delta) / 30000;
   }

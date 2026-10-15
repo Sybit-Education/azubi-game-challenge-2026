@@ -11,7 +11,6 @@ export default class HUD {
       .text(scene.scale.width - 20, 20, '', { fontSize: '30px' })
       .setOrigin(1, 0);
 
-    //second line for player 2
     if (this.secondCar) {
       this.distanceText2 = scene.add
         .text(scene.scale.width - 300, 60, '', { fontSize: '30px' })

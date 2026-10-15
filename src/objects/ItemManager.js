@@ -208,10 +208,9 @@ export default class ItemManager {
   }
 
   itemShop() {
-    // Hotkeys Player1
+    // Player 1 spends coins with the number-row keys
     this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
     this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
-    // this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.key1) &&
@@ -229,10 +228,9 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
-    // Hotkeys Player2
+    // Player 2 uses the equivalent numpad keys
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
-    // this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.numpad1) &&
