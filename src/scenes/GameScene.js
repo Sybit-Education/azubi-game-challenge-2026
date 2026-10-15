@@ -10,6 +10,7 @@ import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
+import RandomObstacle from '../objects/RandomObstacle.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -34,6 +35,9 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('item', 'assets/images/entities/item.png');
     this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
+    this.load.image('random-object1', 'assets/images/entities/obstacles/random-object-1.png');
+    this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
+    this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
 
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
@@ -57,10 +61,11 @@ export default class GameScene extends Phaser.Scene {
     this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
-    this.createRoadObject('obstacle');
+    this.createRoadObject('enemy-car');
     this.createRoadObject('coin');
     this.createRoadObject('item');
     this.createRoadObject('ice');
+    this.createRoadObject('random-obstacle');
     this.createHud();
     this.setBackground('background');
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
@@ -147,12 +152,7 @@ export default class GameScene extends Phaser.Scene {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
-      this.secondCar = new Car(
-        this,
-        this.scale.width / 2 + 90,
-        this.scale.height / 1.25,
-        'UP,LEFT,DOWN,RIGHT',
-      );
+      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25, 'car2');
       this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
@@ -205,7 +205,6 @@ export default class GameScene extends Phaser.Scene {
 
       if (type === 'coin') {
         roadObject = new Coin(this, roadObjectX, spawnY, lane);
-        roadObject.body.setOffset(0, 5);
         this.physics.add.overlap(
           this.car,
           roadObject,
@@ -245,7 +244,7 @@ export default class GameScene extends Phaser.Scene {
           );
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
-      } else if (type === 'obstacle') {
+      } else if (type === 'enemy-car') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
         roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
         roadObject.body.setImmovable(true);
@@ -276,16 +275,35 @@ export default class GameScene extends Phaser.Scene {
           undefined,
           this.ItemManager,
         );
-      }
-
-      if (this.secondCar) {
-        this.physics.add.overlap(
-          this.secondCar,
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.iceEffect,
+            undefined,
+            this.ItemManager,
+          );
+        }
+      } else if (type === 'random-obstacle') {
+        roadObject = new RandomObstacle(this, roadObjectX, spawnY, lane);
+        roadObject.body.setSize(roadObject.width, roadObject.height);
+        roadObject.body.setImmovable(true);
+        this.physics.add.collider(
+          this.car,
           roadObject,
-          this.ItemManager.iceEffect,
+          this.ItemManager.lebenCheckCar1,
           undefined,
           this.ItemManager,
         );
+        if (this.secondCar) {
+          this.physics.add.collider(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.lebenCheckCar2,
+            undefined,
+            this.ItemManager,
+          );
+        }
       }
       this.roadObjects.push(roadObject);
     }
@@ -296,10 +314,12 @@ export default class GameScene extends Phaser.Scene {
       delay = Phaser.Math.Between(500, 2000);
     } else if (type === 'item') {
       delay = Phaser.Math.Between(5000, 10000);
-    } else if (type === 'obstacle') {
+    } else if (type === 'enemy-car') {
       delay = Phaser.Math.Between(2000, 4000);
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
+    } else if (type === 'random-obstacle') {
+      delay = Phaser.Math.Between(1500, 9000);
     }
 
     this.time.delayedCall(delay, () => this.createRoadObject(type));
@@ -321,8 +341,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   collectCoin(car, coin) {
-    coin.destroy();
+    if (!coin.active) return; // Prevent collecting the same coin multiple times
+
     car.increase_score(coin.value);
+    coin.destroy();
   }
 
   // Handle game over when the player collides with an enemy car
@@ -369,7 +391,7 @@ export default class GameScene extends Phaser.Scene {
       return roadObject.active;
     });
 
-    const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
+    const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
     //dead cars do not collect distance anymore
