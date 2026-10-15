@@ -246,6 +246,15 @@ export default class GameScene extends Phaser.Scene {
           undefined,
           this.ItemManager,
         );
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.iceEffect,
+            undefined,
+            this.ItemManager,
+          );
+        }
       } else if (type === 'random-obstacle') {
         roadObject = new RandomObstacle(this, roadObjectX, spawnY, lane);
         roadObject.body.setSize(roadObject.width, roadObject.height);
@@ -266,16 +275,6 @@ export default class GameScene extends Phaser.Scene {
             this.ItemManager,
           );
         }
-      }
-
-      if (this.secondCar) {
-        this.physics.add.overlap(
-          this.secondCar,
-          roadObject,
-          this.ItemManager.iceEffect,
-          undefined,
-          this.ItemManager,
-        );
       }
       this.roadObjects.push(roadObject);
     }
@@ -313,8 +312,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   collectCoin(car, coin) {
-    coin.destroy();
+    if (!coin.active) return; // Prevent collecting the same coin multiple times
+
     car.increase_score(coin.value);
+    coin.destroy();
   }
 
   // Handle game over when the player collides with an enemy car
