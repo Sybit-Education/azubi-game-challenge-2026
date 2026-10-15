@@ -65,6 +65,7 @@ export default class GameScene extends Phaser.Scene {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
+
     this.elapsedTime = 0;
     this.roadObjects = [];
     this.createPlayer();
@@ -171,6 +172,10 @@ export default class GameScene extends Phaser.Scene {
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+    this.lastPlayerLane = this.getPlayerLane(this.car);
+    this.gameStatus = document.getElementById('game-status');
+    this.gameStatus.textContent = '';
+    this.lastPlayerRoadEdge = null;
   }
 
   createWalls() {
@@ -442,6 +447,19 @@ export default class GameScene extends Phaser.Scene {
     return nearestCar(player, this.getCarsForAudio())?.distance ?? Infinity;
   }
 
+  //a function to get carlocation
+  getPlayerLane(car) {
+    const laneCount = 4;
+    const roadWidth = this.track1.displayWidth;
+    const roadLeft = this.track1.x - roadWidth / 2;
+    const laneWidth = roadWidth / laneCount;
+
+    const positionOnRoad = car.x - roadLeft;
+    const laneIndex = Math.floor(positionOnRoad / laneWidth);
+
+    return Phaser.Math.Clamp(laneIndex, 0, laneCount - 1);
+  }
+
   // Update the game state every frame
   update(_, delta) {
     this.InputManager.update();
@@ -449,6 +467,29 @@ export default class GameScene extends Phaser.Scene {
     this.elapsedTime += delta;
     if (!this.car.dead) {
       this.car.move(this.InputManager.getControlsP1);
+      const currentLane = this.getPlayerLane(this.car);
+
+      let currentRoadEdge = null;
+
+      if (this.car.x <= this.car.leftLimit) {
+        currentRoadEdge = 'left';
+      } else if (this.car.x >= this.car.rightLimit) {
+        currentRoadEdge = 'right';
+      }
+
+      const laneChanged = currentLane !== this.lastPlayerLane;
+      const edgeChanged = currentRoadEdge !== this.lastPlayerRoadEdge;
+
+      if (this.registry.get('accessibility enabled')) {
+        if (edgeChanged && currentRoadEdge !== null) {
+          this.gameStatus.textContent = `${currentRoadEdge} road edge`;
+        } else if (laneChanged) {
+          this.gameStatus.textContent = `Lane ${currentLane + 1}`;
+        }
+      }
+
+      this.lastPlayerLane = currentLane;
+      this.lastPlayerRoadEdge = currentRoadEdge;
       this.car.update_boundary_particles();
       this.car.intendedXVelocity = this.car.body.velocity.x;
     }

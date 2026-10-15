@@ -5,6 +5,7 @@ import sensorBeepUrl from './sensor-beep.wav?url';
 import carPassByUrl from './car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './car-pass-by-johnnyfarmer-spatial.wav?url';
 import carPassByHighwayUrl from './car-pass-by-961-studios-spatial.wav?url';
+import plantGrowUrl from './plant-grow.ogg?url';
 
 function loadSound(scene, key, fileUrl) {
   if (scene.cache.audio.exists(key)) return;
@@ -21,6 +22,7 @@ export function preloadGameplaySounds(scene) {
   loadSound(scene, 'car-pass-by', carPassByUrl);
   loadSound(scene, 'car-pass-by-johnnyfarmer', carPassByJohnnyUrl);
   loadSound(scene, 'car-pass-by-961-studios', carPassByHighwayUrl);
+  loadSound(scene, 'plant-grow', plantGrowUrl);
 }
 
 export function preloadMenuSounds(scene) {
