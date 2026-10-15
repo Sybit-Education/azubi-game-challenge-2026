@@ -91,7 +91,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
-      .image(background.x * 0.79 + padding, accessibilitySwitch.y / 0.66, 'Game Mode')
+      .image(background.x / 1.29 + padding, accessibilitySwitch.y / 0.66, 'Game Mode')
       .setScale(0.35)
       .setOrigin(0);
 
