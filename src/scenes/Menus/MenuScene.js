@@ -93,9 +93,9 @@ export default class MenuScene extends Phaser.Scene {
 
     const footer_btn_y = this.scale.height / 1.17;
 
-    this.add
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-2);
 
     this.add
@@ -142,8 +142,8 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(howToPlayScale)
       .setInteractive({ useHandCursor: true });
 
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
 
@@ -175,6 +175,22 @@ export default class MenuScene extends Phaser.Scene {
         scaleY: 0.24,
         duration: 100,
       });
+    });
+
+    //Background parralax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
+
+    //homepage car parralax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
     });
 
     // Some variables to keep track of the button states
