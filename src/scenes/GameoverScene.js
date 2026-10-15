@@ -24,13 +24,16 @@ export default class GameoverScene extends Phaser.Scene {
     this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
       'gameover-play-again',
-      'assets/images/gameover-scene-assets/nochmal-spielen.png',
+      'assets/images/gameover-scene-assets/play-again-button.png',
     );
     this.load.image('p1-won-logo', 'assets/images/gameover-scene-assets/player-1-won.png');
     this.load.image('p2-won-logo', 'assets/images/gameover-scene-assets/player-2-won.png');
-    this.load.image('gameover-menu-btn', 'assets/images/gameover-scene-assets/hauptmenu-1.png');
+    this.load.image(
+      'gameover-menu-btn',
+      'assets/images/gameover-scene-assets/back-to-menu-button.png',
+    );
     this.load.image('gameover-score-text', 'assets/images/gameover-scene-assets/score.png');
-    this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distanz.png');
+    this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distance.png');
     this.load.image(
       'gameover-hintergrund',
       'assets/images/gameover-scene-assets/game-over-hintergrund.png',
@@ -210,14 +213,14 @@ export default class GameoverScene extends Phaser.Scene {
     const playAgainButton = this.add
       .image(this.width / 2, this.height / 1.8, 'gameover-play-again')
       .setOrigin(0.5)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setScale(0.4);
 
     // Home page button
     const lobbyButton = this.add
       .image(this.width / 2, this.height / 1.5, 'gameover-menu-btn')
       .setOrigin(0.5)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .setScale(0.4);
 
     // Creates html hovers
