@@ -26,8 +26,8 @@ export default class GameoverScene extends Phaser.Scene {
       'gameover-play-again',
       'assets/images/gameover-scene-assets/nochmal-spielen.png',
     );
-    this.load.image('p1-won-logo', 'assets/images/gameover-scene-assets/player-1-won.png')
-    this.load.image('p2-won-logo', 'assets/images/gameover-scene-assets/player-2-won.png')
+    this.load.image('p1-won-logo', 'assets/images/gameover-scene-assets/player-1-won.png');
+    this.load.image('p2-won-logo', 'assets/images/gameover-scene-assets/player-2-won.png');
     this.load.image('gameover-menu-btn', 'assets/images/gameover-scene-assets/hauptmenu-1.png');
     this.load.image('gameover-score-text', 'assets/images/gameover-scene-assets/score.png');
     this.load.image('gameover-distance-text', 'assets/images/gameover-scene-assets/distanz.png');
@@ -146,27 +146,26 @@ export default class GameoverScene extends Phaser.Scene {
     if (this.isMultiplayer) {
       if (this.score > this.score2) {
         winner = 1;
+      } else if (this.distance > this.distance2) {
+        winner = 1;
+      } else if (this.score2 > this.score) {
+        winner = 2;
+      } else if (this.distance2 > this.distance) {
+        winner = 2;
       }
-
-      else if (this.distance > this.distance2) {
-        winner = 1
-      } 
-
-      else if (this.score2 > this.score) {
-        winner = 2
-      }
-
-      else if (this.distance2 > this.distance) {
-        winner = 2
-      } 
 
       if (winner === 1) {
-        this.add.image(this.width / 2, this.height / 3, "p1-won-logo")
+        this.add.image(this.width / 2, this.height / 3, 'p1-won-logo');
+      } else {
+        this.add.image(this.width / 2, this.height / 3, 'p2-won-logo');
       }
+    }
 
-      else {
-        this.add.image(this.width / 2, this.height / 3, "p2-won-logo")
-      }
+    if (!this.isMultiplayer) {
+      this.add
+        .image(this.width / 2, this.height / 3, 'gameover-title')
+        .setOrigin(0.5)
+        .setScale(0.6);
     }
 
     // Distance text
