@@ -5,12 +5,10 @@ import { positionAccessibleControls } from '../accessibility/positionControls.js
 import { parseLeaderboard } from './LeaderboardScene.js';
 
 export default class GameoverScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('GameoverScene');
   }
 
-  // On init
   init(data) {
     this.distance = data.distance;
     this.score = data.score;
@@ -19,7 +17,6 @@ export default class GameoverScene extends Phaser.Scene {
     this.isMultiplayer = data?.isMultiplayer ?? false;
   }
 
-  // Pre load scene
   preload() {
     this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
@@ -40,9 +37,7 @@ export default class GameoverScene extends Phaser.Scene {
     );
   }
 
-  // On create
   create() {
-    // Parse leaderboard
     const leaderboard = parseLeaderboard();
 
     const savePlayerBest = (name, distance) => {
@@ -61,36 +56,28 @@ export default class GameoverScene extends Phaser.Scene {
       savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
     }
 
-    // Sorts leaderboard
     leaderboard.sort((a, b) => b.distance - a.distance);
 
-    // Saves each player's best distance; the leaderboard scene displays only the top 10.
+    // Persist complete player history; the leaderboard limits display to the top ten later
     localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
 
-    // Debug log leader
     console.debug(leaderboard);
 
-    // Wrapper variables
     this.width = this.scale.width;
     this.height = this.scale.height;
 
-    // Create input manager
-    this.InputManager = new InputManager(this);
+    this.inputManager = new InputManager(this);
 
-    // Setup input manager
-    this.InputManager.create();
+    this.inputManager.create();
 
-    // Gets elements by id
     const gameOverUi = document.getElementById('game-over-ui');
     const finalScore = document.getElementById('final-score');
     const distance = document.getElementById('final-distance');
     const retryGame = document.getElementById('retry');
     const backToHomeScreen = document.getElementById('back-to-home');
 
-    // Makes ui visable
     gameOverUi.hidden = false;
 
-    // Fill in data
     finalScore.textContent = this.score;
     distance.textContent = this.distance;
     if (this.isMultiplayer) {
@@ -98,50 +85,45 @@ export default class GameoverScene extends Phaser.Scene {
       distance.textContent = `player 1: ${this.distance}, player 2: ${this.distance2}`;
     }
 
-    // Retry function
     const retryFunction = () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
       });
     };
 
-    // Back to home function
     const backToHomeFunction = () => {
       this.scene.start(
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
       );
     };
 
-    // Register listener
     retryGame.addEventListener('click', retryFunction);
     backToHomeScreen.addEventListener('click', backToHomeFunction);
 
-    // Auto focus retry button
     retryGame.focus();
 
-    // Shutdown listener
     this.events.once('shutdown', () => {
       retryGame.removeEventListener('click', retryFunction);
       backToHomeScreen.removeEventListener('click', backToHomeFunction);
 
-      // Hides ui
       gameOverUi.hidden = true;
     });
 
-    // Wrapper variables
     this.width = this.scale.width;
     this.height = this.scale.height;
 
-    // Background
     this.add
       .image(this.width / 2, this.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height);
 
-    // Style for stats
     const statsStyle = {
       fontSize: '30px',
     };
 
+    this.add
+      .image(this.width / 2, this.height / 3, 'gameover-title')
+      .setOrigin(0.5)
+      .setScale(0.6);
     // Header
 
     let winner = 0;
@@ -171,65 +153,54 @@ export default class GameoverScene extends Phaser.Scene {
         .setScale(0.6);
     }
 
-    // Distance text
     this.add
       .image(this.width / 1.9, this.height / 2.2, 'gameover-distance-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
-    // Distance display
     this.add
       .text(this.width / 1.67, this.height / 2.2, ` ${this.distance} Km`, statsStyle)
       .setOrigin(0.5);
 
-    // Score text
     this.add
       .image(this.width / 2.7, this.height / 2.2, 'gameover-score-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
-    // Score display
     this.add
       .text(this.width / 2.31, this.height / 2.2, `${this.score} Pts`, statsStyle)
       .setOrigin(0.5);
 
-    //in multiplayer: top line is player 1, below is player 2
+    // Show a second statistics row when the game was played in multiplayer mode
     if (this.isMultiplayer) {
       this.add.text(this.width / 4, this.height / 2.2, 'P1', statsStyle).setOrigin(0.5);
       this.add.text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle).setOrigin(0.5);
 
-      // Points text
       this.add
         .text(this.width / 2.31, this.height / 2.2 + 40, `${this.score2} Pts`, statsStyle)
         .setOrigin(0.5);
 
-      // Distance text
       this.add
         .text(this.width / 1.67, this.height / 2.2 + 40, ` ${this.distance2} Km`, statsStyle)
         .setOrigin(0.5);
     }
 
-    // Play again button
     const playAgainButton = this.add
       .image(this.width / 2, this.height / 1.8, 'gameover-play-again')
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .setScale(0.4);
 
-    // Home page button
     const lobbyButton = this.add
       .image(this.width / 2, this.height / 1.5, 'gameover-menu-btn')
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .setScale(0.4);
 
-    // Creates html hovers
     positionAccessibleControls(this, [
       [retryGame, playAgainButton],
       [backToHomeScreen, lobbyButton],
     ]);
-
-    // Hover state for buttons
 
     playAgainButton.on('pointerover', () => {
       this.selectButton(playAgainButton);
@@ -247,7 +218,6 @@ export default class GameoverScene extends Phaser.Scene {
       this.deselectButton(lobbyButton);
     });
 
-    // Click events
     playAgainButton.on('pointerdown', () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
@@ -280,8 +250,7 @@ export default class GameoverScene extends Phaser.Scene {
       });
     };
 
-    // Menu button array and selected index
-    this.Buttons = [
+    this.buttons = [
       {
         button: playAgainButton,
         action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
@@ -301,48 +270,47 @@ export default class GameoverScene extends Phaser.Scene {
 
     this.selectedIndex = 0;
 
-    this.selectButton(this.Buttons[0].button);
+    this.selectButton(this.buttons[0].button);
   }
 
-  // On every frame
   update() {
-    this.InputManager.update();
-    if (this.InputManager.getControlsP1.button1) {
+    this.inputManager.update();
+    if (this.inputManager.getControlsP1.button1) {
       this.deselectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex--;
 
       if (this.selectedIndex < 0) {
-        this.selectedIndex = this.Buttons.length - 1;
+        this.selectedIndex = this.buttons.length - 1;
       }
 
       this.selectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button3) {
+    if (this.inputManager.getControlsP1.button3) {
       this.deselectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex++;
 
-      if (this.selectedIndex >= this.Buttons.length) {
+      if (this.selectedIndex >= this.buttons.length) {
         this.selectedIndex = 0;
       }
 
       this.selectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button2) {
-      this.Buttons[this.selectedIndex].action?.();
+    if (this.inputManager.getControlsP1.button2) {
+      this.buttons[this.selectedIndex].action?.();
     }
   }
 }

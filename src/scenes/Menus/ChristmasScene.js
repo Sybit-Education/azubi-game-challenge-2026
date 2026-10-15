@@ -1,15 +1,12 @@
 import Phaser from 'phaser';
 
 export default class ChristmasScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('ChristmasScene');
   }
 
-  // Pre load images
   preload() {
     this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
-    //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
       'christmas-homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -49,9 +46,8 @@ export default class ChristmasScene extends Phaser.Scene {
     );
   }
 
-  // Create scene
   create() {
-    const footer_btn_y = this.scale.height / 1.17;
+    const footerButtonY = this.scale.height / 1.17;
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'christmas-homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height)
@@ -67,13 +63,13 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.5);
 
-    const settings_button = this.add
+    const settingsButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.55, 'christmas-homepage-settings')
       .setOrigin(0.5)
       .setScale(0.33)
       .setInteractive();
 
-    const play_button = this.add
+    const playButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.33)
@@ -99,10 +95,10 @@ export default class ChristmasScene extends Phaser.Scene {
       .setDepth(-2)
       .setInteractive();
 
-    play_button.on('pointerover', () => {
+    playButton.on('pointerover', () => {
       this.tweens.add({
         targets: [twoPlayerButton, hitboxVisual],
-        x: play_button.x + 350,
+        x: playButton.x + 350,
         duration: 150,
       });
     });
@@ -122,7 +118,7 @@ export default class ChristmasScene extends Phaser.Scene {
       });
     });
 
-    play_button.on('pointerout', () => {
+    playButton.on('pointerout', () => {
       this.time.delayedCall(0, () => {
         if (!isTwoPlayerHovered) {
           this.tweens.add({
@@ -134,14 +130,14 @@ export default class ChristmasScene extends Phaser.Scene {
       });
     });
     const creditsButton = this.add
-      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
+      .image(this.scale.width / 1.14, footerButtonY, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.4)
       .setInteractive();
     creditsButton.setDepth(3);
 
     this.add
-      .image(this.scale.width / 1.3, footer_btn_y * 1.1, 'christmas-homepage-resonanz')
+      .image(this.scale.width / 1.3, footerButtonY * 1.1, 'christmas-homepage-resonanz')
       .setOrigin(0.5)
       .setScale(0.4);
 
@@ -151,7 +147,7 @@ export default class ChristmasScene extends Phaser.Scene {
       .setScale(0.33);
 
     this.add
-      .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
+      .image(this.scale.width / 2, footerButtonY, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.4);
     this.add
@@ -159,12 +155,12 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3);
 
-    play_button.on('pointerdown', () => {
+    playButton.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     });
 
-    settings_button.on('pointerdown', () => {
+    settingsButton.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
       this.scene.bringToTop('PopUpScene');
     });
@@ -172,7 +168,6 @@ export default class ChristmasScene extends Phaser.Scene {
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
     });
-    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
