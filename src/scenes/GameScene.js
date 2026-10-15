@@ -291,7 +291,7 @@ export default class GameScene extends Phaser.Scene {
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
     } else if (type === 'random-obstacle') {
-      delay = Phaser.Math.Between(700, 3000);
+      delay = Phaser.Math.Between(1500, 9000);
     }
 
     this.time.delayedCall(delay, () => this.createRoadObject(type));
