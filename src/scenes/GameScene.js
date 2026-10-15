@@ -289,7 +289,7 @@ export default class GameScene extends Phaser.Scene {
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
     } else if (type === 'random-obstacle') {
-      delay = Phaser.Math.Between(700, 3000);
+      delay = Phaser.Math.Between(1500, 9000);
     }
 
     this.time.delayedCall(delay, () => this.createRoadObject(type));
@@ -355,7 +355,7 @@ export default class GameScene extends Phaser.Scene {
       return roadObject.active;
     });
 
-    const targetTrackSpeed = Math.min(1500, 600 + this.elapsedTime * 0.005);
+    const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
     this.track2.speed = targetTrackSpeed;
     // A player who has been eliminated no longer accumulates distance

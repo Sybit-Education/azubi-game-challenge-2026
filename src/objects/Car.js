@@ -100,7 +100,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     // Ramp up forward velocity gradually so the car appears to launch from the start line
     let speed = 60;
     const accelerate = () => {
-      this.setVelocityY(speed);
+      //funktion. die den speed variable senkt (negativ = positiv, weil -y ist oben und +y ist unten frag nicht wieso)
+      this.setVelocityY(speed * (this.scene.scale.height / 1200)); // speeds are tuned for 1200px height
 
       if (speed <= -800) {
         return;
