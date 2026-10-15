@@ -84,7 +84,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     }
   }
 
-  update_boundary_particles() {
+  updateBoundaryParticles() {
     if (this.x === this.leftLimit) {
       this.boundaryParticles.setPosition(this.x - this.displayWidth / 2 + 15, this.y - 95);
       this.boundaryParticles.emitting = true;
@@ -112,11 +112,11 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     accelerate();
   }
 
-  increase_score(points) {
+  increaseScore(points) {
     return (this.score += points);
   }
 
-  decrease_score(points) {
+  decreaseScore(points) {
     return (this.score -= points);
   }
 
@@ -124,11 +124,11 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setVelocityX(0);
   }
 
-  update_meters(currentSpeed, delta) {
+  updateMeters(currentSpeed, delta) {
     this.meters += (currentSpeed * delta) / 30000;
   }
 
-  calculate_km() {
+  calculateKilometers() {
     return (this.meters / 1000).toFixed(2);
   }
 }

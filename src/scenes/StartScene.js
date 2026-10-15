@@ -24,8 +24,8 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
     this.load.image('background', 'assets/images/map-skins/hintergrund.png');
-    this.load.image('starting_Banner', 'assets/images/race-track-assets/starting-banner.png');
-    this.load.image('startingLine', 'assets/images/race-track-assets/starting-and-finish-line.png');
+    this.load.image('starting-banner', 'assets/images/race-track-assets/starting-banner.png');
+    this.load.image('starting-line', 'assets/images/race-track-assets/starting-and-finish-line.png');
     this.load.image('start-count-3', 'assets/images/race-track-assets/countdown-3.png');
     this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
     this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
@@ -34,8 +34,8 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.InputManager = new InputManager(this);
-    this.InputManager.create();
+    this.inputManager = new InputManager(this);
+    this.inputManager.create();
 
     this.leaving = false;
     this.secondCar = null;
@@ -189,12 +189,12 @@ export default class StartScene extends Phaser.Scene {
     if (this.car.y <= -300) {
       this.goToGame();
     }
-    this.InputManager.update();
+    this.inputManager.update();
     if (
-      this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button2 ||
-      this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button2
+      this.inputManager.getControlsP1.button4 ||
+      this.inputManager.getControlsP1.button2 ||
+      this.inputManager.getControlsP2.button4 ||
+      this.inputManager.getControlsP2.button2
     ) {
       this.goToGame();
     }

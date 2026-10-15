@@ -52,8 +52,8 @@ export default class MenuScene extends Phaser.Scene {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
-    this.InputManager = new InputManager(this);
-    this.InputManager.create();
+    this.inputManager = new InputManager(this);
+    this.inputManager.create();
 
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
@@ -85,7 +85,7 @@ export default class MenuScene extends Phaser.Scene {
       menu.hidden = true;
     });
 
-    const footer_btn_y = this.scale.height / 1.17;
+    const footerButtonY = this.scale.height / 1.17;
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
@@ -104,7 +104,7 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.5)
       .setDepth(-1);
 
-    const play_button = this.add
+    const playButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.3)
@@ -117,21 +117,21 @@ export default class MenuScene extends Phaser.Scene {
       .setVisible(false)
       .setInteractive({ useHandCursor: true });
 
-    const settings_button = this.add
+    const settingsButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
       .setOrigin(0.5)
       .setScale(0.3)
       .setInteractive({ useHandCursor: true });
 
     const creditsButton = this.add
-      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
+      .image(this.scale.width / 1.14, footerButtonY, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.3)
       .setInteractive({ useHandCursor: true });
 
     const howToPlayScale = 0.2;
     const howToPlayButton = this.add
-      .image(this.scale.width / 8, footer_btn_y, 'homepage-how-to-play')
+      .image(this.scale.width / 8, footerButtonY, 'homepage-how-to-play')
       .setOrigin(0.5)
       .setScale(howToPlayScale)
       .setInteractive({ useHandCursor: true });
@@ -173,8 +173,8 @@ export default class MenuScene extends Phaser.Scene {
     let isTwoPlayerHovered = false;
     this.isMultiplayerSelected = false;
     let hideSubmenuEvent;
-    const playOriginalY = play_button.y;
-    const settingsOriginalY = settings_button.y;
+    const playOriginalY = playButton.y;
+    const settingsOriginalY = settingsButton.y;
     const creditsOriginalY = creditsButton.y;
     const howToPlayOriginalY = howToPlayButton.y;
 
@@ -196,7 +196,7 @@ export default class MenuScene extends Phaser.Scene {
         this.tweens.killTweensOf(twoPlayerButton);
         this.tweens.add({
           targets: twoPlayerButton,
-          x: play_button.x,
+          x: playButton.x,
           duration: 150,
           onComplete: () => {
             if (!isPlayHovered && !isTwoPlayerHovered) {
@@ -213,8 +213,8 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
-        x: play_button.x + 325,
-        y: play_button.y - 3,
+        x: playButton.x + 325,
+        y: playButton.y - 3,
         duration: 150,
       });
     };
@@ -233,15 +233,15 @@ export default class MenuScene extends Phaser.Scene {
       scheduleHide();
     };
 
-    play_button.on('pointerover', () => {
+    playButton.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      this.selectButton(play_button, playOriginalY);
+      this.selectButton(playButton, playOriginalY);
     });
 
-    play_button.on('pointerout', () => {
+    playButton.on('pointerout', () => {
       isPlayHovered = false;
-      this.deselectButton(play_button, playOriginalY);
+      this.deselectButton(playButton, playOriginalY);
       scheduleHide();
     });
 
@@ -250,7 +250,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(play_button, playOriginalY);
+        this.selectButton(playButton, playOriginalY);
       }
     });
 
@@ -260,16 +260,16 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(0);
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
-        this.deselectButton(play_button, playOriginalY);
+        this.deselectButton(playButton, playOriginalY);
       }
     });
 
-    settings_button.on('pointerover', () => {
-      this.selectButton(settings_button, settingsOriginalY);
+    settingsButton.on('pointerover', () => {
+      this.selectButton(settingsButton, settingsOriginalY);
     });
 
-    settings_button.on('pointerout', () => {
-      this.deselectButton(settings_button, settingsOriginalY);
+    settingsButton.on('pointerout', () => {
+      this.deselectButton(settingsButton, settingsOriginalY);
     });
 
     creditsButton.on('pointerover', () => {
@@ -280,8 +280,8 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(creditsButton, creditsOriginalY);
     });
 
-    settings_button.on('pointerout', () => {
-      this.deselectButton(settings_button, settingsOriginalY);
+    settingsButton.on('pointerout', () => {
+      this.deselectButton(settingsButton, settingsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
@@ -317,25 +317,25 @@ export default class MenuScene extends Phaser.Scene {
     };
 
     positionAccessibleControls(this, [
-      [playBtn, play_button],
-      [settingsBtn, settings_button],
+      [playBtn, playButton],
+      [settingsBtn, settingsButton],
     ]);
 
-    play_button.on('pointerdown', startGame);
+    playButton.on('pointerdown', startGame);
 
     twoPlayerButton.on('pointerdown', () => {
       startMultiplayer();
     });
 
-    settings_button.on('pointerdown', openSettings);
+    settingsButton.on('pointerdown', openSettings);
 
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
 
     this.menuButtons = [
-      { button: play_button, y: playOriginalY, action: startGame },
-      { button: settings_button, y: settingsOriginalY, action: openSettings },
+      { button: playButton, y: playOriginalY, action: startGame },
+      { button: settingsButton, y: settingsOriginalY, action: openSettings },
       { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
       {
         button: creditsButton,
@@ -352,8 +352,8 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   update() {
-    this.InputManager.update();
-    const controls = this.InputManager.getControlsP1;
+    this.inputManager.update();
+    const controls = this.inputManager.getControlsP1;
     const rightPressed =
       controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
     const leftPressed =

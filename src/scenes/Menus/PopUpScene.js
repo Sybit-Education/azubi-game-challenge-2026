@@ -36,8 +36,8 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   create() {
-    this.InputManager = new InputManager(this);
-    this.InputManager.create();
+    this.inputManager = new InputManager(this);
+    this.inputManager.create();
 
     this.parentSceneKeys = ['MenuScene', 'ChristmasScene'].filter((key) =>
       this.scene.isActive(key),
@@ -81,7 +81,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0)
       .setInteractive();
 
-    const Accessibilitycircle = this.add
+    const accessibilityCircle = this.add
       .image(background.x * 1.06 + padding, height * 0.196, 'switchCircle')
       .setScale(0.35)
       .setOrigin(0)
@@ -149,7 +149,7 @@ export default class PopUpScene extends Phaser.Scene {
     standardModeButton.on('pointerdown', chooseStandardMode);
 
     let accessibilityEnabled = false;
-    const leftX = Accessibilitycircle.x;
+    const leftX = accessibilityCircle.x;
     const rightX = leftX * 1.035;
 
     const toggleAccessibility = () => {
@@ -159,7 +159,7 @@ export default class PopUpScene extends Phaser.Scene {
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
-        targets: Accessibilitycircle,
+        targets: accessibilityCircle,
         x: accessibilityEnabled ? rightX : leftX,
         duration: 150,
         ease: 'Power2',
@@ -167,7 +167,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
-    Accessibilitycircle.on('pointerdown', toggleAccessibility);
+    accessibilityCircle.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
@@ -176,7 +176,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Animate panel contents as a group while leaving the dimming overlay fixed
     const panel = [
-      Accessibilitycircle,
+      accessibilityCircle,
       background,
       closeButton,
       settingsLabel,
@@ -211,7 +211,7 @@ export default class PopUpScene extends Phaser.Scene {
           this.scene.stop();
           this.parentSceneKeys.forEach((key) => {
             const parentScene = this.scene.get(key);
-            parentScene.InputManager?.resetButtonStates();
+            parentScene.inputManager?.resetButtonStates();
             this.scene.resume(key);
           });
         },
@@ -352,8 +352,8 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   update() {
-    this.InputManager.update();
-    const controls = this.InputManager.getControlsP1;
+    this.inputManager.update();
+    const controls = this.inputManager.getControlsP1;
     const items = this.navigationItems();
 
     if (controls.button1 || controls.accelerate) {

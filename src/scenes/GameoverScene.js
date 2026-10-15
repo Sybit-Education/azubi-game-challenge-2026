@@ -64,9 +64,9 @@ export default class GameoverScene extends Phaser.Scene {
     this.width = this.scale.width;
     this.height = this.scale.height;
 
-    this.InputManager = new InputManager(this);
+    this.inputManager = new InputManager(this);
 
-    this.InputManager.create();
+    this.inputManager.create();
 
     const gameOverUi = document.getElementById('game-over-ui');
     const finalScore = document.getElementById('final-score');
@@ -220,7 +220,7 @@ export default class GameoverScene extends Phaser.Scene {
       });
     };
 
-    this.Buttons = [
+    this.buttons = [
       {
         button: playAgainButton,
         action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
@@ -240,47 +240,47 @@ export default class GameoverScene extends Phaser.Scene {
 
     this.selectedIndex = 0;
 
-    this.selectButton(this.Buttons[0].button);
+    this.selectButton(this.buttons[0].button);
   }
 
   update() {
-    this.InputManager.update();
-    if (this.InputManager.getControlsP1.button1) {
+    this.inputManager.update();
+    if (this.inputManager.getControlsP1.button1) {
       this.deselectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex--;
 
       if (this.selectedIndex < 0) {
-        this.selectedIndex = this.Buttons.length - 1;
+        this.selectedIndex = this.buttons.length - 1;
       }
 
       this.selectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button3) {
+    if (this.inputManager.getControlsP1.button3) {
       this.deselectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
 
       this.selectedIndex++;
 
-      if (this.selectedIndex >= this.Buttons.length) {
+      if (this.selectedIndex >= this.buttons.length) {
         this.selectedIndex = 0;
       }
 
       this.selectButton(
-        this.Buttons[this.selectedIndex].button,
-        this.Buttons[this.selectedIndex].y,
+        this.buttons[this.selectedIndex].button,
+        this.buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button2) {
-      this.Buttons[this.selectedIndex].action?.();
+    if (this.inputManager.getControlsP1.button2) {
+      this.buttons[this.selectedIndex].action?.();
     }
   }
 }
