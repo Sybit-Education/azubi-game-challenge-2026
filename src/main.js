@@ -30,6 +30,10 @@ const config = {
     gamepad: true,
   },
 
+  loader: {
+    baseURL: import.meta.env.BASE_URL,
+  },
+
   scene: [
     BootScene,
     MenuScene,
