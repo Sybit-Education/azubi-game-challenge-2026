@@ -78,14 +78,14 @@ export default class GameScene extends Phaser.Scene {
     this.hotbar.setScrollFactor(0);
     this.hotbar.setScale(0.13);
 
-    // Coin Icon
+    // Coin Icon Player 1
     this.hotbarCoin = this.add.image(380, 53, 'hotbar-coin');
     this.hotbarCoin.setScale(0.5);
     this.hotbarCoin.setDepth(1000);
     this.hotbarCoin.setScrollFactor(0);
 
-    // Coin Number
-    this.coinText = this.add.text(420, 28, this.ItemManager.coinBudgetPlayer1, {
+    // Coin Number Player 1
+    this.coinText1 = this.add.text(420, 30, this.ItemManager.coinBudgetPlayer1, {
         fontSize: '34px',
         color: '#ffffff',
         fontFamily: 'Silkscreen',
@@ -93,8 +93,8 @@ export default class GameScene extends Phaser.Scene {
         strokeThickness: '2'
     });
 
-    this.coinText.setDepth(1000);
-    this.coinText.setScrollFactor(0);
+    this.coinText1.setDepth(1000);
+    this.coinText1.setScrollFactor(0);
   }
 
   setBackground(img) {
@@ -412,6 +412,6 @@ export default class GameScene extends Phaser.Scene {
     this.hud.update();
 
     this.ItemManager.itemShop();
-    this.coinText.setText(this.ItemManager.coinBudgetPlayer1);
+    this.coinText1.setText(this.ItemManager.coinBudgetPlayer1);
   }
 }
