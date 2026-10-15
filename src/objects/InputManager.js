@@ -11,14 +11,14 @@ export default class InputManager {
 
   create() {
     this.keys = this.scene.input.keyboard.addKeys({
-      upP1: Phaser.Input.Keyboard.KeyCodes.UP,
-      downP1: Phaser.Input.Keyboard.KeyCodes.DOWN,
-      leftP1: Phaser.Input.Keyboard.KeyCodes.LEFT,
-      rightP1: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-      upP2: Phaser.Input.Keyboard.KeyCodes.W,
-      downP2: Phaser.Input.Keyboard.KeyCodes.S,
-      leftP2: Phaser.Input.Keyboard.KeyCodes.A,
-      rightP2: Phaser.Input.Keyboard.KeyCodes.D,
+      upP1: Phaser.Input.Keyboard.KeyCodes.W,
+      downP1: Phaser.Input.Keyboard.KeyCodes.S,
+      leftP1: Phaser.Input.Keyboard.KeyCodes.A,
+      rightP1: Phaser.Input.Keyboard.KeyCodes.D,
+      upP2: Phaser.Input.Keyboard.KeyCodes.UP,
+      downP2: Phaser.Input.Keyboard.KeyCodes.DOWN,
+      leftP2: Phaser.Input.Keyboard.KeyCodes.LEFT,
+      rightP2: Phaser.Input.Keyboard.KeyCodes.RIGHT,
       select: Phaser.Input.Keyboard.KeyCodes.ENTER,
     });
   }
