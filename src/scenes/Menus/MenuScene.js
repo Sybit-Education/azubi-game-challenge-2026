@@ -27,7 +27,7 @@ export default class MenuScene extends Phaser.Scene {
       'homepage-settings',
       'assets/images/homepage/default-homepage/settings-button.png',
     );
-    this.load.image('homepage-car', 'assets/images/homepage/default-homepage/car.png');
+    this.load.image('homepage-car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
     this.load.image(
       'homepage-credits',
       'assets/images/homepage/default-homepage/credits-button.png',
@@ -148,10 +148,24 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(howToPlayScale)
       .setInteractive({ useHandCursor: true });
 
-    const homepageCar = this.add
+    // Blur car
+    const blurCar = this.add
       .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(1.925)
+      .setAlpha(0.5);
+
+    // Enable filters
+    blurCar.enableFilters();
+
+    // Blur config
+    blurCar.filters.internal.addBlur(0, 2, 2, 0.25);
+
+    // Front car
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+      .setOrigin(0.5, 0.6)
+      .setScale(1.5);
 
     // Leaderboard button
     const leaderboardButton = this.add
@@ -196,6 +210,14 @@ export default class MenuScene extends Phaser.Scene {
       homepageCar.setPosition(
         this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
         this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
+    //homepage blur car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      blurCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.02,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.02,
       );
     });
 
