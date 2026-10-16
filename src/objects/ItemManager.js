@@ -116,69 +116,69 @@ export default class ItemManager {
   }
 
   itemMagnetCar1() {
-      this.scene.car.magnetActive = true;
+    this.scene.car.magnetActive = true;
 
-      const magnet = this.scene.time.addEvent({
-          delay: 16,
-          loop: true,
-          callback: () => {
-              for (const roadObject of this.scene.roadObjects) {
-                  if (roadObject.texture?.key !== 'coin') {
-                      continue;
-                  }
+    const magnet = this.scene.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        for (const roadObject of this.scene.roadObjects) {
+          if (roadObject.texture?.key !== 'coin') {
+            continue;
+          }
 
-                  const distance = Phaser.Math.Distance.Between(
-                      this.scene.car.x,
-                      this.scene.car.y,
-                      roadObject.x,
-                      roadObject.y
-                  );
+          const distance = Phaser.Math.Distance.Between(
+            this.scene.car.x,
+            this.scene.car.y,
+            roadObject.x,
+            roadObject.y,
+          );
 
-                  if (distance < 600) {
-                      roadObject.x += (this.scene.car.x - roadObject.x) * 0.1;
-                      roadObject.y += (this.scene.car.y - roadObject.y) * 0.1;
-                  }
-              }
-          },
-      });
+          if (distance < 600) {
+            roadObject.x += (this.scene.car.x - roadObject.x) * 0.1;
+            roadObject.y += (this.scene.car.y - roadObject.y) * 0.1;
+          }
+        }
+      },
+    });
 
-      this.scene.time.delayedCall(10000, () => {
-          this.scene.car.magnetActive = false;
-          magnet.remove();
-      });
+    this.scene.time.delayedCall(10000, () => {
+      this.scene.car.magnetActive = false;
+      magnet.remove();
+    });
   }
 
-    itemMagnetCar2() {
-      this.scene.secondCar.magnetActive = true;
+  itemMagnetCar2() {
+    this.scene.secondCar.magnetActive = true;
 
-      const magnet = this.scene.time.addEvent({
-          delay: 16,
-          loop: true,
-          callback: () => {
-              for (const roadObject of this.scene.roadObjects) {
-                  if (roadObject.texture?.key !== 'coin') {
-                      continue;
-                  }
+    const magnet = this.scene.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        for (const roadObject of this.scene.roadObjects) {
+          if (roadObject.texture?.key !== 'coin') {
+            continue;
+          }
 
-                  const distance = Phaser.Math.Distance.Between(
-                      this.scene.secondCar.x,
-                      this.scene.secondCar.y,
-                      roadObject.x,
-                      roadObject.y
-                  );
+          const distance = Phaser.Math.Distance.Between(
+            this.scene.secondCar.x,
+            this.scene.secondCar.y,
+            roadObject.x,
+            roadObject.y,
+          );
 
-                  if (distance < 600) {
-                      roadObject.x += (this.scene.secondCar.x - roadObject.x) * 0.1;
-                      roadObject.y += (this.scene.secondCar.y - roadObject.y) * 0.1;
-                  }
-              }
-          },
-      });
+          if (distance < 600) {
+            roadObject.x += (this.scene.secondCar.x - roadObject.x) * 0.1;
+            roadObject.y += (this.scene.secondCar.y - roadObject.y) * 0.1;
+          }
+        }
+      },
+    });
 
-      this.scene.time.delayedCall(10000, () => {
-          this.scene.secondCar.magnetActive = false;
-          magnet.remove();
-      });
+    this.scene.time.delayedCall(10000, () => {
+      this.scene.secondCar.magnetActive = false;
+      magnet.remove();
+    });
   }
 
   lebenCheckCar1(car) {

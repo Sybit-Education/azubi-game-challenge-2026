@@ -73,7 +73,6 @@ export default class GameScene extends Phaser.Scene {
     // Hotbar
     this.hotbar = this.add.image(585, 0, 'hotbar');
     this.hotbar.setOrigin(0, 0);
-    this.hotbar.setScale(0.3);
     this.hotbar.setDepth(1000);
     this.hotbar.setScrollFactor(0);
     this.hotbar.setScale(0.13);
@@ -86,11 +85,11 @@ export default class GameScene extends Phaser.Scene {
 
     // Coin Number Player 1
     this.coinText1 = this.add.text(420, 30, this.ItemManager.coinBudgetPlayer1, {
-        fontSize: '34px',
-        color: '#ffffff',
-        fontFamily: 'Silkscreen',
-        stroke: '#000000',
-        strokeThickness: '2'
+      fontSize: '34px',
+      color: '#ffffff',
+      fontFamily: 'Silkscreen',
+      stroke: '#000000',
+      strokeThickness: '2',
     });
 
     this.coinText1.setDepth(1000);
