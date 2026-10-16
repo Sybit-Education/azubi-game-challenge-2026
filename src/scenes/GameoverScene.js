@@ -1,6 +1,13 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
+import {
+  preloadMenuSounds,
+  preloadGameplaySounds,
+  playMenuClick,
+  bindMenuFocusSounds,
+} from '../../audio/menuSounds.js';
+
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
 
@@ -21,6 +28,8 @@ export default class GameoverScene extends Phaser.Scene {
 
   // Pre load scene
   preload() {
+    preloadMenuSounds(this);
+    preloadGameplaySounds(this);
     this.load.image('gameover-title', 'assets/images/gameover-scene-assets/game-over.png');
     this.load.image(
       'gameover-play-again',
@@ -98,8 +107,38 @@ export default class GameoverScene extends Phaser.Scene {
       distance.textContent = `player 1: ${this.distance}, player 2: ${this.distance2}`;
     }
 
+    const totalScore = (this.score ?? 0) + (this.isMultiplayer ? (this.score2 ?? 0) : 0);
+
+    const coinCount = Math.floor(totalScore / 50);
+
+    if (coinCount > 0) {
+      const countingSound = this.sound.add('collect-coin', {
+        volume: 0.3,
+        rate: 10,
+      });
+
+      let remainingCoins = coinCount;
+
+      const playNextCoin = () => {
+        if (remainingCoins === 0) return;
+
+        remainingCoins -= 1;
+        countingSound.play();
+      };
+
+      countingSound.on('complete', playNextCoin);
+
+      this.events.once('shutdown', () => {
+        countingSound.off('complete', playNextCoin);
+        countingSound.destroy();
+      });
+
+      playNextCoin();
+    }
+
     // Retry function
     const retryFunction = () => {
+      playMenuClick(this);
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
       });
@@ -107,6 +146,7 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Back to home function
     const backToHomeFunction = () => {
+      playMenuClick(this);
       this.scene.start(
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
       );
@@ -255,22 +295,9 @@ export default class GameoverScene extends Phaser.Scene {
     });
 
     // Click events
-    this.playAgainButton.on('pointerdown', () => {
-      this.scene.start('GameScene', {
-        isMultiplayer: this.isMultiplayer,
-      });
-    });
-
-    this.lobbyButton.on('pointerdown', () => {
-      const gameMode = this.registry.get('gameMode');
-
-      if (gameMode === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
-    });
-
+    this.playAgainButton.on('pointerdown', retryFunction);
+    this.lobbyButton.on('pointerdown', backToHomeFunction);
+    bindMenuFocusSounds(this, ['retry', 'back-to-home']);
     this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
@@ -291,18 +318,11 @@ export default class GameoverScene extends Phaser.Scene {
     this.Buttons = [
       {
         button: this.playAgainButton,
-        action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
+        action: retryFunction,
       },
       {
         button: this.lobbyButton,
-        action: () => {
-          const gameMode = this.registry.get('gameMode');
-          if (gameMode === 'christmas') {
-            this.scene.start('ChristmasScene');
-          } else {
-            this.scene.start('MenuScene');
-          }
-        },
+        action: backToHomeFunction,
       },
     ];
 

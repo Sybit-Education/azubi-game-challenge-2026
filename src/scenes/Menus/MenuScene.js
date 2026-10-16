@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/menuSounds.js';
+
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 import InputManager from '../../objects/InputManager.js';
@@ -12,6 +14,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
+    preloadMenuSounds(this);
     this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
@@ -52,7 +55,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   // Create scene
-  async create() {
+  async create(data) {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
@@ -61,32 +64,49 @@ export default class MenuScene extends Phaser.Scene {
     this.InputManager.create();
 
     const playBtn = document.getElementById('start-game');
+    const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
+    const creditBtn = document.getElementById('credit-btn');
     const menu = document.getElementById('accessible-ui');
     menu.hidden = false;
 
     const startGame = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'standard');
       this.scene.start('NameInputScene', { isMultiplayer: false });
     };
 
     const startMultiplayer = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'multiplayer');
       this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
 
     const openSettings = () => {
+      playMenuClick(this);
       this.scene.launch('PopUpScene');
     };
 
+    const openCredits = () => {
+      playMenuClick(this);
+      this.scene.start('CreditsScene');
+    };
+
     playBtn.addEventListener('click', startGame);
-    playBtn.focus();
+    const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
+    focusTarget.focus();
+
+    multiplayerBtn.addEventListener('click', startMultiplayer);
+
     settingsBtn.addEventListener('click', openSettings);
+    creditBtn.addEventListener('click', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
+      multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
+      creditBtn.removeEventListener('click', openCredits);
       menu.hidden = true;
     });
 
@@ -222,7 +242,7 @@ export default class MenuScene extends Phaser.Scene {
       cancelScheduledHide();
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
+        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected || document.activeElement === multiplayerBtn) {
           return;
         }
 
@@ -232,7 +252,11 @@ export default class MenuScene extends Phaser.Scene {
           x: play_button.x,
           duration: 150,
           onComplete: () => {
-            if (!isPlayHovered && !isTwoPlayerHovered) {
+            if (
+              !isPlayHovered &&
+              !isTwoPlayerHovered &&
+              document.activeElement !== multiplayerBtn
+            ) {
               twoPlayerButton.setVisible(false);
             }
           },
@@ -265,6 +289,12 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(twoPlayerButton, playOriginalY - 3);
       scheduleHide();
     };
+    multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
+    multiplayerBtn.addEventListener('blur', scheduleHide);
+    this.events.once('shutdown', () => {
+      multiplayerBtn.removeEventListener('focus', revealTwoPlayerButton);
+      multiplayerBtn.removeEventListener('blur', scheduleHide);
+    });
 
     play_button.on('pointerover', () => {
       isPlayHovered = true;
@@ -353,7 +383,9 @@ export default class MenuScene extends Phaser.Scene {
     // Click events
     positionAccessibleControls(this, [
       [playBtn, play_button],
+      [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
+      [creditBtn, creditsButton],
     ]);
 
     play_button.on('pointerdown', startGame);
@@ -364,9 +396,8 @@ export default class MenuScene extends Phaser.Scene {
 
     settings_button.on('pointerdown', openSettings);
 
-    creditsButton.on('pointerdown', () => {
-      this.scene.start('CreditsScene');
-    });
+    creditsButton.on('pointerdown', openCredits);
+    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
 
     // Menu button array and selected index
     this.menuButtons = [
@@ -376,7 +407,7 @@ export default class MenuScene extends Phaser.Scene {
       {
         button: creditsButton,
         y: creditsOriginalY,
-        action: () => this.scene.start('CreditsScene'),
+        action: openCredits,
       },
     ];
 

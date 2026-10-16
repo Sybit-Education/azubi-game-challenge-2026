@@ -1,15 +1,23 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 
+
+import { preloadMenuSounds, playMenuClick } from '../../audio/menuSounds.js';
 export default class CreditsScene extends Phaser.Scene {
   constructor() {
     super('CreditsScene');
+  }
+
+  preload() {
+    preloadMenuSounds(this);
   }
 
   create() {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+    const creditsUI = document.getElementById('credits-ui');
+    const creditsContent = document.getElementById('credits-content');
 
     let creditText = `
       SYBIT KART
@@ -53,6 +61,10 @@ export default class CreditsScene extends Phaser.Scene {
 
     Thanks for playing!
     `;
+
+    creditsContent.textContent = creditText;
+    creditsUI.hidden = false;
+
     let skipText = 'Press SPACE to skip';
 
     this.width = this.scale.width;
@@ -74,9 +86,16 @@ export default class CreditsScene extends Phaser.Scene {
       ease: 'Linear',
     });
 
-    this.input.keyboard.on('keydown-SPACE', () => {
-      this.scene.start('MenuScene');
-    });
+    const returnToMenu = () => {
+      playMenuClick(this);
+      const menuScene =
+        this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
+
+      this.scene.start(menuScene, { focusTarget: 'credit-btn' });
+    };
+
+    this.input.keyboard.on('keydown-SPACE', returnToMenu);
+    this.input.keyboard.on('keydown-ESC', returnToMenu);
 
     const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {
       fontSize: '24px',
@@ -89,6 +108,12 @@ export default class CreditsScene extends Phaser.Scene {
       duration: 850,
       yoyo: true,
       repeat: -1,
+    });
+
+    this.events.once('shutdown', () => {
+      creditsUI.hidden = true;
+      this.input.keyboard.off('keydown-SPACE', returnToMenu);
+      this.input.keyboard.off('keydown-ESC', returnToMenu);
     });
   }
 
