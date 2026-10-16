@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class Track extends Phaser.GameObjects.Image {
   constructor(scene, x, y) {
@@ -13,7 +13,8 @@ export default class Track extends Phaser.GameObjects.Image {
   }
 
   move(delta) {
-    this.y += (this.speed * delta) / 1000;
+    const heightFactor = this.scene.scale.height / 1200; // speeds are tuned for 1200px height
+    this.y += (this.speed * heightFactor * delta) / 1000;
 
     if (this.y >= this.scene.scale.height) {
       this.y -= this.displayHeight * 2;

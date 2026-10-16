@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
@@ -12,39 +12,48 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('homepage-2player', 'assets/sprites/Homepage/2Multiplayer.png');
+    this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
-      'assets/sprites/Homepage/Default Homepage/background.png',
+      'assets/images/homepage/default-homepage/background.png',
     );
     this.load.image(
       'WeCreateCXChampions',
-      'assets/sprites/Homepage/Default Homepage/WeCreateCXChampions.png',
+      'assets/images/homepage/default-homepage/we-create-cx-champions.png',
     );
-    this.load.image('homepage-title', 'assets/sprites/Homepage/Default Homepage/SYBIT KART.png');
-    this.load.image('homepage-play-btn', 'assets/sprites/Homepage/Default Homepage/playButton.png');
+    this.load.image('homepage-title', 'assets/images/homepage/default-homepage/sybit-kart.png');
+    this.load.image('homepage-play-btn', 'assets/images/homepage/default-homepage/play-button.png');
     this.load.image(
       'homepage-settings',
-      'assets/sprites/Homepage/Default Homepage/settingsButton.png',
+      'assets/images/homepage/default-homepage/settings-button.png',
     );
-    this.load.image('homepage-car', 'assets/sprites/Homepage/Default Homepage/car.png');
-    this.load.image('homepage-newCar', 'assets/sprites/Entities/Player Skins/SybitKartPlayer1.png');
+    this.load.image('homepage-car', 'assets/images/homepage/default-homepage/car.png');
     this.load.image(
       'homepage-credits',
-      'assets/sprites/Homepage/Default Homepage/creditsButton.png',
+      'assets/images/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
-      'homepage-anleitung',
-      'assets/sprites/Homepage/Default Homepage/anleitungButton.png',
+      'homepage-how-to-play',
+      'assets/images/homepage/default-homepage/how-to-play-button.png',
     );
     this.load.image(
       'homepage-barrierefreiheit',
-      'assets/sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
+    this.load.image(
+      'homepage-leaderboard-btn',
+      'assets/images/gameover-scene-assets/leaderboard-button.png',
+    );
+    this.load.image(
+      'leaderboard-homepage-btn',
+      'assets/images/gameover-scene-assets/back-to-menu-button.png',
+    );
+    this.load.image('homepage-line', 'assets/images/homepage/default-homepage/line.png');
   }
 
   // Create scene
-  create() {
+  async create() {
+    await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it
@@ -58,12 +67,12 @@ export default class MenuScene extends Phaser.Scene {
 
     const startGame = () => {
       this.registry.set('gameMode', 'standard');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
+      this.scene.start('NameInputScene', { isMultiplayer: false });
     };
 
     const startMultiplayer = () => {
       this.registry.set('gameMode', 'multiplayer');
-      this.scene.start('LoadingScene', { isMultiplayer: true });
+      this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
 
@@ -85,9 +94,14 @@ export default class MenuScene extends Phaser.Scene {
 
     const footer_btn_y = this.scale.height / 1.17;
 
-    this.add
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
       .setDepth(-2);
 
     this.add
@@ -127,15 +141,15 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.3)
       .setInteractive({ useHandCursor: true });
 
-    const AnleitungsButton = this.add
-      .image(this.scale.width / 8, footer_btn_y, 'homepage-anleitung')
+    const howToPlayScale = 0.2;
+    const howToPlayButton = this.add
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-how-to-play')
       .setOrigin(0.5)
-      .setScale(0.3)
+      .setScale(howToPlayScale)
       .setInteractive({ useHandCursor: true });
 
-    // Blur car
     const blurCar = this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-newCar')
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
       .setScale(1.9)
       .setAlpha(0.5);
@@ -152,6 +166,52 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5, 0.6)
       .setScale(1.5);
 
+    // Leaderboard button
+    const leaderboardButton = this.add
+      .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
+      .setScale(0.24)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    // Leaderboard click listener
+    leaderboardButton.on('pointerdown', () => {
+      this.scene.start('LeaderboardScene');
+    });
+
+    leaderboardButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.26,
+        scaleY: 0.26,
+        duration: 100,
+      });
+    });
+
+    leaderboardButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.24,
+        scaleY: 0.24,
+        duration: 100,
+      });
+    });
+
+    //Background parallax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
+
+    //homepage car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
     // Some variables to keep track of the button states
     let isPlayHovered = false;
     let isTwoPlayerHovered = false;
@@ -160,7 +220,7 @@ export default class MenuScene extends Phaser.Scene {
     const playOriginalY = play_button.y;
     const settingsOriginalY = settings_button.y;
     const creditsOriginalY = creditsButton.y;
-    const AnleitungsOriginalY = AnleitungsButton.y;
+    const howToPlayOriginalY = howToPlayButton.y;
 
     // Functions
 
@@ -274,30 +334,30 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(creditsButton, creditsOriginalY);
     });
 
-    AnleitungsButton.on('pointerover', () => {
-      this.selectButton(AnleitungsButton, AnleitungsOriginalY);
+    howToPlayButton.on('pointerover', () => {
+      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
     });
 
-    AnleitungsButton.on('pointerout', () => {
-      this.deselectButton(AnleitungsButton, AnleitungsOriginalY);
+    howToPlayButton.on('pointerout', () => {
+      this.deselectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
     });
 
     // Helper functions for button animations
-    this.selectButton = (button, originalY) => {
+    this.selectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
-        scaleX: 0.32,
-        scaleY: 0.32,
+        scaleX: scale + 0.02,
+        scaleY: scale + 0.02,
         y: originalY - 5,
         duration: 50,
       });
     };
 
-    this.deselectButton = (button, originalY) => {
+    this.deselectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
-        scaleX: 0.3,
-        scaleY: 0.3,
+        scaleX: scale,
+        scaleY: scale,
         y: originalY,
         duration: 50,
       });
@@ -325,7 +385,7 @@ export default class MenuScene extends Phaser.Scene {
     this.menuButtons = [
       { button: play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
-      { button: AnleitungsButton, y: AnleitungsOriginalY },
+      { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
       {
         button: creditsButton,
         y: creditsOriginalY,
@@ -362,6 +422,7 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
       );
 
       this.selectedIndex--;
@@ -373,6 +434,7 @@ export default class MenuScene extends Phaser.Scene {
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
       );
     }
     if (controls.button3) {
@@ -380,6 +442,7 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
       );
 
       this.selectedIndex++;
@@ -391,6 +454,7 @@ export default class MenuScene extends Phaser.Scene {
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
       );
     }
     if (controls.button2) {

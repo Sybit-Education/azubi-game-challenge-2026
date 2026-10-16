@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
@@ -8,61 +8,68 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
-    this.load.image('christmas-homepage-2player', 'assets/sprites/Homepage/2Multiplayer.png');
-    //this.load.image('playButton', 'sprites/buttonTemplate.png');
+    this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
+    //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
       'christmas-homepage-hintergrund',
-      'assets/sprites/Homepage/Default Homepage/background.png',
+      'assets/images/homepage/default-homepage/background.png',
     );
     this.load.image(
       'christmas-homepage-resonanz',
-      'assets/sprites/Homepage/Default Homepage/Resonanz.png',
+      'assets/images/homepage/default-homepage/resonanz.png',
     );
     this.load.image(
       'christmas-homepage-title',
-      'assets/sprites/Homepage/Weihnachts Homepage/Sybit Kart Weihnachtsthema.png',
+      'assets/images/homepage/weihnachts-homepage/sybit-kart-weihnachtsthema.png',
     );
     this.load.image(
       'christmas-homepage-lights',
-      'assets/sprites/Homepage/Weihnachts Homepage/Die Lichterkette.png',
+      'assets/images/homepage/weihnachts-homepage/die-lichterkette.png',
     );
     this.load.image(
       'christmas-homepage-play-btn',
-      'assets/sprites/Homepage/Default Homepage/playButton.png',
+      'assets/images/homepage/default-homepage/play-button.png',
     );
     this.load.image(
       'christmas-homepage-settings',
-      'assets/sprites/Homepage/Default Homepage/settingsButton.png',
+      'assets/images/homepage/default-homepage/settings-button.png',
     );
     this.load.image(
       'christmas-homepage-trees',
-      'assets/sprites/Homepage/Weihnachts Homepage/biggerTrees.png',
+      'assets/images/homepage/weihnachts-homepage/bigger-trees.png',
     );
-    this.load.image('christmas-homepage-car', 'assets/sprites/Homepage/Default Homepage/car.png');
+    this.load.image('christmas-homepage-car', 'assets/images/homepage/default-homepage/car.png');
+
+    this.load.image('christmas-homepage-line', 'assets/images/homepage/default-homepage/line.png');
     this.load.image(
       'christmas-homepage-credits',
-      'assets/sprites/Homepage/Default Homepage/creditsButton.png',
+      'assets/images/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
       'christmas-homepage-barrierefreiheit',
-      'assets/sprites/Homepage/Default Homepage/barrierefreiheitButton.png',
+      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
     );
   }
 
   // Create scene
   create() {
     const footer_btn_y = this.scale.height / 1.17;
-    this.add
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'christmas-homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-100);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'christmas-homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
+      .setDepth(-2);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 3, 'christmas-homepage-title')
       .setOrigin(0.5)
       .setScale(0.5);
 
-    this.add
+    const lights = this.add
       .image(this.scale.width / 2, this.scale.height / 6, 'christmas-homepage-lights')
       .setOrigin(0.5)
       .setScale(0.5);
@@ -145,19 +152,51 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.4);
 
-    this.add
+    const trees = this.add
       .image(this.scale.width / 3, this.scale.height * 0.84, 'christmas-homepage-trees')
       .setOrigin(0.5)
-      .setScale(0.33);
+      .setScale(0.35);
 
     this.add
       .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.4);
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+
+    //Background parralax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
+
+    //homepage car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
+    //christmas lights parallax effect
+    this.input.on('pointermove', (pointer) => {
+      lights.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.03,
+        this.scale.height / 6 + (pointer.y - this.scale.height / 2) * 0.03,
+      );
+    });
+
+    //christmas trees parallax effect
+    this.input.on('pointermove', (pointer) => {
+      trees.setPosition(
+        this.scale.width / 3 + (pointer.x - this.scale.width / 2) * 0.0225,
+        this.scale.height * 0.84 + (pointer.y - this.scale.height / 2) * 0.0225,
+      );
+    });
 
     play_button.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');

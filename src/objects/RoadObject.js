@@ -1,4 +1,4 @@
-/* global Phaser */
+import Phaser from 'phaser';
 
 export default class RoadObject extends Phaser.GameObjects.Image {
   constructor(scene, x, y, texture, lane) {
@@ -6,7 +6,6 @@ export default class RoadObject extends Phaser.GameObjects.Image {
 
     this.gameScene = scene;
     this.lane = lane;
-    this.speed = 600;
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -15,9 +14,10 @@ export default class RoadObject extends Phaser.GameObjects.Image {
   }
 
   move(time, delta) {
-    this.speed = Math.min(1500, 600 + time * 0.005);
+    this.speed = Math.min(1600, 700 + time * 0.005);
 
-    this.y += (this.speed * delta) / 1000;
+    const heightFactor = this.gameScene.scale.height / 1200; // speeds are tuned for 1200px height
+    this.y += (this.speed * heightFactor * delta) / 1000;
 
     const buffer = 100;
 
