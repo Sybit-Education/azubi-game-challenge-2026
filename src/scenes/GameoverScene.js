@@ -133,7 +133,7 @@ export default class GameoverScene extends Phaser.Scene {
     this.height = this.scale.height;
 
     // Background
-    this.add
+    this.background = this.add
       .image(this.width / 2, this.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height);
 
@@ -158,66 +158,73 @@ export default class GameoverScene extends Phaser.Scene {
       }
 
       if (winner === 1) {
-        this.add.image(this.width / 2, this.height / 3, 'p1-won-logo');
+        this.title = this.add.image(this.width / 2, this.height / 3, 'p1-won-logo');
       } else {
-        this.add.image(this.width / 2, this.height / 3, 'p2-won-logo');
+        this.title = this.add.image(this.width / 2, this.height / 3, 'p2-won-logo');
       }
     }
 
     if (!this.isMultiplayer) {
-      this.add
+      this.title = this.add
         .image(this.width / 2, this.height / 3, 'gameover-title')
         .setOrigin(0.5)
         .setScale(0.6);
     }
 
+    // the won logos have scale 1, gameover-title has 0.6
+    this.titleScale = this.isMultiplayer ? 1 : 0.6;
+
     // Distance text
-    this.add
+    this.distanceLabel = this.add
       .image(this.width / 1.9, this.height / 2.2, 'gameover-distance-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
     // Distance display
-    this.add
+    this.distanceText = this.add
       .text(this.width / 1.67, this.height / 2.2, ` ${this.distance} Km`, statsStyle)
       .setOrigin(0.5);
 
     // Score text
-    this.add
+    this.scoreLabel = this.add
       .image(this.width / 2.7, this.height / 2.2, 'gameover-score-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
     // Score display
-    this.add
+    this.scoreText = this.add
       .text(this.width / 2.31, this.height / 2.2, `${this.score} Pts`, statsStyle)
       .setOrigin(0.5);
 
     //in multiplayer: top line is player 1, below is player 2
     if (this.isMultiplayer) {
-      this.add.text(this.width / 4, this.height / 2.2, 'P1', statsStyle).setOrigin(0.5);
-      this.add.text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle).setOrigin(0.5);
+      this.p1Label = this.add
+        .text(this.width / 4, this.height / 2.2, 'P1', statsStyle)
+        .setOrigin(0.5);
+      this.p2Label = this.add
+        .text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle)
+        .setOrigin(0.5);
 
       // Points text
-      this.add
+      this.scoreText2 = this.add
         .text(this.width / 2.31, this.height / 2.2 + 40, `${this.score2} Pts`, statsStyle)
         .setOrigin(0.5);
 
       // Distance text
-      this.add
+      this.distanceText2 = this.add
         .text(this.width / 1.67, this.height / 2.2 + 40, ` ${this.distance2} Km`, statsStyle)
         .setOrigin(0.5);
     }
 
     // Play again button
-    const playAgainButton = this.add
+    this.playAgainButton = this.add
       .image(this.width / 2, this.height / 1.8, 'gameover-play-again')
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .setScale(0.4);
 
     // Home page button
-    const lobbyButton = this.add
+    this.lobbyButton = this.add
       .image(this.width / 2, this.height / 1.5, 'gameover-menu-btn')
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
@@ -225,36 +232,36 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Creates html hovers
     positionAccessibleControls(this, [
-      [retryGame, playAgainButton],
-      [backToHomeScreen, lobbyButton],
+      [retryGame, this.playAgainButton],
+      [backToHomeScreen, this.lobbyButton],
     ]);
 
     // Hover state for buttons
 
-    playAgainButton.on('pointerover', () => {
-      this.selectButton(playAgainButton);
+    this.playAgainButton.on('pointerover', () => {
+      this.selectButton(this.playAgainButton);
     });
 
-    playAgainButton.on('pointerout', () => {
-      this.deselectButton(playAgainButton);
+    this.playAgainButton.on('pointerout', () => {
+      this.deselectButton(this.playAgainButton);
     });
 
-    lobbyButton.on('pointerover', () => {
-      this.selectButton(lobbyButton);
+    this.lobbyButton.on('pointerover', () => {
+      this.selectButton(this.lobbyButton);
     });
 
-    lobbyButton.on('pointerout', () => {
-      this.deselectButton(lobbyButton);
+    this.lobbyButton.on('pointerout', () => {
+      this.deselectButton(this.lobbyButton);
     });
 
     // Click events
-    playAgainButton.on('pointerdown', () => {
+    this.playAgainButton.on('pointerdown', () => {
       this.scene.start('GameScene', {
         isMultiplayer: this.isMultiplayer,
       });
     });
 
-    lobbyButton.on('pointerdown', () => {
+    this.lobbyButton.on('pointerdown', () => {
       const gameMode = this.registry.get('gameMode');
 
       if (gameMode === 'christmas') {
@@ -283,11 +290,11 @@ export default class GameoverScene extends Phaser.Scene {
     // Menu button array and selected index
     this.Buttons = [
       {
-        button: playAgainButton,
+        button: this.playAgainButton,
         action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
       },
       {
-        button: lobbyButton,
+        button: this.lobbyButton,
         action: () => {
           const gameMode = this.registry.get('gameMode');
           if (gameMode === 'christmas') {
@@ -302,6 +309,16 @@ export default class GameoverScene extends Phaser.Scene {
     this.selectedIndex = 0;
 
     this.selectButton(this.Buttons[0].button);
+
+    this.resize({
+      width: this.scale.width,
+      height: this.scale.height,
+    });
+
+    this.scale.on('resize', this.resize, this);
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
+    });
   }
 
   // On every frame
@@ -344,5 +361,44 @@ export default class GameoverScene extends Phaser.Scene {
     if (this.InputManager.getControlsP1.button2) {
       this.Buttons[this.selectedIndex].action?.();
     }
+  }
+
+  resize(gameSize) {
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    const scaleFactor = Math.min(width / 1920, height / 1080);
+
+    this.background.setPosition(width / 2, height / 2).setDisplaySize(width, height);
+
+    this.title.setPosition(width / 2, height / 3).setScale(this.titleScale * scaleFactor);
+
+    this.distanceLabel.setPosition(width / 1.9, height / 2.2).setScale(0.4 * scaleFactor);
+
+    this.distanceText.setPosition(width / 1.67, height / 2.2).setFontSize(30 * scaleFactor);
+
+    this.scoreLabel.setPosition(width / 2.7, height / 2.2).setScale(0.4 * scaleFactor);
+
+    this.scoreText.setPosition(width / 2.31, height / 2.2).setFontSize(30 * scaleFactor);
+
+    if (this.isMultiplayer) {
+      this.p1Label.setPosition(width / 4, height / 2.2).setFontSize(30 * scaleFactor);
+
+      this.p2Label
+        .setPosition(width / 4, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+
+      this.scoreText2
+        .setPosition(width / 2.31, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+
+      this.distanceText2
+        .setPosition(width / 1.67, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+    }
+
+    this.playAgainButton.setPosition(width / 2, height / 1.8).setScale(0.4 * scaleFactor);
+
+    this.lobbyButton.setPosition(width / 2, height / 1.5).setScale(0.4 * scaleFactor);
   }
 }
