@@ -152,14 +152,14 @@ export default class MenuScene extends Phaser.Scene {
     const blurCar = this.add
       .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
-      .setScale(1.9)
+      .setScale(1.925)
       .setAlpha(0.5);
 
     // Enable filters
     blurCar.enableFilters();
 
     // Blur config
-    blurCar.filters.internal.addBlur(0, 2, 2, 0.5);
+    blurCar.filters.internal.addBlur(0, 2, 2, 0.25);
 
     // Front car
     const homepageCar = this.add
