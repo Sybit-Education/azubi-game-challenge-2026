@@ -39,6 +39,8 @@ export default class ChristmasScene extends Phaser.Scene {
       'assets/images/homepage/weihnachts-homepage/bigger-trees.png',
     );
     this.load.image('christmas-homepage-car', 'assets/images/homepage/default-homepage/car.png');
+
+    this.load.image('christmas-homepage-line', 'assets/images/homepage/default-homepage/line.png');
     this.load.image(
       'christmas-homepage-credits',
       'assets/images/homepage/default-homepage/credits-button.png',
@@ -52,17 +54,22 @@ export default class ChristmasScene extends Phaser.Scene {
   // Create scene
   create() {
     const footer_btn_y = this.scale.height / 1.17;
-    this.add
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'christmas-homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-100);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'christmas-homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
+      .setDepth(-2);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 3, 'christmas-homepage-title')
       .setOrigin(0.5)
       .setScale(0.5);
 
-    this.add
+    const lights = this.add
       .image(this.scale.width / 2, this.scale.height / 6, 'christmas-homepage-lights')
       .setOrigin(0.5)
       .setScale(0.5);
@@ -145,19 +152,51 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.4);
 
-    this.add
+    const trees = this.add
       .image(this.scale.width / 3, this.scale.height * 0.84, 'christmas-homepage-trees')
       .setOrigin(0.5)
-      .setScale(0.33);
+      .setScale(0.35);
 
     this.add
       .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
       .setOrigin(0.5)
       .setScale(0.4);
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
       .setScale(0.3);
+
+    //Background parralax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
+
+    //homepage car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
+    //christmas lights parallax effect
+    this.input.on('pointermove', (pointer) => {
+      lights.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.03,
+        this.scale.height / 6 + (pointer.y - this.scale.height / 2) * 0.03,
+      );
+    });
+
+    //christmas trees parallax effect
+    this.input.on('pointermove', (pointer) => {
+      trees.setPosition(
+        this.scale.width / 3 + (pointer.x - this.scale.width / 2) * 0.0225,
+        this.scale.height * 0.84 + (pointer.y - this.scale.height / 2) * 0.0225,
+      );
+    });
 
     play_button.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');

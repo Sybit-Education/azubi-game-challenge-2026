@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y) {
-    //If multiplayer clicked, controls will equal "LEFT, RIGHT". Ref: GameScenes.js ("this.secondCar = new Car(this, this.scale.width / 2 + 120, this.scale.height / 1.25, 'LEFT,RIGHT');")
-    super(scene, x, y, 'car');
+  constructor(scene, x, y, texture = 'car') {
+    super(scene, x, y, texture);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -106,7 +105,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     let speed = 60; //auto startet bei 60, bisschen nach hinten um start zu simulieren
     const accelerate = () => {
       //funktion. die den speed variable senkt (negativ = positiv, weil -y ist oben und +y ist unten frag nicht wieso)
-      this.setVelocityY(speed);
+      this.setVelocityY(speed * (this.scene.scale.height / 1200)); // speeds are tuned for 1200px height
 
       if (speed <= -800) {
         //wenn die geschwidnigkeit -800 erreicht wird, bleibt sie konstant

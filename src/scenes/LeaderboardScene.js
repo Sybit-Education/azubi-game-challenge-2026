@@ -7,7 +7,8 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   // On create
-  create() {
+  async create() {
+    await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
 
     // Background image
@@ -52,7 +53,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Home button display
     const backButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.3, 'leaderboard-homepage-btn')
-      .setScale(0.5)
+      .setScale(0.4)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
@@ -64,16 +65,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     backButton.on('pointerover', () => {
       this.tweens.add({
         targets: backButton,
-        scaleX: 0.55,
-        scaleY: 0.55,
+        scaleX: 0.45,
+        scaleY: 0.45,
         duration: 100,
       });
     });
     backButton.on('pointerout', () => {
       this.tweens.add({
         targets: backButton,
-        scaleX: 0.5,
-        scaleY: 0.5,
+        scaleX: 0.4,
+        scaleY: 0.4,
         duration: 100,
       });
     });

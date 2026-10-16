@@ -20,6 +20,7 @@ export default class StartScene extends Phaser.Scene {
 
   preload() {
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
+    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
     this.load.image('background', 'assets/images/map-skins/hintergrund.png');
@@ -109,12 +110,7 @@ export default class StartScene extends Phaser.Scene {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
-      this.secondCar = new Car(
-        this,
-        this.scale.width / 2 + 90,
-        this.scale.height / 1.2,
-        'LEFT,RIGHT',
-      );
+      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2');
       this.secondCar.body.setSize(
         this.secondCar.displayWidth * 1.25,
         this.secondCar.displayHeight * 1.25,
