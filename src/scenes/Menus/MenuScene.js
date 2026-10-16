@@ -148,21 +148,20 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(howToPlayScale)
       .setInteractive({ useHandCursor: true });
 
+    // Blur car
     const blurCar = this.add
       .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
       .setScale(1.9)
       .setAlpha(0.5);
 
-    // Add blur
-    const blurFX = blurCar.preFX.addBlur();
 
-    // Blur config
-    blurFX.strength = 0.3;
+    blurCar.enableFilters();
+    const blurController = blurCar.filters.internal.addBlur();
 
     // Front car
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-newCar')
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
       .setOrigin(0.5, 0.6)
       .setScale(1.5);
 
