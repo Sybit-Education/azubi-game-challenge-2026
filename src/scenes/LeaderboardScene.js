@@ -101,7 +101,8 @@ export function parseLeaderboard() {
 
   const bestByPlayer = new Map();
   entries.forEach((entry) => {
-    const playerKey = entry.name.trim().toLowerCase();
+    const playerKey = entry.name?.trim()?.toLowerCase() ?? 'unknown';
+
     const previousBest = bestByPlayer.get(playerKey);
     if (!previousBest || entry.distance > previousBest.distance) {
       bestByPlayer.set(playerKey, entry);
