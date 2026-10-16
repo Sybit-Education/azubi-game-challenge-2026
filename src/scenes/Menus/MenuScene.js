@@ -28,6 +28,7 @@ export default class MenuScene extends Phaser.Scene {
       'assets/sprites/Homepage/Default Homepage/settingsButton.png',
     );
     this.load.image('homepage-car', 'assets/sprites/Homepage/Default Homepage/car.png');
+    this.load.image('homepage-newCar', 'assets/sprites/Entities/Player Skins/SybitKartPlayer1.png');
     this.load.image(
       'homepage-credits',
       'assets/sprites/Homepage/Default Homepage/creditsButton.png',
@@ -132,10 +133,24 @@ export default class MenuScene extends Phaser.Scene {
       .setScale(0.3)
       .setInteractive({ useHandCursor: true });
 
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    // Blur car
+    const blurCar = this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-newCar')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(1.9)
+      .setAlpha(0.5);
+
+    // Add blur
+    const blurFX = blurCar.preFX.addBlur();
+
+    // Blur config
+    blurFX.strength = 0.3;
+
+    // Front car
+    this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-newCar')
+      .setOrigin(0.5, 0.6)
+      .setScale(1.5);
 
     // Some variables to keep track of the button states
     let isPlayHovered = false;
