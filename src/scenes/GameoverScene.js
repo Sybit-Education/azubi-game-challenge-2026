@@ -44,15 +44,14 @@ export default class GameoverScene extends Phaser.Scene {
   create() {
     // Parse leaderboard
     const leaderboard = parseLeaderboard();
-
     const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim();
-      const existingEntry = leaderboard.find((entry) => entry.name.trim() === playerKey);
+      const playerKey = name.trim() ?? 'Unbekannt';
 
+      const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
       if (existingEntry) {
         existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
       } else {
-        leaderboard.push({ name, distance: Number(distance) });
+        leaderboard.push({ name: name || 'Unbekannt', distance: Number(distance) });
       }
     };
 
