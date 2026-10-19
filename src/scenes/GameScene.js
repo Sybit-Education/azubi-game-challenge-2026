@@ -49,7 +49,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   //Alle Objekte in der Szene initialisieren
-  create() {
+  async create() {
+    await document.fonts.load('32px Tiny5');
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
