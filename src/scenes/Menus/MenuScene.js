@@ -231,6 +231,7 @@ export default class MenuScene extends Phaser.Scene {
         this.tweens.add({
           targets: twoPlayerButton,
           x: this.play_button.x,
+          y: this.play_button.y,
           duration: 150,
           onComplete: () => {
             if (!isPlayHovered && !isTwoPlayerHovered) {
@@ -247,8 +248,8 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
-        x: this.play_button.x + 325,
-        y: this.play_button.y - 3,
+        x: this.play_button.x + 325 * this.scaleFactor,
+        y: this.play_button.y - 10 * this.scaleFactor,
         duration: 150,
       });
     };
@@ -284,7 +285,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(this.play_button, playOriginalY);
+        this.selectButton(this.play_button, playOriginalY - 10 * this.scaleFactor);
       }
     });
 
