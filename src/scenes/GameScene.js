@@ -42,6 +42,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
+    this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
 
     this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
@@ -64,7 +65,9 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('ice');
     this.createRoadObject('random-obstacle');
     this.createHud();
-    this.setBackground('background');
+    this.setBackground(
+      this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
+    );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
   }
 
