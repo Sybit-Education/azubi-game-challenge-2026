@@ -40,14 +40,15 @@ export default class GameoverScene extends Phaser.Scene {
     );
   }
 
-  // On create
+  // On create 
   create() {
+  
     // Parse leaderboard
     const leaderboard = parseLeaderboard();
-
+/*
     const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim();
-      const existingEntry = leaderboard.find((entry) => entry.name.trim() === playerKey);
+      const playerKey = (name || 'Unbekannt').trim();
+      const existingEntry = leaderboard.find((entry) => (entry.name.trim() || 'Unknown') === playerKey);
 
       if (existingEntry) {
         existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
@@ -60,6 +61,8 @@ export default class GameoverScene extends Phaser.Scene {
     if (this.isMultiplayer) {
       savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
     }
+*/
+
 
     // Sorts leaderboard
     leaderboard.sort((a, b) => b.distance - a.distance);
