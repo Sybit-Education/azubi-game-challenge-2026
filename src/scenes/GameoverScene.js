@@ -271,10 +271,11 @@ export default class GameoverScene extends Phaser.Scene {
       }
     });
 
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
     this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.45,
+        scale: 0.45 * this.scaleFactor,
         duration: 100,
       });
     };
@@ -282,7 +283,7 @@ export default class GameoverScene extends Phaser.Scene {
     this.deselectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.4,
+        scale: 0.4 * this.scaleFactor,
         duration: 100,
       });
     };
