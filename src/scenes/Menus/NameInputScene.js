@@ -13,11 +13,12 @@ export default class NameInputScene extends Phaser.Scene {
     await document.fonts.load('32px Tiny5');
     this.playerNames = [];
     this.activePlayer = 0;
+    this.scaleFactor = this.scale.height / 1080;
 
-    this.add
+    this.prompt = this.add
       .text(this.scale.width / 2, this.scale.height / 3, 'Enter your name', {
         fontFamily: 'Tiny5',
-        fontSize: '48px',
+        fontSize: `${48 * this.scaleFactor}px`,
         color: '#ffffff',
       })
       .setOrigin(0.5);
@@ -25,7 +26,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.nameText = this.add
       .text(this.scale.width / 2, this.scale.height / 2, '', {
         fontFamily: 'Tiny5',
-        fontSize: '32px',
+        fontSize: `${32 * this.scaleFactor}px`,
         color: '#ffffff',
       })
       .setOrigin(0.5);
