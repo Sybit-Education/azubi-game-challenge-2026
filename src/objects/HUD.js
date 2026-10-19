@@ -5,14 +5,14 @@ export default class HUD {
     this.scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
 
     this.scoreText = scene.add
-      .text(scene.scale.width - 20, 20, '', {
+      .text(scene.scale.width - 20 * this.scaleFactor, 20 * this.scaleFactor, '', {
         fontFamily: 'Tiny5',
         fontSize: `${40 * this.scaleFactor}px`,
       })
       .setOrigin(1, 0);
 
     this.distanceText = scene.add
-      .text(this.scoreText.x - 300 * this.scaleFactor, 20, '', {
+      .text(this.scoreText.x - 300 * this.scaleFactor, 20 * this.scaleFactor, '', {
         fontFamily: 'Tiny5',
         fontSize: `${40 * this.scaleFactor}px`,
       })
@@ -21,14 +21,14 @@ export default class HUD {
     //second line for player 2
     if (this.secondCar) {
       this.distanceText2 = scene.add
-        .text(scene.scale.width - 300, 60, '', {
+        .text(scene.scale.width - 300 * this.scaleFactor, 60 * this.scaleFactor, '', {
           fontFamily: 'Tiny5',
           fontSize: `${40 * this.scaleFactor}px`,
         })
         .setOrigin(1, 0);
 
       this.scoreText2 = scene.add
-        .text(scene.scale.width - 20, 60, '', {
+        .text(scene.scale.width - 20 * this.scaleFactor, 60 * this.scaleFactor, '', {
           fontFamily: 'Tiny5',
           fontSize: `${40 * this.scaleFactor}px`,
         })

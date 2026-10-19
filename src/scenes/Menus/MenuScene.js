@@ -37,10 +37,6 @@ export default class MenuScene extends Phaser.Scene {
       'assets/images/homepage/default-homepage/how-to-play-button.png',
     );
     this.load.image(
-      'homepage-barrierefreiheit',
-      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
-    );
-    this.load.image(
       'homepage-leaderboard-btn',
       'assets/images/gameover-scene-assets/leaderboard-button.png',
     );
@@ -146,7 +142,7 @@ export default class MenuScene extends Phaser.Scene {
     const howToPlayButton = this.add
       .image(this.scale.width / 8, footer_btn_y, 'homepage-how-to-play')
       .setOrigin(0.5)
-      .setScale(0.2 * this.scaleFactor)
+      .setScale(howToPlayScale * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const homepageCar = this.add
@@ -169,8 +165,8 @@ export default class MenuScene extends Phaser.Scene {
     leaderboardButton.on('pointerover', () => {
       this.tweens.add({
         targets: leaderboardButton,
-        scaleX: 0.26,
-        scaleY: 0.26,
+        scaleX: 0.26 * this.scaleFactor,
+        scaleY: 0.26 * this.scaleFactor,
         duration: 100,
       });
     });
@@ -178,8 +174,8 @@ export default class MenuScene extends Phaser.Scene {
     leaderboardButton.on('pointerout', () => {
       this.tweens.add({
         targets: leaderboardButton,
-        scaleX: 0.24,
-        scaleY: 0.24,
+        scaleX: 0.24 * this.scaleFactor,
+        scaleY: 0.24 * this.scaleFactor,
         duration: 100,
       });
     });

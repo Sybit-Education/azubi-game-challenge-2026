@@ -63,7 +63,13 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     // On home button listener
     this.backButton.on('pointerdown', () => {
-      this.scene.start('MenuScene');
+      const gameMode = this.registry.get('gameMode');
+
+      if (gameMode === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
     });
     // Hover effect
     this.backButton.on('pointerover', () => {
