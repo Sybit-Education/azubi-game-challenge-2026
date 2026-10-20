@@ -10,6 +10,7 @@ export default class LeaderboardScene extends Phaser.Scene {
   async create() {
     await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
     this.background = this.add
@@ -23,7 +24,8 @@ export default class LeaderboardScene extends Phaser.Scene {
         fontSize: '90px',
         color: '#ffffff',
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScale(1 * this.scaleFactor);
 
     // Debug logging
     console.debug(leaderboard);
@@ -57,9 +59,25 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Home button display
     this.backButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.3, 'leaderboard-homepage-btn')
-      .setScale(0.4)
+      .setScale(0.4 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
+
+    this.resetButton = this.add
+      .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
+        fontFamily: 'Tiny5',
+        fontSize: '40px',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .setScale(1 * this.scaleFactor);
+
+    this.resetButton.on('pointerdown', () => {
+      localStorage.removeItem('leaderboard');
+
+      this.scene.restart();
+    });
 
     // On home button listener
     this.backButton.on('pointerdown', () => {
@@ -75,16 +93,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.backButton.on('pointerover', () => {
       this.tweens.add({
         targets: this.backButton,
-        scaleX: 0.45,
-        scaleY: 0.45,
+        scaleX: 0.45 * this.scaleFactor,
+        scaleY: 0.45 * this.scaleFactor,
         duration: 100,
       });
     });
     this.backButton.on('pointerout', () => {
       this.tweens.add({
         targets: this.backButton,
-        scaleX: 0.4,
-        scaleY: 0.4,
+        scaleX: 0.4 * this.scaleFactor,
+        scaleY: 0.4 * this.scaleFactor,
         duration: 100,
       });
     });

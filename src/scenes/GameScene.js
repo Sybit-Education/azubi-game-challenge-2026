@@ -335,7 +335,8 @@ export default class GameScene extends Phaser.Scene {
     if (this.secondCar && !(this.car.dead && this.secondCar.dead)) {
       return;
     }
-
+    this.walls.forEach((wall) => wall.destroy());
+    this.walls = [];
     this.scene.start('GameoverScene', {
       distance: this.car.calculate_km(),
       score: this.car.score,

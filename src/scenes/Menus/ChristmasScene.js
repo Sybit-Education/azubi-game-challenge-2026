@@ -211,7 +211,8 @@ export default class ChristmasScene extends Phaser.Scene {
     };
 
     const startMultiplayer = () => {
-      this.registry.set('gameMode', 'multiplayer');
+      this.registry.set('isMultiplayer', true);
+      this.registry.set('gameMode', 'christmas');
       this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
@@ -375,7 +376,7 @@ export default class ChristmasScene extends Phaser.Scene {
 
     play_button.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
+      this.scene.start('NameInputScene', { isMultiplayer: false });
     });
     twoPlayerButton.on('pointerdown', () => {
       startMultiplayer();
