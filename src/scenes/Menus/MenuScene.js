@@ -124,9 +124,10 @@ export default class MenuScene extends Phaser.Scene {
     const twoPlayerButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-2player')
       .setOrigin(0.5)
-      .setScale(0.278 * this.scaleFactor)
+      .setScale(0.275 * this.scaleFactor)
       .setVisible(false)
-      .setInteractive({ useHandCursor: true });
+      .setInteractive({ useHandCursor: true })
+      .setDepth(-1);
 
     const settings_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
@@ -219,21 +220,29 @@ export default class MenuScene extends Phaser.Scene {
 
     const scheduleHide = () => {
       cancelScheduledHide();
+
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
+
         if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
           return;
         }
 
         this.tweens.killTweensOf(twoPlayerButton);
+
         this.tweens.add({
           targets: twoPlayerButton,
           x: this.play_button.x,
           y: this.play_button.y,
-          duration: 150,
+          scaleX: 0.275 * this.scaleFactor,
+          scaleY: 0.275 * this.scaleFactor,
+          alpha: 0.7,
+          duration: 180,
+          ease: 'Cubic.easeIn',
           onComplete: () => {
             if (!isPlayHovered && !isTwoPlayerHovered) {
               twoPlayerButton.setVisible(false);
+              twoPlayerButton.setAlpha(1);
             }
           },
         });
@@ -243,12 +252,17 @@ export default class MenuScene extends Phaser.Scene {
     const revealTwoPlayerButton = () => {
       cancelScheduledHide();
       this.tweens.killTweensOf(twoPlayerButton);
-      twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
         x: this.play_button.x + 325 * this.scaleFactor,
-        y: this.play_button.y - 10 * this.scaleFactor,
-        duration: 150,
+        y: playOriginalY - 10 * this.scaleFactor,
+        scaleX: (0.278 + 0.02) * this.scaleFactor,
+        scaleY: (0.278 + 0.02) * this.scaleFactor,
+        duration: 220,
+        ease: 'Sine.easeOut',
+      });
+      this.time.delayedCall(100, () => {
+        twoPlayerButton.setVisible(true);
       });
     };
 
@@ -275,6 +289,10 @@ export default class MenuScene extends Phaser.Scene {
     this.play_button.on('pointerout', () => {
       isPlayHovered = false;
       this.deselectButton(this.play_button, playOriginalY);
+
+      if (twoPlayerButton.visible) {
+        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+      }
       scheduleHide();
     });
 
@@ -283,7 +301,13 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(this.play_button, playOriginalY - 10 * this.scaleFactor);
+        this.selectButton(this.play_button, playOriginalY);
+
+        this.tweens.add({
+          targets: twoPlayerButton,
+          y: playOriginalY - 10 * this.scaleFactor,
+          duration: 50,
+        });
       }
     });
 
@@ -291,6 +315,9 @@ export default class MenuScene extends Phaser.Scene {
       isTwoPlayerHovered = false;
       isPlayHovered = false;
       twoPlayerButton.setDepth(0);
+      if (twoPlayerButton.visible) {
+        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+      }
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
         this.deselectButton(this.play_button, playOriginalY);
@@ -322,7 +349,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     howToPlayButton.on('pointerover', () => {
-      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
+      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale * this.scaleFactor);
     });
 
     howToPlayButton.on('pointerout', () => {
@@ -340,11 +367,11 @@ export default class MenuScene extends Phaser.Scene {
       });
     };
 
-    this.deselectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
+    this.deselectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
-        scaleX: scale,
-        scaleY: scale,
+        scaleX: scale * this.scaleFactor,
+        scaleY: scale * this.scaleFactor,
         y: originalY,
         duration: 50,
       });
