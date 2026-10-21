@@ -26,6 +26,9 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
     this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
+    this.load.image('winter-car', 'assets/images/entities/player-skins/winter-car-P1.png');
+    this.load.image('winter-car2', 'assets/images/entities/player-skins/winter-car-P2.png');
+
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
 
@@ -71,7 +74,7 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('random-obstacle');
     this.createHud();
     this.setBackground(
-      this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
+      this.registry.get('gameMode') === 'ChristmasScene' ? 'background-winter' : 'background',
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
   }
