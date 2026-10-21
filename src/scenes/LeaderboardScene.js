@@ -187,4 +187,3 @@ export function parseLeaderboard() {
 
   return [...bestByPlayer.values()].sort((a, b) => b.distance - a.distance);
 }
-  
