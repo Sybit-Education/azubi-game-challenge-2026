@@ -48,12 +48,9 @@ export default class PopUpScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
     const uiScale = Phaser.Math.Clamp(
-     Math.min(
-      this.scale.width / 1920,
-      this.scale.height / 1080
-    ),
-    0.6, // minimum
-    1 // maximum
+      Math.min(this.scale.width / 1920, this.scale.height / 1080),
+      0.6, // minimum
+      1, // maximum
     );
 
     const background = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
@@ -64,7 +61,7 @@ export default class PopUpScene extends Phaser.Scene {
     const rightColumn = popupRight - padding;
     const rowGap = 120 * uiScale;
     const row1Y = height * 0.2;
-    const row2Y = row1Y + rowGap; 
+    const row2Y = row1Y + rowGap;
     const row3Y = row2Y + rowGap * 2;
 
     const closeButton = this.add
@@ -101,7 +98,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     const Accessibilitycircle = this.add
       .image(rightColumn, row1Y, 'switchCircle')
-      .setScale(0.35 * uiScale)
+      .setScale(0.37 * uiScale)
       .setOrigin(0.5, 0.5)
       .setInteractive({ useHandCursor: true });
 
@@ -170,21 +167,18 @@ export default class PopUpScene extends Phaser.Scene {
     //defining switch status, "origin x" and "goal x"
     let accessibilityEnabled = false;
 
-     const switchLeft =
-    accessibilitySwitch.x - accessibilitySwitch.displayWidth;
+    // Left position
+    const switchLeft =
+      accessibilitySwitch.x -
+      accessibilitySwitch.displayWidth +
+      accessibilitySwitch.displayHeight / 2;
 
-    const switchRight =
-    accessibilitySwitch.x;
+    // Right position
+    const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
-    const leftX =
-    switchLeft + Accessibilitycircle.displayWidth / 2;
-
-    const rightX =
-    switchRight - Accessibilitycircle.displayWidth / 2;
-
-    Accessibilitycircle.x = leftX;
-    Accessibilitycircle.y =
-    row1Y + accessibilitySwitch.displayHeight / 2;
+    // Sets coordinates
+    Accessibilitycircle.x = switchLeft;
+    Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
 
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
@@ -197,7 +191,7 @@ export default class PopUpScene extends Phaser.Scene {
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
         targets: Accessibilitycircle,
-        x: accessibilityEnabled ? rightX : leftX,
+        x: accessibilityEnabled ? switchRight : switchLeft,
         duration: 150,
         ease: 'Power2',
       });
@@ -207,9 +201,9 @@ export default class PopUpScene extends Phaser.Scene {
     Accessibilitycircle.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
-    .image(background.x, row3Y * 2, 'closeLabel')
-    .setScale(0.66 * uiScale)
-    .setOrigin(0.5);
+      .image(background.x, row3Y * 2, 'closeLabel')
+      .setScale(0.66 * uiScale)
+      .setOrigin(0.5);
 
     // Slide the panel in from the right edge. The dim overlay stays in place.
     //added an array of all the elements. add element here, to animate
@@ -312,13 +306,17 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.navigationItems = () => {
       const items = [
-        { button: closeButton, action: close, scale: 0.4 },
-        { button: accessibilitySwitch, action: toggleAccessibility, scale: 0.3 },
-        { button: standardModeButton, action: chooseStandardMode, scale: 0.3 },
+        { button: closeButton, action: close, scale: 0.4 * uiScale },
+        { button: accessibilitySwitch, action: toggleAccessibility, scale: 0.37 * uiScale },
+        { button: standardModeButton, action: chooseStandardMode, scale: 0.3 * uiScale },
       ];
 
       if (hoveringStandard) {
-        items.push({ button: christmasModeButton, action: chooseChristmasMode, scale: 0.3 });
+        items.push({
+          button: christmasModeButton,
+          action: chooseChristmasMode,
+          scale: 0.3 * uiScale,
+        });
       }
 
       return items;
@@ -345,30 +343,6 @@ export default class PopUpScene extends Phaser.Scene {
       });
     });
 
-accessibilitySwitch.on('pointerover', () => {
-  this.tweens.add({
-    targets: [
-      accessibilitySwitch,
-      Accessibilitycircle,
-    ],
-    scaleX: 0.37 * uiScale,
-    scaleY: 0.37 * uiScale,
-    duration: 100,
-  });
-});
-
-accessibilitySwitch.on('pointerout', () => {
-  this.tweens.add({
-    targets: [
-      accessibilitySwitch,
-      Accessibilitycircle,
-    ],
-    scaleX: 0.35 * uiScale,
-    scaleY: 0.35 * uiScale,
-    duration: 100,
-  });
-});
-
     standardModeButton.on('pointerover', () => {
       this.tweens.add({
         targets: standardModeButton,
@@ -386,11 +360,6 @@ accessibilitySwitch.on('pointerout', () => {
         duration: 100,
       });
     });
-
-    console.log(
-    accessibilitySwitch.displayHeight,
-    Accessibilitycircle.displayHeight
-);
   }
   updateGamepadSelection() {
     const items = this.navigationItems();
