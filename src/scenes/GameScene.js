@@ -68,10 +68,16 @@ export default class GameScene extends Phaser.Scene {
 
     this.elapsedTime = 0;
     this.roadObjects = [];
+    this.currentLaneDanger = null;
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
+    this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
+      volume: 0.2,
+      loop: true,
+    });
+
     // Each player car gets its own proximity sensor.
     this.carSensors = [new CarSensor(this, this.car)];
     if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
@@ -102,6 +108,7 @@ export default class GameScene extends Phaser.Scene {
       canvas.removeAttribute('role');
       canvas.removeAttribute('aria-label');
       canvas.removeAttribute('tabindex');
+      this.roadEdgeScrape.destroy();
     });
   }
 
@@ -416,6 +423,9 @@ export default class GameScene extends Phaser.Scene {
 
     //only the car that got hit dies
     car.dead = true;
+    this.sound.play('collision-hit', {volume: 0.3});
+    this.sound.play('collision-bang', {volume:0.3})
+    this.sound.play('collision-impact', {volume:0.3});
     car.boundaryParticles.emitting = false;
     car.disableBody(true, true); //hides the dead car
 
@@ -459,9 +469,116 @@ export default class GameScene extends Phaser.Scene {
 
     return Phaser.Math.Clamp(laneIndex, 0, laneCount - 1);
   }
+getObstaclesInLane(lane) {
+return this.roadObjects.filter((object) => {
+  const isObstacle =
+  object instanceof EnemyCar || 
+  object instanceof RandomObstacle
 
+  return object.active && isObstacle && object.lane === lane;
+})
+}
+
+getObstaclesAhead(car, lane) {
+  const obstacles = this.getObstaclesInLane(lane);
+
+  return obstacles.filter((obstacle) => {
+    return obstacle.body.bottom <= car.body.top;
+  });
+}
+
+getNearestObstacleAhead(car, lane) {
+  const obstacles = this.getObstaclesAhead(car, lane);
+  let nearest = null;
+
+  for (const obstacle of obstacles) {
+    const distance = car.body.top - obstacle.body.bottom;
+
+    if (nearest === null || distance < nearest.distance) {
+      nearest = {
+        obstacle,
+        distance,
+      };
+    }
+  }
+
+  return nearest;
+}
+
+getTimeUntilObstacle(car, obstacle) {
+  if (!Number.isFinite(obstacle.speed)) return Infinity;
+
+  const distance = car.body.top - obstacle.body.bottom;
+  const heightFactor = this.scale.height / 1200;
+  const obstacleSpeed = obstacle.speed * heightFactor;
+  const playerSpeed = car.body.velocity.y;
+  const closingSpeed = obstacleSpeed - playerSpeed;
+
+  if (closingSpeed <= 0) return Infinity;
+
+  return Math.max(0, distance) / closingSpeed;
+}
+getSoonestObstacleAhead(car, lane) {
+  const obstacles = this.getObstaclesAhead(car, lane);
+let soonest = null;
+
+for(const obstacle of obstacles) {
+
+  const seconds = this.getTimeUntilObstacle(car, obstacle);
+  if(!Number.isFinite(seconds)) continue;
+
+  if(soonest === null || seconds < soonest.seconds) {
+    soonest = {
+      obstacle,
+        seconds,
+    };
+  }
+}
+return soonest;
+}
+
+
+  updateLaneDanger() {
+    this.currentLaneDanger = null;
+
+    if (this.car.dead) return;
+
+    const lane = this.getPlayerLane(this.car);
+    const soonest = this.getSoonestObstacleAhead(this.car, lane);
+    const warningSeconds = 4;
+
+    if (soonest !== null && soonest.seconds <= warningSeconds) {
+      this.currentLaneDanger = {
+        obstacle: soonest.obstacle,
+        seconds: soonest.seconds,
+        lane,
+      };
+    }
+  }
+
+  updateRoadEdgeScrape() {
+    if (this.car.dead) {
+      this.roadEdgeScrape.stop();
+      return;
+    }
+
+    const controls = this.InputManager.getControlsP1;
+    const edge = this.lastPlayerRoadEdge;
+    const pushingLeft = edge === 'left' && controls.left && !controls.right;
+    const pushingRight = edge === 'right' && controls.right && !controls.left;
+
+    if (pushingLeft || pushingRight) {
+      this.roadEdgeScrape.setPan(pushingLeft ? -1 : 1);
+
+      if (!this.roadEdgeScrape.isPlaying && !this.sound.locked) {
+        this.roadEdgeScrape.play();
+      }
+    } else {
+      this.roadEdgeScrape.stop();
+    }
+  }
   // Update the game state every frame
-  update(_, delta) {
+  update(_, delta,) {
     this.InputManager.update();
 
     this.elapsedTime += delta;
@@ -483,6 +600,11 @@ export default class GameScene extends Phaser.Scene {
       if (this.registry.get('accessibility enabled')) {
         if (edgeChanged && currentRoadEdge !== null) {
           this.gameStatus.textContent = `${currentRoadEdge} road edge`;
+
+          const pan = currentRoadEdge === 'left' ? -1 : 1;
+
+          this.sound.play('road-edge-hit', { volume: 0.25, pan });
+          this.sound.play('collision-hit', { volume: 0.15, pan });
         } else if (laneChanged) {
           this.gameStatus.textContent = `Lane ${currentLane + 1}`;
         }
@@ -493,6 +615,9 @@ export default class GameScene extends Phaser.Scene {
       this.car.update_boundary_particles();
       this.car.intendedXVelocity = this.car.body.velocity.x;
     }
+
+    this.updateRoadEdgeScrape();
+
     if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.move(this.InputManager.getControlsP2);
       this.secondCar.update_boundary_particles();
@@ -503,6 +628,8 @@ export default class GameScene extends Phaser.Scene {
       roadObject.move(this.elapsedTime, delta);
       return roadObject.active;
     });
+
+    this.updateLaneDanger();
 
     // Check after movement so sounds use the current car positions.
     const carsForAudio = this.getCarsForAudio();
