@@ -11,7 +11,6 @@ import BootScene from './scenes/Menus/BootScene.js';
 import LeaderboardScene from './scenes/LeaderboardScene.js';
 import NameInputScene from './scenes/Menus/NameInputScene.js';
 
-// Global phaser config
 const config = {
   type: Phaser.AUTO,
   scale: {
@@ -49,5 +48,4 @@ const config = {
   ],
 };
 
-// Create game
 new Phaser.Game(config);
