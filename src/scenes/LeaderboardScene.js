@@ -13,9 +13,18 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
-    this.background = this.add
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height);
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    //Background parallax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
 
     // Titel Überschrifft "Leaderboard"
     this.title = this.add
@@ -115,6 +124,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       height: this.scale.height,
     });
   }
+  
 
   resize(gameSize) {
     const width = gameSize.width;
