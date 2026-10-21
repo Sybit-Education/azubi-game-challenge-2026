@@ -96,7 +96,11 @@ export default class CreditsScene extends Phaser.Scene {
     this.InputManager.update();
 
     if (this.InputManager.getControlsP1.button4) {
-      this.scene.start('MenuScene');
+      if (this.registry.get('gameMode') === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
     }
   }
 }
