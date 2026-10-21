@@ -124,7 +124,6 @@ export default class LeaderboardScene extends Phaser.Scene {
       height: this.scale.height,
     });
   }
-  
 
   resize(gameSize) {
     const width = gameSize.width;
