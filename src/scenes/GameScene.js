@@ -426,9 +426,9 @@ export default class GameScene extends Phaser.Scene {
 
     //only the car that got hit dies
     car.dead = true;
-    this.sound.play('collision-hit', {volume: 0.3});
-    this.sound.play('collision-bang', {volume:0.3})
-    this.sound.play('collision-impact', {volume:0.3});
+    this.sound.play('collision-hit', { volume: 0.3 });
+    this.sound.play('collision-bang', { volume: 0.3 });
+    this.sound.play('collision-impact', { volume: 0.3 });
     car.boundaryParticles.emitting = false;
     car.disableBody(true, true); //hides the dead car
 
@@ -472,74 +472,70 @@ export default class GameScene extends Phaser.Scene {
 
     return Phaser.Math.Clamp(laneIndex, 0, laneCount - 1);
   }
-getObstaclesInLane(lane) {
-return this.roadObjects.filter((object) => {
-  const isObstacle =
-  object instanceof EnemyCar || 
-  object instanceof RandomObstacle
+  getObstaclesInLane(lane) {
+    return this.roadObjects.filter((object) => {
+      const isObstacle = object instanceof EnemyCar || object instanceof RandomObstacle;
 
-  return object.active && isObstacle && object.lane === lane;
-})
-}
+      return object.active && isObstacle && object.lane === lane;
+    });
+  }
 
-getObstaclesAhead(car, lane) {
-  const obstacles = this.getObstaclesInLane(lane);
+  getObstaclesAhead(car, lane) {
+    const obstacles = this.getObstaclesInLane(lane);
 
-  return obstacles.filter((obstacle) => {
-    return obstacle.body.bottom <= car.body.top;
-  });
-}
+    return obstacles.filter((obstacle) => {
+      return obstacle.body.bottom <= car.body.top;
+    });
+  }
 
-getNearestObstacleAhead(car, lane) {
-  const obstacles = this.getObstaclesAhead(car, lane);
-  let nearest = null;
+  getNearestObstacleAhead(car, lane) {
+    const obstacles = this.getObstaclesAhead(car, lane);
+    let nearest = null;
 
-  for (const obstacle of obstacles) {
-    const distance = car.body.top - obstacle.body.bottom;
+    for (const obstacle of obstacles) {
+      const distance = car.body.top - obstacle.body.bottom;
 
-    if (nearest === null || distance < nearest.distance) {
-      nearest = {
-        obstacle,
-        distance,
-      };
+      if (nearest === null || distance < nearest.distance) {
+        nearest = {
+          obstacle,
+          distance,
+        };
+      }
     }
+
+    return nearest;
   }
 
-  return nearest;
-}
+  getTimeUntilObstacle(car, obstacle) {
+    if (!Number.isFinite(obstacle.speed)) return Infinity;
 
-getTimeUntilObstacle(car, obstacle) {
-  if (!Number.isFinite(obstacle.speed)) return Infinity;
+    const distance = car.body.top - obstacle.body.bottom;
+    const heightFactor = this.scale.height / 1200;
+    const obstacleSpeed = obstacle.speed * heightFactor;
+    const playerSpeed = car.body.velocity.y;
+    const closingSpeed = obstacleSpeed - playerSpeed;
 
-  const distance = car.body.top - obstacle.body.bottom;
-  const heightFactor = this.scale.height / 1200;
-  const obstacleSpeed = obstacle.speed * heightFactor;
-  const playerSpeed = car.body.velocity.y;
-  const closingSpeed = obstacleSpeed - playerSpeed;
+    if (closingSpeed <= 0) return Infinity;
 
-  if (closingSpeed <= 0) return Infinity;
-
-  return Math.max(0, distance) / closingSpeed;
-}
-getSoonestObstacleAhead(car, lane) {
-  const obstacles = this.getObstaclesAhead(car, lane);
-let soonest = null;
-
-for(const obstacle of obstacles) {
-
-  const seconds = this.getTimeUntilObstacle(car, obstacle);
-  if(!Number.isFinite(seconds)) continue;
-
-  if(soonest === null || seconds < soonest.seconds) {
-    soonest = {
-      obstacle,
-        seconds,
-    };
+    return Math.max(0, distance) / closingSpeed;
   }
-}
-return soonest;
-}
+  getSoonestObstacleAhead(car, lane) {
+    const obstacles = this.getObstaclesAhead(car, lane);
+    let soonest = null;
 
+    for (const obstacle of obstacles) {
+      const seconds = this.getTimeUntilObstacle(car, obstacle);
+      if (!Number.isFinite(seconds)) continue;
+
+      if (soonest === null || seconds < soonest.seconds) {
+        soonest = {
+          obstacle,
+          seconds,
+        };
+      }
+    }
+    return soonest;
+  }
 
   updateLaneDanger() {
     this.currentLaneDanger = null;
@@ -631,7 +627,7 @@ return soonest;
     }
   }
   // Update the game state every frame
-  update(_, delta,) {
+  update(_, delta) {
     this.InputManager.update();
 
     this.elapsedTime += delta;

@@ -268,7 +268,6 @@ export default class ChristmasScene extends Phaser.Scene {
       scheduleHide();
     };
 
-
     twoPlayerButton.on('pointerover', () => {
       isTwoPlayerHovered = true;
       twoPlayerButton.setDepth(-1);

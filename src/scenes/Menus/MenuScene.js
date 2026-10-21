@@ -243,7 +243,12 @@ export default class MenuScene extends Phaser.Scene {
 
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected || document.activeElement === multiplayerBtn) {
+        if (
+          isPlayHovered ||
+          isTwoPlayerHovered ||
+          this.isMultiplayerSelected ||
+          document.activeElement === multiplayerBtn
+        ) {
           return;
         }
 
