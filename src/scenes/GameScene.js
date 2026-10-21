@@ -43,9 +43,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
+    this.load.image('winter-car-P1', 'assets/images/entities/player-skins/winter-car-player-1.png');
+    this.load.image('winter-car-P2', 'assets/images/entities/player-skins/winter-car-player-2.png');
 
     this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
-    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');t
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -124,17 +126,23 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
-      this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
+      const player1Texture = this.registry.get('gameMode') === 'christmas' ? 'winter-car-P1' : 'car';
+      const player2Texture = this.registry.get('gameMode') === 'christmas' ? 'winter-car-P2' : 'car2';
 
-      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25, 'car2');
-      this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
-      this.physics.add.collider(this.car, this.secondCar);
+      if (this.isMultiplayer) {
+        this.car = new Car( this, this.scale.width / 2 - 90, this.scale.height / 1.25, player1Texture);
+        this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
+        
+        this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25, player2Texture);
+
+        this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
-    }
+    };
   }
+}
+
 
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
