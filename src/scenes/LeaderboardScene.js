@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from '../objects/InputManager.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -8,19 +9,22 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // On create
   async create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
-    const background = this.add
+    this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-2);
 
     //Background parallax effect
     this.input.on('pointermove', (pointer) => {
-      background.setPosition(
+      this.background.setPosition(
         this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
         this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
       );
@@ -123,6 +127,14 @@ export default class LeaderboardScene extends Phaser.Scene {
       width: this.scale.width,
       height: this.scale.height,
     });
+  }
+
+  update() {
+    this.InputManager.update();
+
+    if (this.InputManager.getControlsP1.button4) {
+      this.scene.start('MenuScene');
+    }
   }
 
   resize(gameSize) {
