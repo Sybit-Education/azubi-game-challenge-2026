@@ -36,8 +36,8 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   create() {
-    this.inputManager = new InputManager(this);
-    this.inputManager.create();
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     this.parentSceneKeys = ['MenuScene', 'ChristmasScene'].filter((key) =>
       this.scene.isActive(key),
@@ -58,7 +58,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     closeButton.setDepth(9999);
 
-    // Dim the game behind the settings panel
+    // Dim the game behind the settings panel.
     const dim = this.add
       .rectangle(0, 0, width, height, 0x000000, 0.48)
       .setOrigin(0)
@@ -74,19 +74,22 @@ export default class PopUpScene extends Phaser.Scene {
       .image(background.x / 1.2, height * 0.2, 'Accessibility Mode')
       .setScale(0.35)
       .setOrigin(0);
-    // The registry stores this preference, but gameplay behavior does not consume it yet
+    //rowY += Math.max(48, 58 * uiScale);
+
+    // Static switch mockup: settings are visual only for now.
     const accessibilitySwitch = this.add
       .image(background.x * 1.06 + padding, height * 0.195, 'switchOff')
       .setScale(0.3)
       .setOrigin(0)
       .setInteractive();
 
-    const accessibilityCircle = this.add
+    const Accessibilitycircle = this.add
       .image(background.x * 1.06 + padding, height * 0.196, 'switchCircle')
       .setScale(0.35)
       .setOrigin(0)
       .setInteractive({ useHandCursor: true });
 
+    //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
       .image(background.x * 0.79 + padding, accessibilitySwitch.y / 0.66, 'Game Mode')
       .setScale(0.35)
@@ -133,7 +136,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     const chooseStandardMode = () => {
-      // Choosing Standard from the Christmas scene returns to the standard menu
+      //im christmas mode: zurück zu standard
       if (this.parentSceneKeys.includes('ChristmasScene')) {
         this.registry.set('gameMode', 'standard');
         this.scene.stop('ChristmasScene');
@@ -141,16 +144,20 @@ export default class PopUpScene extends Phaser.Scene {
         this.scene.start('MenuScene');
         return;
       }
-      hoveringStandard = !hoveringStandard;
+      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
       updateChristmasButton();
     };
 
     christmasModeButton.on('pointerdown', chooseChristmasMode);
     standardModeButton.on('pointerdown', chooseStandardMode);
 
+    //defining switch status, "origin x" and "goal x"
     let accessibilityEnabled = false;
-    const leftX = accessibilityCircle.x;
+    const leftX = Accessibilitycircle.x;
     const rightX = leftX * 1.035;
+
+    //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
+    //tween für den kreisanimation
 
     const toggleAccessibility = () => {
       accessibilityEnabled = !accessibilityEnabled;
@@ -159,7 +166,7 @@ export default class PopUpScene extends Phaser.Scene {
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
-        targets: accessibilityCircle,
+        targets: Accessibilitycircle,
         x: accessibilityEnabled ? rightX : leftX,
         duration: 150,
         ease: 'Power2',
@@ -167,16 +174,17 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
-    accessibilityCircle.on('pointerdown', toggleAccessibility);
+    Accessibilitycircle.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
       .image(background.x, height - padding, 'closeLabel')
       .setScale(0.66)
       .setOrigin(0.5);
 
-    // Animate panel contents as a group while leaving the dimming overlay fixed
+    // Slide the panel in from the right edge. The dim overlay stays in place.
+    //added an array of all the elements. add element here, to animate
     const panel = [
-      accessibilityCircle,
+      Accessibilitycircle,
       background,
       closeButton,
       settingsLabel,
@@ -188,8 +196,10 @@ export default class PopUpScene extends Phaser.Scene {
       closeLabel,
     ];
 
+    //fades the dimming in slowly
     this.tweens.add({ targets: dim, alpha: 1, duration: 200 });
 
+    //animates each panel to move
     panel.forEach((obj) => (obj.x += width));
     this.tweens.add({
       targets: panel,
@@ -211,7 +221,7 @@ export default class PopUpScene extends Phaser.Scene {
           this.scene.stop();
           this.parentSceneKeys.forEach((key) => {
             const parentScene = this.scene.get(key);
-            parentScene.inputManager?.resetButtonStates();
+            parentScene.InputManager?.resetButtonStates();
             this.scene.resume(key);
           });
         },
@@ -286,6 +296,8 @@ export default class PopUpScene extends Phaser.Scene {
     this.selectedIndex = 0;
     this.updateGamepadSelection();
 
+    // Hover-effects for the buttons
+
     closeButton.on('pointerover', () => {
       this.tweens.add({
         targets: closeButton,
@@ -352,8 +364,8 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   update() {
-    this.inputManager.update();
-    const controls = this.inputManager.getControlsP1;
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems();
 
     if (controls.button1 || controls.accelerate) {

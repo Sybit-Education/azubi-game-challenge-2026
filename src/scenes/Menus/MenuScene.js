@@ -5,10 +5,12 @@ import { positionAccessibleControls } from '../../accessibility/positionControls
 import InputManager from '../../objects/InputManager.js';
 
 export default class MenuScene extends Phaser.Scene {
+  // Constructor
   constructor() {
     super('MenuScene');
   }
 
+  // Pre load images
   preload() {
     this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
@@ -45,12 +47,14 @@ export default class MenuScene extends Phaser.Scene {
     this.load.image('homepage-line', 'assets/images/homepage/default-homepage/line.png');
   }
 
+  // Create scene
   async create() {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
-    this.inputManager = new InputManager(this);
-    this.inputManager.create();
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     const playBtn = document.getElementById('start-game');
     const settingsBtn = document.getElementById('settings-btn');
@@ -122,21 +126,21 @@ export default class MenuScene extends Phaser.Scene {
       .setVisible(false)
       .setInteractive({ useHandCursor: true });
 
-    const settingsButton = this.add
+    const settings_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const creditsButton = this.add
-      .image(this.scale.width / 1.14, footerButtonY, 'homepage-credits')
+      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const howToPlayScale = 0.2;
     const howToPlayButton = this.add
-      .image(this.scale.width / 8, footerButtonY, 'homepage-how-to-play')
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-how-to-play')
       .setOrigin(0.5)
       .setScale(howToPlayScale * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
@@ -146,12 +150,14 @@ export default class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor);
 
+    // Leaderboard button
     const leaderboardButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
       .setScale(0.24 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
+    // Leaderboard click listener
     leaderboardButton.on('pointerdown', () => {
       this.scene.start('LeaderboardScene');
     });
@@ -199,6 +205,8 @@ export default class MenuScene extends Phaser.Scene {
     const settingsOriginalY = settings_button.y;
     const creditsOriginalY = creditsButton.y;
     const howToPlayOriginalY = howToPlayButton.y;
+
+    // Functions
 
     const cancelScheduledHide = () => {
       if (hideSubmenuEvent) {
@@ -287,12 +295,12 @@ export default class MenuScene extends Phaser.Scene {
       }
     });
 
-    settingsButton.on('pointerover', () => {
-      this.selectButton(settingsButton, settingsOriginalY);
+    settings_button.on('pointerover', () => {
+      this.selectButton(settings_button, settingsOriginalY);
     });
 
-    settingsButton.on('pointerout', () => {
-      this.deselectButton(settingsButton, settingsOriginalY);
+    settings_button.on('pointerout', () => {
+      this.deselectButton(settings_button, settingsOriginalY);
     });
 
     creditsButton.on('pointerover', () => {
@@ -303,8 +311,8 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(creditsButton, creditsOriginalY);
     });
 
-    settingsButton.on('pointerout', () => {
-      this.deselectButton(settingsButton, settingsOriginalY);
+    settings_button.on('pointerout', () => {
+      this.deselectButton(settings_button, settingsOriginalY);
     });
 
     creditsButton.on('pointerout', () => {
@@ -340,6 +348,7 @@ export default class MenuScene extends Phaser.Scene {
       });
     };
 
+    // Click events
     positionAccessibleControls(this, [
       [playBtn, this.play_button],
       [settingsBtn, settings_button],
@@ -351,12 +360,13 @@ export default class MenuScene extends Phaser.Scene {
       startMultiplayer();
     });
 
-    settingsButton.on('pointerdown', openSettings);
+    settings_button.on('pointerdown', openSettings);
 
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
 
+    // Menu button array and selected index
     this.menuButtons = [
       { button: this.play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
@@ -376,8 +386,8 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   update() {
-    this.inputManager.update();
-    const controls = this.inputManager.getControlsP1;
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
     const rightPressed =
       controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
     const leftPressed =

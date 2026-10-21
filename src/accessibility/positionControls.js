@@ -1,4 +1,4 @@
-// Match HTML focus targets to the rendered Phaser objects, including canvas scaling
+// Match HTML focus targets to the rendered Phaser objects, including canvas scaling.
 export function positionAccessibleControls(scene, controls) {
   const updatePositions = () => {
     const canvas = scene.game.canvas.getBoundingClientRect();

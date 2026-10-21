@@ -7,8 +7,9 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   create() {
-    this.inputManager = new InputManager(this);
-    this.inputManager.create();
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     let creditText = `
       SYBIT KART
@@ -92,9 +93,9 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   update() {
-    this.inputManager.update();
+    this.InputManager.update();
 
-    if (this.inputManager.getControlsP1.button4) {
+    if (this.InputManager.getControlsP1.button4) {
       this.scene.start('MenuScene');
     }
   }
