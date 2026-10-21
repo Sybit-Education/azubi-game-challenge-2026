@@ -315,22 +315,6 @@ export default class PopUpScene extends Phaser.Scene {
       });
     });
 
-    accessibilitySwitch.on('pointerover', () => {
-      this.tweens.add({
-        targets: accessibilitySwitch,
-        scaleX: 0.32,
-        scaleY: 0.32,
-        duration: 100,
-      });
-    });
-    accessibilitySwitch.on('pointerout', () => {
-      this.tweens.add({
-        targets: accessibilitySwitch,
-        scaleX: 0.3,
-        scaleY: 0.3,
-        duration: 100,
-      });
-    });
     standardModeButton.on('pointerover', () => {
       this.tweens.add({
         targets: standardModeButton,
