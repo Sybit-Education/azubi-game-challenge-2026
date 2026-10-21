@@ -322,8 +322,7 @@ export default class GameScene extends Phaser.Scene {
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
     } else if (type === 'extraLife') {
-      delay = Phaser.Math.Between(7000, 12000);
-      //delay = Phaser.Math.Between(15000, 30000);
+      delay = Phaser.Math.Between(15000, 30000);
     } else if (type === 'random-obstacle') {
       delay = Phaser.Math.Between(1500, 9000);
     }

@@ -238,7 +238,7 @@ export default class ItemManager {
   }
 
   itemRandom1() {
-    const random = Phaser.Math.Between(1, 5);
+    const random = Phaser.Math.Between(1, 4);
 
     if (random === 1) {
       return this.itemShrinkCar1();
@@ -248,13 +248,11 @@ export default class ItemManager {
       return this.itemShieldCar1();
     } else if (random === 4) {
       return this.itemNausea();
-    } else if (random === 5) {
-      return this.itemExtraLifeCar1();
     }
   }
 
   itemRandom2() {
-    const random = Phaser.Math.Between(1, 5);
+    const random = Phaser.Math.Between(1, 4);
 
     if (random === 1) {
       return this.itemShrinkCar2();
@@ -264,8 +262,6 @@ export default class ItemManager {
       return this.itemShieldCar2();
     } else if (random === 4) {
       return this.itemNausea();
-    } else if (random === 5) {
-      return this.itemExtraLifeCar2();
     }
   }
 
