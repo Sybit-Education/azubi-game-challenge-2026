@@ -47,7 +47,14 @@ export default class PopUpScene extends Phaser.Scene {
     this.scene.bringToTop();
     const { width, height } = this.scale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
-    const uiScale = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+    const uiScale = Phaser.Math.Clamp(
+     Math.min(
+      this.scale.width / 1920,
+      this.scale.height / 1080
+    ),
+    0.6, // minimum
+    1 // maximum
+    );
 
     const background = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
     background.displayWidth = width / 2.5;
@@ -88,14 +95,14 @@ export default class PopUpScene extends Phaser.Scene {
     // Static switch mockup: settings are visual only for now.
     const accessibilitySwitch = this.add
       .image(rightColumn, row1Y, 'switchOff')
-      .setScale(0.35 * uiScale)
+      .setScale(0.37 * uiScale)
       .setOrigin(1, 0)
-      .setInteractive();
+      .setInteractive({ useHandCursor: true });
 
     const Accessibilitycircle = this.add
-      .image(rightColumn, row1Y * 1.0105, 'switchCircle')
+      .image(rightColumn, row1Y, 'switchCircle')
       .setScale(0.35 * uiScale)
-      .setOrigin(1, 0)
+      .setOrigin(0.5, 0.5)
       .setInteractive({ useHandCursor: true });
 
     //rowY += Math.max(90, 112 * uiScale);
@@ -162,9 +169,23 @@ export default class PopUpScene extends Phaser.Scene {
 
     //defining switch status, "origin x" and "goal x"
     let accessibilityEnabled = false;
-    const leftX = Accessibilitycircle.x * (uiScale * 1.08);
-    const rightX = leftX * (uiScale * 1.166)
-    
+
+     const switchLeft =
+    accessibilitySwitch.x - accessibilitySwitch.displayWidth;
+
+    const switchRight =
+    accessibilitySwitch.x;
+
+    const leftX =
+    switchLeft + Accessibilitycircle.displayWidth / 2;
+
+    const rightX =
+    switchRight - Accessibilitycircle.displayWidth / 2;
+
+    Accessibilitycircle.x = leftX;
+    Accessibilitycircle.y =
+    row1Y + accessibilitySwitch.displayHeight / 2;
+
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
 
@@ -324,22 +345,30 @@ export default class PopUpScene extends Phaser.Scene {
       });
     });
 
-    accessibilitySwitch.on('pointerover', () => {
-      this.tweens.add({
-        targets: accessibilitySwitch,
-        scaleX: 0.32 * uiScale,
-        scaleY: 0.32 * uiScale,
-        duration: 100,
-      });
-    });
-    accessibilitySwitch.on('pointerout', () => {
-      this.tweens.add({
-        targets: accessibilitySwitch,
-        scaleX: 0.3 * uiScale,
-        scaleY: 0.3 * uiScale,
-        duration: 100,
-      });
-    });
+accessibilitySwitch.on('pointerover', () => {
+  this.tweens.add({
+    targets: [
+      accessibilitySwitch,
+      Accessibilitycircle,
+    ],
+    scaleX: 0.37 * uiScale,
+    scaleY: 0.37 * uiScale,
+    duration: 100,
+  });
+});
+
+accessibilitySwitch.on('pointerout', () => {
+  this.tweens.add({
+    targets: [
+      accessibilitySwitch,
+      Accessibilitycircle,
+    ],
+    scaleX: 0.35 * uiScale,
+    scaleY: 0.35 * uiScale,
+    duration: 100,
+  });
+});
+
     standardModeButton.on('pointerover', () => {
       this.tweens.add({
         targets: standardModeButton,
@@ -357,8 +386,12 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 100,
       });
     });
-  }
 
+    console.log(
+    accessibilitySwitch.displayHeight,
+    Accessibilitycircle.displayHeight
+);
+  }
   updateGamepadSelection() {
     const items = this.navigationItems();
     this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex, 0, items.length);
@@ -376,7 +409,6 @@ export default class PopUpScene extends Phaser.Scene {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems();
-
     if (controls.button1 || controls.accelerate) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
       this.updateGamepadSelection();
