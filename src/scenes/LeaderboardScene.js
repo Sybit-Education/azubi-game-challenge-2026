@@ -1,12 +1,10 @@
 import Phaser from 'phaser';
 
 export default class LeaderboardScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('LeaderboardScene');
   }
 
-  // On create
   async create() {
     await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
@@ -25,10 +23,8 @@ export default class LeaderboardScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Debug logging
     console.debug(leaderboard);
 
-    // Style for one entry
     const entryStyle = {
       fontFamily: 'Tiny5',
       fontSize: this.scale.height / 21 + 'px',
@@ -54,8 +50,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       this.leaderboardEntries.push(text);
     });
 
-    // Home button display
-    this.backButton = this.add
+    const backButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.3, 'leaderboard-homepage-btn')
       .setScale(0.4)
       .setOrigin(0.5)
@@ -118,10 +113,9 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 }
 
-// Loads and parses leaderboard
 export function parseLeaderboard() {
   const entries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
-    // String only entries are counted as scores
+    // Support older leaderboard data that stored distances as strings
     if (typeof entry === 'string') {
       return {
         name: 'Unbekannt',
@@ -129,7 +123,6 @@ export function parseLeaderboard() {
       };
     }
 
-    // Parses entity
     return {
       name: entry.name,
       distance: Number(entry.distance),

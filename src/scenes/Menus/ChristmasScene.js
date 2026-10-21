@@ -1,15 +1,12 @@
 import Phaser from 'phaser';
 
 export default class ChristmasScene extends Phaser.Scene {
-  // Constructor
   constructor() {
     super('ChristmasScene');
   }
 
-  // Pre load images
   preload() {
     this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
-    //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
       'christmas-homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -51,7 +48,6 @@ export default class ChristmasScene extends Phaser.Scene {
     );
   }
 
-  // Create scene
   create() {
     const footer_btn_y = this.scale.height / 1.17;
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
@@ -76,13 +72,13 @@ export default class ChristmasScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(0.7 * this.scaleFactor);
 
-    const settings_button = this.add
+    const settingsButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.55, 'christmas-homepage-settings')
       .setOrigin(0.5)
       .setScale(0.33 * this.scaleFactor)
       .setInteractive();
 
-    const play_button = this.add
+    const playButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.33 * this.scaleFactor)
@@ -145,6 +141,10 @@ export default class ChristmasScene extends Phaser.Scene {
       .setDepth(-2)
       .setInteractive();
 
+    playButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: [twoPlayerButton, hitboxVisual],
+        x: playButton.x + 350,
     // Some variables to keep track of the button states
     let isPlayHovered = false;
     let isTwoPlayerHovered = false;
@@ -349,6 +349,14 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     });
 
+    this.add
+      .image(this.scale.width / 2, footerButtonY, 'homepage-barrierefreiheit')
+      .setOrigin(0.5)
+      .setScale(0.4);
+    this.add
+      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+      .setOrigin(0.5)
+      .setScale(0.3);
     //homepage car parallax effect
     this.input.on('pointermove', (pointer) => {
       homepageCar.setPosition(
@@ -373,7 +381,7 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     });
 
-    play_button.on('pointerdown', () => {
+    playButton.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     });
@@ -388,7 +396,6 @@ export default class ChristmasScene extends Phaser.Scene {
     hitboxVisual.on('pointerdown', () => {
       this.scene.start('LoadingScene', { isMultiplayer: true });
     });
-    //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
     });
