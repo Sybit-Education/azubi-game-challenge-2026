@@ -7,6 +7,9 @@ export default class ItemManager {
     this.coinBudgetPlayer1 = 0;
     this.coinBudgetPlayer2 = 0;
 
+    this.coinMultiplierOnP1 = false;
+    this.coinMultiplierOnP2 = false;
+
     this.itemShieldPrize = 20;
     this.itemShrinkPrize = 15;
 
@@ -295,14 +298,33 @@ export default class ItemManager {
     });
   }
 
-  coinBudgetPlus1() {
-    this.coinBudgetPlayer1++;
-    console.log('Spieler1 ' + this.coinBudgetPlayer1 + ' Coins');
+  coinBudgetPlus1(multiplier = 1) {
+    this.coinBudgetPlayer1 += multiplier;
+    console.log('Spieler1 has collected ' + this.coinBudgetPlayer1 + ' Coins');
+    console.log('multiplier: ' + multiplier);
   }
 
-  coinBudgetPlus2() {
-    this.coinBudgetPlayer2++;
-    console.log('Spieler2 ' + this.coinBudgetPlayer2 + ' Coins');
+  coinBudgetPlus2(multiplier = 1) {
+    this.coinBudgetPlayer2 += multiplier;
+    console.log('Spieler2 has collected ' + this.coinBudgetPlayer2 + ' Coins');
+    console.log('multiplier: ' + multiplier);
+  }
+
+  multiplyCoins(car, item) {
+    if (car.multiplierTimer) {
+      car.multiplierTimer.remove();
+    }
+
+    console.log('Multiplier enabled');
+
+    car.coinMultiplier = 2;
+
+    car.multiplierTimer = this.scene.time.delayedCall(10000, () => {
+      car.coinMultiplier = 1;
+      console.log('Multiplier disabled');
+    });
+
+    item.destroy();
   }
 
   itemShop() {
