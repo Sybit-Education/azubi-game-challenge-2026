@@ -24,23 +24,25 @@ export default class ItemManager {
 
   itemShrinkCar1() {
     console.log('shrink');
-    let carShrinkSize = 0.5;
+    const car = this.scene.car;
+    const originScale = car.scale;
 
-    this.scene.car.setScale(carShrinkSize);
+    car.setScale(originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
+      car.setScale(originScale);
     });
   }
 
   itemShrinkCar2() {
     console.log('Shrink 2');
-    let carShrinkSize = 0.5;
+    const car = this.scene.secondCar;
+    const originScale = car.scale;
 
-    this.scene.secondCar.setScale(carShrinkSize);
+    car.setScale(originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
+      car.setScale(originScale);
     });
   }
 
