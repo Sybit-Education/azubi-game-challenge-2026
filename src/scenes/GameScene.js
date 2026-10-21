@@ -8,6 +8,7 @@ import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
+import ExtraLife from '../objects/ExtraLife.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
@@ -33,8 +34,9 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'assets/images/entities/obstacles/enemy-car-3.png');
 
     this.load.image('coin', 'assets/images/entities/coin.png');
-    this.load.image('item', 'assets/images/entities/item.png');
+    this.load.image('item', 'assets/images/entities/mystery-box.png');
     this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
+    this.load.image('extraLife', 'assets/images/entities/extra-life.png');
     this.load.image('random-object1', 'assets/images/entities/obstacles/random-object-1.png');
     this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
     this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
@@ -46,6 +48,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+    console.log(this.textures.get('extraLife'));
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -64,6 +67,7 @@ export default class GameScene extends Phaser.Scene {
     this.createRoadObject('coin');
     this.createRoadObject('item');
     this.createRoadObject('ice');
+    this.createRoadObject('extraLife');
     this.createRoadObject('random-obstacle');
     this.createHud();
     this.setBackground(
@@ -200,6 +204,7 @@ export default class GameScene extends Phaser.Scene {
         }
       } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
+        roadObject.setScale(0.1);
         this.physics.add.overlap(
           this.car,
           roadObject,
@@ -214,6 +219,29 @@ export default class GameScene extends Phaser.Scene {
             this.secondCar,
             roadObject,
             this.ItemManager.itemRandom2,
+            undefined,
+            this.ItemManager,
+          );
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+        }
+      } else if (type === 'extraLife') {
+        roadObject = new ExtraLife(this, roadObjectX, spawnY, lane);
+        roadObject.setTexture('extraLife');
+        roadObject.setScale(0.08);
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.itemExtraLifeCar1,
+          undefined,
+          this.ItemManager,
+        );
+        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.itemExtraLifeCar2,
             undefined,
             this.ItemManager,
           );
@@ -293,6 +321,9 @@ export default class GameScene extends Phaser.Scene {
       delay = Phaser.Math.Between(2000, 4000);
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
+    } else if (type === 'extraLife') {
+      delay = Phaser.Math.Between(7000, 12000);
+      //delay = Phaser.Math.Between(15000, 30000);
     } else if (type === 'random-obstacle') {
       delay = Phaser.Math.Between(1500, 9000);
     }

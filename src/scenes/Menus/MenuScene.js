@@ -116,13 +116,13 @@ export default class MenuScene extends Phaser.Scene {
       .setDepth(-1);
 
     this.play_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-play-btn')
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-play-btn')
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const twoPlayerButton = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-2player')
+      .image(this.scale.width / 5.7, this.scale.height / 1.9, 'homepage-2player')
       .setOrigin(0.5)
       .setScale(0.275 * this.scaleFactor)
       .setVisible(false)
@@ -130,7 +130,7 @@ export default class MenuScene extends Phaser.Scene {
       .setDepth(-1);
 
     const settings_button = this.add
-      .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
+      .image(this.scale.width / 5.7, this.scale.height / 1.55, 'homepage-settings')
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });

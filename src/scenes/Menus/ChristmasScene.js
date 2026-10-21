@@ -111,7 +111,7 @@ export default class ChristmasScene extends Phaser.Scene {
     const trees = this.add
       .image(this.scale.width / 3, this.scale.height, 'christmas-homepage-trees')
       .setOrigin(0.5, 1)
-      .setScale(0.35 * this.scaleFactor);
+      .setScale(0.3 * this.scaleFactor);
 
     const howToPlayScale = 0.2;
     const howToPlayButton = this.add
