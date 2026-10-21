@@ -9,11 +9,13 @@ export default class LeaderboardScene extends Phaser.Scene {
     await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
 
-    this.add
+    // Background image
+    this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height);
 
-    this.add
+    // Titel Überschrifft "Leaderboard"
+    this.title = this.add
       .text(this.scale.width / 2, this.scale.height / 12, 'Leaderboard', {
         fontFamily: 'Tiny5',
         fontSize: '90px',
@@ -29,10 +31,13 @@ export default class LeaderboardScene extends Phaser.Scene {
       color: '#ffffff',
     };
 
+    this.leaderboardEntries = [];
+
     leaderboard.forEach((entry, index) => {
       const name = entry.name || 'Unbekannt';
       const distance = entry.distance || entry;
-      this.add
+
+      const text = this.add
         .text(
           this.scale.width / 2,
           200 + index * (this.scale.height / 20),
@@ -41,6 +46,8 @@ export default class LeaderboardScene extends Phaser.Scene {
         )
         .setOrigin(0.5)
         .setAlpha(index <= 7 ? 1 - (index / 2) * 0.04 : 0.75);
+
+      this.leaderboardEntries.push(text);
     });
 
     const backButton = this.add
@@ -49,24 +56,59 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
-    backButton.on('pointerdown', () => {
-      this.scene.start('MenuScene');
+    // On home button listener
+    this.backButton.on('pointerdown', () => {
+      const gameMode = this.registry.get('gameMode');
+
+      if (gameMode === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
     });
-    backButton.on('pointerover', () => {
+    // Hover effect
+    this.backButton.on('pointerover', () => {
       this.tweens.add({
-        targets: backButton,
+        targets: this.backButton,
         scaleX: 0.45,
         scaleY: 0.45,
         duration: 100,
       });
     });
-    backButton.on('pointerout', () => {
+    this.backButton.on('pointerout', () => {
       this.tweens.add({
-        targets: backButton,
+        targets: this.backButton,
         scaleX: 0.4,
         scaleY: 0.4,
         duration: 100,
       });
+    });
+
+    //listener for resizing
+    this.scale.on('resize', this.resize, this);
+
+    this.resize({
+      width: this.scale.width,
+      height: this.scale.height,
+    });
+  }
+
+  resize(gameSize) {
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    const scaleFactor = Math.min(width / 1920, height / 1080);
+
+    this.background.setPosition(width / 2, height / 2).setDisplaySize(width, height);
+
+    this.title.setPosition(width / 2, height / 12).setFontSize(90 * scaleFactor);
+
+    this.backButton.setPosition(width / 2, height / 1.3).setScale(0.4 * scaleFactor);
+
+    this.leaderboardEntries.forEach((entry, index) => {
+      entry.setPosition(width / 2, 200 * scaleFactor + index * (height / 20));
+
+      entry.setFontSize(height / 21);
     });
   }
 }
@@ -89,7 +131,8 @@ export function parseLeaderboard() {
 
   const bestByPlayer = new Map();
   entries.forEach((entry) => {
-    const playerKey = entry.name.trim().toLowerCase();
+    const playerKey = entry.name?.trim()?.toLowerCase() ?? 'unknown';
+
     const previousBest = bestByPlayer.get(playerKey);
     if (!previousBest || entry.distance > previousBest.distance) {
       bestByPlayer.set(playerKey, entry);

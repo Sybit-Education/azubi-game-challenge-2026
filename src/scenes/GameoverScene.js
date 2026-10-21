@@ -39,15 +39,14 @@ export default class GameoverScene extends Phaser.Scene {
 
   create() {
     const leaderboard = parseLeaderboard();
-
     const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim();
-      const existingEntry = leaderboard.find((entry) => entry.name.trim() === playerKey);
+      const playerKey = name.trim() ?? 'Unbekannt';
 
+      const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
       if (existingEntry) {
         existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
       } else {
-        leaderboard.push({ name, distance: Number(distance) });
+        leaderboard.push({ name: name || 'Unbekannt', distance: Number(distance) });
       }
     };
 
@@ -112,7 +111,8 @@ export default class GameoverScene extends Phaser.Scene {
     this.width = this.scale.width;
     this.height = this.scale.height;
 
-    this.add
+    // Background
+    this.background = this.add
       .image(this.width / 2, this.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width, this.scale.height);
 
@@ -140,47 +140,60 @@ export default class GameoverScene extends Phaser.Scene {
       }
 
       if (winner === 1) {
-        this.add.image(this.width / 2, this.height / 3, 'p1-won-logo');
+        this.title = this.add.image(this.width / 2, this.height / 3, 'p1-won-logo');
       } else {
-        this.add.image(this.width / 2, this.height / 3, 'p2-won-logo');
+        this.title = this.add.image(this.width / 2, this.height / 3, 'p2-won-logo');
       }
     }
 
     if (!this.isMultiplayer) {
-      this.add
+      this.title = this.add
         .image(this.width / 2, this.height / 3, 'gameover-title')
         .setOrigin(0.5)
         .setScale(0.6);
     }
 
-    this.add
+    // the won logos have scale 1, gameover-title has 0.6
+    this.titleScale = this.isMultiplayer ? 1 : 0.6;
+
+    // Distance text
+    this.distanceLabel = this.add
       .image(this.width / 1.9, this.height / 2.2, 'gameover-distance-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
-    this.add
+    // Distance display
+    this.distanceText = this.add
       .text(this.width / 1.67, this.height / 2.2, ` ${this.distance} Km`, statsStyle)
       .setOrigin(0.5);
 
-    this.add
+    // Score text
+    this.scoreLabel = this.add
       .image(this.width / 2.7, this.height / 2.2, 'gameover-score-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
-    this.add
+    // Score display
+    this.scoreText = this.add
       .text(this.width / 2.31, this.height / 2.2, `${this.score} Pts`, statsStyle)
       .setOrigin(0.5);
 
     // Show a second statistics row when the game was played in multiplayer mode
     if (this.isMultiplayer) {
-      this.add.text(this.width / 4, this.height / 2.2, 'P1', statsStyle).setOrigin(0.5);
-      this.add.text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle).setOrigin(0.5);
+      this.p1Label = this.add
+        .text(this.width / 4, this.height / 2.2, 'P1', statsStyle)
+        .setOrigin(0.5);
+      this.p2Label = this.add
+        .text(this.width / 4, this.height / 2.2 + 40, 'P2', statsStyle)
+        .setOrigin(0.5);
 
-      this.add
+      // Points text
+      this.scoreText2 = this.add
         .text(this.width / 2.31, this.height / 2.2 + 40, `${this.score2} Pts`, statsStyle)
         .setOrigin(0.5);
 
-      this.add
+      // Distance text
+      this.distanceText2 = this.add
         .text(this.width / 1.67, this.height / 2.2 + 40, ` ${this.distance2} Km`, statsStyle)
         .setOrigin(0.5);
     }
@@ -198,24 +211,24 @@ export default class GameoverScene extends Phaser.Scene {
       .setScale(0.4);
 
     positionAccessibleControls(this, [
-      [retryGame, playAgainButton],
-      [backToHomeScreen, lobbyButton],
+      [retryGame, this.playAgainButton],
+      [backToHomeScreen, this.lobbyButton],
     ]);
 
     playAgainButton.on('pointerover', () => {
       this.selectButton(playAgainButton);
     });
 
-    playAgainButton.on('pointerout', () => {
-      this.deselectButton(playAgainButton);
+    this.playAgainButton.on('pointerout', () => {
+      this.deselectButton(this.playAgainButton);
     });
 
-    lobbyButton.on('pointerover', () => {
-      this.selectButton(lobbyButton);
+    this.lobbyButton.on('pointerover', () => {
+      this.selectButton(this.lobbyButton);
     });
 
-    lobbyButton.on('pointerout', () => {
-      this.deselectButton(lobbyButton);
+    this.lobbyButton.on('pointerout', () => {
+      this.deselectButton(this.lobbyButton);
     });
 
     playAgainButton.on('pointerdown', () => {
@@ -224,7 +237,7 @@ export default class GameoverScene extends Phaser.Scene {
       });
     });
 
-    lobbyButton.on('pointerdown', () => {
+    this.lobbyButton.on('pointerdown', () => {
       const gameMode = this.registry.get('gameMode');
 
       if (gameMode === 'christmas') {
@@ -234,10 +247,11 @@ export default class GameoverScene extends Phaser.Scene {
       }
     });
 
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
     this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.45,
+        scale: 0.45 * this.scaleFactor,
         duration: 100,
       });
     };
@@ -245,18 +259,18 @@ export default class GameoverScene extends Phaser.Scene {
     this.deselectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.4,
+        scale: 0.4 * this.scaleFactor,
         duration: 100,
       });
     };
 
     this.buttons = [
       {
-        button: playAgainButton,
+        button: this.playAgainButton,
         action: () => this.scene.start('GameScene', { isMultiplayer: this.isMultiplayer }),
       },
       {
-        button: lobbyButton,
+        button: this.lobbyButton,
         action: () => {
           const gameMode = this.registry.get('gameMode');
           if (gameMode === 'christmas') {
@@ -270,7 +284,17 @@ export default class GameoverScene extends Phaser.Scene {
 
     this.selectedIndex = 0;
 
-    this.selectButton(this.buttons[0].button);
+    this.selectButton(this.Buttons[0].button);
+
+    this.resize({
+      width: this.scale.width,
+      height: this.scale.height,
+    });
+
+    this.scale.on('resize', this.resize, this);
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
+    });
   }
 
   update() {
@@ -312,5 +336,44 @@ export default class GameoverScene extends Phaser.Scene {
     if (this.inputManager.getControlsP1.button2) {
       this.buttons[this.selectedIndex].action?.();
     }
+  }
+
+  resize(gameSize) {
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    const scaleFactor = Math.min(width / 1920, height / 1080);
+
+    this.background.setPosition(width / 2, height / 2).setDisplaySize(width, height);
+
+    this.title.setPosition(width / 2, height / 3).setScale(this.titleScale * scaleFactor);
+
+    this.distanceLabel.setPosition(width / 1.9, height / 2.2).setScale(0.4 * scaleFactor);
+
+    this.distanceText.setPosition(width / 1.67, height / 2.2).setFontSize(30 * scaleFactor);
+
+    this.scoreLabel.setPosition(width / 2.7, height / 2.2).setScale(0.4 * scaleFactor);
+
+    this.scoreText.setPosition(width / 2.31, height / 2.2).setFontSize(30 * scaleFactor);
+
+    if (this.isMultiplayer) {
+      this.p1Label.setPosition(width / 4, height / 2.2).setFontSize(30 * scaleFactor);
+
+      this.p2Label
+        .setPosition(width / 4, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+
+      this.scoreText2
+        .setPosition(width / 2.31, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+
+      this.distanceText2
+        .setPosition(width / 1.67, height / 2.2 + 40 * scaleFactor)
+        .setFontSize(30 * scaleFactor);
+    }
+
+    this.playAgainButton.setPosition(width / 2, height / 1.8).setScale(0.4 * scaleFactor);
+
+    this.lobbyButton.setPosition(width / 2, height / 1.5).setScale(0.4 * scaleFactor);
   }
 }

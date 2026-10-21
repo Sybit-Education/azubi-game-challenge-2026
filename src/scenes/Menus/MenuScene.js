@@ -35,10 +35,6 @@ export default class MenuScene extends Phaser.Scene {
       'assets/images/homepage/default-homepage/how-to-play-button.png',
     );
     this.load.image(
-      'homepage-barrierefreiheit',
-      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
-    );
-    this.load.image(
       'homepage-leaderboard-btn',
       'assets/images/gameover-scene-assets/leaderboard-button.png',
     );
@@ -46,6 +42,7 @@ export default class MenuScene extends Phaser.Scene {
       'leaderboard-homepage-btn',
       'assets/images/gameover-scene-assets/back-to-menu-button.png',
     );
+    this.load.image('homepage-line', 'assets/images/homepage/default-homepage/line.png');
   }
 
   async create() {
@@ -85,65 +82,73 @@ export default class MenuScene extends Phaser.Scene {
       menu.hidden = true;
     });
 
-    const footerButtonY = this.scale.height / 1.17;
+    // Interface for our lovely Sybit Kart Game
+
+    const footer_btn_y = this.scale.height / 1.17;
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+
+    const background = this.add
+      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
 
     this.add
-      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
       .setDepth(-2);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 1.08, 'WeCreateCXChampions')
       .setOrigin(0.5)
-      .setScale(0.3)
+      .setScale(0.3 * this.scaleFactor)
       .setDepth(-1);
 
-    this.add
+    this.title = this.add
       .image(this.scale.width / 2, this.scale.height / 4, 'homepage-title')
       .setOrigin(0.5)
-      .setScale(0.5)
+      .setScale(0.5 * this.scaleFactor)
       .setDepth(-1);
 
-    const playButton = this.add
+    this.play_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-play-btn')
       .setOrigin(0.5)
-      .setScale(0.3)
+      .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const twoPlayerButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 2.2, 'homepage-2player')
       .setOrigin(0.5)
-      .setScale(0.278)
+      .setScale(0.278 * this.scaleFactor)
       .setVisible(false)
       .setInteractive({ useHandCursor: true });
 
     const settingsButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.8, 'homepage-settings')
       .setOrigin(0.5)
-      .setScale(0.3)
+      .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const creditsButton = this.add
       .image(this.scale.width / 1.14, footerButtonY, 'homepage-credits')
       .setOrigin(0.5)
-      .setScale(0.3)
+      .setScale(0.3 * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
     const howToPlayScale = 0.2;
     const howToPlayButton = this.add
       .image(this.scale.width / 8, footerButtonY, 'homepage-how-to-play')
       .setOrigin(0.5)
-      .setScale(howToPlayScale)
+      .setScale(howToPlayScale * this.scaleFactor)
       .setInteractive({ useHandCursor: true });
 
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
       .setOrigin(0.5)
-      .setScale(0.3);
+      .setScale(0.3 * this.scaleFactor);
 
     const leaderboardButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
-      .setScale(0.24)
+      .setScale(0.24 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
@@ -154,8 +159,8 @@ export default class MenuScene extends Phaser.Scene {
     leaderboardButton.on('pointerover', () => {
       this.tweens.add({
         targets: leaderboardButton,
-        scaleX: 0.26,
-        scaleY: 0.26,
+        scaleX: 0.26 * this.scaleFactor,
+        scaleY: 0.26 * this.scaleFactor,
         duration: 100,
       });
     });
@@ -163,18 +168,35 @@ export default class MenuScene extends Phaser.Scene {
     leaderboardButton.on('pointerout', () => {
       this.tweens.add({
         targets: leaderboardButton,
-        scaleX: 0.24,
-        scaleY: 0.24,
+        scaleX: 0.24 * this.scaleFactor,
+        scaleY: 0.24 * this.scaleFactor,
         duration: 100,
       });
     });
 
+    //Background parallax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
+
+    //homepage car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
+    // Some variables to keep track of the button states
     let isPlayHovered = false;
     let isTwoPlayerHovered = false;
     this.isMultiplayerSelected = false;
     let hideSubmenuEvent;
-    const playOriginalY = playButton.y;
-    const settingsOriginalY = settingsButton.y;
+    const playOriginalY = this.play_button.y;
+    const settingsOriginalY = settings_button.y;
     const creditsOriginalY = creditsButton.y;
     const howToPlayOriginalY = howToPlayButton.y;
 
@@ -196,7 +218,8 @@ export default class MenuScene extends Phaser.Scene {
         this.tweens.killTweensOf(twoPlayerButton);
         this.tweens.add({
           targets: twoPlayerButton,
-          x: playButton.x,
+          x: this.play_button.x,
+          y: this.play_button.y,
           duration: 150,
           onComplete: () => {
             if (!isPlayHovered && !isTwoPlayerHovered) {
@@ -213,8 +236,8 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
-        x: playButton.x + 325,
-        y: playButton.y - 3,
+        x: this.play_button.x + 325 * this.scaleFactor,
+        y: this.play_button.y - 10 * this.scaleFactor,
         duration: 150,
       });
     };
@@ -233,15 +256,15 @@ export default class MenuScene extends Phaser.Scene {
       scheduleHide();
     };
 
-    playButton.on('pointerover', () => {
+    this.play_button.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      this.selectButton(playButton, playOriginalY);
+      this.selectButton(this.play_button, playOriginalY);
     });
 
-    playButton.on('pointerout', () => {
+    this.play_button.on('pointerout', () => {
       isPlayHovered = false;
-      this.deselectButton(playButton, playOriginalY);
+      this.deselectButton(this.play_button, playOriginalY);
       scheduleHide();
     });
 
@@ -250,7 +273,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(playButton, playOriginalY);
+        this.selectButton(this.play_button, playOriginalY - 10 * this.scaleFactor);
       }
     });
 
@@ -260,7 +283,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(0);
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
-        this.deselectButton(playButton, playOriginalY);
+        this.deselectButton(this.play_button, playOriginalY);
       }
     });
 
@@ -296,17 +319,18 @@ export default class MenuScene extends Phaser.Scene {
       this.deselectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
     });
 
-    this.selectButton = (button, originalY, scale = 0.3) => {
+    // Helper functions for button animations
+    this.selectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
       this.tweens.add({
         targets: button,
-        scaleX: scale + 0.02,
-        scaleY: scale + 0.02,
-        y: originalY - 5,
+        scaleX: scale + 0.02 * this.scaleFactor,
+        scaleY: scale + 0.02 * this.scaleFactor,
+        y: originalY - 10 * this.scaleFactor,
         duration: 50,
       });
     };
 
-    this.deselectButton = (button, originalY, scale = 0.3) => {
+    this.deselectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
       this.tweens.add({
         targets: button,
         scaleX: scale,
@@ -317,11 +341,11 @@ export default class MenuScene extends Phaser.Scene {
     };
 
     positionAccessibleControls(this, [
-      [playBtn, playButton],
-      [settingsBtn, settingsButton],
+      [playBtn, this.play_button],
+      [settingsBtn, settings_button],
     ]);
 
-    playButton.on('pointerdown', startGame);
+    this.play_button.on('pointerdown', startGame);
 
     twoPlayerButton.on('pointerdown', () => {
       startMultiplayer();
@@ -334,8 +358,8 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     this.menuButtons = [
-      { button: playButton, y: playOriginalY, action: startGame },
-      { button: settingsButton, y: settingsOriginalY, action: openSettings },
+      { button: this.play_button, y: playOriginalY, action: startGame },
+      { button: settings_button, y: settingsOriginalY, action: openSettings },
       { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
       {
         button: creditsButton,

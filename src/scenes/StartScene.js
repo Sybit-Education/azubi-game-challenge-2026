@@ -78,7 +78,9 @@ export default class StartScene extends Phaser.Scene {
     this.createPlayer();
     this.createTrack();
     this.createWalls();
-    this.setBackground('background');
+    this.setBackground(
+      this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
+    );
     this.spawnStartingBanner();
     this.time.delayedCall(1500, () => this.countdown());
   }
