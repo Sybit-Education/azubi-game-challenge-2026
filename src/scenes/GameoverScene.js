@@ -44,15 +44,14 @@ export default class GameoverScene extends Phaser.Scene {
   create() {
     // Parse leaderboard
     const leaderboard = parseLeaderboard();
-
     const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim();
-      const existingEntry = leaderboard.find((entry) => entry.name.trim() === playerKey);
+      const playerKey = name.trim() ?? 'Unbekannt';
 
+      const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
       if (existingEntry) {
         existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
       } else {
-        leaderboard.push({ name, distance: Number(distance) });
+        leaderboard.push({ name: name || 'Unbekannt', distance: Number(distance) });
       }
     };
 
@@ -271,10 +270,11 @@ export default class GameoverScene extends Phaser.Scene {
       }
     });
 
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
     this.selectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.45,
+        scale: 0.45 * this.scaleFactor,
         duration: 100,
       });
     };
@@ -282,7 +282,7 @@ export default class GameoverScene extends Phaser.Scene {
     this.deselectButton = (button) => {
       this.tweens.add({
         targets: button,
-        scale: 0.4,
+        scale: 0.4 * this.scaleFactor,
         duration: 100,
       });
     };
