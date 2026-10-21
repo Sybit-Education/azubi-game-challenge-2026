@@ -154,7 +154,7 @@ export default class PopUpScene extends Phaser.Scene {
     //defining switch status, "origin x" and "goal x"
     let accessibilityEnabled = false;
     const leftX = Accessibilitycircle.x;
-    const rightX = leftX * 1.035;
+    const rightX = leftX + (accessibilitySwitch.width * 0.19);
 
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
