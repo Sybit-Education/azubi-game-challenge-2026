@@ -1,16 +1,18 @@
-import menuClickUrl from './menuclick.mp3?url';
-import menuFocusUrl from './menu-focus.ogg?url';
-import collectCoinUrl from './collect-coin.mp3?url';
-import sensorBeepUrl from './sensor-beep.wav?url';
-import carPassByUrl from './car-pass-by-spatial.wav?url';
-import carPassByJohnnyUrl from './car-pass-by-johnnyfarmer-spatial.wav?url';
-import carPassByHighwayUrl from './car-pass-by-961-studios-spatial.wav?url';
-import plantGrowUrl from './plant-grow.wav?url';
-import collisionHitUrl from './collision-hit.wav?url';
-import collisionImpactUrl from './collision-impact.mp3?url';
-import collisionBangUrl from './collision-bang.mp3?url';
-import roadEdgeHitUrl from './road-edge-hit.wav?url';
-import roadEdgeScrapeUrl from './road-edge-scrape.wav?url'
+import menuClickUrl from './menu/menuclick.mp3?url';
+import menuFocusUrl from './menu/menu-focus.ogg?url';
+import collectCoinUrl from './gameplay/collect-coin.mp3?url';
+import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
+import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
+import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
+import carPassByHighwayUrl from './gameplay/car-pass-by-961-studios-spatial.wav?url';
+import plantGrowUrl from './gameplay/plant-grow.wav?url';
+import collisionHitUrl from './gameplay/collision-hit.wav?url';
+import collisionImpactUrl from './gameplay/collision-impact.mp3?url';
+import collisionBangUrl from './gameplay/collision-bang.mp3?url';
+import roadEdgeHitUrl from './gameplay/road-edge-hit.wav?url';
+import roadEdgeScrapeUrl from './gameplay/road-edge-scrape.wav?url';
+import iceWarningUrl from './gameplay/ice-warning.wav?url';
+
 function loadSound(scene, key, fileUrl) {
   if (scene.cache.audio.exists(key)) return;
 
@@ -28,10 +30,11 @@ export function preloadGameplaySounds(scene) {
   loadSound(scene, 'car-pass-by-961-studios', carPassByHighwayUrl);
   loadSound(scene, 'plant-grow', plantGrowUrl);
   loadSound(scene, 'collision-hit', collisionHitUrl);
-loadSound(scene, 'collision-impact', collisionImpactUrl);
-loadSound(scene, 'collision-bang', collisionBangUrl);
-loadSound(scene, 'road-edge-hit', roadEdgeHitUrl);
-loadSound(scene, 'road-edge-scrape', roadEdgeScrapeUrl);
+  loadSound(scene, 'collision-impact', collisionImpactUrl);
+  loadSound(scene, 'collision-bang', collisionBangUrl);
+  loadSound(scene, 'road-edge-hit', roadEdgeHitUrl);
+  loadSound(scene, 'road-edge-scrape', roadEdgeScrapeUrl);
+  loadSound(scene, 'ice-warning', iceWarningUrl);
 }
 
 export function preloadMenuSounds(scene) {

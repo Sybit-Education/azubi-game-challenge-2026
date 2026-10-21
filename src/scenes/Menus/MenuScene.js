@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/menuSounds.js';
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 

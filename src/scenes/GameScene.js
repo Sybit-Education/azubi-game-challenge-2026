@@ -7,7 +7,7 @@ import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import CoinMultiplier from '../objects/CoinMultiplier.js';
-import { preloadGameplaySounds } from '../../audio/menuSounds.js';
+import { preloadGameplaySounds } from '../../audio/sounds.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
 import Item from '../objects/Item.js';
@@ -77,6 +77,8 @@ export default class GameScene extends Phaser.Scene {
       volume: 0.2,
       loop: true,
     });
+    this.iceWarning = this.sound.add('ice-warning', { volume: 0.3 });
+    this.warnedIce = new WeakMap();
 
     // Each player car gets its own proximity sensor.
     this.carSensors = [new CarSensor(this, this.car)];
@@ -109,6 +111,7 @@ export default class GameScene extends Phaser.Scene {
       canvas.removeAttribute('aria-label');
       canvas.removeAttribute('tabindex');
       this.roadEdgeScrape.destroy();
+      this.iceWarning.destroy();
     });
   }
 
@@ -556,6 +559,56 @@ return soonest;
     }
   }
 
+  updateIceWarning() {
+    if (!this.registry.get('accessibility enabled')) {
+      if (this.iceWarning.isPlaying) this.iceWarning.stop();
+      return;
+    }
+
+    // Keep spoken warnings from overlapping; retry pending warnings next frame.
+    if (this.sound.locked || this.iceWarning.isPlaying) return;
+
+    const warningSeconds = 3;
+    let nextWarning = null;
+
+    for (const car of [this.car, this.secondCar]) {
+      if (!car || !car.active || car.dead || !car.body?.enable) continue;
+
+      let warned = this.warnedIce.get(car);
+      if (!warned) {
+        warned = new WeakSet();
+        this.warnedIce.set(car, warned);
+      }
+
+      const lane = this.getPlayerLane(car);
+      for (const ice of this.roadObjects) {
+        if (!(ice instanceof Ice) || !ice.active || !ice.body?.enable) continue;
+        if (ice.lane !== lane || warned.has(ice)) continue;
+        if (ice.body.bottom > car.body.top) continue;
+
+        const seconds = this.getTimeUntilObstacle(car, ice);
+        if (!Number.isFinite(seconds) || seconds > warningSeconds) continue;
+
+        if (nextWarning === null || seconds < nextWarning.seconds) {
+          nextWarning = { car, ice, seconds, warned };
+        }
+      }
+    }
+
+    if (nextWarning === null) return;
+
+    const pan = Phaser.Math.Clamp(
+      (nextWarning.ice.x - nextWarning.car.x) / (this.track1.displayWidth / 2),
+      -1,
+      1,
+    );
+
+    if (this.iceWarning.play({ pan })) {
+      // Mark only successful playback, once per ice patch and player.
+      nextWarning.warned.add(nextWarning.ice);
+    }
+  }
+
   updateRoadEdgeScrape() {
     if (this.car.dead) {
       this.roadEdgeScrape.stop();
@@ -630,6 +683,7 @@ return soonest;
     });
 
     this.updateLaneDanger();
+    this.updateIceWarning();
 
     // Check after movement so sounds use the current car positions.
     const carsForAudio = this.getCarsForAudio();
