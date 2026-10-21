@@ -10,16 +10,16 @@ export default class ItemManager {
     this.itemShieldPrize = 20;
     this.itemShrinkPrize = 15;
 
-    this.player1ShieldActive = false;
-    this.player2ShieldActive = false;
+    this.schildAktivCar1 = false;
+    this.schildAktivCar2 = false;
 
     this.iceTriggered = false;
     this.originScale = this.scene.car.scale;
   }
 
-  shrinkPlayer1Car() {
+  itemShrinkCar1() {
     console.log('shrink');
-    const carShrinkSize = 0.5;
+    let carShrinkSize = 0.5;
 
     this.scene.car.setScale(carShrinkSize);
 
@@ -28,9 +28,9 @@ export default class ItemManager {
     });
   }
 
-  shrinkPlayer2Car() {
+  itemShrinkCar2() {
     console.log('Shrink 2');
-    const carShrinkSize = 0.5;
+    let carShrinkSize = 0.5;
 
     this.scene.secondCar.setScale(carShrinkSize);
 
@@ -39,9 +39,9 @@ export default class ItemManager {
     });
   }
 
-  growPlayer1Car() {
+  itemGrowCar1() {
     console.log('grow');
-    const carGrowSize = 1;
+    let carGrowSize = 1;
 
     this.scene.car.setScale(carGrowSize);
 
@@ -50,9 +50,9 @@ export default class ItemManager {
     });
   }
 
-  growPlayer2Car() {
+  itemGrowCar2() {
     console.log('grow 2');
-    const carGrowSize = 1;
+    let carGrowSize = 1;
 
     this.scene.secondCar.setScale(carGrowSize);
 
@@ -61,11 +61,11 @@ export default class ItemManager {
     });
   }
 
-  activatePlayer1Shield() {
-    console.log('shield');
+  itemShieldCar1() {
+    console.log('schild');
 
-    if (!this.player1ShieldActive) {
-      this.player1ShieldActive = true;
+    if (!this.schildAktivCar1) {
+      this.schildAktivCar1 = true;
       this.scene.car.setTexture('carShield');
 
       this.scene.time.delayedCall(4500, () => {
@@ -79,7 +79,7 @@ export default class ItemManager {
       });
 
       this.scene.time.delayedCall(8000, () => {
-        this.player1ShieldActive = false;
+        this.schildAktivCar1 = false;
 
         this.scene.tweens.killTweensOf(this.scene.car);
         this.scene.car.alpha = 1;
@@ -89,9 +89,9 @@ export default class ItemManager {
     }
   }
 
-  activatePlayer2Shield() {
-    if (!this.player2ShieldActive) {
-      this.player2ShieldActive = true;
+  itemShieldCar2() {
+    if (!this.schildAktivCar2) {
+      this.schildAktivCar2 = true;
       this.scene.secondCar.setTexture('carShield2');
 
       this.scene.time.delayedCall(4500, () => {
@@ -105,7 +105,7 @@ export default class ItemManager {
       });
 
       this.scene.time.delayedCall(8000, () => {
-        this.player2ShieldActive = false;
+        this.schildAktivCar2 = false;
 
         this.scene.tweens.killTweensOf(this.scene.secondCar);
         this.scene.secondCar.alpha = 1;
@@ -115,19 +115,19 @@ export default class ItemManager {
     }
   }
 
-  handlePlayer1Collision(car) {
-    if (!this.player1ShieldActive) {
+  lebenCheckCar1(car) {
+    if (!this.schildAktivCar1) {
       this.scene.gameOver(car);
     }
   }
 
-  handlePlayer2Collision(car) {
-    if (!this.player2ShieldActive) {
+  lebenCheckCar2(car) {
+    if (!this.schildAktivCar2) {
       this.scene.gameOver(car);
     }
   }
 
-  applyNauseaEffect() {
+  itemNausea() {
     console.log('Nausea');
     this.scene.tweens.add({
       targets: this.scene.cameras.main,
@@ -139,35 +139,35 @@ export default class ItemManager {
     });
   }
 
-  applyRandomItemToPlayer1() {
+  itemRandom1() {
     const random = Phaser.Math.Between(1, 4);
 
     if (random === 1) {
-      return this.shrinkPlayer1Car();
+      return this.itemShrinkCar1();
     } else if (random === 2) {
-      return this.growPlayer1Car();
+      return this.itemGrowCar1();
     } else if (random === 3) {
-      return this.activatePlayer1Shield();
+      return this.itemShieldCar1();
     } else if (random === 4) {
-      return this.applyNauseaEffect();
+      return this.itemNausea();
     }
   }
 
-  applyRandomItemToPlayer2() {
+  itemRandom2() {
     const random = Phaser.Math.Between(1, 4);
 
     if (random === 1) {
-      return this.shrinkPlayer2Car();
+      return this.itemShrinkCar2();
     } else if (random === 2) {
-      return this.growPlayer2Car();
+      return this.itemGrowCar2();
     } else if (random === 3) {
-      return this.activatePlayer2Shield();
+      return this.itemShieldCar2();
     } else if (random === 4) {
-      return this.applyNauseaEffect();
+      return this.itemNausea();
     }
   }
 
-  applyIceEffect(car) {
+  iceEffect(car) {
     if (car.iceTriggered) {
       return;
     }
@@ -176,9 +176,9 @@ export default class ItemManager {
 
     console.log('ice!');
 
-    const randomDirection = Phaser.Math.Between(0, 1);
+    const zufallszahl = Phaser.Math.Between(0, 1);
 
-    if (randomDirection === 1) {
+    if (zufallszahl === 1) {
       this.scene.tweens.add({
         targets: car,
         x: car.x + 300,
@@ -197,26 +197,27 @@ export default class ItemManager {
     });
   }
 
-  addCoinToPlayer1Budget() {
+  coinBudgetPlus1() {
     this.coinBudgetPlayer1++;
-    console.log(`Player 1 has ${this.coinBudgetPlayer1} coins`);
+    console.log('Spieler1 ' + this.coinBudgetPlayer1 + ' Coins');
   }
 
-  addCoinToPlayer2Budget() {
+  coinBudgetPlus2() {
     this.coinBudgetPlayer2++;
-    console.log(`Player 2 has ${this.coinBudgetPlayer2} coins`);
+    console.log('Spieler2 ' + this.coinBudgetPlayer2 + ' Coins');
   }
 
-  updateItemShop() {
-    // Player 1 spends coins with the number-row keys
+  itemShop() {
+    // Hotkeys Player1
     this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
     this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+    // this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.key1) &&
       this.coinBudgetPlayer1 >= this.itemShieldPrize
     ) {
-      this.activatePlayer1Shield();
+      this.itemShieldCar1();
       this.coinBudgetPlayer1 -= this.itemShieldPrize;
     }
 
@@ -224,19 +225,20 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.key2) &&
       this.coinBudgetPlayer1 >= this.itemShrinkPrize
     ) {
-      this.shrinkPlayer1Car();
+      this.itemShrinkCar1();
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
-    // Player 2 uses the equivalent numpad keys
+    // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
+    // this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.numpad1) &&
       this.coinBudgetPlayer2 >= this.itemShieldPrize
     ) {
-      this.activatePlayer2Shield();
+      this.itemShieldCar2();
       this.coinBudgetPlayer2 -= this.itemShieldPrize;
     }
 
@@ -244,7 +246,7 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.numpad2) &&
       this.coinBudgetPlayer2 >= this.itemShrinkPrize
     ) {
-      this.shrinkPlayer2Car();
+      this.itemShrinkCar2();
       this.coinBudgetPlayer2 -= this.itemShrinkPrize;
     }
   }

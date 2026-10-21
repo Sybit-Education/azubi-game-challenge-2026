@@ -24,8 +24,9 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
     this.load.image('background', 'assets/images/map-skins/hintergrund.png');
-    this.load.image('starting-banner', 'assets/images/race-track-assets/starting-banner.png');
-    this.load.image('starting-line', 'assets/images/race-track-assets/starting-and-finish-line.png');
+    this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
+    this.load.image('starting_Banner', 'assets/images/race-track-assets/starting-banner.png');
+    this.load.image('startingLine', 'assets/images/race-track-assets/starting-and-finish-line.png');
     this.load.image('start-count-3', 'assets/images/race-track-assets/countdown-3.png');
     this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
     this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
@@ -34,8 +35,8 @@ export default class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.inputManager = new InputManager(this);
-    this.inputManager.create();
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     this.leaving = false;
     this.secondCar = null;
@@ -85,6 +86,7 @@ export default class StartScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => this.countdown());
   }
 
+  //countdown
   countdown() {
     this.showNumber('start-count-3');
     this.sound.play('countdown');
@@ -103,7 +105,7 @@ export default class StartScene extends Phaser.Scene {
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
-    background.setDepth(-10);
+    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
   createPlayer() {
@@ -128,10 +130,10 @@ export default class StartScene extends Phaser.Scene {
   }
 
   spawnStartingBanner() {
-    const s = this.scale.height / 900;
+    const s = this.scale.height / 900; // 900 = höhe, auf der die werte gepasst haben
     const roadWidth = this.track1.displayWidth;
 
-    // The banners are 1404 pixels apart, so this scale matches them to the road
+    //banner so breit wie die straße (im bild sind die pfosten 1404px auseinander)
     const bannerScale = roadWidth / 1404;
     const bannerY = this.track1.y + this.track1.displayHeight / 2 - 20 * s;
 
@@ -139,10 +141,11 @@ export default class StartScene extends Phaser.Scene {
     startingLine.setScale(bannerScale);
     startingLine.setDepth(21);
 
-    // The checkerboard is 264 pixels wide and must render above the road but below cars
+    //checkerboard auf dem boden, unter dem auto (depth 10) aber über der straße (depth -1)
+    //der streifen im bild ist 264px breit, liegt bei den füßen vom banner
     const lineScale = roadWidth / 264;
     const checkerboard = new StartingLine(this, this.track1.x, bannerY + 248 * bannerScale);
-    checkerboard.setScale(lineScale, lineScale * 0.4);
+    checkerboard.setScale(lineScale, lineScale * 0.4); // breite, höhe
     checkerboard.setDepth(5);
   }
 
@@ -191,12 +194,12 @@ export default class StartScene extends Phaser.Scene {
     if (this.car.y <= -300) {
       this.goToGame();
     }
-    this.inputManager.update();
+    this.InputManager.update();
     if (
-      this.inputManager.getControlsP1.button4 ||
-      this.inputManager.getControlsP1.button2 ||
-      this.inputManager.getControlsP2.button4 ||
-      this.inputManager.getControlsP2.button2
+      this.InputManager.getControlsP1.button4 ||
+      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP2.button4 ||
+      this.InputManager.getControlsP2.button2
     ) {
       this.goToGame();
     }

@@ -34,8 +34,8 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
-    this.inputManager = new InputManager(this);
-    this.inputManager.create();
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     this.cameras.main.setBackgroundColor('#6f3198');
 
@@ -106,9 +106,6 @@ export default class LoadingScene extends Phaser.Scene {
 
     const scaleFactor = Math.min(width / 1920, height / 1080);
 
-    // Show a randomly selected message while the loading animation runs
-    const funnyComments = ['Message1', 'Message2', 'Message3', 'Message4'];
-    const randomComment = funnyComments[Math.floor(Math.random() * funnyComments.length)];
     const centerX = width / 2;
     const centerY = height / 2;
 
@@ -148,10 +145,10 @@ export default class LoadingScene extends Phaser.Scene {
     this.InputManager.update();
 
     if (
-      this.inputManager.getControlsP1.button4 ||
-      this.inputManager.getControlsP1.button2 ||
-      this.inputManager.getControlsP2.button4 ||
-      this.inputManager.getControlsP2.button2
+      this.InputManager.getControlsP1.button4 ||
+      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP2.button4 ||
+      this.InputManager.getControlsP2.button2
     ) {
       this.scene.start('StartScene', {
         isMultiplayer: this.isMultiplayer,

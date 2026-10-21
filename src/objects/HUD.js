@@ -18,6 +18,7 @@ export default class HUD {
       })
       .setOrigin(1, 0);
 
+    //second line for player 2
     if (this.secondCar) {
       this.distanceText2 = scene.add
         .text(scene.scale.width - 300 * this.scaleFactor, 60 * this.scaleFactor, '', {
@@ -37,13 +38,13 @@ export default class HUD {
 
   update() {
     if (this.secondCar) {
-      this.distanceText.setText(`P1 Distance: ${this.car.calculateKilometers()} km`);
+      this.distanceText.setText(`P1 Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`P1 Score: ${this.car.score}`);
 
-      this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculateKilometers()} km`);
+      this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
     } else {
-      this.distanceText.setText(`Distance: ${this.car.calculateKilometers()} km`);
+      this.distanceText.setText(`Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`Score: ${this.car.score}`);
     }
   }
