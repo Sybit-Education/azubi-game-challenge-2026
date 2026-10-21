@@ -17,27 +17,37 @@ export default class ItemManager {
     this.originScale = this.scene.car.scale;
   }
 
-  itemShrinkCar1() {
-    console.log('shrink');
-    let carShrinkSize = 0.5;
+  itemShrink(car) {
+  const carShrinkSize = 0.5;
 
-    this.scene.car.setScale(carShrinkSize);
+  car.setScale(carShrinkSize);
 
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
+  this.scene.time.delayedCall(10000, () => {
+    car.setScale(this.originScale);
     });
   }
 
-  itemShrinkCar2() {
-    console.log('Shrink 2');
-    let carShrinkSize = 0.5;
+  // itemShrinkCar1() {
+  //   console.log('shrink');
+  //   let carShrinkSize = 0.5;
 
-    this.scene.secondCar.setScale(carShrinkSize);
+  //   this.scene.car.setScale(carShrinkSize);
 
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
-    });
-  }
+  //   this.scene.time.delayedCall(10000, () => {
+  //     this.scene.car.setScale(this.originScale);
+  //   });
+  // }
+
+  // itemShrinkCar2() {
+  //   console.log('Shrink 2');
+  //   let carShrinkSize = 0.5;
+
+  //   this.scene.secondCar.setScale(carShrinkSize);
+
+  //   this.scene.time.delayedCall(10000, () => {
+  //     this.scene.secondCar.setScale(this.originScale);
+  //   });
+  // }
 
   itemGrowCar1() {
     console.log('grow');
@@ -205,11 +215,11 @@ export default class ItemManager {
     });
   }
 
-  itemRandom1() {
-    const random = Phaser.Math.Between(1, 5);
+  itemRandom1(car) {
+    const random = Phaser.Math.Between(1, 1);  // für Test auf 1
 
     if (random === 1) {
-      return this.itemShrinkCar1();
+      return this.itemShrink(car);
     } else if (random === 2) {
       return this.itemGrowCar1();
     } else if (random === 3) {
