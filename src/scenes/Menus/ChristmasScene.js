@@ -39,51 +39,97 @@ export default class ChristmasScene extends Phaser.Scene {
       'assets/images/homepage/weihnachts-homepage/bigger-trees.png',
     );
     this.load.image('christmas-homepage-car', 'assets/images/homepage/default-homepage/car.png');
+
+    this.load.image('christmas-homepage-line', 'assets/images/homepage/default-homepage/line.png');
     this.load.image(
       'christmas-homepage-credits',
       'assets/images/homepage/default-homepage/credits-button.png',
     );
     this.load.image(
-      'christmas-homepage-barrierefreiheit',
-      'assets/images/homepage/default-homepage/barrierefreiheit-button.png',
+      'homepage-how-to-play',
+      'assets/images/homepage/default-homepage/how-to-play-button.png',
     );
   }
 
   // Create scene
   create() {
     const footer_btn_y = this.scale.height / 1.17;
-    this.add
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+
+    const background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'christmas-homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height)
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-100);
+
+    this.add
+      .image(this.scale.width / 2, this.scale.height / 1.12, 'christmas-homepage-line')
+      .setDisplaySize(this.scale.width - 175, 1)
+      .setDepth(-2);
 
     this.add
       .image(this.scale.width / 2, this.scale.height / 3, 'christmas-homepage-title')
       .setOrigin(0.5)
-      .setScale(0.5);
+      .setScale(0.5 * this.scaleFactor);
 
-    this.add
+    const lights = this.add
       .image(this.scale.width / 2, this.scale.height / 6, 'christmas-homepage-lights')
       .setOrigin(0.5)
-      .setScale(0.5);
+      .setScale(0.7 * this.scaleFactor);
 
     const settings_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.55, 'christmas-homepage-settings')
       .setOrigin(0.5)
-      .setScale(0.33)
+      .setScale(0.33 * this.scaleFactor)
       .setInteractive();
 
     const play_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-play-btn')
       .setOrigin(0.5)
-      .setScale(0.33)
+      .setScale(0.33 * this.scaleFactor)
       .setInteractive();
 
     const twoPlayerButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-2player')
       .setOrigin(0.5)
-      .setScale(0.278)
-      .setDepth(-1);
+      .setScale(0.278 * this.scaleFactor)
+      .setDepth(-1)
+      .setInteractive({ useHandCursor: true });
+
+    const creditsButton = this.add
+      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
+      .setOrigin(0.5)
+      .setScale(0.3 * this.scaleFactor)
+      .setInteractive();
+    creditsButton.setDepth(3);
+
+    this.add
+      .image(this.scale.width / 1.3, footer_btn_y * 1.1, 'christmas-homepage-resonanz')
+      .setOrigin(0.5)
+      .setScale(0.4 * this.scaleFactor);
+
+    const trees = this.add
+      .image(this.scale.width / 3, this.scale.height, 'christmas-homepage-trees')
+      .setOrigin(0.5, 1)
+      .setScale(0.35 * this.scaleFactor);
+
+    const howToPlayScale = 0.2;
+    const howToPlayButton = this.add
+      .image(this.scale.width / 8, footer_btn_y, 'homepage-how-to-play')
+      .setOrigin(0.5)
+      .setScale(howToPlayScale * this.scaleFactor)
+      .setInteractive({ useHandCursor: true });
+
+    const homepageCar = this.add
+      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
+      .setOrigin(0.5)
+      .setScale(0.3 * this.scaleFactor);
+
+    // Leaderboard button
+    const leaderboardButton = this.add
+      .image(this.scale.width / 2, this.scale.height / 1.17, 'homepage-leaderboard-btn')
+      .setScale(0.24 * this.scaleFactor)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     const hitAreaPadding = 12;
     const hitboxVisual = this.add
@@ -99,71 +145,241 @@ export default class ChristmasScene extends Phaser.Scene {
       .setDepth(-2)
       .setInteractive();
 
-    play_button.on('pointerover', () => {
-      this.tweens.add({
-        targets: [twoPlayerButton, hitboxVisual],
-        x: play_button.x + 350,
-        duration: 150,
-      });
-    });
-
+    // Some variables to keep track of the button states
+    let isPlayHovered = false;
     let isTwoPlayerHovered = false;
+    this.isMultiplayerSelected = false;
+    let hideSubmenuEvent;
+    const playOriginalY = play_button.y;
+    const settingsOriginalY = settings_button.y;
+    const creditsOriginalY = creditsButton.y;
+    const howToPlayOriginalY = howToPlayButton.y;
+    const cancelScheduledHide = () => {
+      if (hideSubmenuEvent) {
+        this.time.removeEvent(hideSubmenuEvent);
+        hideSubmenuEvent = undefined;
+      }
+    };
 
-    hitboxVisual.on('pointerover', () => {
-      isTwoPlayerHovered = true;
-    });
+    const scheduleHide = () => {
+      cancelScheduledHide();
+      hideSubmenuEvent = this.time.delayedCall(180, () => {
+        hideSubmenuEvent = undefined;
+        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
+          return;
+        }
 
-    hitboxVisual.on('pointerout', () => {
-      isTwoPlayerHovered = false;
+        this.tweens.killTweensOf(twoPlayerButton);
+        this.tweens.add({
+          targets: twoPlayerButton,
+          x: play_button.x,
+          y: play_button.y,
+          duration: 150,
+          onComplete: () => {
+            if (!isPlayHovered && !isTwoPlayerHovered) {
+              twoPlayerButton.setVisible(false);
+            }
+          },
+        });
+      });
+    };
+
+    const revealTwoPlayerButton = () => {
+      cancelScheduledHide();
+      this.tweens.killTweensOf(twoPlayerButton);
+      twoPlayerButton.setVisible(true);
       this.tweens.add({
-        targets: [twoPlayerButton, hitboxVisual],
-        x: this.scale.width / 5.7,
+        targets: twoPlayerButton,
+        x: play_button.x + 325 * this.scaleFactor,
+        y: play_button.y - 10 * this.scaleFactor,
         duration: 150,
       });
+    };
+
+    this.selectMultiplayerOption = () => {
+      this.isMultiplayerSelected = true;
+      revealTwoPlayerButton();
+      twoPlayerButton.setDepth(1);
+      this.selectButton(twoPlayerButton, playOriginalY - 3);
+    };
+
+    this.clearMultiplayerOption = () => {
+      this.isMultiplayerSelected = false;
+      twoPlayerButton.setDepth(0);
+      this.deselectButton(twoPlayerButton, playOriginalY - 3);
+      scheduleHide();
+    };
+
+    const startMultiplayer = () => {
+      this.registry.set('gameMode', 'multiplayer');
+      this.scene.start('NameInputScene', { isMultiplayer: true });
+    };
+    this.startMultiplayer = startMultiplayer;
+
+    twoPlayerButton.on('pointerover', () => {
+      isTwoPlayerHovered = true;
+      twoPlayerButton.setDepth(-1);
+      cancelScheduledHide();
+      if (!isPlayHovered && isTwoPlayerHovered) {
+        this.selectButton(play_button, playOriginalY - 10 * this.scaleFactor);
+      }
+    });
+
+    twoPlayerButton.on('pointerout', () => {
+      isTwoPlayerHovered = false;
+      isPlayHovered = false;
+      twoPlayerButton.setDepth(0);
+      scheduleHide();
+      if (!isPlayHovered && !isTwoPlayerHovered) {
+        this.deselectButton(play_button, playOriginalY);
+      }
+    });
+
+    this.selectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: scale + 0.02 * this.scaleFactor,
+        scaleY: scale + 0.02 * this.scaleFactor,
+        y: originalY - 10 * this.scaleFactor,
+        duration: 50,
+      });
+    };
+
+    this.deselectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
+      this.tweens.add({
+        targets: button,
+        scaleX: scale,
+        scaleY: scale,
+        y: originalY,
+        duration: 50,
+      });
+    };
+
+    play_button.on('pointerover', () => {
+      isPlayHovered = true;
+      revealTwoPlayerButton();
+      this.selectButton(play_button, playOriginalY);
     });
 
     play_button.on('pointerout', () => {
-      this.time.delayedCall(0, () => {
-        if (!isTwoPlayerHovered) {
-          this.tweens.add({
-            targets: [twoPlayerButton, hitboxVisual],
-            x: this.scale.width / 5.7,
-            duration: 150,
-          });
-        }
+      isPlayHovered = false;
+      this.deselectButton(play_button, playOriginalY);
+      scheduleHide();
+    });
+
+    twoPlayerButton.on('pointerover', () => {
+      isTwoPlayerHovered = true;
+      twoPlayerButton.setDepth(-1);
+      cancelScheduledHide();
+      if (!isPlayHovered && isTwoPlayerHovered) {
+        this.selectButton(this.play_button, playOriginalY - 10 * this.scaleFactor);
+      }
+    });
+
+    twoPlayerButton.on('pointerout', () => {
+      isTwoPlayerHovered = false;
+      isPlayHovered = false;
+      twoPlayerButton.setDepth(0);
+      scheduleHide();
+      if (!isPlayHovered && !isTwoPlayerHovered) {
+        this.deselectButton(this.play_button, playOriginalY);
+      }
+    });
+
+    settings_button.on('pointerover', () => {
+      this.selectButton(settings_button, settingsOriginalY);
+    });
+
+    settings_button.on('pointerout', () => {
+      this.deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerover', () => {
+      this.selectButton(creditsButton, creditsOriginalY);
+    });
+
+    creditsButton.on('pointerout', () => {
+      this.deselectButton(creditsButton, creditsOriginalY);
+    });
+
+    settings_button.on('pointerout', () => {
+      this.deselectButton(settings_button, settingsOriginalY);
+    });
+
+    creditsButton.on('pointerout', () => {
+      this.deselectButton(creditsButton, creditsOriginalY);
+    });
+
+    howToPlayButton.on('pointerover', () => {
+      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
+    });
+
+    howToPlayButton.on('pointerout', () => {
+      this.deselectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
+    });
+
+    // Leaderboard click listener
+    leaderboardButton.on('pointerdown', () => {
+      this.scene.start('LeaderboardScene');
+    });
+
+    leaderboardButton.on('pointerover', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.26 * this.scaleFactor,
+        scaleY: 0.26 * this.scaleFactor,
+        duration: 100,
       });
     });
-    const creditsButton = this.add
-      .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
-      .setOrigin(0.5)
-      .setScale(0.4)
-      .setInteractive();
-    creditsButton.setDepth(3);
 
-    this.add
-      .image(this.scale.width / 1.3, footer_btn_y * 1.1, 'christmas-homepage-resonanz')
-      .setOrigin(0.5)
-      .setScale(0.4);
+    leaderboardButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: leaderboardButton,
+        scaleX: 0.24 * this.scaleFactor,
+        scaleY: 0.24 * this.scaleFactor,
+        duration: 100,
+      });
+    });
 
-    this.add
-      .image(this.scale.width / 3, this.scale.height * 0.84, 'christmas-homepage-trees')
-      .setOrigin(0.5)
-      .setScale(0.33);
+    //Background parralax effect
+    this.input.on('pointermove', (pointer) => {
+      background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
 
-    this.add
-      .image(this.scale.width / 2, footer_btn_y, 'homepage-barrierefreiheit')
-      .setOrigin(0.5)
-      .setScale(0.4);
-    this.add
-      .image(this.scale.width, this.scale.height / 1.5, 'homepage-car')
-      .setOrigin(0.5)
-      .setScale(0.3);
+    //homepage car parallax effect
+    this.input.on('pointermove', (pointer) => {
+      homepageCar.setPosition(
+        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
+        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
+      );
+    });
+
+    //christmas lights parallax effect
+    this.input.on('pointermove', (pointer) => {
+      lights.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.03,
+        this.scale.height / 6 + (pointer.y - this.scale.height / 2) * 0.03,
+      );
+    });
+
+    //christmas trees parallax effect
+    this.input.on('pointermove', (pointer) => {
+      trees.setPosition(
+        this.scale.width / 3 + (pointer.x - this.scale.width / 2) * 0.0225,
+        this.scale.height + (pointer.y - this.scale.height / 2) * 0.0225,
+      );
+    });
 
     play_button.on('pointerdown', () => {
       this.registry.set('gameMode', 'christmas');
       this.scene.start('LoadingScene', { isMultiplayer: false });
     });
-
+    twoPlayerButton.on('pointerdown', () => {
+      startMultiplayer();
+    });
     settings_button.on('pointerdown', () => {
       this.scene.launch('PopUpScene');
       this.scene.bringToTop('PopUpScene');
@@ -175,6 +391,14 @@ export default class ChristmasScene extends Phaser.Scene {
     //logik um multiplayer zu starten
     creditsButton.on('pointerdown', () => {
       this.scene.start('CreditsScene');
+    });
+
+    this.tweens.add({
+      targets: lights,
+      alpha: 0.2,
+      duration: 2000,
+      yoyo: 0.5,
+      repeat: -1,
     });
   }
 }
