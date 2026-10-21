@@ -88,13 +88,13 @@ export default class PopUpScene extends Phaser.Scene {
     // Static switch mockup: settings are visual only for now.
     const accessibilitySwitch = this.add
       .image(rightColumn, row1Y, 'switchOff')
-      .setScale(0.60 * uiScale)
+      .setScale(0.35 * uiScale)
       .setOrigin(1, 0)
       .setInteractive();
 
     const Accessibilitycircle = this.add
       .image(rightColumn, row1Y * 1.0105, 'switchCircle')
-      .setScale(0.30 * uiScale)
+      .setScale(0.35 * uiScale)
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
 
@@ -164,6 +164,7 @@ export default class PopUpScene extends Phaser.Scene {
     let accessibilityEnabled = false;
     const leftX = Accessibilitycircle.x * (uiScale * 1.08);
     const rightX = leftX * (uiScale * 1.166)
+    
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
 
