@@ -41,8 +41,11 @@ export default class GameoverScene extends Phaser.Scene {
   }
 
   // On create
-  create() {
+  async create() {
     // Parse leaderboard
+    await document.fonts.load('32px Tiny5');
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+
     const leaderboard = parseLeaderboard();
     const savePlayerBest = (name, distance) => {
       const playerKey = name.trim() ?? 'Unbekannt';
@@ -138,7 +141,8 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Style for stats
     const statsStyle = {
-      fontSize: '30px',
+      fontSize: `${30 * this.scaleFactor}px`,
+      fontFamily: 'Tiny5',
     };
 
     // Header
@@ -175,7 +179,7 @@ export default class GameoverScene extends Phaser.Scene {
 
     // Distance text
     this.distanceLabel = this.add
-      .image(this.width / 1.9, this.height / 2.2, 'gameover-distance-text')
+      .image(this.width / 1.9, this.height / 5, 'gameover-distance-text')
       .setOrigin(0.5)
       .setScale(0.4);
 
@@ -373,32 +377,35 @@ export default class GameoverScene extends Phaser.Scene {
 
     this.title.setPosition(width / 2, height / 3).setScale(this.titleScale * scaleFactor);
 
-    this.distanceLabel.setPosition(width / 1.9, height / 2.2).setScale(0.4 * scaleFactor);
+    this.distanceLabel.setPosition(width / 1.8, height / 2.3).setScale(0.4 * scaleFactor);
 
-    this.distanceText.setPosition(width / 1.67, height / 2.2).setFontSize(30 * scaleFactor);
+    this.distanceText.setPosition(width / 1.8, height / 2.1).setFontSize(30 * scaleFactor);
 
-    this.scoreLabel.setPosition(width / 2.7, height / 2.2).setScale(0.4 * scaleFactor);
+    this.scoreLabel.setPosition(width / 2.31, height / 2.3).setScale(0.4 * scaleFactor);
 
-    this.scoreText.setPosition(width / 2.31, height / 2.2).setFontSize(30 * scaleFactor);
+    this.scoreText.setPosition(width / 2.31, height / 2.1).setFontSize(30 * scaleFactor);
 
     if (this.isMultiplayer) {
-      this.p1Label.setPosition(width / 4, height / 2.2).setFontSize(30 * scaleFactor);
+      this.p1Label.setPosition(width / 2.8, height / 2.1).setFontSize(30 * scaleFactor);
 
       this.p2Label
-        .setPosition(width / 4, height / 2.2 + 40 * scaleFactor)
+        .setPosition(width / 2.8, height / 2.1 + 40 * scaleFactor)
         .setFontSize(30 * scaleFactor);
 
       this.scoreText2
-        .setPosition(width / 2.31, height / 2.2 + 40 * scaleFactor)
+        .setPosition(width / 2.31, height / 2.1 + 40 * scaleFactor)
         .setFontSize(30 * scaleFactor);
 
       this.distanceText2
-        .setPosition(width / 1.67, height / 2.2 + 40 * scaleFactor)
+        .setPosition(width / 1.8, height / 2.1 + 40 * scaleFactor)
         .setFontSize(30 * scaleFactor);
+
+      this.playAgainButton.setPosition(width / 2, height / 1.6).setScale(0.4 * scaleFactor);
+
+      this.lobbyButton.setPosition(width / 2, height / 1.4).setScale(0.4 * scaleFactor);
+    } else {
+      this.playAgainButton.setPosition(width / 2, height / 1.8).setScale(0.4 * scaleFactor);
+      this.lobbyButton.setPosition(width / 2, height / 1.5).setScale(0.4 * scaleFactor);
     }
-
-    this.playAgainButton.setPosition(width / 2, height / 1.8).setScale(0.4 * scaleFactor);
-
-    this.lobbyButton.setPosition(width / 2, height / 1.5).setScale(0.4 * scaleFactor);
   }
 }
