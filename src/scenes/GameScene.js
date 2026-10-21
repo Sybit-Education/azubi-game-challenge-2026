@@ -6,6 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
+import CoinMultiplier from '../objects/CoinMultiplier.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ExtraLife from '../objects/ExtraLife.js';
@@ -209,16 +210,12 @@ export default class GameScene extends Phaser.Scene {
           this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'coinMultiplier') {
-        roadObject = new Coin(this, roadObjectX, spawnY, lane);
-        roadObject.setTexture('coinMultiplier');
-        roadObject.setScale(0.08);
-
-        roadObject.body.setSize(roadObject.displayWidth, roadObject.displayHeight, true);
+        roadObject = new CoinMultiplier(this, roadObjectX, spawnY, lane);
 
         this.physics.add.overlap(
           this.car,
           roadObject,
-          this.ItemManager.multiplyCoins,
+          this.ItemManager.multiplyCoins1,
           undefined,
           this.ItemManager,
         );
@@ -227,7 +224,7 @@ export default class GameScene extends Phaser.Scene {
           this.physics.add.overlap(
             this.secondCar,
             roadObject,
-            this.ItemManager.multiplyCoins,
+            this.ItemManager.multiplyCoins2,
             undefined,
             this.ItemManager,
           );
