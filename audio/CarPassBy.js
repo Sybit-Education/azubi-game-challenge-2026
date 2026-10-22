@@ -9,8 +9,17 @@ function isLiveCar(car) {
 
 function getVelocity(car) {
   let y = car.body.velocity?.y ?? 0;
-  if (Number.isFinite(car.speed)) y = car.speed;
-  return { x: car.body.velocity?.x ?? 0, y };
+
+  // Manually moved cars use a speed scaled to the scene height.
+  if (Number.isFinite(car.speed)) {
+    const heightFactor = car.scene.scale.height / 1200;
+    y = car.speed * heightFactor;
+  }
+
+  return {
+    x: car.body.velocity?.x ?? 0,
+    y,
+  };
 }
 
 // Time of the loudest point in each recording, measured from the file start.
