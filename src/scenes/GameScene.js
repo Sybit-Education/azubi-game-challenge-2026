@@ -84,7 +84,7 @@ export default class GameScene extends Phaser.Scene {
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
-       // Hotbar
+    // Hotbar
     this.hotbar = this.add.image(710, 1198, 'hotbar');
     this.hotbar.setOrigin(0, 0);
     this.hotbar.setDepth(1000);
@@ -109,7 +109,7 @@ export default class GameScene extends Phaser.Scene {
     this.coinText1.setDepth(1000);
     this.coinText1.setScrollFactor(0);
 
-    if(this.isMultiplayer){
+    if (this.isMultiplayer) {
       // Coin Icon Player 2
       this.hotbarCoin = this.add.image(2500, 53, 'hotbar-coin');
       this.hotbarCoin.setScale(0.5);
@@ -501,7 +501,7 @@ export default class GameScene extends Phaser.Scene {
     this.ItemManager.itemShop();
     this.coinText1.setText(String(this.ItemManager.coinBudgetPlayer1));
 
-    if(this.isMultiplayer && this.coinText2){
+    if (this.isMultiplayer && this.coinText2) {
       this.coinText2.setText(String(this.ItemManager.coinBudgetPlayer2));
     }
   }
