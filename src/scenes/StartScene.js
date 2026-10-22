@@ -1,6 +1,13 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
+import {
+  preloadMenuSounds,
+  preloadCountdownSound,
+  playMenuClick,
+  bindMenuFocusSounds,
+} from '../../audio/sounds.js';
+
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
 import Car from '../objects/Car.js';
@@ -19,6 +26,8 @@ export default class StartScene extends Phaser.Scene {
   }
 
   preload() {
+    preloadMenuSounds(this);
+    preloadCountdownSound(this);
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
     this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
     this.load.image('track', 'assets/images/race-track-assets/road.png');
@@ -31,7 +40,6 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
     this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
     this.load.image('start-go', 'assets/images/race-track-assets/go-label.png');
-    this.load.audio('countdown', 'assets/audio/sfx/countdown.mp3');
   }
 
   create() {
@@ -47,6 +55,7 @@ export default class StartScene extends Phaser.Scene {
     startUi.hidden = false;
 
     const skipIntro = () => {
+      playMenuClick(this);
       this.goToGame();
     };
 
@@ -73,9 +82,7 @@ export default class StartScene extends Phaser.Scene {
 
     positionAccessibleControls(this, [[skipIntroBtn, skipButton]]);
 
-    skipButton.on('pointerdown', () => {
-      this.goToGame();
-    });
+    skipButton.on('pointerdown', skipIntro);
     this.createPlayer();
     this.createTrack();
     this.createWalls();
@@ -100,6 +107,7 @@ export default class StartScene extends Phaser.Scene {
       }
     });
     this.time.delayedCall(4000, () => this.number.destroy());
+    bindMenuFocusSounds(this, ['skip-intro']);
   }
 
   setBackground(img) {

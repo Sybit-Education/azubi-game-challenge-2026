@@ -7,6 +7,9 @@ import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
 import CoinMultiplier from '../objects/CoinMultiplier.js';
+import { preloadGameplaySounds } from '../../audio/sounds.js';
+import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
+import CarPassBy from '../../audio/CarPassBy.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ExtraLife from '../objects/ExtraLife.js';
@@ -23,8 +26,9 @@ export default class GameScene extends Phaser.Scene {
     this.isMultiplayer = data?.isMultiplayer ?? false;
   }
 
-  //Bilder laden
+  //Load images.
   preload() {
+    preloadGameplaySounds(this);
     this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
     this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
     this.load.image('winter-car', 'assets/images/entities/player-skins/winter-car-P1.png');
@@ -55,18 +59,30 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
   }
 
-  //Alle Objekte in der Szene initialisieren
-  async create() {
-    await document.fonts.load('32px Tiny5');
+  // BootScene loads the font; initialize synchronously before Phaser starts update().
+  create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
+
     this.elapsedTime = 0;
     this.roadObjects = [];
+    this.currentLaneDanger = null;
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
     this.createTrack();
     this.createWalls();
+    this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
+      volume: 0.2,
+      loop: true,
+    });
+    this.iceWarning = this.sound.add('ice-warning', { volume: 0.3 });
+    this.warnedIce = new WeakMap();
+
+    // Each player car gets its own proximity sensor.
+    this.carSensors = [new CarSensor(this, this.car)];
+    if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
+    this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
     this.createRoadObject('enemy-car');
     this.createRoadObject('coin');
     this.createRoadObject('coinMultiplier');
@@ -79,6 +95,23 @@ export default class GameScene extends Phaser.Scene {
       this.registry.get('gameMode') === 'ChristmasScene' ? 'background-winter' : 'background',
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+
+    const canvas = this.game.canvas;
+    const accessibilityEnabled = this.registry.get('accessibility enabled') ?? false;
+    canvas.setAttribute('tabindex', '0');
+
+    if (accessibilityEnabled) {
+      canvas.setAttribute('role', 'application');
+    }
+    canvas.focus();
+
+    this.events.once('shutdown', () => {
+      canvas.removeAttribute('role');
+      canvas.removeAttribute('aria-label');
+      canvas.removeAttribute('tabindex');
+      this.roadEdgeScrape.destroy();
+      this.iceWarning.destroy();
+    });
   }
 
   setBackground(img) {
@@ -87,14 +120,14 @@ export default class GameScene extends Phaser.Scene {
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
-  //funktion die checkt, ob die autos ineinander gebugged sind (passiert oft bei dieser vercrackten phaser physik)
+  //Separate overlapping player cars after the physics update.
   separateOverlappingCars() {
     if (!this.secondCar || this.car.dead || this.secondCar.dead) return;
 
     const firstBody = this.car.body;
     const secondBody = this.secondCar.body;
 
-    //sehr viel mathe ig checke selber nicht aber es klappt halbwegs
+    //Calculate the overlap and identify which car is moving into the other.
     const overlapX =
       Math.min(firstBody.right, secondBody.right) - Math.max(firstBody.left, secondBody.left);
     const overlapY =
@@ -148,6 +181,10 @@ export default class GameScene extends Phaser.Scene {
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+    this.lastPlayerLane = this.getPlayerLane(this.car);
+    this.gameStatus = document.getElementById('game-status');
+    this.gameStatus.textContent = '';
+    this.lastPlayerRoadEdge = null;
   }
 
   createWalls() {
@@ -235,47 +272,24 @@ export default class GameScene extends Phaser.Scene {
       } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
         roadObject.setScale(0.1);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.itemRandom1,
-          undefined,
-          this.ItemManager,
-        );
-        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
-
+        this.physics.add.overlap(this.car, roadObject, this.collectItem, undefined, this);
         if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.itemRandom2,
-            undefined,
-            this.ItemManager,
-          );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectItem, undefined, this);
         }
       } else if (type === 'extraLife') {
         roadObject = new ExtraLife(this, roadObjectX, spawnY, lane);
         roadObject.setTexture('extraLife');
         roadObject.setScale(0.08);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.itemExtraLifeCar1,
-          undefined,
-          this.ItemManager,
-        );
-        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+        this.physics.add.overlap(this.car, roadObject, this.collectExtraLife, undefined, this);
 
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
             roadObject,
-            this.ItemManager.itemExtraLifeCar2,
+            this.collectExtraLife,
             undefined,
-            this.ItemManager,
+            this,
           );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'enemy-car') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
@@ -341,7 +355,7 @@ export default class GameScene extends Phaser.Scene {
       this.roadObjects.push(roadObject);
     }
 
-    // Spawnrate
+    // Spawn intervals.
     let delay;
     if (type === 'coin') {
       delay = Phaser.Math.Between(500, 2000);
@@ -378,10 +392,35 @@ export default class GameScene extends Phaser.Scene {
   }
 
   collectCoin(car, coin) {
-    if (!coin.active) return; // Prevent collecting the same coin multiple times
+    if (!coin.active) return;
 
-    car.increase_score(coin.value * car.coinMultiplier);
+    const value = coin.value * car.coinMultiplier;
+    this.sound.play('collect-coin', { volume: 0.3 });
     coin.destroy();
+    car.increase_score(value);
+  }
+
+  collectExtraLife(car, item) {
+    if (!item.active) return;
+
+    item.destroy();
+    this.sound.play('collect-extra-life', { volume: 0.3 });
+    if (car === this.car) {
+      this.ItemManager.itemExtraLifeCar1();
+    } else if (car === this.secondCar) {
+      this.ItemManager.itemExtraLifeCar2();
+    }
+  }
+
+  collectItem(car, item) {
+    if (!item.active) return;
+
+    item.destroy();
+    if (car === this.car) {
+      this.ItemManager.itemRandom1();
+    } else if (car === this.secondCar) {
+      this.ItemManager.itemRandom2();
+    }
   }
 
   // Handle game over when the player collides with an enemy car
@@ -390,6 +429,9 @@ export default class GameScene extends Phaser.Scene {
 
     //only the car that got hit dies
     car.dead = true;
+    this.sound.play('collision-hit', { volume: 0.3 });
+    this.sound.play('collision-bang', { volume: 0.3 });
+    this.sound.play('collision-impact', { volume: 0.3 });
     car.boundaryParticles.emitting = false;
     car.disableBody(true, true); //hides the dead car
 
@@ -408,6 +450,185 @@ export default class GameScene extends Phaser.Scene {
     }); // Change to DeathScene once there is one
   }
 
+  getCarsForAudio() {
+    // Coins, items and ice patches do not trigger car sounds.
+    return [
+      ...this.roadObjects.filter((object) => object instanceof EnemyCar),
+      this.car,
+      this.secondCar,
+    ];
+  }
+
+  getNearestCarDistance(player) {
+    return nearestCar(player, this.getCarsForAudio())?.distance ?? Infinity;
+  }
+
+  //a function to get carlocation
+  getPlayerLane(car) {
+    const laneCount = 4;
+    const roadWidth = this.track1.displayWidth;
+    const roadLeft = this.track1.x - roadWidth / 2;
+    const laneWidth = roadWidth / laneCount;
+
+    const positionOnRoad = car.x - roadLeft;
+    const laneIndex = Math.floor(positionOnRoad / laneWidth);
+
+    return Phaser.Math.Clamp(laneIndex, 0, laneCount - 1);
+  }
+  getObstaclesInLane(lane) {
+    return this.roadObjects.filter((object) => {
+      const isObstacle = object instanceof EnemyCar || object instanceof RandomObstacle;
+
+      return object.active && isObstacle && object.lane === lane;
+    });
+  }
+
+  getObstaclesAhead(car, lane) {
+    const obstacles = this.getObstaclesInLane(lane);
+
+    return obstacles.filter((obstacle) => {
+      return obstacle.body.bottom <= car.body.top;
+    });
+  }
+
+  getNearestObstacleAhead(car, lane) {
+    const obstacles = this.getObstaclesAhead(car, lane);
+    let nearest = null;
+
+    for (const obstacle of obstacles) {
+      const distance = car.body.top - obstacle.body.bottom;
+
+      if (nearest === null || distance < nearest.distance) {
+        nearest = {
+          obstacle,
+          distance,
+        };
+      }
+    }
+
+    return nearest;
+  }
+
+  getTimeUntilObstacle(car, obstacle) {
+    if (!Number.isFinite(obstacle.speed)) return Infinity;
+
+    const distance = car.body.top - obstacle.body.bottom;
+    const heightFactor = this.scale.height / 1200;
+    const obstacleSpeed = obstacle.speed * heightFactor;
+    const playerSpeed = car.body.velocity.y;
+    const closingSpeed = obstacleSpeed - playerSpeed;
+
+    if (closingSpeed <= 0) return Infinity;
+
+    return Math.max(0, distance) / closingSpeed;
+  }
+  getSoonestObstacleAhead(car, lane) {
+    const obstacles = this.getObstaclesAhead(car, lane);
+    let soonest = null;
+
+    for (const obstacle of obstacles) {
+      const seconds = this.getTimeUntilObstacle(car, obstacle);
+      if (!Number.isFinite(seconds)) continue;
+
+      if (soonest === null || seconds < soonest.seconds) {
+        soonest = {
+          obstacle,
+          seconds,
+        };
+      }
+    }
+    return soonest;
+  }
+
+  updateLaneDanger() {
+    this.currentLaneDanger = null;
+
+    if (this.car.dead) return;
+
+    const lane = this.getPlayerLane(this.car);
+    const soonest = this.getSoonestObstacleAhead(this.car, lane);
+    const warningSeconds = 4;
+
+    if (soonest !== null && soonest.seconds <= warningSeconds) {
+      this.currentLaneDanger = {
+        obstacle: soonest.obstacle,
+        seconds: soonest.seconds,
+        lane,
+      };
+    }
+  }
+
+  updateIceWarning() {
+    if (!this.registry.get('accessibility enabled')) {
+      if (this.iceWarning.isPlaying) this.iceWarning.stop();
+      return;
+    }
+
+    // Keep spoken warnings from overlapping; retry pending warnings next frame.
+    if (this.sound.locked || this.iceWarning.isPlaying) return;
+
+    const warningSeconds = 3;
+    let nextWarning = null;
+
+    for (const car of [this.car, this.secondCar]) {
+      if (!car || !car.active || car.dead || !car.body?.enable) continue;
+
+      let warned = this.warnedIce.get(car);
+      if (!warned) {
+        warned = new WeakSet();
+        this.warnedIce.set(car, warned);
+      }
+
+      const lane = this.getPlayerLane(car);
+      for (const ice of this.roadObjects) {
+        if (!(ice instanceof Ice) || !ice.active || !ice.body?.enable) continue;
+        if (ice.lane !== lane || warned.has(ice)) continue;
+        if (ice.body.bottom > car.body.top) continue;
+
+        const seconds = this.getTimeUntilObstacle(car, ice);
+        if (!Number.isFinite(seconds) || seconds > warningSeconds) continue;
+
+        if (nextWarning === null || seconds < nextWarning.seconds) {
+          nextWarning = { car, ice, seconds, warned };
+        }
+      }
+    }
+
+    if (nextWarning === null) return;
+
+    const pan = Phaser.Math.Clamp(
+      (nextWarning.ice.x - nextWarning.car.x) / (this.track1.displayWidth / 2),
+      -1,
+      1,
+    );
+
+    if (this.iceWarning.play({ pan })) {
+      // Mark only successful playback, once per ice patch and player.
+      nextWarning.warned.add(nextWarning.ice);
+    }
+  }
+
+  updateRoadEdgeScrape() {
+    if (this.car.dead) {
+      this.roadEdgeScrape.stop();
+      return;
+    }
+
+    const controls = this.InputManager.getControlsP1;
+    const edge = this.lastPlayerRoadEdge;
+    const pushingLeft = edge === 'left' && controls.left && !controls.right;
+    const pushingRight = edge === 'right' && controls.right && !controls.left;
+
+    if (pushingLeft || pushingRight) {
+      this.roadEdgeScrape.setPan(pushingLeft ? -1 : 1);
+
+      if (!this.roadEdgeScrape.isPlaying && !this.sound.locked) {
+        this.roadEdgeScrape.play();
+      }
+    } else {
+      this.roadEdgeScrape.stop();
+    }
+  }
   // Update the game state every frame
   update(_, delta) {
     this.InputManager.update();
@@ -415,9 +636,40 @@ export default class GameScene extends Phaser.Scene {
     this.elapsedTime += delta;
     if (!this.car.dead) {
       this.car.move(this.InputManager.getControlsP1);
+      const currentLane = this.getPlayerLane(this.car);
+
+      let currentRoadEdge = null;
+
+      if (this.car.x <= this.car.leftLimit) {
+        currentRoadEdge = 'left';
+      } else if (this.car.x >= this.car.rightLimit) {
+        currentRoadEdge = 'right';
+      }
+
+      const laneChanged = currentLane !== this.lastPlayerLane;
+      const edgeChanged = currentRoadEdge !== this.lastPlayerRoadEdge;
+
+      if (this.registry.get('accessibility enabled')) {
+        if (edgeChanged && currentRoadEdge !== null) {
+          this.gameStatus.textContent = `${currentRoadEdge} road edge`;
+
+          const pan = currentRoadEdge === 'left' ? -1 : 1;
+
+          this.sound.play('road-edge-hit', { volume: 0.25, pan });
+          this.sound.play('collision-hit', { volume: 0.15, pan });
+        } else if (laneChanged) {
+          this.gameStatus.textContent = `Lane ${currentLane + 1}`;
+        }
+      }
+
+      this.lastPlayerLane = currentLane;
+      this.lastPlayerRoadEdge = currentRoadEdge;
       this.car.update_boundary_particles();
       this.car.intendedXVelocity = this.car.body.velocity.x;
     }
+
+    this.updateRoadEdgeScrape();
+
     if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.move(this.InputManager.getControlsP2);
       this.secondCar.update_boundary_particles();
@@ -428,6 +680,14 @@ export default class GameScene extends Phaser.Scene {
       roadObject.move(this.elapsedTime, delta);
       return roadObject.active;
     });
+
+    this.updateLaneDanger();
+    this.updateIceWarning();
+
+    // Check after movement so sounds use the current car positions.
+    const carsForAudio = this.getCarsForAudio();
+    for (const sensor of this.carSensors) sensor.update(delta, carsForAudio);
+    this.carPassBy.update(carsForAudio);
 
     const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
     this.track1.speed = targetTrackSpeed;
