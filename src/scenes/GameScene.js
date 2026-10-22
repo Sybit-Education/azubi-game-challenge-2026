@@ -60,6 +60,7 @@ export default class GameScene extends Phaser.Scene {
 
   //Alle Objekte in der Szene initialisieren
   async create() {
+    console.log('CREATE');
     await document.fonts.load('32px Tiny5');
     this.InputManager = new InputManager(this);
     this.InputManager.create();
@@ -84,7 +85,7 @@ export default class GameScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
        // Hotbar
-    this.hotbar = this.add.image(585, 1198, 'hotbar');
+    this.hotbar = this.add.image(710, 1198, 'hotbar');
     this.hotbar.setOrigin(0, 0);
     this.hotbar.setDepth(1000);
     this.hotbar.setScrollFactor(0);
@@ -500,7 +501,7 @@ export default class GameScene extends Phaser.Scene {
     this.ItemManager.itemShop();
     this.coinText1.setText(String(this.ItemManager.coinBudgetPlayer1));
 
-    if(this.isMultiplayer){
+    if(this.isMultiplayer && this.coinText2){
       this.coinText2.setText(String(this.ItemManager.coinBudgetPlayer2));
     }
   }
