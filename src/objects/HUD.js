@@ -42,8 +42,20 @@ export default class HUD {
         .setScale(0.04 * this.scaleFactor)
         .setOrigin(0.5, 0.5);
 
-      this.disableExtraLife2();
+      this.disable(this.extraLife2);
+
+      this.coinMultiplier2 = scene.add
+        .image(0, 0, 'coinMultiplier')
+        .setScale(0.04 * this.scaleFactor)
+        .setOrigin(0.5, 0.5);
+      this.disable(this.coinMultiplier2);
     }
+
+    this.coinMultiplier1 = scene.add
+      .image(0, 0, 'coinMultiplier')
+      .setScale(0.04 * this.scaleFactor)
+      .setOrigin(0.5, 0.5);
+    this.disable(this.coinMultiplier1);
 
     this.extraLife1 = scene.add
       .image(
@@ -53,23 +65,7 @@ export default class HUD {
       )
       .setScale(0.04 * this.scaleFactor)
       .setOrigin(0.5, 0.5);
-    this.disableExtraLife1();
-  }
-
-  disableExtraLife1() {
-    this.extraLife1.setTint(0x677777);
-  }
-
-  enableExtraLife1() {
-    this.extraLife1.clearTint();
-  }
-
-  disableExtraLife2() {
-    this.extraLife2.setTint(0x677777);
-  }
-
-  enableExtraLife2() {
-    this.extraLife2.clearTint();
+    this.disable(this.extraLife1);
   }
 
   update() {
@@ -85,9 +81,25 @@ export default class HUD {
     }
     this.extraLife1.x = this.distanceText.x + this.distanceText.width + 40 * this.scaleFactor;
     this.extraLife1.y = this.distanceText.y + this.distanceText.height / 1.5;
+
+    this.coinMultiplier1.x = this.distanceText.x + this.distanceText.width + 100 * this.scaleFactor;
+    this.coinMultiplier1.y = this.distanceText.y + this.distanceText.height / 1.5;
+
     if (this.secondCar) {
       this.extraLife2.x = this.distanceText2.x - this.distanceText2.width - 40 * this.scaleFactor;
       this.extraLife2.y = this.extraLife1.y;
+
+      this.coinMultiplier2.x =
+        this.distanceText2.x - this.distanceText2.width - 100 * this.scaleFactor;
+      this.coinMultiplier2.y = this.coinMultiplier1.y;
     }
+  }
+
+  enable(element) {
+    element.clearTint();
+  }
+
+  disable(element) {
+    element.setTint(0x677777);
   }
 }
