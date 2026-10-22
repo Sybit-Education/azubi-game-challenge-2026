@@ -1,5 +1,13 @@
 Audioquellen und Lizenzen für Sybit Kart
 
+Schild einsammeln: audio/gameplay/collect-shield.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
+Ursprünglicher Dateiname: freesound_community-086161_pickups_shield_beltwav-81574.mp3.
+Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+
+Extraleben einsammeln: audio/gameplay/collect-extra-life.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
+Ursprünglicher Dateiname: koiroylers-live-chat-353605.mp3.
+Zuordnung anhand der beiden neuesten Downloads; Quelle/Lizenz wurden vom Nutzer nicht angegeben.
+
 audio/menu/menu-focus.ogg: Kenney, Interface Sounds, tick_001.ogg (unverändert)
 Quelle: https://kenney.nl/assets/interface-sounds
 Lizenz: CC0 1.0; Lizenzangaben des Herausgebers siehe unten.

@@ -1,6 +1,7 @@
 import menuClickUrl from './menu/menuclick.mp3?url';
 import menuFocusUrl from './menu/menu-focus.ogg?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
+import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
@@ -24,6 +25,7 @@ function loadSound(scene, key, fileUrl) {
 
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
+  loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
   loadSound(scene, 'car-sensor', sensorBeepUrl);
   loadSound(scene, 'car-pass-by', carPassByUrl);
   loadSound(scene, 'car-pass-by-johnnyfarmer', carPassByJohnnyUrl);

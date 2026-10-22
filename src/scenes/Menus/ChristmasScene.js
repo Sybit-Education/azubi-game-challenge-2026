@@ -61,7 +61,7 @@ export default class ChristmasScene extends Phaser.Scene {
   create(data) {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
-    //html Menus erneut für diesen Scene herholen.
+    //html Menus erneut für diese Scene herholen.
     const menu = document.getElementById('accessible-ui');
     const playBtn = document.getElementById('start-game');
     const multiplayerBtn = document.getElementById('multiplayer-btn');
@@ -215,7 +215,12 @@ export default class ChristmasScene extends Phaser.Scene {
       cancelScheduledHide();
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
+        if (
+          isPlayHovered ||
+          isTwoPlayerHovered ||
+          this.isMultiplayerSelected ||
+          document.activeElement === multiplayerBtn
+        ) {
           return;
         }
 
@@ -228,7 +233,11 @@ export default class ChristmasScene extends Phaser.Scene {
           duration: 180,
           ease: 'Cubic.easeIn',
           onComplete: () => {
-            if (!isPlayHovered && !isTwoPlayerHovered) {
+            if (
+              !isPlayHovered &&
+              !isTwoPlayerHovered &&
+              document.activeElement !== multiplayerBtn
+            ) {
               twoPlayerButton.setVisible(false);
               twoPlayerButton.setAlpha(1);
             }
@@ -253,6 +262,14 @@ export default class ChristmasScene extends Phaser.Scene {
         twoPlayerButton.setVisible(true);
       });
     };
+
+    // Register once when the scene starts so keyboard focus can reveal the submenu.
+    multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
+    multiplayerBtn.addEventListener('blur', scheduleHide);
+    this.events.once('shutdown', () => {
+      multiplayerBtn.removeEventListener('focus', revealTwoPlayerButton);
+      multiplayerBtn.removeEventListener('blur', scheduleHide);
+    });
 
     this.selectMultiplayerOption = () => {
       this.isMultiplayerSelected = true;
@@ -445,6 +462,7 @@ export default class ChristmasScene extends Phaser.Scene {
     });
     positionAccessibleControls(this, [
       [playBtn, play_button],
+      [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
       [creditBtn, creditsButton],
     ]);
@@ -454,7 +472,7 @@ export default class ChristmasScene extends Phaser.Scene {
 
     hitboxVisual.on('pointerdown', startMultiplayer);
 
-    //logik um multiplayer zu starten
+    //logic to start multiplayer
     creditsButton.on('pointerdown', openCredits);
 
     this.events.once('shutdown', () => {

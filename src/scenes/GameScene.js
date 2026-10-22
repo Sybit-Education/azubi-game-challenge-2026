@@ -281,24 +281,16 @@ export default class GameScene extends Phaser.Scene {
         roadObject = new ExtraLife(this, roadObjectX, spawnY, lane);
         roadObject.setTexture('extraLife');
         roadObject.setScale(0.08);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.itemExtraLifeCar1,
-          undefined,
-          this.ItemManager,
-        );
-        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+        this.physics.add.overlap(this.car, roadObject, this.collectExtraLife, undefined, this);
 
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
             roadObject,
-            this.ItemManager.itemExtraLifeCar2,
+            this.collectExtraLife,
             undefined,
-            this.ItemManager,
+            this,
           );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'enemy-car') {
         roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
@@ -407,6 +399,18 @@ export default class GameScene extends Phaser.Scene {
     this.sound.play('collect-coin', { volume: 0.3 });
     coin.destroy();
     car.increase_score(value);
+  }
+
+  collectExtraLife(car, item) {
+    if (!item.active) return;
+
+    item.destroy();
+    this.sound.play('collect-extra-life', { volume: 0.3 });
+    if (car === this.car) {
+      this.ItemManager.itemExtraLifeCar1();
+    } else if (car === this.secondCar) {
+      this.ItemManager.itemExtraLifeCar2();
+    }
   }
 
   collectItem(car, item) {
