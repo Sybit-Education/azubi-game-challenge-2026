@@ -25,46 +25,44 @@ export default class ItemManager {
   itemShrinkCar1() {
     console.log('shrink');
     const car = this.scene.car;
-    const originScale = car.scale;
 
-    car.setScale(originScale * 0.5);
+    car.setScale(this.originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      car.setScale(originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemShrinkCar2() {
     console.log('Shrink 2');
     const car = this.scene.secondCar;
-    const originScale = car.scale;
 
-    car.setScale(originScale * 0.5);
+    car.setScale(this.originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      car.setScale(originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemGrowCar1() {
     console.log('grow');
-    let carGrowSize = 1;
+    const car = this.scene.car;
 
-    this.scene.car.setScale(carGrowSize);
+    this.scene.car.setScale(this.originScale * 1.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemGrowCar2() {
     console.log('grow 2');
-    let carGrowSize = 1;
+    const car = this.scene.secondCar;
 
-    this.scene.secondCar.setScale(carGrowSize);
+    car.setScale(this.originScale * 1.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
   }
 

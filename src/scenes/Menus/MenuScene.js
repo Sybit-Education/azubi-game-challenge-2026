@@ -349,7 +349,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     howToPlayButton.on('pointerover', () => {
-      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale * this.scaleFactor);
+      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
     });
 
     howToPlayButton.on('pointerout', () => {
@@ -357,11 +357,11 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // Helper functions for button animations
-    this.selectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
+    this.selectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
-        scaleX: scale + 0.02 * this.scaleFactor,
-        scaleY: scale + 0.02 * this.scaleFactor,
+        scaleX: (scale + 0.02) * this.scaleFactor,
+        scaleY: (scale + 0.02) * this.scaleFactor,
         y: originalY - 10 * this.scaleFactor,
         duration: 50,
       });
@@ -400,6 +400,12 @@ export default class MenuScene extends Phaser.Scene {
       { button: this.play_button, y: playOriginalY, action: startGame },
       { button: settings_button, y: settingsOriginalY, action: openSettings },
       { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
+      {
+        button: leaderboardButton,
+        y: footer_btn_y,
+        scale: 0.24,
+        action: () => this.scene.start('LeaderboardScene'),
+      },
       {
         button: creditsButton,
         y: creditsOriginalY,
