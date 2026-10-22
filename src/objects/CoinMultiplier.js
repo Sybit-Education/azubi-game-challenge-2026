@@ -5,7 +5,7 @@ export default class CoinMultiplier extends Collectable {
     super(scene, x, y, 'coinMultiplier', lane, 50);
 
     this.setScale(0.075);
-    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+    this.scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
     this.scene.time.delayedCall(0, () => {
       this.body.setSize(300 * this.scaleFactor, 300 * this.scaleFactor);
       this.body.setOffset(0, 0);

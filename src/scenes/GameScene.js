@@ -59,9 +59,8 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
   }
 
-  // Initialize the scene objects after the font is ready.
-  async create() {
-    await document.fonts.load('32px Tiny5');
+  // BootScene loads the font; initialize synchronously before Phaser starts update().
+  create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;

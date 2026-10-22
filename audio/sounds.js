@@ -2,6 +2,7 @@ import menuClickUrl from './menu/menuclick.mp3?url';
 import menuFocusUrl from './menu/menu-focus.ogg?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
+import countdownUrl from './gameplay/countdown.mp3?url';
 import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
@@ -21,6 +22,10 @@ function loadSound(scene, key, fileUrl) {
   // its loader base and accidentally turn / + /audio into //audio.
   const url = new URL(fileUrl, document.baseURI).href;
   scene.load.audio(key, url);
+}
+
+export function preloadCountdownSound(scene) {
+  loadSound(scene, 'countdown', countdownUrl);
 }
 
 export function preloadGameplaySounds(scene) {

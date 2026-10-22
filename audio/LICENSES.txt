@@ -1,5 +1,9 @@
 Audioquellen und Lizenzen für Sybit Kart
 
+Countdown: audio/gameplay/countdown.mp3, unverändert aus der Projekthistorie wiederhergestellt.
+Ursprünglicher Projektpfad: public/assets/audio/sfx/countdown.mp3.
+Quelle/Lizenz dieser vorhandenen Datei wurden vom Nutzer nicht angegeben.
+
 Schild einsammeln: audio/gameplay/collect-shield.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
 Ursprünglicher Dateiname: freesound_community-086161_pickups_shield_beltwav-81574.mp3.
 Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
