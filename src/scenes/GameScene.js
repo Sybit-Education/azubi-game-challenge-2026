@@ -6,6 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import Coin from '../objects/Coin.js';
+import CoinMultiplier from '../objects/CoinMultiplier.js';
 import Item from '../objects/Item.js';
 import Ice from '../objects/Ice.js';
 import ExtraLife from '../objects/ExtraLife.js';
@@ -37,6 +38,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('enemy-car3', 'assets/images/entities/obstacles/enemy-car-3.png');
 
     this.load.image('coin', 'assets/images/entities/coin.png');
+    this.load.image('coinMultiplier', 'assets/images/entities/coin-multiplier.png');
     this.load.image('item', 'assets/images/entities/mystery-box.png');
     this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
     this.load.image('extraLife', 'assets/images/entities/extra-life.png');
@@ -54,7 +56,6 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
-    console.log(this.textures.get('extraLife'));
   }
 
   //Alle Objekte in der Szene initialisieren
@@ -71,6 +72,7 @@ export default class GameScene extends Phaser.Scene {
     this.createWalls();
     this.createRoadObject('enemy-car');
     this.createRoadObject('coin');
+    this.createRoadObject('coinMultiplier');
     this.createRoadObject('item');
     this.createRoadObject('ice');
     this.createRoadObject('extraLife');
@@ -238,20 +240,45 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(
           this.car,
           roadObject,
-          this.ItemManager.coinBudgetPlus1,
+          () => {
+            this.ItemManager.coinBudgetPlus1(this.car.coinMultiplier);
+          },
           undefined,
-          this.ItemManager,
+          this,
         );
         this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
+
         if (this.secondCar) {
           this.physics.add.overlap(
             this.secondCar,
             roadObject,
-            this.ItemManager.coinBudgetPlus2,
+            () => {
+              this.ItemManager.coinBudgetPlus2(this.secondCar.coinMultiplier);
+            },
+            undefined,
+            this,
+          );
+          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
+        }
+      } else if (type === 'coinMultiplier') {
+        roadObject = new CoinMultiplier(this, roadObjectX, spawnY, lane);
+
+        this.physics.add.overlap(
+          this.car,
+          roadObject,
+          this.ItemManager.multiplyCoins1,
+          undefined,
+          this.ItemManager,
+        );
+
+        if (this.secondCar) {
+          this.physics.add.overlap(
+            this.secondCar,
+            roadObject,
+            this.ItemManager.multiplyCoins2,
             undefined,
             this.ItemManager,
           );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
         }
       } else if (type === 'item') {
         roadObject = new Item(this, roadObjectX, spawnY, lane);
@@ -372,6 +399,8 @@ export default class GameScene extends Phaser.Scene {
       delay = Phaser.Math.Between(2000, 4000);
     } else if (type === 'ice') {
       delay = Phaser.Math.Between(6000, 12000);
+    } else if (type === 'coinMultiplier') {
+      delay = Phaser.Math.Between(10000, 20000);
     } else if (type === 'extraLife') {
       delay = Phaser.Math.Between(15000, 30000);
     } else if (type === 'random-obstacle') {
@@ -399,7 +428,7 @@ export default class GameScene extends Phaser.Scene {
   collectCoin(car, coin) {
     if (!coin.active) return; // Prevent collecting the same coin multiple times
 
-    car.increase_score(coin.value);
+    car.increase_score(coin.value * car.coinMultiplier);
     coin.destroy();
   }
 
