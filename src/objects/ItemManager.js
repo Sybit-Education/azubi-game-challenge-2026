@@ -306,11 +306,11 @@ export default class ItemManager {
     });
   }
 
-  itemRandom1(car) {
-    const random = Phaser.Math.Between(1, 1);  // für Test auf 1
+  itemRandom1() {
+    const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
-      return this.itemShrink(car);
+      return this.itemShrinkCar1();
     } else if (random === 2) {
       return this.itemGrowCar1();
     } else if (random === 3) {
