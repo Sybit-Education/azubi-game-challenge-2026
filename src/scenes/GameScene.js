@@ -256,7 +256,7 @@ export default class GameScene extends Phaser.Scene {
         this.physics.add.overlap(
           this.car,
           roadObject,
-          this.ItemManager.itemRandom1,
+          () => this.ItemManager.itemRandom(this.car),
           undefined,
           this.ItemManager,
         );
