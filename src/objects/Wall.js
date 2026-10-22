@@ -12,6 +12,10 @@ export default class Border extends Phaser.GameObjects.Image {
   }
 
   move(delta) {
+    if (!this.scene?.scale) {
+      return;
+    }
+
     const heightFactor = this.scene.scale.height / 1200; // speeds are tuned for 1200px height
     this.y += (this.speed * heightFactor * delta) / 1000;
 

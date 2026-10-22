@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from '../objects/InputManager.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -8,13 +9,26 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // On create
   async create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
+    this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
     this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
-      .setDisplaySize(this.scale.width, this.scale.height);
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    //Background parallax effect
+    this.input.on('pointermove', (pointer) => {
+      this.background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    });
 
     // Titel Überschrifft "Leaderboard"
     this.title = this.add
@@ -23,7 +37,8 @@ export default class LeaderboardScene extends Phaser.Scene {
         fontSize: '90px',
         color: '#ffffff',
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScale(1 * this.scaleFactor);
 
     // Debug logging
     console.debug(leaderboard);
@@ -57,9 +72,25 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Home button display
     this.backButton = this.add
       .image(this.scale.width / 2, this.scale.height / 1.3, 'leaderboard-homepage-btn')
-      .setScale(0.4)
+      .setScale(0.4 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
+
+    this.resetButton = this.add
+      .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
+        fontFamily: 'Tiny5',
+        fontSize: '40px',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5)
+      .setInteractive()
+      .setScale(1 * this.scaleFactor);
+
+    this.resetButton.on('pointerdown', () => {
+      localStorage.removeItem('leaderboard');
+
+      this.scene.restart();
+    });
 
     // On home button listener
     this.backButton.on('pointerdown', () => {
@@ -75,16 +106,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.backButton.on('pointerover', () => {
       this.tweens.add({
         targets: this.backButton,
-        scaleX: 0.45,
-        scaleY: 0.45,
+        scaleX: 0.45 * this.scaleFactor,
+        scaleY: 0.45 * this.scaleFactor,
         duration: 100,
       });
     });
     this.backButton.on('pointerout', () => {
       this.tweens.add({
         targets: this.backButton,
-        scaleX: 0.4,
-        scaleY: 0.4,
+        scaleX: 0.4 * this.scaleFactor,
+        scaleY: 0.4 * this.scaleFactor,
         duration: 100,
       });
     });
@@ -96,6 +127,18 @@ export default class LeaderboardScene extends Phaser.Scene {
       width: this.scale.width,
       height: this.scale.height,
     });
+  }
+
+  update() {
+    this.InputManager.update();
+
+    if (this.InputManager.getControlsP1.button4) {
+      if (this.registry.get('gameMode') === 'christmas') {
+        this.scene.start('ChristmasScene');
+      } else {
+        this.scene.start('MenuScene');
+      }
+    }
   }
 
   resize(gameSize) {

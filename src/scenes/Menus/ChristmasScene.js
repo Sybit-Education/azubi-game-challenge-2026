@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from '../../objects/InputManager.js';
 
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
@@ -53,6 +54,9 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Create scene
   create() {
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
+
     const footer_btn_y = this.scale.height / 1.17;
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
@@ -79,21 +83,22 @@ export default class ChristmasScene extends Phaser.Scene {
     const settings_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.55, 'christmas-homepage-settings')
       .setOrigin(0.5)
-      .setScale(0.33 * this.scaleFactor)
+      .setScale(0.3 * this.scaleFactor)
       .setInteractive();
 
     const play_button = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-play-btn')
       .setOrigin(0.5)
-      .setScale(0.33 * this.scaleFactor)
+      .setScale(0.3 * this.scaleFactor)
       .setInteractive();
 
     const twoPlayerButton = this.add
       .image(this.scale.width / 5.7, this.scale.height / 1.9, 'christmas-homepage-2player')
       .setOrigin(0.5)
-      .setScale(0.278 * this.scaleFactor)
+      .setScale(0.275 * this.scaleFactor)
       .setDepth(-1)
-      .setInteractive({ useHandCursor: true });
+      .setInteractive({ useHandCursor: true })
+      .setVisible(false);
 
     const creditsButton = this.add
       .image(this.scale.width / 1.14, footer_btn_y, 'homepage-credits')
@@ -110,7 +115,7 @@ export default class ChristmasScene extends Phaser.Scene {
     const trees = this.add
       .image(this.scale.width / 3, this.scale.height, 'christmas-homepage-trees')
       .setOrigin(0.5, 1)
-      .setScale(0.35 * this.scaleFactor);
+      .setScale(0.3 * this.scaleFactor);
 
     const howToPlayScale = 0.2;
     const howToPlayButton = this.add
@@ -174,10 +179,13 @@ export default class ChristmasScene extends Phaser.Scene {
           targets: twoPlayerButton,
           x: play_button.x,
           y: play_button.y,
-          duration: 150,
+          alpha: 0.7,
+          duration: 180,
+          ease: 'Cubic.easeIn',
           onComplete: () => {
             if (!isPlayHovered && !isTwoPlayerHovered) {
               twoPlayerButton.setVisible(false);
+              twoPlayerButton.setAlpha(1);
             }
           },
         });
@@ -187,12 +195,17 @@ export default class ChristmasScene extends Phaser.Scene {
     const revealTwoPlayerButton = () => {
       cancelScheduledHide();
       this.tweens.killTweensOf(twoPlayerButton);
-      twoPlayerButton.setVisible(true);
       this.tweens.add({
         targets: twoPlayerButton,
         x: play_button.x + 325 * this.scaleFactor,
-        y: play_button.y - 10 * this.scaleFactor,
-        duration: 150,
+        y: playOriginalY - 10 * this.scaleFactor,
+        scaleX: (0.278 + 0.02) * this.scaleFactor,
+        scaleY: (0.278 + 0.02) * this.scaleFactor,
+        duration: 220,
+        ease: 'Sine.easeOut',
+      });
+      this.time.delayedCall(100, () => {
+        twoPlayerButton.setVisible(true);
       });
     };
 
@@ -211,7 +224,8 @@ export default class ChristmasScene extends Phaser.Scene {
     };
 
     const startMultiplayer = () => {
-      this.registry.set('gameMode', 'multiplayer');
+      this.registry.set('isMultiplayer', true);
+      this.registry.set('gameMode', 'christmas');
       this.scene.start('NameInputScene', { isMultiplayer: true });
     };
     this.startMultiplayer = startMultiplayer;
@@ -221,7 +235,13 @@ export default class ChristmasScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(play_button, playOriginalY - 10 * this.scaleFactor);
+        this.selectButton(play_button, playOriginalY);
+
+        this.tweens.add({
+          targets: twoPlayerButton,
+          y: playOriginalY - 10 * this.scaleFactor,
+          duration: 50,
+        });
       }
     });
 
@@ -229,6 +249,9 @@ export default class ChristmasScene extends Phaser.Scene {
       isTwoPlayerHovered = false;
       isPlayHovered = false;
       twoPlayerButton.setDepth(0);
+      if (twoPlayerButton.visible) {
+        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+      }
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
         this.deselectButton(play_button, playOriginalY);
@@ -245,11 +268,11 @@ export default class ChristmasScene extends Phaser.Scene {
       });
     };
 
-    this.deselectButton = (button, originalY, scale = 0.3 * this.scaleFactor) => {
+    this.deselectButton = (button, originalY, scale = 0.3) => {
       this.tweens.add({
         targets: button,
-        scaleX: scale,
-        scaleY: scale,
+        scaleX: scale * this.scaleFactor,
+        scaleY: scale * this.scaleFactor,
         y: originalY,
         duration: 50,
       });
@@ -263,7 +286,12 @@ export default class ChristmasScene extends Phaser.Scene {
 
     play_button.on('pointerout', () => {
       isPlayHovered = false;
+
       this.deselectButton(play_button, playOriginalY);
+
+      if (twoPlayerButton.visible) {
+        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+      }
       scheduleHide();
     });
 
@@ -373,10 +401,11 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     });
 
-    play_button.on('pointerdown', () => {
+    const startSinglePlayer = () => {
       this.registry.set('gameMode', 'christmas');
-      this.scene.start('LoadingScene', { isMultiplayer: false });
-    });
+      this.scene.start('NameInputScene', { isMultiplayer: false });
+    };
+    play_button.on('pointerdown', startSinglePlayer);
     twoPlayerButton.on('pointerdown', () => {
       startMultiplayer();
     });
@@ -393,6 +422,35 @@ export default class ChristmasScene extends Phaser.Scene {
       this.scene.start('CreditsScene');
     });
 
+    this.menuButtons = [
+      { button: play_button, y: playOriginalY, action: startSinglePlayer },
+      {
+        button: settings_button,
+        y: settingsOriginalY,
+        action: () => {
+          this.scene.launch('PopUpScene');
+          this.scene.bringToTop('PopUpScene');
+        },
+      },
+      { button: howToPlayButton, y: howToPlayOriginalY, scale: howToPlayScale },
+      {
+        button: leaderboardButton,
+        y: footer_btn_y,
+        scale: 0.24,
+        action: () => this.scene.start('LeaderboardScene'),
+      },
+      {
+        button: creditsButton,
+        y: creditsOriginalY,
+        action: () => this.scene.start('CreditsScene'),
+      },
+    ];
+
+    this.selectedIndex = 0;
+    this.previousHorizontalInput = { left: false, right: false };
+    this.hasReadHorizontalInput = false;
+    this.selectButton(this.menuButtons[0].button, this.menuButtons[0].y);
+
     this.tweens.add({
       targets: lights,
       alpha: 0.2,
@@ -400,5 +458,71 @@ export default class ChristmasScene extends Phaser.Scene {
       yoyo: 0.5,
       repeat: -1,
     });
+  }
+
+  update() {
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
+    const rightPressed =
+      controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
+    const leftPressed =
+      controls.left && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
+    this.previousHorizontalInput.left = controls.left;
+    this.previousHorizontalInput.right = controls.right;
+    this.hasReadHorizontalInput = true;
+
+    if (rightPressed && this.selectedIndex === 0) {
+      this.selectMultiplayerOption();
+    } else if (leftPressed && this.isMultiplayerSelected) {
+      this.clearMultiplayerOption();
+    }
+
+    if (controls.button1) {
+      this.clearMultiplayerOption();
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
+      );
+
+      this.selectedIndex--;
+      if (this.selectedIndex < 0) {
+        this.selectedIndex = this.menuButtons.length - 1;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
+      );
+    }
+
+    if (controls.button3) {
+      this.clearMultiplayerOption();
+      this.deselectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
+      );
+
+      this.selectedIndex++;
+      if (this.selectedIndex >= this.menuButtons.length) {
+        this.selectedIndex = 0;
+      }
+
+      this.selectButton(
+        this.menuButtons[this.selectedIndex].button,
+        this.menuButtons[this.selectedIndex].y,
+        this.menuButtons[this.selectedIndex].scale,
+      );
+    }
+
+    if (controls.button2) {
+      if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
+        this.startMultiplayer();
+      } else {
+        this.menuButtons[this.selectedIndex].action?.();
+      }
+    }
   }
 }

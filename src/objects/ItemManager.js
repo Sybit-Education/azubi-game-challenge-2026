@@ -13,52 +13,130 @@ export default class ItemManager {
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
 
+    this.extraLifeActiveCar1 = false;
+    this.extraLifeActiveCar2 = false;
+    this.invulnerableCar1 = false;
+    this.invulnerableCar2 = false;
+
     this.iceTriggered = false;
     this.originScale = this.scene.car.scale;
   }
 
   itemShrinkCar1() {
     console.log('shrink');
-    let carShrinkSize = 0.5;
+    const car = this.scene.car;
 
-    this.scene.car.setScale(carShrinkSize);
+    car.setScale(this.originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemShrinkCar2() {
     console.log('Shrink 2');
-    let carShrinkSize = 0.5;
+    const car = this.scene.secondCar;
 
-    this.scene.secondCar.setScale(carShrinkSize);
+    car.setScale(this.originScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemGrowCar1() {
     console.log('grow');
-    let carGrowSize = 1;
+    const car = this.scene.car;
 
-    this.scene.car.setScale(carGrowSize);
+    this.scene.car.setScale(this.originScale * 1.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
   }
 
   itemGrowCar2() {
     console.log('grow 2');
-    let carGrowSize = 1;
+    const car = this.scene.secondCar;
 
-    this.scene.secondCar.setScale(carGrowSize);
+    car.setScale(this.originScale * 1.5);
 
     this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
+      car.setScale(this.originScale);
     });
+  }
+
+  itemExtraLifeCar1() {
+    console.log('extralife collected');
+
+    if (!this.extraLifeActiveCar1) {
+      this.extraLifeActiveCar1 = true;
+      this.scene.hud.enableExtraLife1();
+    }
+  }
+
+  itemExtraLifeCar2() {
+    console.log('extralife collected');
+
+    if (!this.extraLifeActiveCar2) {
+      this.extraLifeActiveCar2 = true;
+      this.scene.hud.enableExtraLife2();
+    }
+  }
+
+  useExtraLifeCar1(car) {
+    this.extraLifeActiveCar1 = false;
+    this.scene.hud.disableExtraLife1();
+    this.invulnerableCar1 = true;
+    car.setTint(0xff0000);
+
+    this.scene.tweens.add({
+      targets: car,
+      alpha: 0.3,
+      duration: 200,
+      yoyo: true,
+      repeat: 4,
+      onComplete: () => {
+        car.setAlpha(1);
+        car.clearTint();
+      },
+    });
+
+    this.scene.time.delayedCall(1000, () => {
+      this.invulnerableCar1 = false;
+      car.clearTint();
+    });
+
+    console.log('extra life used');
+    return;
+  }
+
+  useExtraLifeCar2(car) {
+    this.extraLifeActiveCar2 = false;
+    this.scene.hud.disableExtraLife2();
+    this.invulnerableCar2 = true;
+
+    car.setTint(0xff0000);
+
+    this.scene.tweens.add({
+      targets: car,
+      alpha: 0.3,
+      duration: 200,
+      yoyo: true,
+      repeat: 4,
+      onComplete: () => {
+        car.setAlpha(1);
+        car.clearTint();
+      },
+    });
+
+    this.scene.time.delayedCall(1000, () => {
+      this.invulnerableCar2 = false;
+      car.clearTint();
+    });
+
+    console.log('extra life used');
+    return;
   }
 
   itemShieldCar1() {
@@ -116,15 +194,35 @@ export default class ItemManager {
   }
 
   lebenCheckCar1(car) {
-    if (!this.schildAktivCar1) {
-      this.scene.gameOver(car);
+    if (this.invulnerableCar1) {
+      return;
     }
+
+    if (this.schildAktivCar1) {
+      return;
+    }
+
+    if (this.extraLifeActiveCar1) {
+      this.useExtraLifeCar1(car);
+      return;
+    }
+    this.scene.gameOver(car);
   }
 
   lebenCheckCar2(car) {
-    if (!this.schildAktivCar2) {
-      this.scene.gameOver(car);
+    if (this.invulnerableCar2) {
+      return;
     }
+    if (this.schildAktivCar2) {
+      return;
+    }
+
+    if (this.extraLifeActiveCar2) {
+      this.useExtraLifeCar2(car);
+      return;
+    }
+
+    this.scene.gameOver(car);
   }
 
   itemNausea() {
