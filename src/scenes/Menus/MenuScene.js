@@ -283,7 +283,6 @@ export default class MenuScene extends Phaser.Scene {
       this.tweens.add({
         targets: twoPlayerButton,
         x: this.play_button.x + 325 * this.scaleFactor,
-        y: playOriginalY - 10 * this.scaleFactor,
         scaleX: (0.278 + 0.02) * this.scaleFactor,
         scaleY: (0.278 + 0.02) * this.scaleFactor,
         duration: 220,
@@ -297,8 +296,6 @@ export default class MenuScene extends Phaser.Scene {
     this.selectMultiplayerOption = () => {
       this.isMultiplayerSelected = true;
       revealTwoPlayerButton();
-      twoPlayerButton.setDepth(1);
-      this.selectButton(twoPlayerButton - 3);
     };
 
     this.clearMultiplayerOption = () => {
@@ -339,7 +336,7 @@ export default class MenuScene extends Phaser.Scene {
 
         this.tweens.add({
           targets: twoPlayerButton,
-          y: playOriginalY - 10 * this.scaleFactor,
+          //y: playOriginalY - 10 * this.scaleFactor,
           duration: 50,
         });
       }
