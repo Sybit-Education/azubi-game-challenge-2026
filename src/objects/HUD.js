@@ -3,69 +3,53 @@ export default class HUD {
     this.car = car;
     this.secondCar = secondCar;
     this.scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
-
+    this.scene = scene;
     const margin = 20 * this.scaleFactor;
+    this.hudBackground = scene.add.graphics();
+    this.hudBackground2 = scene.add.graphics();
+    this.activePowerups = [];
 
     // Player 1 (top-left)
     this.distanceText = scene.add
       .text(margin, margin, '', {
         fontFamily: 'Tiny5',
-        fontSize: `${50 * this.scaleFactor}px`,
+        fontSize: `${40 * this.scaleFactor}px`,
       })
-      .setOrigin(0, 0);
+      .setOrigin(0, 0)
+      .setDepth(5);
 
     this.scoreText = scene.add
       .text(margin, margin + 40 * this.scaleFactor, '', {
         fontFamily: 'Tiny5',
-        fontSize: `${50 * this.scaleFactor}px`,
+        fontSize: `${40 * this.scaleFactor}px`,
       })
-      .setOrigin(0, 0);
+      .setOrigin(0, 0)
+      .setDepth(5);
 
     // Player 2 (top-right)
     if (this.secondCar) {
       this.distanceText2 = scene.add
         .text(scene.scale.width - margin, margin, '', {
           fontFamily: 'Tiny5',
-          fontSize: `${50 * this.scaleFactor}px`,
+          fontSize: `${40 * this.scaleFactor}px`,
         })
-        .setOrigin(1, 0);
+        .setOrigin(1, 0)
+        .setDepth(5);
 
       this.scoreText2 = scene.add
         .text(scene.scale.width - margin, margin + 40 * this.scaleFactor, '', {
           fontFamily: 'Tiny5',
-          fontSize: `${50 * this.scaleFactor}px`,
+          fontSize: `${40 * this.scaleFactor}px`,
         })
-        .setOrigin(1, 0);
-
-      this.extraLife2 = scene.add
-        .image(0, 0, 'extraLife')
-        .setScale(0.04 * this.scaleFactor)
-        .setOrigin(0.5, 0.5);
-
-      this.disable(this.extraLife2);
-
-      this.coinMultiplier2 = scene.add
-        .image(0, 0, 'coinMultiplier')
-        .setScale(0.04 * this.scaleFactor)
-        .setOrigin(0.5, 0.5);
-      this.disable(this.coinMultiplier2);
+        .setOrigin(1, 0)
+        .setDepth(5);
     }
 
-    this.coinMultiplier1 = scene.add
-      .image(0, 0, 'coinMultiplier')
-      .setScale(0.04 * this.scaleFactor)
-      .setOrigin(0.5, 0.5);
-    this.disable(this.coinMultiplier1);
-
-    this.extraLife1 = scene.add
-      .image(
-        this.distanceText.x + this.distanceText.width + 40 * this.scaleFactor,
-        this.distanceText.y,
-        'extraLife',
-      )
-      .setScale(0.04 * this.scaleFactor)
-      .setOrigin(0.5, 0.5);
-    this.disable(this.extraLife1);
+    this.statsBackground = this.scene.add
+      .image(0 * this.scaleFactor, 0 * this.scaleFactor, 'stats-background')
+      .setDepth(4)
+      .setScale(0.65)
+      .setOrigin(0);
   }
 
   update() {
@@ -79,27 +63,129 @@ export default class HUD {
       this.distanceText.setText(`Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`Score: ${this.car.score}`);
     }
-    this.extraLife1.x = this.distanceText.x + this.distanceText.width + 40 * this.scaleFactor;
-    this.extraLife1.y = this.distanceText.y + this.distanceText.height / 1.5;
 
-    this.coinMultiplier1.x = this.distanceText.x + this.distanceText.width + 100 * this.scaleFactor;
-    this.coinMultiplier1.y = this.distanceText.y + this.distanceText.height / 1.5;
+    const x = this.statsBackground.x;
+    const y = this.statsBackground.y;
+    const width = this.statsBackground.displayWidth;
+    const height = this.statsBackground.displayHeight;
 
-    if (this.secondCar) {
-      this.extraLife2.x = this.distanceText2.x - this.distanceText2.width - 40 * this.scaleFactor;
-      this.extraLife2.y = this.extraLife1.y;
+    this.hudBackground.clear();
+    this.hudBackground.fillStyle(0x000000, 0.9);
+    this.hudBackground.fillRect(x, y, width, height);
 
-      this.coinMultiplier2.x =
-        this.distanceText2.x - this.distanceText2.width - 100 * this.scaleFactor;
-      this.coinMultiplier2.y = this.coinMultiplier1.y;
+    this.hudBackground.lineStyle(10, 0x000000, 1);
+    this.hudBackground.strokeRect(x, y, width, height);
+    this.hudBackground.setDepth(1);
+  }
+
+  showPowerupTimer(texture, duration = 10000, scale = 0.05) {
+    const icon = this.scene.add
+      .image(0, 140 * this.scaleFactor, texture)
+      .setScale(scale * this.scaleFactor)
+      .setDepth(10);
+
+    const overlay = this.scene.add.graphics();
+    overlay.setDepth(11);
+
+    const powerup = {
+      icon,
+      overlay,
+      permanent: true,
+      type: 'extraLife',
+    };
+
+    this.activePowerups.push(powerup);
+
+    this.layoutPowerups();
+
+    const progress = { value: 0 };
+
+    this.scene.tweens.add({
+      targets: progress,
+      value: 1,
+      duration,
+
+      onUpdate: () => {
+        overlay.clear();
+        overlay.fillStyle(0x000000, 0.7);
+
+        overlay.fillRect(
+          icon.x - icon.displayWidth / 2,
+          icon.y - icon.displayHeight / 2,
+          icon.displayWidth,
+          icon.displayHeight * progress.value,
+        );
+      },
+
+      onComplete: () => {
+        overlay.destroy();
+        icon.destroy();
+
+        const index = this.activePowerups.indexOf(powerup);
+
+        if (index !== -1) {
+          this.activePowerups.splice(index, 1);
+        }
+
+        this.layoutPowerups();
+      },
+    });
+  }
+
+  layoutPowerups() {
+    const startX = 60 * this.scaleFactor;
+    const y = 140 * this.scaleFactor;
+    const spacing = 50 * this.scaleFactor;
+
+    this.activePowerups.forEach((powerup, index) => {
+      const targetX = startX + spacing * index;
+
+      this.scene.tweens.add({
+        targets: powerup.icon,
+        x: targetX,
+        y,
+        duration: 200,
+        ease: 'Power2',
+      });
+    });
+  }
+
+  displayExtraLife() {
+    if (this.extraLifePowerup) {
+      return;
     }
+
+    const icon = this.scene.add
+      .image(0, 0, 'extraLife')
+      .setScale(0.02 * this.scaleFactor)
+      .setDepth(10);
+
+    this.extraLifePowerup = {
+      icon,
+      permanent: true,
+      type: 'extraLife',
+    };
+
+    this.activePowerups.unshift(this.extraLifePowerup);
+
+    this.layoutPowerups();
   }
 
-  enable(element) {
-    element.clearTint();
-  }
+  deactivateExtraLife() {
+    if (!this.extraLifePowerup) {
+      return;
+    }
 
-  disable(element) {
-    element.setTint(0x677777);
+    this.extraLifePowerup.icon.destroy();
+
+    const index = this.activePowerups.indexOf(this.extraLifePowerup);
+
+    if (index !== -1) {
+      this.activePowerups.splice(index, 1);
+    }
+
+    this.extraLifePowerup = null;
+
+    this.layoutPowerups();
   }
 }
