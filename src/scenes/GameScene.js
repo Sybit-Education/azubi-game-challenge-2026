@@ -58,6 +58,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
     this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+
+    this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
+    this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
@@ -96,6 +99,51 @@ export default class GameScene extends Phaser.Scene {
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+
+    // Hotbar
+    this.hotbar = this.add.image(710, 1198, 'hotbar');
+    this.hotbar.setOrigin(0, 0);
+    this.hotbar.setDepth(1000);
+    this.hotbar.setScrollFactor(0);
+    this.hotbar.setScale(0.5);
+
+    // Coin Icon Player 1
+    this.hotbarCoin = this.add.image(910, 53, 'hotbar-coin');
+    this.hotbarCoin.setScale(0.5);
+    this.hotbarCoin.setDepth(1000);
+    this.hotbarCoin.setScrollFactor(0);
+
+    // Coin Number Player 1
+    this.coinText1 = this.add.text(950, 30, this.ItemManager.coinBudgetPlayer1, {
+      fontSize: '34px',
+      color: '#ffffff',
+      fontFamily: 'Silkscreen',
+      stroke: '#000000',
+      strokeThickness: 2,
+    });
+
+    this.coinText1.setDepth(1000);
+    this.coinText1.setScrollFactor(0);
+
+    if (this.isMultiplayer) {
+      // Coin Icon Player 2
+      this.hotbarCoin = this.add.image(2500, 53, 'hotbar-coin');
+      this.hotbarCoin.setScale(0.5);
+      this.hotbarCoin.setDepth(1000);
+      this.hotbarCoin.setScrollFactor(0);
+
+      // Coin Number Player 2
+      this.coinText2 = this.add.text(2540, 30, this.ItemManager.coinBudgetPlayer2, {
+        fontSize: '34px',
+        color: '#ffffff',
+        fontFamily: 'Silkscreen',
+        stroke: '#000000',
+        strokeThickness: 2,
+      });
+
+      this.coinText2.setDepth(1000);
+      this.coinText2.setScrollFactor(0);
+    }
 
     const canvas = this.game.canvas;
     const accessibilityEnabled = this.registry.get('accessibility enabled') ?? false;
@@ -711,5 +759,10 @@ export default class GameScene extends Phaser.Scene {
     this.hud.update();
 
     this.ItemManager.itemShop();
+    this.coinText1.setText(String(this.ItemManager.coinBudgetPlayer1));
+
+    if (this.isMultiplayer && this.coinText2) {
+      this.coinText2.setText(String(this.ItemManager.coinBudgetPlayer2));
+    }
   }
 }

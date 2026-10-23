@@ -10,8 +10,9 @@ export default class ItemManager {
     this.coinMultiplierOnP1 = false;
     this.coinMultiplierOnP2 = false;
 
-    this.itemShieldPrize = 20;
-    this.itemShrinkPrize = 15;
+    this.itemShieldPrize = 35;
+    this.itemShrinkPrize = 25;
+    this.itemHeartPrize = 40;
 
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
@@ -198,6 +199,72 @@ export default class ItemManager {
     }
   }
 
+  itemMagnetCar1() {
+    this.scene.car.magnetActive = true;
+
+    const magnet = this.scene.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        for (const roadObject of this.scene.roadObjects) {
+          if (roadObject.texture?.key !== 'coin') {
+            continue;
+          }
+
+          const distance = Phaser.Math.Distance.Between(
+            this.scene.car.x,
+            this.scene.car.y,
+            roadObject.x,
+            roadObject.y,
+          );
+
+          if (distance < 600) {
+            roadObject.x += (this.scene.car.x - roadObject.x) * 0.1;
+            roadObject.y += (this.scene.car.y - roadObject.y) * 0.1;
+          }
+        }
+      },
+    });
+
+    this.scene.time.delayedCall(10000, () => {
+      this.scene.car.magnetActive = false;
+      magnet.remove();
+    });
+  }
+
+  itemMagnetCar2() {
+    this.scene.secondCar.magnetActive = true;
+
+    const magnet = this.scene.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        for (const roadObject of this.scene.roadObjects) {
+          if (roadObject.texture?.key !== 'coin') {
+            continue;
+          }
+
+          const distance = Phaser.Math.Distance.Between(
+            this.scene.secondCar.x,
+            this.scene.secondCar.y,
+            roadObject.x,
+            roadObject.y,
+          );
+
+          if (distance < 600) {
+            roadObject.x += (this.scene.secondCar.x - roadObject.x) * 0.1;
+            roadObject.y += (this.scene.secondCar.y - roadObject.y) * 0.1;
+          }
+        }
+      },
+    });
+
+    this.scene.time.delayedCall(10000, () => {
+      this.scene.secondCar.magnetActive = false;
+      magnet.remove();
+    });
+  }
+
   lebenCheckCar1(car) {
     if (this.invulnerableCar1) {
       return;
@@ -243,7 +310,7 @@ export default class ItemManager {
   }
 
   itemRandom1() {
-    const random = Phaser.Math.Between(1, 4);
+    const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
       return this.itemShrinkCar1();
@@ -253,11 +320,13 @@ export default class ItemManager {
       return this.itemShieldCar1();
     } else if (random === 4) {
       return this.itemNausea();
+    } else if (random === 5) {
+      return this.itemMagnetCar1();
     }
   }
 
   itemRandom2() {
-    const random = Phaser.Math.Between(1, 4);
+    const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
       return this.itemShrinkCar2();
@@ -267,6 +336,8 @@ export default class ItemManager {
       return this.itemShieldCar2();
     } else if (random === 4) {
       return this.itemNausea();
+    } else if (random === 5) {
+      return this.itemMagnetCar2();
     }
   }
 
@@ -352,7 +423,7 @@ export default class ItemManager {
     // Hotkeys Player1
     this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
     this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
-    // this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+    this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.key1) &&
@@ -370,10 +441,18 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
+    if (
+      Phaser.Input.Keyboard.JustDown(this.key3) &&
+      this.coinBudgetPlayer1 >= this.itemHeartPrize
+    ) {
+      this.itemExtraLifeCar1();
+      this.coinBudgetPlayer1 -= this.itemHeartPrize;
+    }
+
     // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
-    // this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
+    this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.numpad1) &&
@@ -389,6 +468,14 @@ export default class ItemManager {
     ) {
       this.itemShrinkCar2();
       this.coinBudgetPlayer2 -= this.itemShrinkPrize;
+    }
+
+    if (
+      Phaser.Input.Keyboard.JustDown(this.numpad3) &&
+      this.coinBudgetPlayer2 >= this.itemHeartPrize
+    ) {
+      this.itemExtraLifeCar2();
+      this.coinBudgetPlayer2 -= this.itemHeartPrize;
     }
   }
 }
