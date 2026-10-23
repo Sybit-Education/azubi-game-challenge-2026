@@ -14,7 +14,8 @@ export default class NameInputScene extends Phaser.Scene {
 
     this.playerNames = [''];
     this.activePlayer = 0;
-    this.selectedIndex = 0;
+    this.selectedRow = 0;
+    this.selectedColumn = 0;
     this.maxNameLength = 10;
 
     this.scaleFactor = this.scale.height / 1080;
@@ -30,6 +31,9 @@ export default class NameInputScene extends Phaser.Scene {
 
     this.createPrompt();
     this.createCharacterGrid();
+    this.createKeyboardInput();
+
+    this.updateSelection();
 
     const nameY = this.scale.height / 3;
     const labelX = this.scale.width / 2 - 285 * this.scaleFactor;
@@ -47,9 +51,62 @@ export default class NameInputScene extends Phaser.Scene {
       .setOrigin(0, 0.5);
 
     this.updateNamePrompt();
+  }
 
-    // Handle keyboard input for name entry
-    this.input.keyboard.on('keydown', (event) => {
+  createPrompt() {
+    this.prompt = this.add
+      .text(this.scale.width / 2, this.scale.height / 5, '---    ENTER YOUR NAME    ---', {
+        fontFamily: 'Tiny5',
+        fontSize: `${48 * this.scaleFactor}px`,
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
+  }
+
+  createCharacterGrid() {
+    const cellWidth = 70 * this.scaleFactor;
+    const cellHeight = 70 * this.scaleFactor;
+    const startY = this.scale.height * 0.48;
+
+    this.characterTexts = [];
+
+    this.characterGrid.forEach((row, rowIndex) => {
+      const isLastRow = rowIndex === this.characterGrid.length - 1;
+      const rowTexts = row.map((character) =>
+        this.add
+          .text(0, startY + rowIndex * cellHeight, character, {
+            fontFamily: 'Tiny5',
+            fontSize: `${28 * this.scaleFactor}px`,
+            color: '#ffffff',
+            backgroundColor: '#333333',
+            padding: { x: 10, y: 8 },
+          })
+          .setOrigin(0.5),
+      );
+
+      this.characterTexts.push(rowTexts);
+
+      const rowWidth = (9 - 1) * cellWidth;
+      const startX = (this.scale.width - rowWidth) / 2;
+
+      if (isLastRow) {
+        const gridLeft = startX - cellWidth / 4;
+        const gridRight = startX + rowWidth + cellWidth / 4;
+
+        rowTexts[0].setX(gridLeft + rowTexts[0].width / 2);
+        rowTexts[1].setX(this.scale.width / 2);
+        rowTexts[2].setX(gridRight - rowTexts[2].width / 2);
+        return;
+      }
+
+      rowTexts.forEach((text, columnIndex) => {
+        text.setX(startX + columnIndex * cellWidth);
+      });
+    });
+  }
+
+  createKeyboardInput() {
+     this.input.keyboard.on('keydown', (event) => {
       const currentName = this.playerNames[this.activePlayer] || '';
 
       if (event.key === 'Enter') {
@@ -85,58 +142,6 @@ export default class NameInputScene extends Phaser.Scene {
     });
   }
 
-  createPrompt() {
-    this.prompt = this.add
-      .text(this.scale.width / 2, this.scale.height / 5, '---    ENTER YOUR NAME    ---', {
-        fontFamily: 'Tiny5',
-        fontSize: `${48 * this.scaleFactor}px`,
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
-  }
-
-  createCharacterGrid() {
-    const cellWidth = 70 * this.scaleFactor;
-    const cellHeight = 70 * this.scaleFactor;
-    const startY = this.scale.height * 0.48;
-
-    this.characterTexts = [];
-
-    this.characterGrid.forEach((row, rowIndex) => {
-      const isLastRow = rowIndex === this.characterGrid.length - 1;
-      const rowTexts = row.map((character) =>
-        this.add
-          .text(0, startY + rowIndex * cellHeight, character, {
-            fontFamily: 'Tiny5',
-            fontSize: `${28 * this.scaleFactor}px`,
-            color: '#ffffff',
-            backgroundColor: '#333333',
-            padding: { x: 10, y: 8 },
-          })
-          .setOrigin(0.5),
-      );
-
-      this.characterTexts.push(...rowTexts);
-
-      const rowWidth = (9 - 1) * cellWidth;
-      const startX = (this.scale.width - rowWidth) / 2;
-
-      if (isLastRow) {
-        const gridLeft = startX - cellWidth / 4;
-        const gridRight = startX + rowWidth + cellWidth / 4;
-
-        rowTexts[0].setX(gridLeft + rowTexts[0].width / 2);
-        rowTexts[1].setX(this.scale.width / 2);
-        rowTexts[2].setX(gridRight - rowTexts[2].width / 2);
-        return;
-      }
-
-      rowTexts.forEach((text, columnIndex) => {
-        text.setX(startX + columnIndex * cellWidth);
-      });
-    });
-  }
-
   updateNamePrompt() {
     const currentName = this.playerNames[this.activePlayer] || '';
     let label;
@@ -153,5 +158,20 @@ export default class NameInputScene extends Phaser.Scene {
         this.labelText.x + this.labelText.width + 8 * this.scaleFactor,
         this.labelText.y,
       );
+  }
+
+  updateSelection() {
+    this.characterTexts.forEach((row, rowIndex) => {
+      row.forEach((textObject, columnIndex) => {
+        const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
+        textObject.setColor(isSelected ? '#000000' : '#ffffff');
+        textObject.setBackgroundColor(isSelected ? '#ffffff' : '#333333');
+        textObject.setScale(isSelected ? 1.15 : 1);
+      });
+    });
+  }
+
+  moveSelection(dx, dy) {
+    // Content
   }
 }
