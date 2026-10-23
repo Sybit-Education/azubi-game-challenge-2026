@@ -58,10 +58,8 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
   }
 
-  //Alle Objekte in der Szene initialisieren
+  // BootScene loads the font; initialize synchronously before Phaser starts update().
   async create() {
-    console.log('CREATE');
-    await document.fonts.load('32px Tiny5');
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
@@ -128,6 +126,23 @@ export default class GameScene extends Phaser.Scene {
       this.coinText2.setDepth(1000);
       this.coinText2.setScrollFactor(0);
     }
+
+    const canvas = this.game.canvas;
+    const accessibilityEnabled = this.registry.get('accessibility enabled') ?? false;
+    canvas.setAttribute('tabindex', '0');
+
+    if (accessibilityEnabled) {
+      canvas.setAttribute('role', 'application');
+    }
+    canvas.focus();
+
+    this.events.once('shutdown', () => {
+      canvas.removeAttribute('role');
+      canvas.removeAttribute('aria-label');
+      canvas.removeAttribute('tabindex');
+      this.roadEdgeScrape.destroy();
+      this.iceWarning.destroy();
+    });
   }
 
   setBackground(img) {
