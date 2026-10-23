@@ -265,7 +265,14 @@ export default class ItemManager {
     });
   }
 
-  lebenCheckCar1(car) {
+  // Checks health for car 1
+  lebenCheckCar1(car, object) {
+    // Duck check
+    if (object.texture.key === 'random-object2') {
+      this.yeet(object);
+      return;
+    }
+
     if (this.invulnerableCar1) {
       return;
     }
@@ -306,6 +313,42 @@ export default class ItemManager {
       duration: 500,
       yoyo: true,
       repeat: 2.5,
+    });
+  }
+
+  // Yeets a target
+  yeet(target) {
+    // Disable collition
+    target.body.enable = false;
+
+    // Start coords
+    const startX = target.x;
+    const startY = target.y;
+
+    // Windows width
+    const windowWidth = this.scene.scale.width;
+
+    // Changes texture - TODO
+    // target.setTexture('car');
+
+    // Gets tweens
+    const tweens = this.scene.tweens;
+    // Target
+    tweens.add({
+      targets: target,
+      x: startX > windowWidth / 2 ? startX + 800 : startX - 800,
+      duration: 1000,
+    });
+
+    // Animation
+    tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: 1000,
+      onUpdate: (tween) => {
+        const t = tween.getValue();
+        target.y = startY + t * 25 - Math.sin(t * Math.PI) * 350;
+      },
     });
   }
 
