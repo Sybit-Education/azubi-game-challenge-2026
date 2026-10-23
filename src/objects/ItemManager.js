@@ -52,7 +52,8 @@ export default class ItemManager {
     console.log('grow');
     const car = this.scene.car;
 
-    this.scene.car.setScale(this.originScale * 1.5);
+    car.setScale(this.originScale * 1.5);
+    this.scene.sound.play('plant-grow', { volume: 0.3 });
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
@@ -64,6 +65,7 @@ export default class ItemManager {
     const car = this.scene.secondCar;
 
     car.setScale(this.originScale * 1.5);
+    this.scene.sound.play('plant-grow', { volume: 0.3 });
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);

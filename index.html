@@ -14,10 +14,14 @@
   </head>
   <!-- Body -->
   <body style="margin: 0">
+    <div id="game-status" class="sr-only" role="status" aria-atomic="true"></div>
+
     <main id="accessible-ui" class="accessible-layer">
       <h1 class="sr-only">Sybit Kart</h1>
       <button id="start-game" type="button">play</button>
+      <button id="multiplayer-btn" type="button">multiplayer</button>
       <button id="settings-btn" type="button">Settings</button>
+      <button id="credit-btn" type="button">credits</button>
     </main>
 
     <script type="importmap">
@@ -32,13 +36,21 @@
       <button id="skip-intro" type="button">Skip Intro!</button>
     </section>
 
+    <section id="credits-ui" class="sr-only" hidden>
+      <h2>Credits</h2>
+      <div id="credits-content"></div>
+      <p>Press Eskape to skip</p>
+    </section>
+
     <section id="game-over-ui" class="accessible-layer" hidden>
-      <h2 class="sr-only">game over</h2>
+      <div id="game-over-result">
+        <h2 class="sr-only">game over</h2>
 
-      <p class="sr-only">Score: <span id="final-score"></span> Pts</p>
-      <p class="sr-only">Distance: <span id="final-distance"></span> Km</p>
+        <p class="sr-only">Score: <span id="final-score"></span> Pts</p>
+        <p class="sr-only">Distance: <span id="final-distance"></span> Km</p>
+      </div>
 
-      <button id="retry" type="button">retry</button>
+      <button id="retry" type="button" aria-describedby="game-over-result">retry</button>
       <button id="back-to-home" type="button">mainMenu</button>
     </section>
 
@@ -110,6 +122,13 @@
       appearance: none;
       pointer-events: none;
       font-size: 0;
+    }
+
+    /* Modal dialogs make the canvas inert; their HTML controls handle clicks. */
+    #settings-dialog button,
+    #settings-dialog input,
+    #settings-dialog select {
+      pointer-events: auto;
     }
 
     .accessible-layer button:focus-visible,

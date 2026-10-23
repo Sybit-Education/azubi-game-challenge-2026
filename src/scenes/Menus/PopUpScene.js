@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 export default class PopUpScene extends Phaser.Scene {
@@ -9,6 +11,7 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   preload() {
+    preloadMenuSounds(this);
     this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
     this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
     this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
@@ -46,6 +49,14 @@ export default class PopUpScene extends Phaser.Scene {
 
     this.scene.bringToTop();
     const { width, height } = this.scale;
+
+    // Get HTML controls first so every handler can access them.
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const dialog = document.getElementById('settings-dialog');
+    const accessibilityToggle = document.getElementById('accessible-toggle');
+    const gameModeMenu = document.getElementById('game-mode-menu');
+
     const padding = Math.max(24, Math.min(width, height) * 0.06);
     const uiScale = Phaser.Math.Clamp(
       Math.min(this.scale.width / 1920, this.scale.height / 1080),
@@ -89,14 +100,14 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0);
     //rowY += Math.max(48, 58 * uiScale);
 
-    // Static switch mockup: settings are visual only for now.
+    // The visual switch and HTML checkbox share the same saved state.
     const accessibilitySwitch = this.add
       .image(rightColumn, row1Y, 'switchOff')
       .setScale(0.37 * uiScale)
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
 
-    const Accessibilitycircle = this.add
+    const accessibilityKnob = this.add
       .image(rightColumn, row1Y, 'switchCircle')
       .setScale(0.37 * uiScale)
       .setOrigin(0.5, 0.5)
@@ -142,6 +153,7 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     const chooseChristmasMode = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
@@ -149,7 +161,8 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     const chooseStandardMode = () => {
-      //im christmas mode: zurück zu standard
+      playMenuClick(this);
+      //Return from Christmas mode to standard mode.
       if (this.parentSceneKeys.includes('ChristmasScene')) {
         this.registry.set('gameMode', 'standard');
         this.scene.stop('ChristmasScene');
@@ -157,15 +170,16 @@ export default class PopUpScene extends Phaser.Scene {
         this.scene.start('MenuScene');
         return;
       }
-      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
+      hoveringStandard = !hoveringStandard; // Toggle the dropdown on each click.
       updateChristmasButton();
     };
 
     christmasModeButton.on('pointerdown', chooseChristmasMode);
     standardModeButton.on('pointerdown', chooseStandardMode);
 
-    //defining switch status, "origin x" and "goal x"
-    let accessibilityEnabled = false;
+    // Load the saved state and remember the switch knob's two positions.
+    let accessibilityEnabled =
+      this.registry.get('accessibility enabled') ?? this.registry.get('accessibilityMode') ?? false;
 
     // Left position
     const switchLeft =
@@ -177,28 +191,35 @@ export default class PopUpScene extends Phaser.Scene {
     const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
     // Sets coordinates
-    Accessibilitycircle.x = switchLeft;
-    Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
+    accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
+    accessibilityKnob.x = accessibilityEnabled ? switchRight : switchLeft;
+    accessibilityKnob.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
 
-    //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
-    //tween für den kreisanimation
+    // Mouse, keyboard and gamepad use the same function to change the state.
 
-    const toggleAccessibility = () => {
-      accessibilityEnabled = !accessibilityEnabled;
-
+    const setAccessibilityEnabled = (enabled) => {
+      accessibilityEnabled = enabled;
+      this.registry.set('accessibility enabled', accessibilityEnabled);
+      // Other game code still uses this legacy key. Keep both keys in sync.
       this.registry.set('accessibilityMode', accessibilityEnabled);
+      accessibilityToggle.checked = accessibilityEnabled;
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
-        targets: Accessibilitycircle,
+        targets: accessibilityKnob,
         x: accessibilityEnabled ? switchRight : switchLeft,
         duration: 150,
         ease: 'Power2',
       });
     };
 
+    const toggleAccessibility = () => {
+      playMenuClick(this);
+      setAccessibilityEnabled(!accessibilityEnabled);
+    };
+
     accessibilitySwitch.on('pointerdown', toggleAccessibility);
-    Accessibilitycircle.on('pointerdown', toggleAccessibility);
+    accessibilityKnob.on('pointerdown', toggleAccessibility);
 
     const closeLabel = this.add
       .image(background.x, row3Y * 2, 'closeLabel')
@@ -208,7 +229,7 @@ export default class PopUpScene extends Phaser.Scene {
     // Slide the panel in from the right edge. The dim overlay stays in place.
     //added an array of all the elements. add element here, to animate
     const panel = [
-      Accessibilitycircle,
+      accessibilityKnob,
       background,
       closeButton,
       settingsLabel,
@@ -235,6 +256,7 @@ export default class PopUpScene extends Phaser.Scene {
     let closing = false;
     const close = () => {
       if (closing) return; // ignore double clicks
+      playMenuClick(this);
       closing = true;
       this.tweens.add({ targets: panel, x: `+=${width}`, duration: 200, ease: 'Cubic.easeIn' });
       this.tweens.add({
@@ -257,22 +279,38 @@ export default class PopUpScene extends Phaser.Scene {
     this.input.keyboard.once('keydown-M', close);
     this.input.keyboard.once('keydown-ESC', close);
 
-    const settingsBtn = document.getElementById('settings-btn');
-    const closeSettingsBtn = document.getElementById('close-settings');
-    const dialog = document.getElementById('settings-dialog');
-    const accessibilityToggle = document.getElementById('accessible-toggle');
-    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
-    const gameModeMenu = document.getElementById('game-mode-menu');
+    accessibilityToggle.checked = accessibilityEnabled;
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
+
+    // Phaser also listens on window. Input in the HTML dialog must not
+    // trigger the visual controls a second time. Do not use preventDefault:
+    // native checkbox and keyboard behavior must keep working.
+    const nativeInputEvents = [
+      'mousedown',
+      'mouseup',
+      'touchstart',
+      'touchend',
+      'keydown',
+      'keyup',
+    ];
+    const stopPhaserInput = (event) => {
+      const formControl = event.target.closest('button, input, select');
+      if (formControl) event.stopPropagation();
+    };
+    for (const eventName of nativeInputEvents) {
+      dialog.addEventListener(eventName, stopPhaserInput);
+    }
 
     const closeWindows = close;
 
     const handleAccessibilityChange = () => {
-      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+      playMenuClick(this);
+      setAccessibilityEnabled(accessibilityToggle.checked);
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
     const handleGameModeChange = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', gameModeMenu.value);
       this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
       this.scene.stop('PopUpScene');
@@ -289,6 +327,9 @@ export default class PopUpScene extends Phaser.Scene {
     dialog.addEventListener('cancel', handleCancel);
 
     this.events.once('shutdown', () => {
+      for (const eventName of nativeInputEvents) {
+        dialog.removeEventListener(eventName, stopPhaserInput);
+      }
       closeSettingsBtn.removeEventListener('click', closeWindows);
       dialog.removeEventListener('cancel', handleCancel);
       accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
@@ -360,6 +401,7 @@ export default class PopUpScene extends Phaser.Scene {
         duration: 100,
       });
     });
+    bindMenuFocusSounds(this, ['close-settings', 'accessible-toggle', 'game-mode-menu']);
   }
   updateGamepadSelection() {
     const items = this.navigationItems();
