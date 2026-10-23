@@ -23,6 +23,7 @@ export default class StartScene extends Phaser.Scene {
 
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
+    this.isChristmas = data?.isChristmas ?? false;
   }
 
   preload() {
@@ -195,6 +196,7 @@ export default class StartScene extends Phaser.Scene {
     this.sound.stopByKey('countdown');
     this.scene.start('GameScene', {
       isMultiplayer: this.isMultiplayer,
+      isChristmas: this.isChristmas,
     });
   }
 
