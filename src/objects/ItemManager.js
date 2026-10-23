@@ -439,6 +439,14 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
+    if (
+      Phaser.Input.Keyboard.JustDown(this.key3) &&
+      this.coinBudgetPlayer1 >= this.itemHeartPrize
+    ) {
+      this.itemExtraLifeCar1();
+      this.coinBudgetPlayer1 -= this.itemHeartPrize;
+    }
+
     // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
@@ -458,6 +466,14 @@ export default class ItemManager {
     ) {
       this.itemShrinkCar2();
       this.coinBudgetPlayer2 -= this.itemShrinkPrize;
+    }
+
+    if (
+      Phaser.Input.Keyboard.JustDown(this.numpad3) &&
+      this.coinBudgetPlayer2 >= this.itemHeartPrize
+    ) {
+      this.itemExtraLifeCar2();
+      this.coinBudgetPlayer2 -= this.itemHeartPrize;
     }
   }
 }
