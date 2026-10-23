@@ -59,7 +59,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
-  async create() {
+  create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
