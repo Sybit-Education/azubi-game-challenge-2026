@@ -265,10 +265,10 @@ export default class ItemManager {
     });
   }
 
-// Checks health for car 1
+  // Checks health for car 1
   lebenCheckCar1(car, object) {
     // Duck check
-    if (object.texture.key  === 'random-object2') {
+    if (object.texture.key === 'random-object2') {
       this.yeet(object);
       return;
     }
