@@ -22,151 +22,51 @@ export default class ItemManager {
     this.originScale = this.scene.car.scale;
   }
 
-  itemShrinkCar1() {
-    console.log('shrink');
-    const car = this.scene.car;
-    const originScale = car.scale;
+  itemShrink(car) {
+    const originalScale = car.scale;
 
-    car.setScale(originScale * 0.5);
+    car.setScale(originalScale * 0.5);
 
     this.scene.time.delayedCall(10000, () => {
-      car.setScale(originScale);
+      car.setScale(originalScale);
     });
   }
 
-  itemShrinkCar2() {
-    console.log('Shrink 2');
-    const car = this.scene.secondCar;
-    const originScale = car.scale;
-
-    car.setScale(originScale * 0.5);
+  itemGrow(car) {
+    car.setScale(1);
 
     this.scene.time.delayedCall(10000, () => {
-      car.setScale(originScale);
+      car.setScale(this.originScale);
     });
   }
 
-  itemGrowCar1() {
-    console.log('grow');
-    let carGrowSize = 1;
-
-    this.scene.car.setScale(carGrowSize);
-
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.car.setScale(this.originScale);
-    });
-  }
-
-  itemGrowCar2() {
-    console.log('grow 2');
-    let carGrowSize = 1;
-
-    this.scene.secondCar.setScale(carGrowSize);
-
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.setScale(this.originScale);
-    });
-  }
-
-  itemMagnetCar1() {
-    this.scene.car.magnetActive = true;
-
-    const magnet = this.scene.time.addEvent({
-      delay: 16,
-      loop: true,
-      callback: () => {
-        for (const roadObject of this.scene.roadObjects) {
-          if (roadObject.texture?.key !== 'coin') {
-            continue;
-          }
-
-          const distance = Phaser.Math.Distance.Between(
-            this.scene.car.x,
-            this.scene.car.y,
-            roadObject.x,
-            roadObject.y,
-          );
-
-          if (distance < 600) {
-            roadObject.x += (this.scene.car.x - roadObject.x) * 0.1;
-            roadObject.y += (this.scene.car.y - roadObject.y) * 0.1;
-          }
-        }
-      },
-    });
-
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.car.magnetActive = false;
-      magnet.remove();
-    });
-  }
-
-  itemMagnetCar2() {
-    this.scene.secondCar.magnetActive = true;
-
-    const magnet = this.scene.time.addEvent({
-      delay: 16,
-      loop: true,
-      callback: () => {
-        for (const roadObject of this.scene.roadObjects) {
-          if (roadObject.texture?.key !== 'coin') {
-            continue;
-          }
-
-          const distance = Phaser.Math.Distance.Between(
-            this.scene.secondCar.x,
-            this.scene.secondCar.y,
-            roadObject.x,
-            roadObject.y,
-          );
-
-          if (distance < 600) {
-            roadObject.x += (this.scene.secondCar.x - roadObject.x) * 0.1;
-            roadObject.y += (this.scene.secondCar.y - roadObject.y) * 0.1;
-          }
-        }
-      },
-    });
-    
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.magnetActive = false;
-      magnet.remove();
-    });
-  }
-  
-  //neu
   itemMagnet(car) {
-  car.magnetActive = true;
+    car.magnetActive = true;
 
-  const magnet = this.scene.time.addEvent({
-    delay: 16,
-    loop: true,
-    callback: () => {
-      for (const roadObject of this.scene.roadObjects) {
-        if (roadObject.texture?.key !== 'coin') {
-          continue;
+    const magnet = this.scene.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        for (const roadObject of this.scene.roadObjects) {
+          if (roadObject.texture?.key !== 'coin') {
+            continue;
+          }
+
+          const distance = Phaser.Math.Distance.Between(car.x, car.y, roadObject.x, roadObject.y);
+
+          if (distance < 600) {
+            roadObject.x += (car.x - roadObject.x) * 0.1;
+            roadObject.y += (car.y - roadObject.y) * 0.1;
+          }
         }
+      },
+    });
 
-        const distance = Phaser.Math.Distance.Between(
-          car.x,
-          car.y,
-          roadObject.x,
-          roadObject.y,
-        );
-
-        if (distance < 600) {
-          roadObject.x += (car.x - roadObject.x) * 0.1;
-          roadObject.y += (car.y - roadObject.y) * 0.1;
-        }
-      }
-    },
-  });
-
-  this.scene.time.delayedCall(10000, () => {
-    car.magnetActive = false;
-    magnet.remove();
-  });
-}
+    this.scene.time.delayedCall(10000, () => {
+      car.magnetActive = false;
+      magnet.remove();
+    });
+  }
 
   itemExtraLifeCar1() {
     console.log('extralife collected');
@@ -340,18 +240,18 @@ export default class ItemManager {
   }
 
   itemRandom1() {
-    const random = Phaser.Math.Between(1, 1);
+    const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
       return this.itemShrink(this.scene.car);
     } else if (random === 2) {
-      return this.itemGrowCar1();
+      return this.itemGrow(this.scene.car);
     } else if (random === 3) {
       return this.itemShieldCar1();
     } else if (random === 4) {
       return this.itemNausea();
     } else if (random === 5) {
-      return this.itemMagnetCar1();
+      return this.itemMagnet(this.scene.car);
     }
   }
 
@@ -359,33 +259,16 @@ export default class ItemManager {
     const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
-      return this.itemShrinkCar2();
+      return this.itemShrink(this.scene.secondCar);
     } else if (random === 2) {
-      return this.itemGrowCar2();
+      return this.itemGrow(this.scene.secondCar);
     } else if (random === 3) {
       return this.itemShieldCar2();
     } else if (random === 4) {
       return this.itemNausea();
     } else if (random === 5) {
-      return this.itemMagnetCar2();
+      return this.itemMagnet(this.scene.secondCar);
     }
-  }
-
-  //neu
-    itemRandom(car) {
-    const random = Phaser.Math.Between(1, 4); // 4 zu 5 machen wenn Shield fixed
-
-    if (random === 1) {
-      return this.itemShrink(car);
-    } else if (random === 2) {
-      return this.itemGrow(car);
-    } else if (random === 3) {
-      return this.itemNausea();
-    } else if (random === 4) {
-      return this.itemMagnet(car);
-    }// else if (random === 5) {
-    //   return this.itemShield(car);
-    // }
   }
 
   iceEffect(car) {
@@ -438,7 +321,7 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.key1) &&
       this.coinBudgetPlayer1 >= this.itemShieldPrize
     ) {
-      this.itemShield(this.car);
+      this.itemShieldCar1();
       this.coinBudgetPlayer1 -= this.itemShieldPrize;
     }
 
@@ -446,7 +329,7 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.key2) &&
       this.coinBudgetPlayer1 >= this.itemShrinkPrize
     ) {
-      this.itemShrink(this.car);
+      this.itemShrink(this.scene.car);
       this.coinBudgetPlayer1 -= this.itemShrinkPrize;
     }
 
@@ -459,7 +342,7 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.numpad1) &&
       this.coinBudgetPlayer2 >= this.itemShieldPrize
     ) {
-      this.itemShield(this.secondCar);
+      this.itemShieldCar2();
       this.coinBudgetPlayer2 -= this.itemShieldPrize;
     }
 
@@ -467,7 +350,7 @@ export default class ItemManager {
       Phaser.Input.Keyboard.JustDown(this.numpad2) &&
       this.coinBudgetPlayer2 >= this.itemShrinkPrize
     ) {
-      this.itemShrink(this.secondCar);
+      this.itemShrink(this.scene.secondCar);
       this.coinBudgetPlayer2 -= this.itemShrinkPrize;
     }
   }
