@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
 
+import {
+  getAccessibilityMode,
+  setAccessibilityMode,
+} from '../../accessibility/accessibilityMode.js';
 import InputManager from '../../objects/InputManager.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
@@ -89,7 +93,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0);
     //rowY += Math.max(48, 58 * uiScale);
 
-    // Static switch mockup: settings are visual only for now.
+    // Accessibility mode switch.
     const accessibilitySwitch = this.add
       .image(rightColumn, row1Y, 'switchOff')
       .setScale(0.37 * uiScale)
@@ -165,7 +169,7 @@ export default class PopUpScene extends Phaser.Scene {
     standardModeButton.on('pointerdown', chooseStandardMode);
 
     //defining switch status, "origin x" and "goal x"
-    let accessibilityEnabled = false;
+    let accessibilityEnabled = getAccessibilityMode(this.registry);
 
     // Left position
     const switchLeft =
@@ -177,8 +181,9 @@ export default class PopUpScene extends Phaser.Scene {
     const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
     // Sets coordinates
-    Accessibilitycircle.x = switchLeft;
+    Accessibilitycircle.x = accessibilityEnabled ? switchRight : switchLeft;
     Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
+    accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
 
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
@@ -186,7 +191,7 @@ export default class PopUpScene extends Phaser.Scene {
     const toggleAccessibility = () => {
       accessibilityEnabled = !accessibilityEnabled;
 
-      this.registry.set('accessibilityMode', accessibilityEnabled);
+      setAccessibilityMode(this.registry, accessibilityEnabled);
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
@@ -261,14 +266,16 @@ export default class PopUpScene extends Phaser.Scene {
     const closeSettingsBtn = document.getElementById('close-settings');
     const dialog = document.getElementById('settings-dialog');
     const accessibilityToggle = document.getElementById('accessible-toggle');
-    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    accessibilityToggle.checked = getAccessibilityMode(this.registry);
     const gameModeMenu = document.getElementById('game-mode-menu');
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
     const closeWindows = close;
 
     const handleAccessibilityChange = () => {
-      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+      accessibilityEnabled = setAccessibilityMode(this.registry, accessibilityToggle.checked);
+      accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
+      Accessibilitycircle.x = accessibilityEnabled ? switchRight : switchLeft;
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 

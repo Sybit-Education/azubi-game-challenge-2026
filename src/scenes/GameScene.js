@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { getAccessibilityMode } from '../accessibility/accessibilityMode.js';
 import { createCarSpatialAudioSystem } from '../accessibility/audio/createCarSpatialAudioSystem.js';
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
@@ -63,8 +64,7 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
     this.createTrack();
-    const accessibilityEnabled =
-      this.registry.get('accessibilityMode') ?? this.registry.get('accessibility enabled') ?? false;
+    const accessibilityEnabled = getAccessibilityMode(this.registry);
 
     this.carSpatialAudio = accessibilityEnabled
       ? createCarSpatialAudioSystem(this, (roadObject) => roadObject instanceof EnemyCar)

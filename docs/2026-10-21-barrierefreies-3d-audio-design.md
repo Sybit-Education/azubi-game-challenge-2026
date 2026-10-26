@@ -427,18 +427,32 @@ export function createCarSpatialAudioSystem(scene, isEnemyCar) {
 
 ### 11.6 In die vorhandene GameScene einbinden
 
-Die Aktivierung liest beide bereits im Projekt vorkommenden Registry-Schlüssel. Der erste gesetzte Wert gewinnt: accessibilityMode oder, zur Kompatibilität mit dem HTML-Schalter, accessibility enabled.
+Die Aktivierung verwendet accessibilityMode als gemeinsamen Schlüssel. Der bisherige HTML-Schlüssel accessibility enabled dient als Migrationsfallback. Beide Schalter schreiben anschließend immer beide Werte, damit Canvas- und HTML-Einstellung nicht auseinanderlaufen.
+
+```js
+// src/accessibility/accessibilityMode.js
+export function getAccessibilityMode(registry) {
+  return registry.get('accessibilityMode') ?? registry.get('accessibility enabled') ?? false;
+}
+
+export function setAccessibilityMode(registry, enabled) {
+  const normalizedValue = Boolean(enabled);
+  registry.set('accessibilityMode', normalizedValue);
+  registry.set('accessibility enabled', normalizedValue);
+  return normalizedValue;
+}
+```
 
 ```js
 // Ausschnitt aus src/scenes/GameScene.js
 import Phaser from 'phaser';
 
+import { getAccessibilityMode } from '../accessibility/accessibilityMode.js';
 import { createCarSpatialAudioSystem } from '../accessibility/audio/createCarSpatialAudioSystem.js';
 import EnemyCar from '../objects/EnemyCar.js';
 
 // Nach createPlayer() und createTrack():
-const accessibilityEnabled =
-  this.registry.get('accessibilityMode') ?? this.registry.get('accessibility enabled') ?? false;
+const accessibilityEnabled = getAccessibilityMode(this.registry);
 
 this.carSpatialAudio = accessibilityEnabled
   ? createCarSpatialAudioSystem(this, (roadObject) => roadObject instanceof EnemyCar)
@@ -464,7 +478,7 @@ this.carSpatialAudio?.update({
 
 ### 11.7 Tests mit dem eingebauten Node-Test-Runner
 
-Die reine Mathematik, der Lebenszyklus des Audio-Graphen und die Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio-Grenze wird durch kleine Attrappen ersetzt.
+Die Einstellungssynchronisierung, reine Mathematik, der Lebenszyklus des Audio-Graphen und die Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio-Grenze wird durch kleine Attrappen ersetzt.
 
 ```js
 // test/accessibility/carSpatialMath.test.js
