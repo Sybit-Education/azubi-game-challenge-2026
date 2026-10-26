@@ -22,7 +22,7 @@ function updatePlayerOne(scene) {
       const pan = currentRoadEdge === 'left' ? -1 : 1;
       scene.sound.play('road-edge-hit', { volume: 0.25, pan });
       scene.sound.play('collision-hit', { volume: 0.15, pan });
-    } else if (laneChanged) {
+    } else if (laneChanged && !scene.laneAnnouncements.speaks) {
       scene.gameStatus.textContent = `Lane ${currentLane + 1}`;
     }
   }
@@ -67,6 +67,7 @@ function updateRoadObjects(scene, delta) {
 }
 
 function updateAudio(scene, delta) {
+  scene.laneAnnouncements.update();
   // Update after movement so sounds use the cars' current positions.
   const carsForAudio = scene.getCarsForAudio();
   const obstaclesForAudio = scene.getObstaclesForAudio();

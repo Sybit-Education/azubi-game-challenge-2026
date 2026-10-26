@@ -14,6 +14,7 @@ import { updateGameScene } from './GameSceneFrame.js';
 import { createRoadObject } from './GameSceneRoadObjects.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
+import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -125,6 +126,7 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
     this.coinAnnouncements = new CoinAnnouncements(this);
+    this.laneAnnouncements = new LaneAnnouncements(this);
     this.createTrack();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
