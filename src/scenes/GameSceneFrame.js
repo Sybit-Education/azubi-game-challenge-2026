@@ -42,18 +42,12 @@ function updatePlayerTwo(scene) {
 }
 
 function updateRoadEdgeScrape(scene) {
-  if (scene.car.dead) {
-    scene.roadEdgeScrape.stop();
-    return;
-  }
+  // The second car is null in single-player.
+  const scraping = [scene.car, scene.secondCar].some(
+    (car) => car && !car.dead && car.boundaryParticles?.emitting,
+  );
 
-  const controls = scene.InputManager.getControlsP1;
-  const edge = scene.lastPlayerRoadEdge;
-  const pushingLeft = edge === 'left' && controls.left && !controls.right;
-  const pushingRight = edge === 'right' && controls.right && !controls.left;
-
-  if (pushingLeft || pushingRight) {
-    scene.roadEdgeScrape.setPan(pushingLeft ? -1 : 1);
+  if (scraping) {
     if (!scene.roadEdgeScrape.isPlaying && !scene.sound.locked) {
       scene.roadEdgeScrape.play();
     }
