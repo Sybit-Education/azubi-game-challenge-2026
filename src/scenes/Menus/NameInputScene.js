@@ -11,17 +11,18 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   async create() {
-    await document.fonts.load('32px Tiny5');
-
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+    this.previousNavigation = { left: false, right: false, up: false, down: false };
+
+    await document.fonts.load('32px Tiny5');
 
     this.playerNames = [''];
     this.activePlayer = 0;
     this.selectedRow = 0;
     this.selectedColumn = 0;
-    this.maxNameLength = 10;
+    this.maxNameLength = 20;
 
     this.scaleFactor = this.scale.height / 1080;
 
@@ -112,40 +113,69 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   createKeyboardInput() {
-     this.input.keyboard.on('keydown', (event) => {
+    this.input.keyboard.on('keydown', (event) => {
       const currentName = this.playerNames[this.activePlayer] || '';
 
       if (event.key === 'Enter') {
-        if (currentName.trim().length === 0) return;
-
-        this.playerNames[this.activePlayer] = currentName.trim();
-        if (this.isMultiplayer && this.activePlayer === 0) {
-          this.activePlayer = 1;
-          this.updateNamePrompt();
-          return;
-        }
-
-        localStorage.setItem('Playername', this.playerNames[0]);
-        if (this.isMultiplayer) {
-          localStorage.setItem('Playername2', this.playerNames[1]);
-        } else {
-          localStorage.removeItem('Playername2');
-        }
-
-        this.scene.start('LoadingScene', {
-          isMultiplayer: this.isMultiplayer,
-        });
+        this.submitName();
         return;
       }
 
       if (event.key === 'Backspace') {
         this.playerNames[this.activePlayer] = currentName.slice(0, -1);
-      } else if (event.key.length === 1) {
+      } else if (event.key.length === 1 && currentName.length < this.maxNameLength) {
         this.playerNames[this.activePlayer] = currentName + event.key;
       }
 
       this.updateNamePrompt();
     });
+  }
+
+  submitName() {
+    const currentName = (this.playerNames[this.activePlayer] || '').trim();
+    if (currentName.length === 0) return;
+
+    this.playerNames[this.activePlayer] = currentName;
+    if (this.isMultiplayer && this.activePlayer === 0) {
+      this.activePlayer = 1;
+      this.updateNamePrompt();
+      return;
+    }
+
+    localStorage.setItem('Playername', this.playerNames[0]);
+    if (this.isMultiplayer) {
+      localStorage.setItem('Playername2', this.playerNames[1]);
+    } else {
+      localStorage.removeItem('Playername2');
+    }
+
+    this.scene.start('LoadingScene', {
+      isMultiplayer: this.isMultiplayer,
+    });
+  }
+
+  selectCharacter() {
+    const character = this.characterGrid[this.selectedRow][this.selectedColumn];
+    const currentName = this.playerNames[this.activePlayer] || '';
+
+    if (character === 'END') {
+      this.submitName();
+    } else if (character === 'DELETE') {
+      this.playerNames[this.activePlayer] = currentName.slice(0, -1);
+      this.updateNamePrompt();
+    } else if (character === 'SPACE') {
+      this.appendCharacter(' ');
+    } else {
+      this.appendCharacter(character);
+    }
+  }
+
+  appendCharacter(character) {
+    const currentName = this.playerNames[this.activePlayer] || '';
+    if (currentName.length >= this.maxNameLength) return;
+
+    this.playerNames[this.activePlayer] = currentName + character;
+    this.updateNamePrompt();
   }
 
   updateNamePrompt() {
@@ -178,28 +208,55 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   moveSelection(dx, dy) {
-    this.selectedRow += dy;
-    this.selectedColumn += dx;
-
-    // Wrap around the selection
-    if (this.selectedRow < 0) {
-      this.selectedRow = this.characterGrid.length - 1;
-    } else if (this.selectedRow >= this.characterGrid.length) {
-      this.selectedRow = 0;
-    }
-
-    if (this.selectedColumn < 0) {
-      this.selectedColumn = this.characterGrid[this.selectedRow].length - 1;
-    } else if (this.selectedColumn >= this.characterGrid[this.selectedRow].length) {
-      this.selectedColumn = 0;
-    }
+    this.selectedRow = Phaser.Math.Wrap(
+      this.selectedRow + dy,
+      0,
+      this.characterGrid.length,
+    );
+    const rowLength = this.characterGrid[this.selectedRow].length;
+    this.selectedColumn =
+      dx === 0
+        ? Math.min(this.selectedColumn, rowLength - 1)
+        : Phaser.Math.Wrap(this.selectedColumn + dx, 0, rowLength);
 
     this.updateSelection();
   }
 
   update() {
-    InputManager.update();
+    this.InputManager.update();
 
-    
+    if (!this.characterGrid) return;
+
+    const controls = this.InputManager.getControlsP1;
+    const gamepad = this.input.gamepad;
+    const pad = gamepad?.enabled ? gamepad.getPad(0) : null;
+    const connectedPad = pad?.pad?.connected ? pad : null;
+    const directions = {
+      left: controls.left,
+      right: controls.right, 
+      up: controls.accelerate,
+      down: controls.brake,
+    };
+    const justPressed = {
+      left: directions.left && !this.previousNavigation.left,
+      right: directions.right && !this.previousNavigation.right,
+      up: directions.up && !this.previousNavigation.up,
+      down: directions.down && !this.previousNavigation.down,
+    };
+    this.previousNavigation = directions;
+
+    if (justPressed.left) {
+      this.moveSelection(-1, 0);
+    } else if (justPressed.right) {
+      this.moveSelection(1, 0);
+    } else if (justPressed.up) {
+      this.moveSelection(0, -1);
+    } else if (justPressed.down) {
+      this.moveSelection(0, 1);
+    }
+
+    if (controls.button2) {
+      this.selectCharacter();
+    }
   }
 }
