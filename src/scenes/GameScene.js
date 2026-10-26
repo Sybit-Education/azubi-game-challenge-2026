@@ -389,10 +389,11 @@ export default class GameScene extends Phaser.Scene {
         roadObject = new RandomObstacle(this, roadObjectX, spawnY, lane);
         roadObject.body.setSize(roadObject.width, roadObject.height);
         roadObject.body.setImmovable(true);
+
         this.physics.add.collider(
           this.car,
           roadObject,
-          this.ItemManager.lebenCheckCar1,
+          (_, object2) => this.ItemManager.lebenCheckCar1(this.car, object2),
           undefined,
           this.ItemManager,
         );
