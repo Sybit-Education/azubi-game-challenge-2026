@@ -191,7 +191,7 @@ Fehler werden nicht nur als Kollision gewertet. Auch verspätete Reaktionen, fal
 
 ## 11. Projektnahe JavaScript-Beispiele
 
-Die folgenden Beispiele entsprechen dem Projektstand mit Phaser 4.2.1, JavaScript-ES-Modulen und Vite. Sie zeigen den im Branch eingebauten ersten Schritt: Gegnerfahrzeuge und Spieler 2 werden relativ zu Spieler 1 räumlich hörbar. Spieler 1 (this.car) ist in diesem Beispiel immer der Hörer.
+Die folgenden Beispiele entsprechen dem Projektstand mit Phaser 4.2.1, JavaScript-ES-Modulen und Vite. Gegnerfahrzeuge und Spieler 2 werden relativ zu Spieler 1 räumlich hörbar. Spieler 1 (this.car) ist der Hörer und besitzt zusätzlich einen leiseren, mittigen Eigenmotor. Dessen Tonhöhe folgt der Spielgeschwindigkeit. Beim stabilen Spurwechsel ertönen ein kurzer Ton von tief (links) nach hoch (rechts) und eine englische Ansage wie „Lane three“.
 
 Die Lösung erzeugt den Motorklang direkt mit der Web Audio API. Es werden deshalb keine zusätzlichen MP3- oder OGG-Dateien benötigt. Wenn Web Audio im Browser nicht verfügbar ist, bleibt das Spiel ohne diesen Beispielklang lauffähig.
 
@@ -211,7 +211,20 @@ export const CAR_AUDIO_CONFIG = Object.freeze({
   maxSources: 3,
   enemyFrequency: 72,
   opponentFrequency: 108,
+  listenerFrequencyMin: 84,
+  listenerFrequencyMax: 132,
+  gameSpeedMin: 700,
+  gameSpeedMax: 1600,
+  laneHysteresisFactor: 0.1,
   baseGain: 0.08,
+  listenerGain: 0.035,
+  fadeInSeconds: 0.25,
+  fadeOutSeconds: 0.25,
+  frequencySmoothingSeconds: 0.08,
+  laneCueFrequencies: Object.freeze([330, 440, 550, 660]),
+  laneCueGain: 0.055,
+  laneCueAttackSeconds: 0.015,
+  laneCueDurationSeconds: 0.16,
   smoothingSeconds: 0.04,
 });
 ```
@@ -275,6 +288,8 @@ export function selectAudibleCars(
 }
 ```
 
+Der Eigenmotor wird separat behandelt und zählt deshalb nicht gegen diese drei räumlichen Fremdquellen. mapSpeedToListenerFrequency bildet die Straßengeschwindigkeit geklemmt von 700–1600 auf 84–132 Hz ab. resolveRoadLane teilt die Straße in vier Bereiche und verlangt zehn Prozent einer Spurbreite Abstand zur Grenze, bevor ein erneuter Spurhinweis ausgelöst wird. Dadurch wiederholt sich die Ansage nicht bei kleinen Positionsschwankungen.
+
 ### 11.3 Synthetischen 3D-Motor erzeugen
 
 SpatialEngineSource baut pro hörbarem Fahrzeug diese Kette auf:
@@ -283,38 +298,25 @@ SpatialEngineSource baut pro hörbarem Fahrzeug diese Kette auf:
 OscillatorNode -> BiquadFilterNode -> GainNode -> PannerNode -> Phaser-Ausgang
 ```
 
-Der Panner verwendet HRTF. Positionsänderungen und Lautstärke werden geglättet, damit die Aktualisierung in jedem Frame nicht knackt oder springt.
+Der Panner verwendet HRTF. Eine neue Quelle startet bei Lautstärke null und blendet über 250 ms ein. destroy blendet ebenfalls über 250 ms aus, plant erst danach das Ende des Oszillators und trennt die Knoten im ended-Ereignis. Dadurch entstehen beim Erzeugen und Entfernen keine harten Sprünge. Positions- und Frequenzänderungen werden unabhängig davon geglättet.
 
 ```js
-// src/accessibility/audio/SpatialEngineSource.js
-import { CAR_AUDIO_CONFIG } from './carAudioConfig.js';
-
+// Auszüge aus src/accessibility/audio/SpatialEngineSource.js
 export class SpatialEngineSource {
-  constructor(audioContext, destination, frequency) {
+  constructor(
+    audioContext,
+    destination,
+    frequency,
+    { targetGain = CAR_AUDIO_CONFIG.baseGain } = {},
+  ) {
     this.audioContext = audioContext;
+    this.targetGain = targetGain;
+    this.audible = false;
     this.destroyed = false;
 
-    this.oscillator = audioContext.createOscillator();
-    this.filter = audioContext.createBiquadFilter();
-    this.gain = audioContext.createGain();
-    this.panner = audioContext.createPanner();
-
-    this.oscillator.type = 'sawtooth';
-    this.oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-    this.filter.type = 'lowpass';
-    this.filter.frequency.setValueAtTime(240, audioContext.currentTime);
+    // Erzeugung und Verbindung von oscillator, filter, gain und panner
     this.gain.gain.setValueAtTime(0, audioContext.currentTime);
-
-    this.panner.panningModel = 'HRTF';
-    this.panner.distanceModel = 'linear';
-    this.panner.refDistance = 1;
-    this.panner.maxDistance = CAR_AUDIO_CONFIG.maxLongitudinalUnits;
-    this.panner.rolloffFactor = 1;
-
-    this.oscillator.connect(this.filter);
-    this.filter.connect(this.gain);
-    this.gain.connect(this.panner);
-    this.panner.connect(destination);
+    this.oscillator.onended = () => this.disconnectNodes();
     this.oscillator.start();
   }
 
@@ -323,107 +325,131 @@ export class SpatialEngineSource {
 
     const now = this.audioContext.currentTime;
     const smoothing = CAR_AUDIO_CONFIG.smoothingSeconds;
-
     this.panner.positionX.setTargetAtTime(x, now, smoothing);
     this.panner.positionY.setTargetAtTime(y, now, smoothing);
     this.panner.positionZ.setTargetAtTime(z, now, smoothing);
-    this.gain.gain.setTargetAtTime(CAR_AUDIO_CONFIG.baseGain, now, smoothing);
+
+    if (!this.audible) {
+      this.audible = true;
+      this.fadeInStartTime = now;
+      this.setGainAt(0, now);
+      this.gain.gain.linearRampToValueAtTime(this.targetGain, now + CAR_AUDIO_CONFIG.fadeInSeconds);
+    }
+  }
+
+  setFrequency(frequency) {
+    if (this.destroyed) return;
+
+    this.oscillator.frequency.setTargetAtTime(
+      frequency,
+      this.audioContext.currentTime,
+      CAR_AUDIO_CONFIG.frequencySmoothingSeconds,
+    );
   }
 
   destroy() {
     if (this.destroyed) return;
 
     this.destroyed = true;
-    this.oscillator.stop();
-    this.oscillator.disconnect();
-    this.filter.disconnect();
-    this.gain.disconnect();
-    this.panner.disconnect();
+    const now = this.audioContext.currentTime;
+    const stopTime = now + CAR_AUDIO_CONFIG.fadeOutSeconds;
+    const currentGain = this.getCurrentGain(now);
+    this.setGainAt(currentGain, now);
+    this.gain.gain.linearRampToValueAtTime(0, stopTime);
+    this.oscillator.stop(stopTime);
   }
 }
 ```
+
+getCurrentGain berechnet den aktuellen linearen Hüllkurvenwert auch dann, wenn der Fade-in noch läuft. setGainAt entfernt ältere Automationsereignisse und setzt bei now einen ausdrücklichen Startwert. Damit beginnt die Ausblendrampe garantiert am gerade hörbaren Pegel.
 
 Die Quelle wird an scene.sound.destination angeschlossen. Dadurch gelten Phasers Stummschaltung und Gesamtlautstärke auch für den synthetischen Klang.
 
-### 11.4 Quellen für Fahrzeuge verwalten
+### 11.4 Eigenmotor, Fremdfahrzeuge und Spurhinweise verwalten
 
-CarSpatialAudioSystem erhält normale Phaser-Objekte, wählt die relevanten Fahrzeuge aus und verwendet das Fahrzeugobjekt selbst als Map-Schlüssel. Verlässt ein Auto die Auswahl oder wird zerstört, wird auch seine Audioquelle entfernt.
+CarSpatialAudioSystem besitzt eine dauerhafte Quelle für Spieler 1 und bis zu drei ausgewählte Fremdfahrzeuge. Der Eigenmotor liegt bei X/Y/Z = 0, ist leiser als die anderen Motoren und erhält in jedem Frame die aus gameSpeed berechnete Frequenz. Die räumliche Auswahl für EnemyCar und Spieler 2 bleibt unverändert.
 
 ```js
-// src/accessibility/audio/CarSpatialAudioSystem.js
-import { mapCarToAudioPosition, selectAudibleCars } from './carSpatialMath.js';
-
-export class CarSpatialAudioSystem {
-  constructor({ sourceFactory, isEnemyCar }) {
-    this.sourceFactory = sourceFactory;
-    this.isEnemyCar = isEnemyCar;
-    this.candidates = [];
-    this.sources = new Map();
+// Auszüge aus src/accessibility/audio/CarSpatialAudioSystem.js
+update({
+  listenerCar,
+  roadObjects,
+  opponentCar,
+  roadLeftEdge,
+  roadWidth,
+  viewportHeight,
+  gameSpeed,
+}) {
+  if (!listenerCar?.active || listenerCar.dead) {
+    this.clear();
+    return;
   }
 
-  update({ listenerCar, roadObjects, opponentCar, roadWidth, viewportHeight }) {
-    if (!listenerCar?.active || listenerCar.dead) {
-      this.clear();
-      return;
-    }
+  this.updateListener(
+    listenerCar,
+    roadLeftEdge,
+    roadWidth,
+    gameSpeed,
+  );
 
-    this.candidates.length = 0;
+  // Anschließend: höchstens drei Gegner-/Opponent-Quellen auswählen,
+  // positionieren und nicht mehr benötigte Quellen ausblenden.
+}
 
-    for (const roadObject of roadObjects) {
-      if (this.isEnemyCar(roadObject)) {
-        this.candidates.push({
-          target: roadObject,
-          kind: 'enemy',
-        });
-      }
-    }
+updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed) {
+  if (!this.listenerSource) {
+    this.listenerSource = this.sourceFactory('listener');
+    this.listenerSource.setPosition({ x: 0, y: 0, z: 0 });
+  }
 
-    if (opponentCar && opponentCar !== listenerCar) {
-      this.candidates.push({
-        target: opponentCar,
-        kind: 'opponent',
-      });
-    }
+  this.listenerSource.setFrequency(
+    mapSpeedToListenerFrequency(gameSpeed),
+  );
 
-    const selected = selectAudibleCars(this.candidates, listenerCar, viewportHeight);
+  const nextLane = resolveRoadLane(
+    listenerCar.x,
+    roadLeftEdge,
+    roadWidth,
+    this.currentLane,
+  );
 
-    this.synchronizeSources(selected, listenerCar, roadWidth, viewportHeight);
+  if (nextLane !== this.currentLane) {
+    this.currentLane = nextLane;
+    this.laneCue.announce(nextLane);
   }
 }
 ```
 
-Die vollständige Klasse enthält zusätzlich synchronizeSources, clear und destroy. Diese Methoden aktualisieren Positionen, räumen nicht mehr ausgewählte Quellen auf und stoppen beim Verlassen der Szene sämtliche Oszillatoren.
+LaneCueAnnouncer erzeugt pro Hinweis einen kurzen Sinuston. Die Frequenzen 330, 440, 550 und 660 Hz stehen von links nach rechts für Spur eins bis vier. Wenn die Speech-Synthesis-API verfügbar ist, wird gleichzeitig mit en-US die passende englische Ansage gesprochen. Eine noch laufende eigene Spuransage wird vor der nächsten ersetzt, damit immer die aktuelle Spur Vorrang hat. Ohne Speech-Synthesis bleibt der Ton als Fallback erhalten. Beim Tod des Hörers und beim Verlassen der Szene werden Sprache und aktive Cue-Knoten aufgeräumt.
 
 ### 11.5 Nur mit Phasers Web-Audio-Backend starten
 
-Die kleine Factory kapselt den Browser- und Phaser-spezifischen Teil. Gegner erhalten 72 Hz, Spieler 2 erhält 108 Hz, damit beide Typen neben ihrer Position auch an der Tonhöhe unterscheidbar sind.
+Die Factory kapselt den Browser- und Phaser-spezifischen Teil. Gegner starten bei 72 Hz, Spieler 2 bei 108 Hz. Der eigene Motor startet leiser bei 84 Hz und kann bis 132 Hz ansteigen.
 
 ```js
-// src/accessibility/audio/createCarSpatialAudioSystem.js
-import Phaser from 'phaser';
+// Auszüge aus src/accessibility/audio/createCarSpatialAudioSystem.js
+import { getEngineVoice } from './engineVoice.js';
+import { LaneCueAnnouncer } from './LaneCueAnnouncer.js';
 
-import { CAR_AUDIO_CONFIG } from './carAudioConfig.js';
-import { CarSpatialAudioSystem } from './CarSpatialAudioSystem.js';
-import { SpatialEngineSource } from './SpatialEngineSource.js';
+return new CarSpatialAudioSystem({
+  isEnemyCar,
+  laneCue: new LaneCueAnnouncer({
+    audioContext: scene.sound.context,
+    destination: scene.sound.destination,
+    speechSynthesis: globalThis.speechSynthesis,
+    Utterance: globalThis.SpeechSynthesisUtterance,
+  }),
+  sourceFactory: (kind) => {
+    const { frequency, targetGain } = getEngineVoice(kind);
 
-export function createCarSpatialAudioSystem(scene, isEnemyCar) {
-  const WebAudioSoundManager = Phaser.Sound?.WebAudioSoundManager;
-
-  if (!WebAudioSoundManager || !(scene.sound instanceof WebAudioSoundManager)) {
-    return null;
-  }
-
-  return new CarSpatialAudioSystem({
-    isEnemyCar,
-    sourceFactory: (kind) => {
-      const frequency =
-        kind === 'opponent' ? CAR_AUDIO_CONFIG.opponentFrequency : CAR_AUDIO_CONFIG.enemyFrequency;
-
-      return new SpatialEngineSource(scene.sound.context, scene.sound.destination, frequency);
-    },
-  });
-}
+    return new SpatialEngineSource(scene.sound.context, scene.sound.destination, frequency, {
+      targetGain,
+    });
+  },
+});
 ```
+
+Wenn scene.sound kein Phaser.Sound.WebAudioSoundManager ist, liefert die Factory weiterhin null und das Spiel läuft ohne das Beispielaudio weiter.
 
 ### 11.6 In die vorhandene GameScene einbinden
 
@@ -464,21 +490,23 @@ this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 });
 ```
 
-Am Ende von update werden die tatsächlichen Projektobjekte übergeben. Player 1 ist this.car und damit der Hörer. Player 2 ist this.secondCar. Gegner befinden sich zusammen mit anderen Objekten in roadObjects; die Factory filtert mit EnemyCar. Die Straßenbreite stammt aus track1.displayWidth.
+Am Ende von update werden die tatsächlichen Projektobjekte übergeben. Player 1 ist this.car und damit der Hörer. Player 2 ist this.secondCar. Gegner befinden sich zusammen mit anderen Objekten in roadObjects; die Factory filtert mit EnemyCar. Straßenkante und -breite stammen aus track1, die Motortonhöhe aus targetTrackSpeed.
 
 ```js
 this.carSpatialAudio?.update({
   listenerCar: this.car,
   roadObjects: this.roadObjects,
   opponentCar: this.secondCar,
+  roadLeftEdge: this.track1.x - this.track1.displayWidth / 2,
   roadWidth: this.track1.displayWidth,
   viewportHeight: this.scale.height,
+  gameSpeed: targetTrackSpeed,
 });
 ```
 
 ### 11.7 Tests mit dem eingebauten Node-Test-Runner
 
-Die Einstellungssynchronisierung, reine Mathematik, der Lebenszyklus des Audio-Graphen und die Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio-Grenze wird durch kleine Attrappen ersetzt.
+Die Einstellungssynchronisierung, reine Mathematik, Geschwindigkeitsabbildung, Spurhysterese, kombinierte Spurhinweise, Fade-Lebenszyklus und Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio- und Speech-Synthesis-Grenzen werden durch kleine Attrappen ersetzt.
 
 ```js
 // test/accessibility/carSpatialMath.test.js

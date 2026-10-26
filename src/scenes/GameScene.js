@@ -434,8 +434,10 @@ export default class GameScene extends Phaser.Scene {
       listenerCar: this.car,
       roadObjects: this.roadObjects,
       opponentCar: this.secondCar,
+      roadLeftEdge: this.track1.x - this.track1.displayWidth / 2,
       roadWidth: this.track1.displayWidth,
       viewportHeight: this.scale.height,
+      gameSpeed: targetTrackSpeed,
     });
   }
 }

@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 
-import { CAR_AUDIO_CONFIG } from './carAudioConfig.js';
 import { CarSpatialAudioSystem } from './CarSpatialAudioSystem.js';
+import { getEngineVoice } from './engineVoice.js';
+import { LaneCueAnnouncer } from './LaneCueAnnouncer.js';
 import { SpatialEngineSource } from './SpatialEngineSource.js';
 
 export function createCarSpatialAudioSystem(scene, isEnemyCar) {
@@ -13,11 +14,18 @@ export function createCarSpatialAudioSystem(scene, isEnemyCar) {
 
   return new CarSpatialAudioSystem({
     isEnemyCar,
+    laneCue: new LaneCueAnnouncer({
+      audioContext: scene.sound.context,
+      destination: scene.sound.destination,
+      speechSynthesis: globalThis.speechSynthesis,
+      Utterance: globalThis.SpeechSynthesisUtterance,
+    }),
     sourceFactory: (kind) => {
-      const frequency =
-        kind === 'opponent' ? CAR_AUDIO_CONFIG.opponentFrequency : CAR_AUDIO_CONFIG.enemyFrequency;
+      const { frequency, targetGain } = getEngineVoice(kind);
 
-      return new SpatialEngineSource(scene.sound.context, scene.sound.destination, frequency);
+      return new SpatialEngineSource(scene.sound.context, scene.sound.destination, frequency, {
+        targetGain,
+      });
     },
   });
 }

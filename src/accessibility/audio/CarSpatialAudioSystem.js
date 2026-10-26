@@ -1,19 +1,36 @@
-import { mapCarToAudioPosition, selectAudibleCars } from './carSpatialMath.js';
+import {
+  mapCarToAudioPosition,
+  mapSpeedToListenerFrequency,
+  resolveRoadLane,
+  selectAudibleCars,
+} from './carSpatialMath.js';
 
 export class CarSpatialAudioSystem {
-  constructor({ sourceFactory, isEnemyCar }) {
+  constructor({ sourceFactory, isEnemyCar, laneCue = null }) {
     this.sourceFactory = sourceFactory;
     this.isEnemyCar = isEnemyCar;
+    this.laneCue = laneCue;
     this.candidates = [];
     this.sources = new Map();
+    this.listenerSource = null;
+    this.currentLane = null;
   }
 
-  update({ listenerCar, roadObjects, opponentCar, roadWidth, viewportHeight }) {
+  update({
+    listenerCar,
+    roadObjects,
+    opponentCar,
+    roadLeftEdge,
+    roadWidth,
+    viewportHeight,
+    gameSpeed,
+  }) {
     if (!listenerCar?.active || listenerCar.dead) {
       this.clear();
       return;
     }
 
+    this.updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed);
     this.candidates.length = 0;
 
     for (const roadObject of roadObjects) {
@@ -29,6 +46,24 @@ export class CarSpatialAudioSystem {
     const selected = selectAudibleCars(this.candidates, listenerCar, viewportHeight);
 
     this.synchronizeSources(selected, listenerCar, roadWidth, viewportHeight);
+  }
+
+  updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed) {
+    if (!this.listenerSource) {
+      this.listenerSource = this.sourceFactory('listener');
+      this.listenerSource.setPosition({ x: 0, y: 0, z: 0 });
+    }
+
+    this.listenerSource.setFrequency(mapSpeedToListenerFrequency(gameSpeed));
+
+    if (!this.laneCue || !Number.isFinite(roadLeftEdge)) return;
+
+    const nextLane = resolveRoadLane(listenerCar.x, roadLeftEdge, roadWidth, this.currentLane);
+
+    if (nextLane !== this.currentLane) {
+      this.currentLane = nextLane;
+      this.laneCue.announce(nextLane);
+    }
   }
 
   synchronizeSources(selected, listenerCar, roadWidth, viewportHeight) {
@@ -55,6 +90,11 @@ export class CarSpatialAudioSystem {
   }
 
   clear() {
+    this.listenerSource?.destroy();
+    this.listenerSource = null;
+    this.currentLane = null;
+    this.laneCue?.silence();
+
     for (const source of this.sources.values()) {
       source.destroy();
     }
@@ -64,5 +104,6 @@ export class CarSpatialAudioSystem {
 
   destroy() {
     this.clear();
+    this.laneCue?.destroy();
   }
 }

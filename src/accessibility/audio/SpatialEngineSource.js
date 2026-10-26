@@ -1,9 +1,18 @@
 import { CAR_AUDIO_CONFIG } from './carAudioConfig.js';
 
 export class SpatialEngineSource {
-  constructor(audioContext, destination, frequency) {
+  constructor(
+    audioContext,
+    destination,
+    frequency,
+    { targetGain = CAR_AUDIO_CONFIG.baseGain } = {},
+  ) {
     this.audioContext = audioContext;
+    this.targetGain = targetGain;
     this.destroyed = false;
+    this.audible = false;
+    this.disconnected = false;
+    this.fadeInStartTime = null;
 
     this.oscillator = audioContext.createOscillator();
     this.filter = audioContext.createBiquadFilter();
@@ -28,6 +37,7 @@ export class SpatialEngineSource {
     this.filter.connect(this.gain);
     this.gain.connect(this.panner);
     this.panner.connect(destination);
+    this.oscillator.onended = () => this.disconnectNodes();
     this.oscillator.start();
   }
 
@@ -40,14 +50,58 @@ export class SpatialEngineSource {
     this.panner.positionX.setTargetAtTime(x, now, smoothing);
     this.panner.positionY.setTargetAtTime(y, now, smoothing);
     this.panner.positionZ.setTargetAtTime(z, now, smoothing);
-    this.gain.gain.setTargetAtTime(CAR_AUDIO_CONFIG.baseGain, now, smoothing);
+
+    if (!this.audible) {
+      this.audible = true;
+      this.fadeInStartTime = now;
+      this.setGainAt(0, now);
+      this.gain.gain.linearRampToValueAtTime(this.targetGain, now + CAR_AUDIO_CONFIG.fadeInSeconds);
+    }
+  }
+
+  setFrequency(frequency) {
+    if (this.destroyed) return;
+
+    this.oscillator.frequency.setTargetAtTime(
+      frequency,
+      this.audioContext.currentTime,
+      CAR_AUDIO_CONFIG.frequencySmoothingSeconds,
+    );
   }
 
   destroy() {
     if (this.destroyed) return;
 
     this.destroyed = true;
-    this.oscillator.stop();
+    const now = this.audioContext.currentTime;
+    const stopTime = now + CAR_AUDIO_CONFIG.fadeOutSeconds;
+    const currentGain = this.getCurrentGain(now);
+
+    this.setGainAt(currentGain, now);
+    this.gain.gain.linearRampToValueAtTime(0, stopTime);
+    this.oscillator.stop(stopTime);
+  }
+
+  getCurrentGain(time) {
+    if (!this.audible || this.fadeInStartTime === null) return 0;
+
+    const fadeProgress = Math.min(
+      1,
+      Math.max(0, (time - this.fadeInStartTime) / CAR_AUDIO_CONFIG.fadeInSeconds),
+    );
+
+    return this.targetGain * fadeProgress;
+  }
+
+  setGainAt(value, time) {
+    this.gain.gain.cancelScheduledValues(time);
+    this.gain.gain.setValueAtTime(value, time);
+  }
+
+  disconnectNodes() {
+    if (this.disconnected) return;
+
+    this.disconnected = true;
     this.oscillator.disconnect();
     this.filter.disconnect();
     this.gain.disconnect();

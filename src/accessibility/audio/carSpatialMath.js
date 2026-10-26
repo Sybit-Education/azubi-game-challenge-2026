@@ -2,6 +2,36 @@ import { CAR_AUDIO_CONFIG } from './carAudioConfig.js';
 
 const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
+export function mapSpeedToListenerFrequency(gameSpeed) {
+  const speedRange = CAR_AUDIO_CONFIG.gameSpeedMax - CAR_AUDIO_CONFIG.gameSpeedMin;
+  const frequencyRange =
+    CAR_AUDIO_CONFIG.listenerFrequencyMax - CAR_AUDIO_CONFIG.listenerFrequencyMin;
+  const normalizedSpeed = clamp((gameSpeed - CAR_AUDIO_CONFIG.gameSpeedMin) / speedRange, 0, 1);
+
+  return CAR_AUDIO_CONFIG.listenerFrequencyMin + normalizedSpeed * frequencyRange;
+}
+
+export function resolveRoadLane(carX, roadLeftEdge, roadWidth, currentLane = null) {
+  const laneWidth = roadWidth / CAR_AUDIO_CONFIG.laneCount;
+  const rawLane = clamp(
+    Math.floor((carX - roadLeftEdge) / laneWidth),
+    0,
+    CAR_AUDIO_CONFIG.laneCount - 1,
+  );
+
+  if (currentLane === null) return rawLane;
+
+  const currentLaneLeft = roadLeftEdge + currentLane * laneWidth;
+  const currentLaneRight = currentLaneLeft + laneWidth;
+  const hysteresis = laneWidth * CAR_AUDIO_CONFIG.laneHysteresisFactor;
+
+  if (carX < currentLaneLeft - hysteresis || carX >= currentLaneRight + hysteresis) {
+    return rawLane;
+  }
+
+  return currentLane;
+}
+
 export function mapCarToAudioPosition(sourceCar, listenerCar, roadWidth, viewportHeight) {
   const laneWidth = roadWidth / CAR_AUDIO_CONFIG.laneCount;
   const horizontalOffset = sourceCar.x - listenerCar.x;

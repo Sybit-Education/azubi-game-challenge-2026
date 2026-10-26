@@ -6,11 +6,16 @@ import { CarSpatialAudioSystem } from '../../src/accessibility/audio/CarSpatialA
 class FakeSpatialSource {
   constructor() {
     this.positions = [];
+    this.frequencies = [];
     this.destroyed = false;
   }
 
   setPosition(position) {
     this.positions.push(position);
+  }
+
+  setFrequency(frequency) {
+    this.frequencies.push(frequency);
   }
 
   destroy() {
@@ -40,11 +45,11 @@ test('owns sources for the selected enemy and opponent cars', () => {
     opponentCar,
     roadWidth: 800,
     viewportHeight: 1000,
+    gameSpeed: 700,
   });
 
-  assert.equal(createdKinds[0], 'enemy');
-  assert.equal(createdKinds[1], 'opponent');
-  const [enemySource, opponentSource] = createdSources;
+  assert.deepEqual(createdKinds, ['listener', 'enemy', 'opponent']);
+  const [listenerSource, enemySource, opponentSource] = createdSources;
   assert.deepEqual(enemySource.positions[0], {
     x: 0,
     y: 0,
@@ -59,8 +64,103 @@ test('owns sources for the selected enemy and opponent cars', () => {
     opponentCar: null,
     roadWidth: 800,
     viewportHeight: 1000,
+    gameSpeed: 700,
   });
 
+  assert.equal(listenerSource.destroyed, false);
   assert.equal(enemySource.destroyed, true);
   assert.equal(opponentSource.destroyed, true);
+
+  system.destroy();
+
+  assert.equal(listenerSource.destroyed, true);
+});
+
+test('keeps a centered listener engine and announces stable lane changes', () => {
+  const createdKinds = [];
+  const createdSources = [];
+  const announcedLanes = [];
+  const laneCue = {
+    silenceCalls: 0,
+    announce: (lane) => announcedLanes.push(lane),
+    silence() {
+      this.silenceCalls += 1;
+    },
+    destroy() {
+      this.destroyed = true;
+    },
+  };
+  const listenerCar = { x: 350, y: 800, active: true };
+  const system = new CarSpatialAudioSystem({
+    isEnemyCar: () => false,
+    laneCue,
+    sourceFactory: (kind) => {
+      const source = new FakeSpatialSource();
+      createdKinds.push(kind);
+      createdSources.push(source);
+      return source;
+    },
+  });
+
+  system.update({
+    listenerCar,
+    roadObjects: [],
+    opponentCar: null,
+    roadLeftEdge: 100,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 700,
+  });
+
+  assert.deepEqual(createdKinds, ['listener']);
+  assert.deepEqual(createdSources[0].positions[0], { x: 0, y: 0, z: 0 });
+  assert.deepEqual(createdSources[0].frequencies, [84]);
+  assert.deepEqual(announcedLanes, [1]);
+
+  listenerCar.x = 510;
+  system.update({
+    listenerCar,
+    roadObjects: [],
+    opponentCar: null,
+    roadLeftEdge: 100,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 1600,
+  });
+
+  assert.deepEqual(announcedLanes, [1]);
+
+  listenerCar.x = 521;
+  system.update({
+    listenerCar,
+    roadObjects: [],
+    opponentCar: null,
+    roadLeftEdge: 100,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 1600,
+  });
+
+  assert.deepEqual(createdKinds, ['listener']);
+  assert.deepEqual(createdSources[0].frequencies, [84, 132, 132]);
+  assert.deepEqual(announcedLanes, [1, 2]);
+
+  listenerCar.dead = true;
+  system.update({
+    listenerCar,
+    roadObjects: [],
+    opponentCar: null,
+    roadLeftEdge: 100,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 1600,
+  });
+
+  assert.equal(createdSources[0].destroyed, true);
+  assert.equal(laneCue.silenceCalls, 1);
+
+  system.destroy();
+
+  assert.equal(laneCue.silenceCalls, 2);
+  assert.equal(laneCue.destroyed, true);
 });

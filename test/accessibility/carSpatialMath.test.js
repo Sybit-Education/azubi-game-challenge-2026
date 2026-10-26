@@ -3,6 +3,8 @@ import test from 'node:test';
 
 import {
   mapCarToAudioPosition,
+  mapSpeedToListenerFrequency,
+  resolveRoadLane,
   selectAudibleCars,
 } from '../../src/accessibility/audio/carSpatialMath.js';
 
@@ -40,4 +42,21 @@ test('keeps only the three nearest active cars inside the audible window', () =>
     selected.map(({ target }) => target.y),
     [700, 600, 500],
   );
+});
+
+test('raises the listener engine pitch with game speed and clamps both ends', () => {
+  assert.equal(mapSpeedToListenerFrequency(500), 84);
+  assert.equal(mapSpeedToListenerFrequency(700), 84);
+  assert.equal(mapSpeedToListenerFrequency(1150), 108);
+  assert.equal(mapSpeedToListenerFrequency(1600), 132);
+  assert.equal(mapSpeedToListenerFrequency(2000), 132);
+});
+
+test('changes lanes only after crossing a boundary with hysteresis', () => {
+  assert.equal(resolveRoadLane(150, 100, 800), 0);
+  assert.equal(resolveRoadLane(310, 100, 800, 0), 0);
+  assert.equal(resolveRoadLane(321, 100, 800, 0), 1);
+  assert.equal(resolveRoadLane(290, 100, 800, 1), 1);
+  assert.equal(resolveRoadLane(279, 100, 800, 1), 0);
+  assert.equal(resolveRoadLane(900, 100, 800), 3);
 });
