@@ -301,7 +301,7 @@ export default class MenuScene extends Phaser.Scene {
     this.clearMultiplayerOption = () => {
       this.isMultiplayerSelected = false;
       twoPlayerButton.setDepth(0);
-      // this.deselectButton(twoPlayerButton - 3);
+      this.deselectButton(twoPlayerButton, 0.278);
       scheduleHide();
     };
     multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
@@ -465,7 +465,6 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
 
@@ -477,7 +476,6 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
     }
@@ -485,7 +483,6 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
 
@@ -497,7 +494,6 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
     }
