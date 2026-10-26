@@ -394,10 +394,12 @@ export default class PopUpScene extends Phaser.Scene {
     this.selectedIndex = 0;
     this.updateGamepadSelection();
 
-    const bindOverlayHover = (element, object, baseScale) => {
+    const bindOverlayHover = (element, object, baseScale, hoverScale = 1.2) => {
       const updateScale = (hovered) => {
         const isSelected = this.navigationItems()[this.selectedIndex]?.button === object;
-        const scale = baseScale * (hovered ? 1.2 : isSelected ? 1.12 : 1);
+        const scale =
+          baseScale *
+          (hovered ? Math.max(hoverScale, isSelected ? 1.06 : 1) : isSelected ? 1.06 : 1);
         this.tweens.add({ targets: object, scale, duration: 100 });
       };
       const onEnter = () => updateScale(true);
@@ -411,8 +413,8 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     bindOverlayHover(closeSettingsBtn, closeButton, 0.4 * uiScale);
-    bindOverlayHover(gameModeMenu, standardModeButton, 0.3 * uiScale);
-    bindOverlayHover(christmasModeChoice, christmasModeButton, 0.3 * uiScale);
+    bindOverlayHover(gameModeMenu, standardModeButton, 0.3 * uiScale, 1.06);
+    bindOverlayHover(christmasModeChoice, christmasModeButton, 0.3 * uiScale, 1.06);
 
     const setSwitchHover = (hovered) => {
       switchHovered = hovered;
@@ -442,7 +444,7 @@ export default class PopUpScene extends Phaser.Scene {
       } else {
         this.tweens.add({
           targets: item.button,
-          scale: selected ? item.scale * 1.12 : item.scale,
+          scale: selected ? item.scale * 1.06 : item.scale,
           duration: 100,
         });
       }
