@@ -200,7 +200,6 @@ export default class ChristmasScene extends Phaser.Scene {
     let isTwoPlayerHovered = false;
     this.isMultiplayerSelected = false;
     let hideSubmenuEvent;
-    const playOriginalY = play_button.y;
     const cancelScheduledHide = () => {
       if (hideSubmenuEvent) {
         this.time.removeEvent(hideSubmenuEvent);
