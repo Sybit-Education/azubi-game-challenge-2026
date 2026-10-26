@@ -12,6 +12,8 @@ import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
 import { updateGameScene } from './GameSceneFrame.js';
 import { createRoadObject } from './GameSceneRoadObjects.js';
+import RandomObstacle from '../objects/RandomObstacle.js';
+import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -122,6 +124,7 @@ export default class GameScene extends Phaser.Scene {
     this.currentLaneDanger = null;
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
+    this.coinAnnouncements = new CoinAnnouncements(this);
     this.createTrack();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
@@ -404,6 +407,16 @@ export default class GameScene extends Phaser.Scene {
       score2: this.secondCar ? this.secondCar.score : null,
       isMultiplayer: this.isMultiplayer,
     }); // Change to DeathScene once there is one
+  }
+
+  getObstaclesForAudio() {
+    return [
+      ...this.roadObjects.filter(
+        (object) => object instanceof EnemyCar || object instanceof RandomObstacle,
+      ),
+      this.car,
+      this.secondCar,
+    ];
   }
 
   getCarsForAudio() {

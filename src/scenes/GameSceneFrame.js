@@ -69,7 +69,8 @@ function updateRoadObjects(scene, delta) {
 function updateAudio(scene, delta) {
   // Update after movement so sounds use the cars' current positions.
   const carsForAudio = scene.getCarsForAudio();
-  for (const sensor of scene.carSensors) sensor.update(delta, carsForAudio);
+  const obstaclesForAudio = scene.getObstaclesForAudio();
+  for (const sensor of scene.carSensors) sensor.update(delta, obstaclesForAudio);
   scene.carPassBy.update(carsForAudio);
 }
 
@@ -92,6 +93,7 @@ function updateTrackAndHud(scene, delta) {
   scene.track2.move(delta);
   scene.hud.update();
   scene.ItemManager.itemShop();
+  scene.coinAnnouncements.update();
   scene.coinText1.setText(String(scene.ItemManager.coinBudgetPlayer1));
 
   if (scene.isMultiplayer && scene.coinText2) {
