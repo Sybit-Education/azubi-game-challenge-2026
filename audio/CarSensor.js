@@ -128,26 +128,22 @@ export default class CarSensor {
   }
 
   getWarning(cars) {
-    const accessibilityEnabled = this.scene.registry.get('accessibility enabled') ?? false;
-
-    if (accessibilityEnabled) {
-      const prediction = nextCollision(this.player, cars);
-      if (prediction && prediction.seconds <= WARNING_SECONDS) {
-        // Beeping speeds up between four and two seconds before a predicted collision.
-        // From two seconds onward, use the fastest interval to allow time to steer away.
-        const progress = clamp(
-          (prediction.seconds - REACTION_SECONDS) / (WARNING_SECONDS - REACTION_SECONDS),
-          0,
-          1,
-        );
-        return {
-          car: prediction.car,
-          interval: FAST_BEEP_MS + (SLOW_BEEP_MS - FAST_BEEP_MS) * progress,
-          urgent: prediction.seconds <= REACTION_SECONDS,
-        };
-      }
+    const prediction = nextCollision(this.player, cars);
+    if (prediction && prediction.seconds <= WARNING_SECONDS) {
+      // The closer a crash gets, the quicker the beeps come in.
+      const progress = clamp(
+        (prediction.seconds - REACTION_SECONDS) / (WARNING_SECONDS - REACTION_SECONDS),
+        0,
+        1,
+      );
+      return {
+        car: prediction.car,
+        interval: FAST_BEEP_MS + (SLOW_BEEP_MS - FAST_BEEP_MS) * progress,
+        urgent: prediction.seconds <= REACTION_SECONDS,
+      };
     }
 
+    // Give a gentle heads-up when a car is nearby but no crash is predicted.
     const nearest = nearestCar(this.player, cars);
     const range = this.scene.scale.height * 0.3;
     if (!nearest || nearest.distance >= range) return null;
@@ -161,22 +157,30 @@ export default class CarSensor {
 
   stop() {
     if (this.sound.isPlaying) this.sound.stop();
+    // Start fresh next time, with no old warning left over.
     this.sinceLastBeep = Infinity;
     this.urgent = false;
   }
 
   update(delta, cars) {
+    // Keep this helper quiet when accessibility mode is off.
+    if (!this.scene.registry.get('accessibility enabled')) {
+      this.stop();
+      return;
+    }
+
     const warning = this.getWarning(cars);
     if (!warning) {
       this.stop();
       return;
     }
 
-    // When a warning becomes urgent, do not wait for the previous slow interval.
+    // Start urgent beeps right away instead of waiting for the old timer.
     if (warning.urgent && !this.urgent) this.sinceLastBeep = Infinity;
     this.urgent = warning.urgent;
     this.sinceLastBeep += delta;
 
+    // Wait until the browser allows audio and the last beep has finished.
     if (this.scene.sound.locked || this.sound.isPlaying) return;
     if (this.sinceLastBeep < warning.interval) return;
 
