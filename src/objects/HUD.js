@@ -5,9 +5,12 @@ export default class HUD {
     this.scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
     this.scene = scene;
     const margin = 20 * this.scaleFactor;
-    this.hudBackground = scene.add.graphics();
-    this.hudBackground2 = scene.add.graphics();
-    this.activePowerups = [];
+    this.statsFrame = scene.add.graphics();
+    this.statsFrame2 = scene.add.graphics();
+    this.activePowerupsP1 = [];
+    this.activePowerupsP2 = [];
+    this.extraLifePowerupP1 = null;
+    this.extraLifePowerupP2 = null;
 
     // Player 1 (top-left)
     this.distanceText = scene.add
@@ -43,42 +46,63 @@ export default class HUD {
         })
         .setOrigin(1, 0)
         .setDepth(5);
+
+      this.statsBackground2 = this.scene.add
+        .image(
+          this.scene.scale.width - 0 * this.scaleFactor,
+          0 * this.scaleFactor,
+          'stats-background',
+        )
+        .setDepth(4)
+        .setScale(0.5 * this.scaleFactor)
+        .setOrigin(0);
+      this.statsBackground2.setFlipX(true);
+      this.statsBackground2.x -= this.statsBackground2.displayWidth;
     }
 
     this.statsBackground = this.scene.add
       .image(0 * this.scaleFactor, 0 * this.scaleFactor, 'stats-background')
       .setDepth(4)
-      .setScale(0.65)
+      .setScale(0.5 * this.scaleFactor)
       .setOrigin(0);
   }
 
   update() {
+    const x = this.statsBackground.x;
+    const x2 = this.statsBackground.x;
+    const y = this.statsBackground.y;
+    const width = this.statsBackground.displayWidth;
+    const height = this.statsBackground.displayHeight;
+
     if (this.secondCar) {
       this.distanceText.setText(`P1 Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`P1 Score: ${this.car.score}`);
 
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
+
+      this.statsFrame2.clear();
+      this.statsFrame2.fillStyle(0x000000, 0.9);
+      this.statsFrame2.fillRect(x, y, width, height);
+
+      this.statsFrame2.lineStyle(10, 0x000000, 1);
+      this.statsFrame2.strokeRect(x2, y, width, height);
+      this.statsFrame2.setDepth(1);
     } else {
       this.distanceText.setText(`Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`Score: ${this.car.score}`);
     }
 
-    const x = this.statsBackground.x;
-    const y = this.statsBackground.y;
-    const width = this.statsBackground.displayWidth;
-    const height = this.statsBackground.displayHeight;
+    this.statsFrame.clear();
+    this.statsFrame.fillStyle(0x000000, 0.9);
+    this.statsFrame.fillRect(x, y, width, height);
 
-    this.hudBackground.clear();
-    this.hudBackground.fillStyle(0x000000, 0.9);
-    this.hudBackground.fillRect(x, y, width, height);
-
-    this.hudBackground.lineStyle(10, 0x000000, 1);
-    this.hudBackground.strokeRect(x, y, width, height);
-    this.hudBackground.setDepth(1);
+    this.statsFrame.lineStyle(10, 0x000000, 1);
+    this.statsFrame.strokeRect(x, y, width, height);
+    this.statsFrame.setDepth(1);
   }
 
-  showPowerupTimer(texture, duration = 10000, scale = 0.05) {
+  showPowerupTimer(texture, duration = 10000, scale = 0.05, player = 1) {
     const icon = this.scene.add
       .image(0, 140 * this.scaleFactor, texture)
       .setScale(scale * this.scaleFactor)
@@ -91,10 +115,15 @@ export default class HUD {
       icon,
       overlay,
       permanent: true,
-      type: 'extraLife',
+      type: texture,
+      player,
     };
 
-    this.activePowerups.push(powerup);
+    if (player === 1) {
+      this.activePowerupsP1.push(powerup);
+    } else {
+      this.activePowerupsP2.push(powerup);
+    }
 
     this.layoutPowerups();
 
@@ -121,10 +150,12 @@ export default class HUD {
         overlay.destroy();
         icon.destroy();
 
-        const index = this.activePowerups.indexOf(powerup);
+        const list = player === 1 ? this.activePowerupsP1 : this.activePowerupsP2;
+
+        const index = list.indexOf(powerup);
 
         if (index !== -1) {
-          this.activePowerups.splice(index, 1);
+          list.splice(index, 1);
         }
 
         this.layoutPowerups();
@@ -133,25 +164,36 @@ export default class HUD {
   }
 
   layoutPowerups() {
-    const startX = 60 * this.scaleFactor;
     const y = 140 * this.scaleFactor;
     const spacing = 50 * this.scaleFactor;
 
-    this.activePowerups.forEach((powerup, index) => {
-      const targetX = startX + spacing * index;
+    // P1 icons
+    const startX1 = 60 * this.scaleFactor;
 
+    this.activePowerupsP1.forEach((powerup, index) => {
       this.scene.tweens.add({
         targets: powerup.icon,
-        x: targetX,
-        y,
+        x: startX1 + spacing * index,
+        y: y,
         duration: 200,
         ease: 'Power2',
       });
     });
+
+    // P2 icons
+    const startX2 = this.scene.scale.width - 60 * this.scaleFactor;
+
+    this.activePowerupsP2.forEach((powerup, index) => {
+      powerup.icon.setPosition(startX2 - spacing * index, y);
+    });
   }
 
-  displayExtraLife() {
-    if (this.extraLifePowerup) {
+  displayExtraLife(player = 1) {
+    if (player === 1 && this.extraLifePowerupP1) {
+      return;
+    }
+
+    if (player === 2 && this.extraLifePowerupP2) {
       return;
     }
 
@@ -160,31 +202,45 @@ export default class HUD {
       .setScale(0.02 * this.scaleFactor)
       .setDepth(10);
 
-    this.extraLifePowerup = {
+    const powerup = {
       icon,
       permanent: true,
       type: 'extraLife',
     };
 
-    this.activePowerups.unshift(this.extraLifePowerup);
+    if (player === 1) {
+      this.extraLifePowerupP1 = powerup;
+      this.activePowerupsP1.unshift(powerup);
+    } else {
+      this.extraLifePowerupP2 = powerup;
+      this.activePowerupsP2.unshift(powerup);
+    }
 
     this.layoutPowerups();
   }
 
-  deactivateExtraLife() {
-    if (!this.extraLifePowerup) {
+  deactivateExtraLife(player = 1) {
+    const powerup = player === 1 ? this.extraLifePowerupP1 : this.extraLifePowerupP2;
+
+    if (!powerup) {
       return;
     }
 
-    this.extraLifePowerup.icon.destroy();
+    powerup.icon.destroy();
 
-    const index = this.activePowerups.indexOf(this.extraLifePowerup);
+    const list = player === 1 ? this.activePowerupsP1 : this.activePowerupsP2;
+
+    const index = list.indexOf(powerup);
 
     if (index !== -1) {
-      this.activePowerups.splice(index, 1);
+      list.splice(index, 1);
     }
 
-    this.extraLifePowerup = null;
+    if (player === 1) {
+      this.extraLifePowerupP1 = null;
+    } else {
+      this.extraLifePowerupP2 = null;
+    }
 
     this.layoutPowerups();
   }

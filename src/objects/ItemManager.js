@@ -28,7 +28,7 @@ export default class ItemManager {
 
   itemShrinkCar1() {
     console.log('shrink');
-    this.scene.hud.showPowerupTimer('shrink', 10000, 0.08);
+    this.scene.hud.showPowerupTimer('shrink', 10000, 0.1, 1);
     const car = this.scene.car;
 
     car.setScale(this.originScale * 0.5);
@@ -40,6 +40,7 @@ export default class ItemManager {
 
   itemShrinkCar2() {
     console.log('Shrink 2');
+    this.scene.hud.showPowerupTimer('shrink', 10000, 0.1, 2);
     const car = this.scene.secondCar;
 
     car.setScale(this.originScale * 0.5);
@@ -51,6 +52,8 @@ export default class ItemManager {
 
   itemGrowCar1() {
     console.log('grow');
+    this.scene.hud.showPowerupTimer('grow', 10000, 0.04, 1);
+
     const car = this.scene.car;
 
     car.setScale(this.originScale * 1.5);
@@ -63,6 +66,7 @@ export default class ItemManager {
 
   itemGrowCar2() {
     console.log('grow 2');
+    this.scene.hud.showPowerupTimer('grow', 10000, 0.04, 2);
     const car = this.scene.secondCar;
 
     car.setScale(this.originScale * 1.5);
@@ -75,7 +79,7 @@ export default class ItemManager {
 
   itemExtraLifeCar1() {
     console.log('extralife collected');
-    this.scene.hud.displayExtraLife();
+    this.scene.hud.displayExtraLife(1);
 
     if (!this.extraLifeActiveCar1) {
       this.extraLifeActiveCar1 = true;
@@ -84,6 +88,7 @@ export default class ItemManager {
 
   itemExtraLifeCar2() {
     console.log('extralife collected');
+    this.scene.hud.displayExtraLife(2);
 
     if (!this.extraLifeActiveCar2) {
       this.extraLifeActiveCar2 = true;
@@ -94,7 +99,8 @@ export default class ItemManager {
     this.extraLifeActiveCar1 = false;
     this.invulnerableCar1 = true;
     car.setTint(0xff0000);
-    this.scene.hud.deactivateExtraLife();
+    this.scene.hud.deactivateExtraLife(1);
+
     this.scene.tweens.add({
       targets: car,
       alpha: 0.3,
@@ -119,8 +125,8 @@ export default class ItemManager {
   useExtraLifeCar2(car) {
     this.extraLifeActiveCar2 = false;
     this.invulnerableCar2 = true;
-
     car.setTint(0xff0000);
+    this.scene.hud.deactivateExtraLife(2);
 
     this.scene.tweens.add({
       targets: car,
@@ -145,7 +151,7 @@ export default class ItemManager {
 
   itemShieldCar1() {
     console.log('schild');
-    this.scene.hud.showPowerupTimer('shield', 4500, 0.03);
+    this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 1);
 
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
@@ -173,6 +179,7 @@ export default class ItemManager {
   }
 
   itemShieldCar2() {
+    this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 2);
     if (!this.schildAktivCar2) {
       this.schildAktivCar2 = true;
       this.scene.secondCar.setTexture('carShield2');
@@ -200,7 +207,7 @@ export default class ItemManager {
 
   itemMagnetCar1() {
     this.scene.car.magnetActive = true;
-
+    this.scene.hud.showPowerupTimer('magnet', 10000, 0.2, 1);
     const magnet = this.scene.time.addEvent({
       delay: 16,
       loop: true,
@@ -233,7 +240,7 @@ export default class ItemManager {
 
   itemMagnetCar2() {
     this.scene.secondCar.magnetActive = true;
-
+    this.scene.hud.showPowerupTimer('shield', 10000, 0.2, 2);
     const magnet = this.scene.time.addEvent({
       delay: 16,
       loop: true,
@@ -388,7 +395,7 @@ export default class ItemManager {
     }
 
     console.log('Multiplier enabled');
-    this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.02);
+    this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 1);
 
     car.coinMultiplier = 2;
     car.multiplierTimer = this.scene.time.delayedCall(10000, () => {
@@ -405,7 +412,7 @@ export default class ItemManager {
     }
 
     console.log('Multiplier enabled');
-
+    this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 2);
     car.coinMultiplier = 2;
     car.multiplierTimer = this.scene.time.delayedCall(10000, () => {
       car.coinMultiplier = 1;
