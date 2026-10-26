@@ -140,6 +140,15 @@ export default class NameInputScene extends Phaser.Scene {
       return;
     }
 
+    this.saveNamesAndStart();
+  }
+
+  skipNameEntry() {
+    this.playerNames = this.isMultiplayer ? ['PLAYER1', 'PLAYER2'] : ['UNKNOWN'];
+    this.saveNamesAndStart();
+  }
+
+  saveNamesAndStart() {
     localStorage.setItem('Playername', this.playerNames[0]);
     if (this.isMultiplayer) {
       localStorage.setItem('Playername2', this.playerNames[1]);
@@ -223,6 +232,16 @@ export default class NameInputScene extends Phaser.Scene {
 
     if (!this.characterGrid) return;
 
+    const controls = this.InputManager.getControlsP1;
+    if (controls.button4) {
+      this.scene.start('MenuScene');
+      return;
+    }
+    if (controls.button1) {
+      this.skipNameEntry();
+      return;
+    }
+
     const gamepad = this.input.gamepad;
     const pad = gamepad?.enabled ? gamepad.getPad(0) : null;
     const connectedPad = pad?.pad?.connected ? pad : null;
@@ -253,7 +272,7 @@ export default class NameInputScene extends Phaser.Scene {
       this.moveSelection(0, 1);
     }
 
-    if (this.InputManager.getControlsP1.button2) {
+    if (controls.button2) {
       this.selectCharacter();
     }
   }
