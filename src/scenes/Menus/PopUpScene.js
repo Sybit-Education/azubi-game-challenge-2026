@@ -211,6 +211,35 @@ export default class PopUpScene extends Phaser.Scene {
     accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
     accessibilityKnob.x = accessibilityEnabled ? switchRight : switchLeft;
     accessibilityKnob.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
+    const switchBaseScale = 0.37 * uiScale;
+    const switchBaseWidth = accessibilitySwitch.displayWidth;
+    const switchBaseHeight = accessibilitySwitch.displayHeight;
+    let switchHovered = false;
+    let switchSelected = false;
+
+    const updateSwitchScale = () => {
+      const scaleFactor = switchHovered || switchSelected ? 1.06 : 1;
+      const scale = switchBaseScale * scaleFactor;
+      const knobX = accessibilityEnabled
+        ? accessibilitySwitch.x - (switchBaseHeight * scaleFactor) / 2
+        : accessibilitySwitch.x -
+          switchBaseWidth * scaleFactor +
+          (switchBaseHeight * scaleFactor) / 2;
+      const knobY = accessibilitySwitch.y + (switchBaseHeight * scaleFactor) / 2;
+
+      this.tweens.add({
+        targets: accessibilitySwitch,
+        scale,
+        duration: 100,
+      });
+      this.tweens.add({
+        targets: accessibilityKnob,
+        x: knobX,
+        y: knobY,
+        scale,
+        duration: 100,
+      });
+    };
 
     // Mouse, keyboard and gamepad use the same function to change the state.
 
@@ -222,12 +251,7 @@ export default class PopUpScene extends Phaser.Scene {
       accessibilityToggle.checked = accessibilityEnabled;
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
-      this.tweens.add({
-        targets: accessibilityKnob,
-        x: accessibilityEnabled ? switchRight : switchLeft,
-        duration: 150,
-        ease: 'Power2',
-      });
+      updateSwitchScale();
     };
 
     const toggleAccessibility = () => {
@@ -359,24 +383,17 @@ export default class PopUpScene extends Phaser.Scene {
     ]);
     dialog.showModal();
 
-    let switchHovered = false;
-    const updateSwitchFeedback = (selected) => {
-      const alpha = selected || switchHovered ? 0.8 : 1;
-      this.tweens.add({
-        targets: [accessibilitySwitch, accessibilityKnob],
-        alpha,
-        duration: 100,
-      });
-    };
-
     this.navigationItems = () => {
       const items = [
         { button: closeButton, action: close, scale: 0.4 * uiScale },
         {
           button: accessibilitySwitch,
           action: toggleAccessibility,
-          scale: 0.37 * uiScale,
-          applySelection: updateSwitchFeedback,
+          scale: switchBaseScale,
+          applySelection: (selected) => {
+            switchSelected = selected;
+            updateSwitchScale();
+          },
         },
         { button: standardModeButton, action: toggleGameModeDropdown, scale: 0.3 * uiScale },
       ];
@@ -418,9 +435,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     const setSwitchHover = (hovered) => {
       switchHovered = hovered;
-      updateSwitchFeedback(
-        this.navigationItems()[this.selectedIndex]?.button === accessibilitySwitch,
-      );
+      updateSwitchScale();
     };
     const onSwitchEnter = () => setSwitchHover(true);
     const onSwitchLeave = () => setSwitchHover(false);
