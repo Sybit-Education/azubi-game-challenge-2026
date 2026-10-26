@@ -43,7 +43,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.updateSelection();
 
     const nameY = this.scale.height / 3;
-    const labelX = this.scale.width / 2 - 285 * this.scaleFactor;
+    const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
     const nameStyle = {
       fontFamily: 'Tiny5',
       fontSize: `${32 * this.scaleFactor}px`,
@@ -227,15 +227,17 @@ export default class NameInputScene extends Phaser.Scene {
 
     if (!this.characterGrid) return;
 
-    const controls = this.InputManager.getControlsP1;
     const gamepad = this.input.gamepad;
     const pad = gamepad?.enabled ? gamepad.getPad(0) : null;
     const connectedPad = pad?.pad?.connected ? pad : null;
+    const axisX = connectedPad?.axes?.[0]?.getValue() ?? 0;
+    const axisY = connectedPad?.axes?.[1]?.getValue() ?? 0;
+    const deadzone = 0.2;
     const directions = {
-      left: controls.left,
-      right: controls.right, 
-      up: controls.accelerate,
-      down: controls.brake,
+      left: axisX < -deadzone,
+      right: axisX > deadzone,
+      up: axisY < -deadzone,
+      down: axisY > deadzone,
     };
     const justPressed = {
       left: directions.left && !this.previousNavigation.left,
@@ -255,7 +257,7 @@ export default class NameInputScene extends Phaser.Scene {
       this.moveSelection(0, 1);
     }
 
-    if (controls.button2) {
+    if (this.InputManager.getControlsP1.button2) {
       this.selectCharacter();
     }
   }
