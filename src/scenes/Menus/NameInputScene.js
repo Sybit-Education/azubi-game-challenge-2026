@@ -49,12 +49,8 @@ export default class NameInputScene extends Phaser.Scene {
       color: '#ffffff',
     };
 
-    this.labelText = this.add
-      .text(labelX, nameY, '', nameStyle)
-      .setOrigin(0, 0.5);
-    this.nameText = this.add
-      .text(labelX, nameY, '', nameStyle)
-      .setOrigin(0, 0.5);
+    this.labelText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
+    this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
 
     this.updateNamePrompt();
   }
@@ -213,11 +209,7 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   moveSelection(dx, dy) {
-    this.selectedRow = Phaser.Math.Wrap(
-      this.selectedRow + dy,
-      0,
-      this.characterGrid.length,
-    );
+    this.selectedRow = Phaser.Math.Wrap(this.selectedRow + dy, 0, this.characterGrid.length);
     const rowLength = this.characterGrid[this.selectedRow].length;
     this.selectedColumn =
       dx === 0
