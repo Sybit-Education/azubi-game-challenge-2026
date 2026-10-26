@@ -87,7 +87,7 @@ Maximal drei Quellen erhalten gleichzeitig Vordergrundlautstärke. Weitere Quell
 
 ### 4.5 `FeedbackBus` und `SpeechOutput`
 
-Der `FeedbackBus` spielt kurze, mittige Rückmeldungen für Spurwechsel, Straßenrand, Einsammeln, Treffer, Start und Pause. `SpeechOutput` kapselt gesprochene Menüs, Statusabfragen und Ergebnisse. Feste Ansagen werden als geprüfte Audiodateien ausgeliefert. Dynamische Zahlen werden aus aufgenommenen Zahl- und Ziffernfragmenten zusammengesetzt; lokale Sprachsynthese ist nur eine optionale Alternative und keine Voraussetzung. Dieselben Informationen liegen zusätzlich in zugänglichen HTML-Elementen für den Screenreader vor.
+Der `FeedbackBus` spielt kurze Rückmeldungen für Spurwechsel, Straßenrand, Einsammeln, Treffer, Start und Pause. Bedien- und Sammelhinweise liegen mittig. Der Crash des Hörerautos liegt ebenfalls mittig; ein Crash des gegnerischen Spielerautos bleibt dagegen relativ zum Hörer räumlich positioniert. `SpeechOutput` kapselt gesprochene Menüs, Statusabfragen und Ergebnisse. Feste Ansagen werden als geprüfte Audiodateien ausgeliefert. Dynamische Zahlen werden aus aufgenommenen Zahl- und Ziffernfragmenten zusammengesetzt; lokale Sprachsynthese ist nur eine optionale Alternative und keine Voraussetzung. Dieselben Informationen liegen zusätzlich in zugänglichen HTML-Elementen für den Screenreader vor.
 
 ## 5. Klangsprache
 
@@ -101,7 +101,8 @@ Der `FeedbackBus` spielt kurze, mittige Rückmeldungen für Spurwechsel, Straße
 | sammelbares Item            | heller räumlicher Signalton                         | objekttypischer Rhythmus                       |
 | Überqueren einer Spurgrenze | kurzer mittiger Bestätigungston                     | Weltquellen verschieben sich relativ zum Hörer |
 | Straßenrand                 | deutliches Fehlersignal                             | keine Bewegung in eine weitere Spur            |
-| Treffer oder Einsammeln     | kurzer mittiger Ereigniston                         | gesonderte Klangfarbe für positiv und negativ  |
+| Treffer                     | Hörer mittig, gegnerischer Spieler relativ          | kurze negative Klangfarbe                      |
+| Einsammeln                  | kurzer mittiger Ereigniston                         | eigene positive Klangfarbe                     |
 
 Motor, Musik und Atmosphäre bleiben unterhalb der Informationssignale. Kritische Warnungen senken unwichtige Quellen vorübergehend ab. Sprache senkt alle nicht kritischen Quellen für die Dauer der Ansage ab. Musik kann separat deaktiviert werden; Warnungen, Sprache und Umgebung erhalten getrennte Lautstärkeregler.
 
@@ -191,7 +192,7 @@ Fehler werden nicht nur als Kollision gewertet. Auch verspätete Reaktionen, fal
 
 ## 11. Projektnahe JavaScript-Beispiele
 
-Die folgenden Beispiele entsprechen dem Projektstand mit Phaser 4.2.1, JavaScript-ES-Modulen und Vite. Gegnerfahrzeuge und Spieler 2 werden relativ zu Spieler 1 räumlich hörbar. Spieler 1 (this.car) ist der Hörer und besitzt zusätzlich einen leiseren, mittigen Eigenmotor. Dessen Tonhöhe folgt der Spielgeschwindigkeit. Beim stabilen Spurwechsel ertönen ein kurzer Ton von tief (links) nach hoch (rechts) und eine englische Ansage wie „Lane three“.
+Die folgenden Beispiele entsprechen dem Projektstand mit Phaser 4.2.1, JavaScript-ES-Modulen und Vite. Gegnerfahrzeuge und Spieler 2 werden relativ zu Spieler 1 räumlich hörbar. Spieler 1 (this.car) ist der Hörer und besitzt zusätzlich einen leiseren, mittigen Eigenmotor. Dessen Tonhöhe folgt der Spielgeschwindigkeit. Beim stabilen Spurwechsel ertönen ein kurzer Ton von tief (links) nach hoch (rechts) und eine englische Ansage wie „Lane three“. Ein wirksamer Zusammenstoß erhält zusätzlich einen kurzen räumlichen Crash-Klang.
 
 Die Lösung erzeugt den Motorklang direkt mit der Web Audio API. Es werden deshalb keine zusätzlichen MP3- oder OGG-Dateien benötigt. Wenn Web Audio im Browser nicht verfügbar ist, bleibt das Spiel ohne diesen Beispielklang lauffähig.
 
@@ -225,6 +226,12 @@ export const CAR_AUDIO_CONFIG = Object.freeze({
   laneCueGain: 0.055,
   laneCueAttackSeconds: 0.015,
   laneCueDurationSeconds: 0.16,
+  crashStartFrequency: 140,
+  crashEndFrequency: 45,
+  crashFilterFrequency: 500,
+  crashGain: 0.18,
+  crashAttackSeconds: 0.008,
+  crashDurationSeconds: 0.28,
   smoothingSeconds: 0.04,
 });
 ```
@@ -420,18 +427,97 @@ updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed) {
 }
 ```
 
-LaneCueAnnouncer erzeugt pro Hinweis einen kurzen Sinuston. Die Frequenzen 330, 440, 550 und 660 Hz stehen von links nach rechts für Spur eins bis vier. Wenn die Speech-Synthesis-API verfügbar ist, wird gleichzeitig mit en-US die passende englische Ansage gesprochen. Eine noch laufende eigene Spuransage wird vor der nächsten ersetzt, damit immer die aktuelle Spur Vorrang hat. Ohne Speech-Synthesis bleibt der Ton als Fallback erhalten. Beim Tod des Hörers und beim Verlassen der Szene werden Sprache und aktive Cue-Knoten aufgeräumt.
+LaneCueAnnouncer erzeugt pro Hinweis einen kurzen Sinuston. Die Frequenzen 330, 440, 550 und 660 Hz stehen von links nach rechts für Spur eins bis vier. Wenn die Speech-Synthesis-API verfügbar ist, wird gleichzeitig die passende englische Ansage gesprochen. Nur `utterance.lang = 'en-US'` reicht dafür nicht zuverlässig aus, weil einige Browser trotzdem ihre deutsche Standardstimme verwenden. Deshalb sucht die Implementierung mit `speechSynthesis.getVoices()` zuerst explizit nach einer installierten en-US-Stimme und danach nach einer anderen englischen Stimme. Das Ereignis `voiceschanged` aktualisiert die Auswahl, falls der Browser seine Stimmen erst nach dem Szenenstart bereitstellt.
 
-### 11.5 Nur mit Phasers Web-Audio-Backend starten
+```js
+selectEnglishVoice() {
+  const voices = this.speechSynthesis?.getVoices?.() ?? [];
+
+  return (
+    voices.find(({ lang }) => lang?.toLowerCase() === 'en-us') ??
+    voices.find(({ lang }) => lang?.toLowerCase().startsWith('en')) ??
+    null
+  );
+}
+
+const utterance = new this.Utterance(`Lane ${LANE_NAMES[safeLaneIndex]}`);
+utterance.voice = this.englishVoice;
+utterance.lang = this.englishVoice?.lang ?? 'en-US';
+```
+
+Eine noch laufende eigene Spuransage wird vor der nächsten ersetzt, damit immer die aktuelle Spur Vorrang hat. Ohne Speech-Synthesis bleibt der Ton als Fallback erhalten. Beim Tod des Hörers und beim Verlassen der Szene werden Sprache, der `voiceschanged`-Listener und aktive Cue-Knoten aufgeräumt.
+
+### 11.5 Räumlichen Crash-Klang bei wirksamen Treffern erzeugen
+
+CrashSoundPlayer erzeugt eine 280 ms lange, schnell abfallende Sägezahnwelle. Ein Tiefpass macht daraus einen kurzen dumpfen Aufprall. Die Position kommt aus demselben `mapCarToAudioPosition` wie bei den Fahrzeugmotoren: Ein Treffer von Spieler 1 liegt mittig, ein Treffer von Spieler 2 bleibt relativ zu Spieler 1 räumlich hörbar.
+
+```js
+// Auszüge aus src/accessibility/audio/CrashSoundPlayer.js
+play({ x, y, z }) {
+  const now = this.audioContext.currentTime;
+  const endTime = now + CAR_AUDIO_CONFIG.crashDurationSeconds;
+
+  oscillator.frequency.setValueAtTime(CAR_AUDIO_CONFIG.crashStartFrequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    CAR_AUDIO_CONFIG.crashEndFrequency,
+    endTime,
+  );
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(
+    CAR_AUDIO_CONFIG.crashGain,
+    now + CAR_AUDIO_CONFIG.crashAttackSeconds,
+  );
+  gain.gain.linearRampToValueAtTime(0, endTime);
+
+  panner.panningModel = 'HRTF';
+  panner.positionX.setValueAtTime(x, now);
+  panner.positionY.setValueAtTime(y, now);
+  panner.positionZ.setValueAtTime(z, now);
+}
+```
+
+Die Trefferregel verhindert Doppel- und Fehlsignale: Ein bereits totes, unverwundbares oder durch ein Schild geschütztes Auto bleibt still. Wird ein Extraleben verbraucht oder endet der Treffer tödlich, wird der Crash-Klang vor der jeweiligen Spielreaktion gestartet. Bereits laufende Crash-Klänge dürfen ihre kurze Hüllkurve beim Szenenwechsel beenden und trennen danach selbstständig alle Audioknoten.
+
+```js
+// src/objects/carHit.js
+export function handleCarHit({
+  car,
+  invulnerable,
+  shieldActive,
+  extraLifeActive,
+  onEffectiveHit,
+  useExtraLife,
+  gameOver,
+}) {
+  const outcome = resolveCarHit({
+    dead: car.dead,
+    invulnerable,
+    shieldActive,
+    extraLifeActive,
+  });
+
+  if (outcome === 'ignored') return outcome;
+  onEffectiveHit?.(car);
+
+  if (outcome === 'extra-life') useExtraLife(car);
+  else gameOver(car);
+
+  return outcome;
+}
+```
+
+### 11.6 Nur mit Phasers Web-Audio-Backend starten
 
 Die Factory kapselt den Browser- und Phaser-spezifischen Teil. Gegner starten bei 72 Hz, Spieler 2 bei 108 Hz. Der eigene Motor startet leiser bei 84 Hz und kann bis 132 Hz ansteigen.
 
 ```js
 // Auszüge aus src/accessibility/audio/createCarSpatialAudioSystem.js
 import { getEngineVoice } from './engineVoice.js';
+import { CrashSoundPlayer } from './CrashSoundPlayer.js';
 import { LaneCueAnnouncer } from './LaneCueAnnouncer.js';
 
 return new CarSpatialAudioSystem({
+  crashSound: new CrashSoundPlayer(scene.sound.context, scene.sound.destination),
   isEnemyCar,
   laneCue: new LaneCueAnnouncer({
     audioContext: scene.sound.context,
@@ -451,7 +537,7 @@ return new CarSpatialAudioSystem({
 
 Wenn scene.sound kein Phaser.Sound.WebAudioSoundManager ist, liefert die Factory weiterhin null und das Spiel läuft ohne das Beispielaudio weiter.
 
-### 11.6 In die vorhandene GameScene einbinden
+### 11.7 In die vorhandene GameScene einbinden
 
 Die Aktivierung verwendet accessibilityMode als gemeinsamen Schlüssel. Der bisherige HTML-Schlüssel accessibility enabled dient als Migrationsfallback. Beide Schalter schreiben anschließend immer beide Werte, damit Canvas- und HTML-Einstellung nicht auseinanderlaufen.
 
@@ -504,9 +590,25 @@ this.carSpatialAudio?.update({
 });
 ```
 
-### 11.7 Tests mit dem eingebauten Node-Test-Runner
+ItemManager leitet beide Kollisionspfade über dieselbe geprüfte Trefferregel. Damit gilt das Verhalten gleichermaßen für Spieler 1 und Spieler 2.
 
-Die Einstellungssynchronisierung, reine Mathematik, Geschwindigkeitsabbildung, Spurhysterese, kombinierte Spurhinweise, Fade-Lebenszyklus und Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio- und Speech-Synthesis-Grenzen werden durch kleine Attrappen ersetzt.
+```js
+lebenCheckCar1(car) {
+  return handleCarHit({
+    car,
+    extraLifeActive: this.extraLifeActiveCar1,
+    gameOver: (hitCar) => this.scene.gameOver(hitCar),
+    invulnerable: this.invulnerableCar1,
+    onEffectiveHit: (hitCar) => this.scene.carSpatialAudio?.playCrash(hitCar),
+    shieldActive: this.schildAktivCar1,
+    useExtraLife: (hitCar) => this.useExtraLifeCar1(hitCar),
+  });
+}
+```
+
+### 11.8 Tests mit dem eingebauten Node-Test-Runner
+
+Die Einstellungssynchronisierung, reine Mathematik, Geschwindigkeitsabbildung, Spurhysterese, explizite englische Stimmauswahl, kombinierte Spurhinweise, Fade-Lebenszyklus, Crash-Regeln und Quellenverwaltung laufen ohne Browser mit node:test. Die Web-Audio- und Speech-Synthesis-Grenzen werden durch kleine Attrappen ersetzt.
 
 ```js
 // test/accessibility/carSpatialMath.test.js

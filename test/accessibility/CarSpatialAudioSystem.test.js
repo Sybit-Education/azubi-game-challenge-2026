@@ -23,6 +23,21 @@ class FakeSpatialSource {
   }
 }
 
+class FakeCrashSound {
+  constructor() {
+    this.positions = [];
+    this.destroyed = false;
+  }
+
+  play(position) {
+    this.positions.push(position);
+  }
+
+  destroy() {
+    this.destroyed = true;
+  }
+}
+
 test('owns sources for the selected enemy and opponent cars', () => {
   const createdKinds = [];
   const createdSources = [];
@@ -163,4 +178,63 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
 
   assert.equal(laneCue.silenceCalls, 2);
   assert.equal(laneCue.destroyed, true);
+});
+
+test('positions crash sounds relative to the listener car', () => {
+  const crashSound = new FakeCrashSound();
+  const listenerCar = { x: 500, y: 800, active: true };
+  const opponentCar = { x: 700, y: 600, active: true };
+  const system = new CarSpatialAudioSystem({
+    crashSound,
+    isEnemyCar: () => false,
+    sourceFactory: () => new FakeSpatialSource(),
+  });
+
+  system.update({
+    listenerCar,
+    roadObjects: [],
+    opponentCar,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 700,
+  });
+
+  assert.equal(typeof system.playCrash, 'function');
+  system.playCrash(listenerCar);
+  system.playCrash(opponentCar);
+
+  assert.deepEqual(crashSound.positions, [
+    { x: 0, y: 0, z: -0, forwardDistance: 0 },
+    { x: 2, y: 0, z: -6, forwardDistance: 200 },
+  ]);
+
+  system.destroy();
+
+  assert.equal(crashSound.destroyed, true);
+});
+
+test('keeps the last listener position for a later opponent crash', () => {
+  const crashSound = new FakeCrashSound();
+  const listenerCar = { x: 500, y: 800, active: true };
+  const opponentCar = { x: 700, y: 600, active: true };
+  const system = new CarSpatialAudioSystem({
+    crashSound,
+    isEnemyCar: () => false,
+    sourceFactory: () => new FakeSpatialSource(),
+  });
+  const frame = {
+    listenerCar,
+    roadObjects: [],
+    opponentCar,
+    roadWidth: 800,
+    viewportHeight: 1000,
+    gameSpeed: 700,
+  };
+
+  system.update(frame);
+  listenerCar.dead = true;
+  system.update(frame);
+  system.playCrash(opponentCar);
+
+  assert.deepEqual(crashSound.positions, [{ x: 2, y: 0, z: -6, forwardDistance: 200 }]);
 });

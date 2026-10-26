@@ -6,14 +6,18 @@ import {
 } from './carSpatialMath.js';
 
 export class CarSpatialAudioSystem {
-  constructor({ sourceFactory, isEnemyCar, laneCue = null }) {
+  constructor({ sourceFactory, isEnemyCar, laneCue = null, crashSound = null }) {
     this.sourceFactory = sourceFactory;
     this.isEnemyCar = isEnemyCar;
     this.laneCue = laneCue;
+    this.crashSound = crashSound;
     this.candidates = [];
     this.sources = new Map();
     this.listenerSource = null;
     this.currentLane = null;
+    this.listenerCar = null;
+    this.roadWidth = null;
+    this.viewportHeight = null;
   }
 
   update({
@@ -30,6 +34,9 @@ export class CarSpatialAudioSystem {
       return;
     }
 
+    this.listenerCar = listenerCar;
+    this.roadWidth = roadWidth;
+    this.viewportHeight = viewportHeight;
     this.updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed);
     this.candidates.length = 0;
 
@@ -46,6 +53,14 @@ export class CarSpatialAudioSystem {
     const selected = selectAudibleCars(this.candidates, listenerCar, viewportHeight);
 
     this.synchronizeSources(selected, listenerCar, roadWidth, viewportHeight);
+  }
+
+  playCrash(crashedCar) {
+    if (!this.crashSound || !this.listenerCar) return;
+
+    this.crashSound.play(
+      mapCarToAudioPosition(crashedCar, this.listenerCar, this.roadWidth, this.viewportHeight),
+    );
   }
 
   updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed) {
@@ -104,6 +119,10 @@ export class CarSpatialAudioSystem {
 
   destroy() {
     this.clear();
+    this.listenerCar = null;
+    this.roadWidth = null;
+    this.viewportHeight = null;
     this.laneCue?.destroy();
+    this.crashSound?.destroy();
   }
 }

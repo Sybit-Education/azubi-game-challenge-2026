@@ -22,5 +22,11 @@ export const CAR_AUDIO_CONFIG = Object.freeze({
   laneCueGain: 0.055,
   laneCueAttackSeconds: 0.015,
   laneCueDurationSeconds: 0.16,
+  crashStartFrequency: 140,
+  crashEndFrequency: 45,
+  crashFilterFrequency: 500,
+  crashGain: 0.18,
+  crashAttackSeconds: 0.008,
+  crashDurationSeconds: 0.28,
   smoothingSeconds: 0.04,
 });

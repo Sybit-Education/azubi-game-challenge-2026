@@ -10,6 +10,11 @@ export class LaneCueAnnouncer {
     this.Utterance = Utterance;
     this.activeCues = new Set();
     this.pendingUtterance = null;
+    this.englishVoice = this.selectEnglishVoice();
+    this.handleVoicesChanged = () => {
+      this.englishVoice = this.selectEnglishVoice();
+    };
+    this.speechSynthesis?.addEventListener?.('voiceschanged', this.handleVoicesChanged);
   }
 
   announce(laneIndex) {
@@ -39,7 +44,8 @@ export class LaneCueAnnouncer {
     if (this.speechSynthesis && this.Utterance) {
       this.cancelSpeech();
       const utterance = new this.Utterance(`Lane ${LANE_NAMES[safeLaneIndex]}`);
-      utterance.lang = 'en-US';
+      utterance.voice = this.englishVoice;
+      utterance.lang = this.englishVoice?.lang ?? 'en-US';
       utterance.rate = 1.1;
       utterance.volume = 0.75;
       utterance.onend = () => this.finishSpeech(utterance);
@@ -47,6 +53,16 @@ export class LaneCueAnnouncer {
       this.pendingUtterance = utterance;
       this.speechSynthesis.speak(utterance);
     }
+  }
+
+  selectEnglishVoice() {
+    const voices = this.speechSynthesis?.getVoices?.() ?? [];
+
+    return (
+      voices.find(({ lang }) => lang?.toLowerCase() === 'en-us') ??
+      voices.find(({ lang }) => lang?.toLowerCase().startsWith('en')) ??
+      null
+    );
   }
 
   finishSpeech(utterance) {
@@ -84,5 +100,6 @@ export class LaneCueAnnouncer {
 
   destroy() {
     this.silence();
+    this.speechSynthesis?.removeEventListener?.('voiceschanged', this.handleVoicesChanged);
   }
 }

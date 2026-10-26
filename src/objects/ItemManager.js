@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { handleCarHit } from './carHit.js';
+
 export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
@@ -194,35 +196,27 @@ export default class ItemManager {
   }
 
   lebenCheckCar1(car) {
-    if (this.invulnerableCar1) {
-      return;
-    }
-
-    if (this.schildAktivCar1) {
-      return;
-    }
-
-    if (this.extraLifeActiveCar1) {
-      this.useExtraLifeCar1(car);
-      return;
-    }
-    this.scene.gameOver(car);
+    return handleCarHit({
+      car,
+      extraLifeActive: this.extraLifeActiveCar1,
+      gameOver: (hitCar) => this.scene.gameOver(hitCar),
+      invulnerable: this.invulnerableCar1,
+      onEffectiveHit: (hitCar) => this.scene.carSpatialAudio?.playCrash(hitCar),
+      shieldActive: this.schildAktivCar1,
+      useExtraLife: (hitCar) => this.useExtraLifeCar1(hitCar),
+    });
   }
 
   lebenCheckCar2(car) {
-    if (this.invulnerableCar2) {
-      return;
-    }
-    if (this.schildAktivCar2) {
-      return;
-    }
-
-    if (this.extraLifeActiveCar2) {
-      this.useExtraLifeCar2(car);
-      return;
-    }
-
-    this.scene.gameOver(car);
+    return handleCarHit({
+      car,
+      extraLifeActive: this.extraLifeActiveCar2,
+      gameOver: (hitCar) => this.scene.gameOver(hitCar),
+      invulnerable: this.invulnerableCar2,
+      onEffectiveHit: (hitCar) => this.scene.carSpatialAudio?.playCrash(hitCar),
+      shieldActive: this.schildAktivCar2,
+      useExtraLife: (hitCar) => this.useExtraLifeCar2(hitCar),
+    });
   }
 
   itemNausea() {

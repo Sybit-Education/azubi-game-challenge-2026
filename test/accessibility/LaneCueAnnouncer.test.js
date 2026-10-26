@@ -76,6 +76,74 @@ class FakeUtterance {
   }
 }
 
+test('selects an installed US English voice instead of the browser default', () => {
+  const spoken = [];
+  const germanVoice = { lang: 'de-DE', name: 'Deutsch' };
+  const englishVoice = { lang: 'en-US', name: 'English US' };
+  const announcer = new LaneCueAnnouncer({
+    audioContext: new FakeAudioContext(),
+    destination: new FakeAudioNode(),
+    speechSynthesis: {
+      getVoices: () => [germanVoice, englishVoice],
+      speak: (utterance) => spoken.push(utterance),
+    },
+    Utterance: FakeUtterance,
+  });
+
+  announcer.announce(0);
+
+  assert.equal(spoken[0].voice, englishVoice);
+  assert.equal(spoken[0].lang, 'en-US');
+});
+
+test('uses an English voice that becomes available after construction', () => {
+  const spoken = [];
+  const listeners = new Map();
+  const germanVoice = { lang: 'de-DE', name: 'Deutsch' };
+  const englishVoice = { lang: 'en-GB', name: 'English UK' };
+  let voices = [germanVoice];
+  const announcer = new LaneCueAnnouncer({
+    audioContext: new FakeAudioContext(),
+    destination: new FakeAudioNode(),
+    speechSynthesis: {
+      addEventListener: (eventName, listener) => listeners.set(eventName, listener),
+      getVoices: () => voices,
+      speak: (utterance) => spoken.push(utterance),
+    },
+    Utterance: FakeUtterance,
+  });
+
+  voices = [germanVoice, englishVoice];
+  const handleVoicesChanged = listeners.get('voiceschanged');
+  assert.equal(typeof handleVoicesChanged, 'function');
+  handleVoicesChanged();
+  announcer.announce(1);
+
+  assert.equal(spoken[0].voice, englishVoice);
+  assert.equal(spoken[0].lang, 'en-GB');
+});
+
+test('stops listening for browser voice changes when destroyed', () => {
+  const listeners = new Map();
+  const speechSynthesis = {
+    addEventListener: (eventName, listener) => listeners.set(eventName, listener),
+    getVoices: () => [],
+    removeEventListener: (eventName, listener) => {
+      if (listeners.get(eventName) === listener) listeners.delete(eventName);
+    },
+  };
+  const announcer = new LaneCueAnnouncer({
+    audioContext: new FakeAudioContext(),
+    destination: new FakeAudioNode(),
+    speechSynthesis,
+    Utterance: FakeUtterance,
+  });
+
+  announcer.destroy();
+
+  assert.equal(listeners.has('voiceschanged'), false);
+});
+
 test('announces a lane with a left-to-right pitch and English speech', () => {
   const context = new FakeAudioContext();
   const destination = new FakeAudioNode();

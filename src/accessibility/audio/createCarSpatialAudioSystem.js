@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { CarSpatialAudioSystem } from './CarSpatialAudioSystem.js';
+import { CrashSoundPlayer } from './CrashSoundPlayer.js';
 import { getEngineVoice } from './engineVoice.js';
 import { LaneCueAnnouncer } from './LaneCueAnnouncer.js';
 import { SpatialEngineSource } from './SpatialEngineSource.js';
@@ -13,6 +14,7 @@ export function createCarSpatialAudioSystem(scene, isEnemyCar) {
   }
 
   return new CarSpatialAudioSystem({
+    crashSound: new CrashSoundPlayer(scene.sound.context, scene.sound.destination),
     isEnemyCar,
     laneCue: new LaneCueAnnouncer({
       audioContext: scene.sound.context,
