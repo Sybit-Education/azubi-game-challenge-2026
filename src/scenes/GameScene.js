@@ -5,17 +5,13 @@ import EnemyCar from '../objects/EnemyCar.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
-import Coin from '../objects/Coin.js';
-import CoinMultiplier from '../objects/CoinMultiplier.js';
 import { preloadGameplaySounds } from '../../audio/sounds.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
-import Item from '../objects/Item.js';
-import Ice from '../objects/Ice.js';
-import ExtraLife from '../objects/ExtraLife.js';
 import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
-import RandomObstacle from '../objects/RandomObstacle.js';
+import { updateGameScene } from './GameSceneFrame.js';
+import { createRoadObject } from './GameSceneRoadObjects.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -61,6 +57,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
+    this.load.image('shield', 'assets/images/hud-icons/shield.png');
+    this.load.image('shrink', 'assets/images/hud-icons/shrink.png');
+    this.load.image('grow', 'assets/images/hud-icons/grow.png');
+    this.load.image('stats-background', 'assets/images/hud-icons/stats-background.png');
+    this.load.image('magnet', 'assets/images/hud-icons/magnet.png');
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
@@ -87,13 +88,13 @@ export default class GameScene extends Phaser.Scene {
     this.carSensors = [new CarSensor(this, this.car)];
     if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
     this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
-    this.createRoadObject('enemy-car');
-    this.createRoadObject('coin');
-    this.createRoadObject('coinMultiplier');
-    this.createRoadObject('item');
-    this.createRoadObject('ice');
-    this.createRoadObject('extraLife');
-    this.createRoadObject('random-obstacle');
+    createRoadObject(this, 'enemy-car');
+    createRoadObject(this, 'coin');
+    createRoadObject(this, 'coinMultiplier');
+    createRoadObject(this, 'item');
+    createRoadObject(this, 'ice');
+    createRoadObject(this, 'extraLife');
+    createRoadObject(this, 'random-obstacle');
     this.createHud();
     this.setBackground(
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
@@ -261,185 +262,6 @@ export default class GameScene extends Phaser.Scene {
     this.hud = new HUD(this, this.car, this.secondCar);
   }
 
-  // road objects are obstacles and coins
-  createRoadObject(type) {
-    const laneCount = 4;
-    const laneWidth = this.track1.displayWidth / laneCount;
-    const roadLeftEdge = this.scale.width / 2 - this.track1.displayWidth / 2;
-    const lane = Phaser.Math.Between(0, laneCount - 1);
-    const roadObjectX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
-    const spawnY = -200;
-
-    if (this.positionFree(lane, spawnY)) {
-      let roadObject;
-
-      if (type === 'coin') {
-        roadObject = new Coin(this, roadObjectX, spawnY, lane);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          () => {
-            this.ItemManager.coinBudgetPlus1(this.car.coinMultiplier);
-          },
-          undefined,
-          this,
-        );
-        this.physics.add.overlap(this.car, roadObject, this.collectCoin, undefined, this);
-
-        if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            () => {
-              this.ItemManager.coinBudgetPlus2(this.secondCar.coinMultiplier);
-            },
-            undefined,
-            this,
-          );
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectCoin, undefined, this);
-        }
-      } else if (type === 'coinMultiplier') {
-        roadObject = new CoinMultiplier(this, roadObjectX, spawnY, lane);
-
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.multiplyCoins1,
-          undefined,
-          this.ItemManager,
-        );
-
-        if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.multiplyCoins2,
-            undefined,
-            this.ItemManager,
-          );
-        }
-      } else if (type === 'item') {
-        roadObject = new Item(this, roadObjectX, spawnY, lane);
-        roadObject.setScale(0.1);
-        this.physics.add.overlap(this.car, roadObject, this.collectItem, undefined, this);
-        if (this.secondCar) {
-          this.physics.add.overlap(this.secondCar, roadObject, this.collectItem, undefined, this);
-        }
-      } else if (type === 'extraLife') {
-        roadObject = new ExtraLife(this, roadObjectX, spawnY, lane);
-        roadObject.setTexture('extraLife');
-        roadObject.setScale(0.08);
-        this.physics.add.overlap(this.car, roadObject, this.collectExtraLife, undefined, this);
-
-        if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.collectExtraLife,
-            undefined,
-            this,
-          );
-        }
-      } else if (type === 'enemy-car') {
-        roadObject = new EnemyCar(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.width, roadObject.height); //scal- you know the drill
-        roadObject.body.setImmovable(true);
-        this.physics.add.collider(
-          this.car,
-          roadObject,
-          this.ItemManager.lebenCheckCar1,
-          undefined,
-          this.ItemManager,
-        );
-
-        //this.physics.add.collider(this.car, roadObject, this.gameOver, undefined, this);
-        if (this.secondCar) {
-          this.physics.add.collider(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.lebenCheckCar2,
-            undefined,
-            this.ItemManager,
-          );
-        }
-      } else if (type === 'ice') {
-        roadObject = new Ice(this, roadObjectX, spawnY, lane);
-        this.physics.add.overlap(
-          this.car,
-          roadObject,
-          this.ItemManager.iceEffect,
-          undefined,
-          this.ItemManager,
-        );
-        if (this.secondCar) {
-          this.physics.add.overlap(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.iceEffect,
-            undefined,
-            this.ItemManager,
-          );
-        }
-      } else if (type === 'random-obstacle') {
-        roadObject = new RandomObstacle(this, roadObjectX, spawnY, lane);
-        roadObject.body.setSize(roadObject.width, roadObject.height);
-        roadObject.body.setImmovable(true);
-        this.physics.add.collider(
-          this.car,
-          roadObject,
-          this.ItemManager.lebenCheckCar1,
-          undefined,
-          this.ItemManager,
-        );
-        if (this.secondCar) {
-          this.physics.add.collider(
-            this.secondCar,
-            roadObject,
-            this.ItemManager.lebenCheckCar2,
-            undefined,
-            this.ItemManager,
-          );
-        }
-      }
-      this.roadObjects.push(roadObject);
-    }
-
-    // Spawn intervals.
-    let delay;
-    if (type === 'coin') {
-      delay = Phaser.Math.Between(500, 2000);
-    } else if (type === 'item') {
-      delay = Phaser.Math.Between(5000, 10000);
-    } else if (type === 'enemy-car') {
-      delay = Phaser.Math.Between(2000, 4000);
-    } else if (type === 'ice') {
-      delay = Phaser.Math.Between(6000, 12000);
-    } else if (type === 'coinMultiplier') {
-      delay = Phaser.Math.Between(10000, 20000);
-    } else if (type === 'extraLife') {
-      delay = Phaser.Math.Between(15000, 30000);
-    } else if (type === 'random-obstacle') {
-      delay = Phaser.Math.Between(1500, 9000);
-    }
-
-    this.time.delayedCall(delay, () => this.createRoadObject(type));
-  }
-
-  // Checks if the lane is free for spawning a new road object
-  positionFree(lane, spawnY) {
-    const minimumDistance = 500; // Minimum distance between road objects
-
-    return this.roadObjects.every((roadObject) => {
-      if (roadObject.lane !== lane) {
-        return true;
-      }
-
-      const distance = Math.abs(roadObject.y - spawnY);
-
-      return distance >= minimumDistance;
-    });
-  }
-
   collectCoin(car, coin) {
     if (!coin.active) return;
 
@@ -453,7 +275,6 @@ export default class GameScene extends Phaser.Scene {
     if (!item.active) return;
 
     item.destroy();
-    this.sound.play('collect-extra-life', { volume: 0.3 });
     if (car === this.car) {
       this.ItemManager.itemExtraLifeCar1();
     } else if (car === this.secondCar) {
@@ -524,241 +345,7 @@ export default class GameScene extends Phaser.Scene {
 
     return Phaser.Math.Clamp(laneIndex, 0, laneCount - 1);
   }
-  getObstaclesInLane(lane) {
-    return this.roadObjects.filter((object) => {
-      const isObstacle = object instanceof EnemyCar || object instanceof RandomObstacle;
-
-      return object.active && isObstacle && object.lane === lane;
-    });
-  }
-
-  getObstaclesAhead(car, lane) {
-    const obstacles = this.getObstaclesInLane(lane);
-
-    return obstacles.filter((obstacle) => {
-      return obstacle.body.bottom <= car.body.top;
-    });
-  }
-
-  getNearestObstacleAhead(car, lane) {
-    const obstacles = this.getObstaclesAhead(car, lane);
-    let nearest = null;
-
-    for (const obstacle of obstacles) {
-      const distance = car.body.top - obstacle.body.bottom;
-
-      if (nearest === null || distance < nearest.distance) {
-        nearest = {
-          obstacle,
-          distance,
-        };
-      }
-    }
-
-    return nearest;
-  }
-
-  getTimeUntilObstacle(car, obstacle) {
-    if (!Number.isFinite(obstacle.speed)) return Infinity;
-
-    const distance = car.body.top - obstacle.body.bottom;
-    const heightFactor = this.scale.height / 1200;
-    const obstacleSpeed = obstacle.speed * heightFactor;
-    const playerSpeed = car.body.velocity.y;
-    const closingSpeed = obstacleSpeed - playerSpeed;
-
-    if (closingSpeed <= 0) return Infinity;
-
-    return Math.max(0, distance) / closingSpeed;
-  }
-  getSoonestObstacleAhead(car, lane) {
-    const obstacles = this.getObstaclesAhead(car, lane);
-    let soonest = null;
-
-    for (const obstacle of obstacles) {
-      const seconds = this.getTimeUntilObstacle(car, obstacle);
-      if (!Number.isFinite(seconds)) continue;
-
-      if (soonest === null || seconds < soonest.seconds) {
-        soonest = {
-          obstacle,
-          seconds,
-        };
-      }
-    }
-    return soonest;
-  }
-
-  updateLaneDanger() {
-    this.currentLaneDanger = null;
-
-    if (this.car.dead) return;
-
-    const lane = this.getPlayerLane(this.car);
-    const soonest = this.getSoonestObstacleAhead(this.car, lane);
-    const warningSeconds = 4;
-
-    if (soonest !== null && soonest.seconds <= warningSeconds) {
-      this.currentLaneDanger = {
-        obstacle: soonest.obstacle,
-        seconds: soonest.seconds,
-        lane,
-      };
-    }
-  }
-
-  updateIceWarning() {
-    if (!this.registry.get('accessibility enabled')) {
-      if (this.iceWarning.isPlaying) this.iceWarning.stop();
-      return;
-    }
-
-    // Keep spoken warnings from overlapping; retry pending warnings next frame.
-    if (this.sound.locked || this.iceWarning.isPlaying) return;
-
-    const warningSeconds = 3;
-    let nextWarning = null;
-
-    for (const car of [this.car, this.secondCar]) {
-      if (!car || !car.active || car.dead || !car.body?.enable) continue;
-
-      let warned = this.warnedIce.get(car);
-      if (!warned) {
-        warned = new WeakSet();
-        this.warnedIce.set(car, warned);
-      }
-
-      const lane = this.getPlayerLane(car);
-      for (const ice of this.roadObjects) {
-        if (!(ice instanceof Ice) || !ice.active || !ice.body?.enable) continue;
-        if (ice.lane !== lane || warned.has(ice)) continue;
-        if (ice.body.bottom > car.body.top) continue;
-
-        const seconds = this.getTimeUntilObstacle(car, ice);
-        if (!Number.isFinite(seconds) || seconds > warningSeconds) continue;
-
-        if (nextWarning === null || seconds < nextWarning.seconds) {
-          nextWarning = { car, ice, seconds, warned };
-        }
-      }
-    }
-
-    if (nextWarning === null) return;
-
-    const pan = Phaser.Math.Clamp(
-      (nextWarning.ice.x - nextWarning.car.x) / (this.track1.displayWidth / 2),
-      -1,
-      1,
-    );
-
-    if (this.iceWarning.play({ pan })) {
-      // Mark only successful playback, once per ice patch and player.
-      nextWarning.warned.add(nextWarning.ice);
-    }
-  }
-
-  updateRoadEdgeScrape(car) {
-    if (!car) return;
-
-    if (car.dead) {
-      this.roadEdgeScrape.stop();
-      return;
-    }
-
-    if (car.boundaryParticles && car.boundaryParticles.emitting == true) {
-      if (!this.roadEdgeScrape.isPlaying && !this.sound.locked) {
-        this.roadEdgeScrape.play();
-      }
-    } else {
-      this.roadEdgeScrape.stop();
-    }
-  }
-  // Update the game state every frame
   update(_, delta) {
-    this.InputManager.update();
-
-    this.elapsedTime += delta;
-    if (!this.car.dead) {
-      this.car.move(this.InputManager.getControlsP1);
-      const currentLane = this.getPlayerLane(this.car);
-
-      let currentRoadEdge = null;
-
-      if (this.car.x <= this.car.leftLimit) {
-        currentRoadEdge = 'left';
-      } else if (this.car.x >= this.car.rightLimit) {
-        currentRoadEdge = 'right';
-      }
-
-      const laneChanged = currentLane !== this.lastPlayerLane;
-      const edgeChanged = currentRoadEdge !== this.lastPlayerRoadEdge;
-
-      if (this.registry.get('accessibility enabled')) {
-        if (edgeChanged && currentRoadEdge !== null) {
-          this.gameStatus.textContent = `${currentRoadEdge} road edge`;
-
-          const pan = currentRoadEdge === 'left' ? -1 : 1;
-
-          this.sound.play('road-edge-hit', { volume: 0.25, pan });
-          this.sound.play('collision-hit', { volume: 0.15, pan });
-        } else if (laneChanged) {
-          this.gameStatus.textContent = `Lane ${currentLane + 1}`;
-        }
-      }
-
-      this.lastPlayerLane = currentLane;
-      this.lastPlayerRoadEdge = currentRoadEdge;
-      this.car.update_boundary_particles();
-      this.car.intendedXVelocity = this.car.body.velocity.x;
-    }
-
-    this.updateRoadEdgeScrape(this.car);
-    this.updateRoadEdgeScrape(this.secondCar);
-
-    if (this.secondCar && !this.secondCar.dead) {
-      this.secondCar.move(this.InputManager.getControlsP2);
-      this.secondCar.update_boundary_particles();
-      this.secondCar.intendedXVelocity = this.secondCar.body.velocity.x;
-    }
-
-    this.roadObjects = this.roadObjects.filter((roadObject) => {
-      roadObject.move(this.elapsedTime, delta);
-      return roadObject.active;
-    });
-
-    this.updateLaneDanger();
-    this.updateIceWarning();
-
-    // Check after movement so sounds use the current car positions.
-    const carsForAudio = this.getCarsForAudio();
-    for (const sensor of this.carSensors) sensor.update(delta, carsForAudio);
-    this.carPassBy.update(carsForAudio);
-
-    const targetTrackSpeed = Math.min(1600, 700 + this.elapsedTime * 0.005);
-    this.track1.speed = targetTrackSpeed;
-    this.track2.speed = targetTrackSpeed;
-    //dead cars do not collect distance anymore
-    if (!this.car.dead) {
-      this.car.update_meters(targetTrackSpeed, delta);
-    }
-    if (this.secondCar && !this.secondCar.dead) {
-      this.secondCar.update_meters(targetTrackSpeed, delta);
-    }
-
-    for (const wall of this.walls) {
-      wall.speed = targetTrackSpeed;
-      wall.move(delta);
-    }
-
-    this.track1.move(delta);
-    this.track2.move(delta);
-    this.hud.update();
-
-    this.ItemManager.itemShop();
-    this.coinText1.setText(String(this.ItemManager.coinBudgetPlayer1));
-
-    if (this.isMultiplayer && this.coinText2) {
-      this.coinText2.setText(String(this.ItemManager.coinBudgetPlayer2));
-    }
+    updateGameScene(this, delta);
   }
 }
