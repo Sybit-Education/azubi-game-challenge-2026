@@ -434,10 +434,10 @@ export default class PopUpScene extends Phaser.Scene {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems();
-    if (controls.button1 || controls.accelerate) {
+    if (controls.button1) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
       this.updateGamepadSelection();
-    } else if (controls.button3 || controls.brake) {
+    } else if (controls.button3) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
       this.updateGamepadSelection();
     } else if (controls.button2) {
