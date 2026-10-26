@@ -333,12 +333,6 @@ export default class MenuScene extends Phaser.Scene {
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
         this.selectButton(this.play_button);
-
-        this.tweens.add({
-          targets: twoPlayerButton,
-          //y: playOriginalY - 10 * this.scaleFactor,
-          duration: 50,
-        });
       }
     });
 
