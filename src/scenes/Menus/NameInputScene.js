@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from '../../objects/InputManager.js';
 
 export default class NameInputScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +12,10 @@ export default class NameInputScene extends Phaser.Scene {
 
   async create() {
     await document.fonts.load('32px Tiny5');
+
+    // Create InputManager instance and initialize it
+    this.InputManager = new InputManager(this);
+    this.InputManager.create();
 
     this.playerNames = [''];
     this.activePlayer = 0;
@@ -32,6 +37,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.createPrompt();
     this.createCharacterGrid();
     this.createKeyboardInput();
+    this.moveSelection(1, 1);
 
     this.updateSelection();
 
@@ -172,6 +178,28 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   moveSelection(dx, dy) {
-    // Content
+    this.selectedRow += dy;
+    this.selectedColumn += dx;
+
+    // Wrap around the selection
+    if (this.selectedRow < 0) {
+      this.selectedRow = this.characterGrid.length - 1;
+    } else if (this.selectedRow >= this.characterGrid.length) {
+      this.selectedRow = 0;
+    }
+
+    if (this.selectedColumn < 0) {
+      this.selectedColumn = this.characterGrid[this.selectedRow].length - 1;
+    } else if (this.selectedColumn >= this.characterGrid[this.selectedRow].length) {
+      this.selectedColumn = 0;
+    }
+
+    this.updateSelection();
+  }
+
+  update() {
+    InputManager.update();
+
+    
   }
 }
