@@ -51,7 +51,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
     this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
 
-    this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
+    this.load.image('boundary-particle', 'assets/images/particles/friction-particle2.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
@@ -119,6 +119,38 @@ export default class GameScene extends Phaser.Scene {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
+  }
+
+  spawnSnow(mode) {
+    this.add.particles(
+      this.scale.width,
+      this.scale.height,
+      white,
+      {
+        x: {
+          min: 100,
+          max: 1000
+        },
+        y: {
+          min: 100,
+          max: 1000
+        },
+
+        speedX: {
+          min: 5,
+          max: 20
+        },
+
+        speedY: {
+          min: 5,
+          max: 20
+        },
+
+        lifespan: 5000,
+
+        frequency: 50
+      }
+    )
   }
 
   //Separate overlapping player cars after the physics update.

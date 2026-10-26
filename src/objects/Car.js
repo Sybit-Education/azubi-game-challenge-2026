@@ -20,7 +20,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         },
         rotate: () => (this.x < this.scene.scale.width / 2 ? 17 : 0),
         lifespan: 500,
-        scale: { start: 0.7, end: 0.3 },
+        scale: { start: 0.08, end: 0.015 },
         alpha: { start: 1, end: 0 },
         frequency: 70,
         emitting: false,
