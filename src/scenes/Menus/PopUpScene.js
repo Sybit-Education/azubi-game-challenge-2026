@@ -315,6 +315,8 @@ export default class PopUpScene extends Phaser.Scene {
       this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
       this.scene.stop('PopUpScene');
       this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
+      this.sound.play('christmas-whoosh', { volume: 0.2 });
+      this.sound.play('winter-wind', { volume: 0.1 });
     };
     gameModeMenu.addEventListener('change', handleGameModeChange);
     closeSettingsBtn.addEventListener('click', closeWindows);

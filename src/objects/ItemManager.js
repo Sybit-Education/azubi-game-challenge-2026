@@ -83,6 +83,7 @@ export default class ItemManager {
 
     if (!this.extraLifeActiveCar1) {
       this.extraLifeActiveCar1 = true;
+      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
@@ -92,6 +93,7 @@ export default class ItemManager {
 
     if (!this.extraLifeActiveCar2) {
       this.extraLifeActiveCar2 = true;
+      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
@@ -155,6 +157,7 @@ export default class ItemManager {
 
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
+      this.scene.sound.play('shield-collected', { volume: 0.3 });
       this.scene.car.setTexture('carShield');
 
       this.scene.time.delayedCall(4500, () => {
@@ -169,6 +172,7 @@ export default class ItemManager {
 
       this.scene.time.delayedCall(8000, () => {
         this.schildAktivCar1 = false;
+        this.scene.sound.play('shield-over', { volume: 0.3 });
 
         this.scene.tweens.killTweensOf(this.scene.car);
         this.scene.car.alpha = 1;
@@ -182,6 +186,7 @@ export default class ItemManager {
     this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 2);
     if (!this.schildAktivCar2) {
       this.schildAktivCar2 = true;
+      this.scene.sound.play('shield-collected', { volume: 0.3 });
       this.scene.secondCar.setTexture('carShield2');
 
       this.scene.time.delayedCall(4500, () => {
@@ -196,6 +201,7 @@ export default class ItemManager {
 
       this.scene.time.delayedCall(8000, () => {
         this.schildAktivCar2 = false;
+        this.scene.sound.play('shield-over', { volume: 0.3 });
 
         this.scene.tweens.killTweensOf(this.scene.secondCar);
         this.scene.secondCar.alpha = 1;

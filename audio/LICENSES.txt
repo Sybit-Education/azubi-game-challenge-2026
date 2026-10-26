@@ -1,96 +1,35 @@
-Audioquellen und Lizenzen für Sybit Kart
+Titel: Winter Storm Ambience
+Quelle: https://pixabay.com/sound-effects/nature-winter-storm-ambience-283339/
+Lizenz: Pixabay Content License
 
-Countdown: audio/gameplay/countdown.mp3, unverändert aus der Projekthistorie wiederhergestellt.
-Ursprünglicher Projektpfad: public/assets/audio/sfx/countdown.mp3.
-Quelle/Lizenz dieser vorhandenen Datei wurden vom Nutzer nicht angegeben.
+Titel: Christmas Whoosh_1
+Quelle: https://pixabay.com/sound-effects/film-special-effects-christmas-whoosh-1-275403/
+Lizenz: Pixabay Content License
 
-Schild einsammeln: audio/gameplay/collect-shield.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
-Ursprünglicher Dateiname: freesound_community-086161_pickups_shield_beltwav-81574.mp3.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+Titel: Live Chat
+Quelle: https://pixabay.com/sound-effects/live-chat-353605/
+Lizenz: Pixabay Content License
 
-Extraleben einsammeln: audio/gameplay/collect-extra-life.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
-Ursprünglicher Dateiname: koiroylers-live-chat-353605.mp3.
-Zuordnung anhand der beiden neuesten Downloads; Quelle/Lizenz wurden vom Nutzer nicht angegeben.
-
-audio/menu/menu-focus.ogg: Kenney, Interface Sounds, tick_001.ogg (unverändert)
+Titel: Interface Sounds – tick_001.ogg
 Quelle: https://kenney.nl/assets/interface-sounds
-Lizenz: CC0 1.0; Lizenzangaben des Herausgebers siehe unten.
+Lizenz: CC0 1.0
 
-Menüklick: audio/menu/menuclick.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
-Ursprünglicher Dateiname: 795244__onirocrisia__menuclick1.mp3.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+Titel: menuclick1
+Quelle: https://freesound.org/people/Onirocrisia/sounds/795244/
+Lizenz: CC0 1.0
 
-Eiswarnung: audio/gameplay/ice-warning.wav, vom Nutzer bereitgestellt.
-Ursprünglicher Dateiname: A_confident,_energet_#4-1792577693671.wav.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+Titel: Bouncing Power Up 1_4
+Quelle: https://freesound.org/people/Joao_Janz/sounds/478343/
+Lizenz: CC0 1.0
 
-Münzsound: vorhandene Projektdatei audio/gameplay/collect-coin.mp3.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
+Titel: car driving by left to right #2
+Quelle: https://pixabay.com/sound-effects/film-special-effects-car-driving-by-left-to-right-2-535547/
+Lizenz: Pixabay Content License
 
-Wachstum: audio/gameplay/plant-grow.wav, vom Nutzer bereitgestellt.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-
-Kollisionsstimmen: audio/gameplay/collision-impact.mp3 und collision-bang.mp3.
-Vom Nutzer als ElevenLabs-Sounds bereitgestellt; konkrete Lizenzbedingungen
-wurden nicht mitgeliefert.
-
-Aufprall: audio/gameplay/collision-hit.wav, vom Nutzer bereitgestellt.
-Ursprünglicher Dateiname: A_short,_punchy,_car_#1-1792577827375.wav.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-
-Leitplankenkontakt: audio/gameplay/road-edge-hit.wav, vom Nutzer bereitgestellt.
-Ursprünglicher Dateiname: A_very_short,_soft_m_#1-1792578039510.wav.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-
-Leitplankenschleifen: audio/gameplay/road-edge-scrape.wav, vom Nutzer bereitgestellt.
-Ursprünglicher Dateiname: A_continuous,_gentle_#1-1792578150339.wav.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-
-Sensoraufnahme: audio/originals/car-sensors.mp3, vom Nutzer aus Windows-Downloads bereitgestellt.
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-audio/gameplay/sensor-beep.wav: Ausschnitt von 3,90 bis 4,02 Sekunden aus car-sensors.mp3;
-in Mono umgewandelt, Lautstärke normalisiert und an den Rändern kurz ein-/ausgeblendet.
-
-Vorbeifahr-Sound: audio/originals/car-pass-by.mp3, vom Nutzer aus Windows-Downloads bereitgestellt
-(ursprünglicher Dateiname: flutie8211-car-driving-by-left-to-right-2-535547.mp3).
-Quelle/Lizenz dieser Datei wurden vom Nutzer nicht angegeben.
-audio/gameplay/car-pass-by-spatial.wav: Ausschnitt 0,35 bis 4,05 Sekunden; in Mono gemischt,
-Lautstärke normalisiert und Ränder kurz ein-/ausgeblendet. Stereo folgt dem Auto im Spiel.
-
-audio/originals/car-pass-by-johnnyfarmer.mp3: öffentlich verfügbare HQ-Vorschau von Freesound.
-Urheber: Johnnyfarmer
+Titel: Car Passing
 Quelle: https://freesound.org/people/Johnnyfarmer/sounds/209767/
-Lizenz: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
-audio/gameplay/car-pass-by-johnnyfarmer-spatial.wav: Ausschnitt 0 bis 3.775 Sekunden; in Mono gemischt,
-normalisiert und ein-/ausgeblendet. Ungefähre lauteste Stelle: 1.775 Sekunden.
+Lizenz: CC0 1.0
 
-audio/originals/car-pass-by-961-studios.mp3: öffentlich verfügbare HQ-Vorschau von Freesound.
-Urheber: 961_Studios
+Titel: Car passing by.wav
 Quelle: https://freesound.org/people/961_Studios/sounds/244407/
-Lizenz: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
-audio/gameplay/car-pass-by-961-studios-spatial.wav: Ausschnitt 0 bis 3.425 Sekunden; in Mono gemischt,
-normalisiert und ein-/ausgeblendet. Ungefähre lauteste Stelle: 1.425 Sekunden.
-
-Lizenzangaben des Herausgebers (Kenney)
-
-Interface Sounds (1.0)
-
-	Created/distributed by Kenney (www.kenney.nl)
-	Creation date: 11-02-2020
-
-			------------------------------
-
-	License: (Creative Commons Zero, CC0)
-	http://creativecommons.org/publicdomain/zero/1.0/
-
-	This content is free to use in personal, educational and commercial projects.
-
-	Support us by crediting Kenney or www.kenney.nl (this is not mandatory)
-
-			------------------------------
-
-	Donate:   http://support.kenney.nl
-	Patreon:  http://patreon.com/kenney/
-
-	Follow on Twitter for updates:
-	http://twitter.com/KenneyNL
+Lizenz: CC0 1.0
