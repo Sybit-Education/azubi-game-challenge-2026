@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 
+// Texture keys for the blinkers and brake lights, per car skin.
+const LIGHT_TEXTURES = {
+  car: { left: 'blinkLeft', right: 'blinkRight', brake: 'brakeLights' },
+  car2: { left: 'blinkLeft2', right: 'blinkRight2', brake: 'brakeLights2' },
+};
+
 export default class Car extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, texture = 'car', startinglane = 1) {
     super(scene, x, y, texture);
@@ -34,6 +40,24 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.currentLane = startinglane;
     this.laneCooldown = 0;
     this.inputLocked = false;
+    this.baseTexture = texture;
+    this.lights = LIGHT_TEXTURES[texture]; // undefined for skins without light sprites
+  }
+
+  // Swap to a light texture, but never over the shield texture.
+  setLight(name) {
+    if (!this.lights) return;
+
+    const key = this.texture.key;
+    if (key !== this.baseTexture && !Object.values(this.lights).includes(key)) return;
+
+    this.setTexture(this.lights[name]);
+  }
+
+  clearLight(name) {
+    if (this.lights && this.texture.key === this.lights[name]) {
+      this.setTexture(this.baseTexture);
+    }
   }
 
   move(controls) {
@@ -64,9 +88,11 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       this.laneCooldown--;
     }
     if (controls.left) {
-      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
       if (controls.left && this.laneCooldown <= 0 && this.currentLane > 0) {
         this.currentLane--;
+
+        this.setLight('left');
+        this.scene.time.delayedCall(300, () => this.clearLight('left'));
 
         this.setAngle(-4);
 
@@ -91,6 +117,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (controls.right) {
       if (controls.right && this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
         this.currentLane++;
+
+        this.setLight('right');
+        this.scene.time.delayedCall(300, () => this.clearLight('right'));
 
         this.setAngle(4);
 
@@ -118,6 +147,10 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
     if (controls.brake) {
       this.setVelocityY(500);
+      // Don't override a running blinker.
+      if (this.texture.key === this.baseTexture) this.setLight('brake');
+    } else {
+      this.clearLight('brake');
     }
 
     //constraint the cars downward and upward movement to not go out of bounds
