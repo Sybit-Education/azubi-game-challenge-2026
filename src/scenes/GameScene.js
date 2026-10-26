@@ -657,20 +657,15 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  updateRoadEdgeScrape() {
-    if (this.car.dead) {
+  updateRoadEdgeScrape(car) {
+    if (!car) return;
+
+    if (car.dead) {
       this.roadEdgeScrape.stop();
       return;
     }
 
-    const controls = this.InputManager.getControlsP1;
-    const edge = this.lastPlayerRoadEdge;
-    const pushingLeft = edge === 'left' && controls.left && !controls.right;
-    const pushingRight = edge === 'right' && controls.right && !controls.left;
-
-    if (pushingLeft || pushingRight) {
-      this.roadEdgeScrape.setPan(pushingLeft ? -1 : 1);
-
+    if (car.boundaryParticles && car.boundaryParticles.emitting == true) {
       if (!this.roadEdgeScrape.isPlaying && !this.sound.locked) {
         this.roadEdgeScrape.play();
       }
@@ -717,7 +712,8 @@ export default class GameScene extends Phaser.Scene {
       this.car.intendedXVelocity = this.car.body.velocity.x;
     }
 
-    this.updateRoadEdgeScrape();
+    this.updateRoadEdgeScrape(this.car);
+    this.updateRoadEdgeScrape(this.secondCar);
 
     if (this.secondCar && !this.secondCar.dead) {
       this.secondCar.move(this.InputManager.getControlsP2);
