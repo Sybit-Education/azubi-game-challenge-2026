@@ -26,10 +26,22 @@ export default class GameScene extends Phaser.Scene {
   //Load images.
   preload() {
     preloadGameplaySounds(this);
-    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
-    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
-    this.load.image('winter-car', 'assets/images/entities/player-skins/winter-car-P1.png');
-    this.load.image('winter-car2', 'assets/images/entities/player-skins/winter-car-P2.png');
+    this.load.image(
+      'car',
+      'assets/images/entities/player-skins/playersprites/sybit-kart-player-1.png',
+    );
+    this.load.image(
+      'car2',
+      'assets/images/entities/player-skins/playersprites/sybit-kart-player-2.png',
+    );
+    this.load.image(
+      'winter-car',
+      'assets/images/entities/player-skins/playersprites/winter-car-P1.png',
+    );
+    this.load.image(
+      'winter-car2',
+      'assets/images/entities/player-skins/playersprites/winter-car-P2.png',
+    );
 
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
@@ -52,8 +64,11 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
 
-    this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
-    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+    this.load.image('carShield', 'assets/images/entities/player-skins/playerstates/car-shield.png');
+    this.load.image(
+      'carShield2',
+      'assets/images/entities/player-skins/playerstates/car-shield-2.png',
+    );
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
