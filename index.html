@@ -62,10 +62,23 @@
         <input id="accessible-toggle" type="checkbox" />
 
         <label class="sr-only" for="game-mode-menu">game mode</label>
-        <select id="game-mode-menu">
-          <option value="standard">standard</option>
-          <option value="christmas">Christmas mode</option>
-        </select>
+        <button
+          id="game-mode-menu"
+          type="button"
+          aria-expanded="false"
+          aria-controls="christmas-mode-choice"
+        >
+          game mode
+        </button>
+        <button
+          id="christmas-mode-choice"
+          type="button"
+          aria-label="Christmas mode"
+          hidden
+          disabled
+        >
+          Christmas mode
+        </button>
         <p class="sr-only">press escape to close the settings dialog.</p>
         <button id="close-settings" type="button" autofocus>Close</button>
       </dialog>
@@ -157,12 +170,6 @@
     #settings-dialog::backdrop {
       background: transparent;
       pointer-events: none;
-    }
-
-    #settings-dialog select option {
-      color: #000000;
-      background: #ffffff;
-      font-size: 16px;
     }
   </style>
 </html>

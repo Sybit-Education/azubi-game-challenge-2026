@@ -56,6 +56,14 @@ export default class PopUpScene extends Phaser.Scene {
     const dialog = document.getElementById('settings-dialog');
     const accessibilityToggle = document.getElementById('accessible-toggle');
     const gameModeMenu = document.getElementById('game-mode-menu');
+    const christmasModeChoice = document.getElementById('christmas-mode-choice');
+    gameModeMenu.setAttribute(
+      'aria-label',
+      `Game mode: ${this.parentSceneKeys.includes('ChristmasScene') ? 'Christmas' : 'standard'}`,
+    );
+    gameModeMenu.setAttribute('aria-expanded', 'false');
+    christmasModeChoice.hidden = true;
+    christmasModeChoice.disabled = true;
 
     const padding = Math.max(24, Math.min(width, height) * 0.06);
     const uiScale = Phaser.Math.Clamp(
@@ -141,6 +149,9 @@ export default class PopUpScene extends Phaser.Scene {
     const updateChristmasButton = () => {
       const shouldBeOpen = hoveringStandard || hoveringChristmas;
 
+      gameModeMenu.setAttribute('aria-expanded', String(shouldBeOpen));
+      christmasModeChoice.hidden = !shouldBeOpen;
+      christmasModeChoice.disabled = !shouldBeOpen;
       this.tweens.killTweensOf(christmasModeButton);
 
       this.tweens.add({
@@ -280,7 +291,6 @@ export default class PopUpScene extends Phaser.Scene {
     this.input.keyboard.once('keydown-ESC', close);
 
     accessibilityToggle.checked = accessibilityEnabled;
-    gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
     // Phaser also listens on window. Input in the HTML dialog must not
     // trigger the visual controls a second time. Do not use preventDefault:
@@ -309,16 +319,10 @@ export default class PopUpScene extends Phaser.Scene {
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
-    const handleGameModeChange = () => {
-      playMenuClick(this);
-      this.registry.set('gameMode', gameModeMenu.value);
-      this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
-      this.scene.stop('PopUpScene');
-      this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
-      this.sound.play('christmas-whoosh', { volume: 0.2 });
-      this.sound.play('winter-wind', { volume: 0.1 });
-    };
-    gameModeMenu.addEventListener('change', handleGameModeChange);
+    const handleGameModeClick = chooseStandardMode;
+    const handleChristmasModeClick = chooseChristmasMode;
+    gameModeMenu.addEventListener('click', handleGameModeClick);
+    christmasModeChoice.addEventListener('click', handleChristmasModeClick);
     closeSettingsBtn.addEventListener('click', closeWindows);
 
     const handleCancel = (event) => {
@@ -335,7 +339,8 @@ export default class PopUpScene extends Phaser.Scene {
       closeSettingsBtn.removeEventListener('click', closeWindows);
       dialog.removeEventListener('cancel', handleCancel);
       accessibilityToggle.removeEventListener('change', handleAccessibilityChange);
-      gameModeMenu.removeEventListener('change', handleGameModeChange);
+      gameModeMenu.removeEventListener('click', handleGameModeClick);
+      christmasModeChoice.removeEventListener('click', handleChristmasModeClick);
       dialog.close();
       settingsBtn.focus();
     });
@@ -344,6 +349,7 @@ export default class PopUpScene extends Phaser.Scene {
       [closeSettingsBtn, closeButton],
       [accessibilityToggle, accessibilitySwitch],
       [gameModeMenu, standardModeButton],
+      [christmasModeChoice, christmasModeButton],
     ]);
     dialog.showModal();
 
