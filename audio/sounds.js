@@ -1,7 +1,12 @@
 import menuClickUrl from './menu/menuclick.mp3?url';
 import menuFocusUrl from './menu/menu-focus.ogg?url';
+import christmasModeSound from './menu/christmas-whoosh.mp3?url';
+import secondChristmasSound from './menu/winter-wind.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
+import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
+import shieldOverUrl from './gameplay/shield-over.mp3?url';
+
 import countdownUrl from './gameplay/countdown.mp3?url';
 import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
@@ -14,6 +19,17 @@ import collisionBangUrl from './gameplay/collision-bang.mp3?url';
 import roadEdgeHitUrl from './gameplay/road-edge-hit.wav?url';
 import roadEdgeScrapeUrl from './gameplay/road-edge-scrape.wav?url';
 import iceWarningUrl from './gameplay/ice-warning.wav?url';
+import duckQuack1Url from './gameplay/duck-quack-1.mp3?url';
+import duckQuack2Url from './gameplay/duck-quack-2.mp3?url';
+import duckQuack3Url from './gameplay/duck-quack-3.mp3?url';
+
+const duckQuackSounds = [
+  { key: 'duck-quack-1', url: duckQuack1Url },
+  { key: 'duck-quack-2', url: duckQuack2Url },
+  { key: 'duck-quack-3', url: duckQuack3Url },
+];
+
+export const DUCK_QUACK_SOUND_KEYS = duckQuackSounds.map((sound) => sound.key);
 
 function loadSound(scene, key, fileUrl) {
   if (scene.cache.audio.exists(key)) return;
@@ -31,6 +47,8 @@ export function preloadCountdownSound(scene) {
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
   loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
+  loadSound(scene, 'shield-collected', shieldCollectedUrl);
+  loadSound(scene, 'shield-over', shieldOverUrl);
   loadSound(scene, 'car-sensor', sensorBeepUrl);
   loadSound(scene, 'car-pass-by', carPassByUrl);
   loadSound(scene, 'car-pass-by-johnnyfarmer', carPassByJohnnyUrl);
@@ -42,11 +60,16 @@ export function preloadGameplaySounds(scene) {
   loadSound(scene, 'road-edge-hit', roadEdgeHitUrl);
   loadSound(scene, 'road-edge-scrape', roadEdgeScrapeUrl);
   loadSound(scene, 'ice-warning', iceWarningUrl);
+  for (const sound of duckQuackSounds) {
+    loadSound(scene, sound.key, sound.url);
+  }
 }
 
 export function preloadMenuSounds(scene) {
   loadSound(scene, 'menu-click', menuClickUrl);
   loadSound(scene, 'menu-focus', menuFocusUrl);
+  loadSound(scene, 'christmas-whoosh', christmasModeSound);
+  loadSound(scene, 'winter-wind', secondChristmasSound);
 }
 
 export function playMenuClick(scene) {
