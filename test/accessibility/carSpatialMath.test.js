@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
+import * as carSpatialMath from '../../src/accessibility/audio/carSpatialMath.js';
+
+const {
   mapCarToAudioPosition,
   mapSpeedToListenerFrequency,
   resolveRoadLane,
   selectAudibleCars,
-} from '../../src/accessibility/audio/carSpatialMath.js';
+} = carSpatialMath;
 
 test('maps a centered car ahead of the listener to negative z', () => {
   const position = mapCarToAudioPosition({ x: 500, y: 200 }, { x: 500, y: 800 }, 800, 1000);
@@ -59,4 +61,12 @@ test('changes lanes only after crossing a boundary with hysteresis', () => {
   assert.equal(resolveRoadLane(290, 100, 800, 1), 1);
   assert.equal(resolveRoadLane(279, 100, 800, 1), 0);
   assert.equal(resolveRoadLane(900, 100, 800), 3);
+});
+
+test('raises engine gain smoothly as another car gets close', () => {
+  assert.equal(typeof carSpatialMath.mapAudioPositionToProximityGain, 'function');
+  assert.equal(carSpatialMath.mapAudioPositionToProximityGain({ x: 0, z: 0 }), 1.35);
+  assert.equal(carSpatialMath.mapAudioPositionToProximityGain({ x: 2, z: 0 }), 1.35);
+  assert.equal(carSpatialMath.mapAudioPositionToProximityGain({ x: 0, z: -16 }), 0.95);
+  assert.equal(carSpatialMath.mapAudioPositionToProximityGain({ x: 0, z: 30 }), 0.55);
 });
