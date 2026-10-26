@@ -61,6 +61,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
+    this.load.image('shield', 'assets/images/hud-icons/shield.png');
+    this.load.image('shrink', 'assets/images/hud-icons/shrink.png');
+    this.load.image('grow', 'assets/images/hud-icons/grow.png');
+    this.load.image('stats-background', 'assets/images/hud-icons/stats-background.png');
+    this.load.image('magnet', 'assets/images/hud-icons/magnet.png');
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
