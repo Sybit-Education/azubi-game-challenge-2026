@@ -32,13 +32,12 @@ export default class NameInputScene extends Phaser.Scene {
       ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
       ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0'],
       ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['DELETE', 'SPACE', 'END'],
+      ['DELETE', 'END'],
     ];
 
     this.createPrompt();
     this.createCharacterGrid();
     this.createKeyboardInput();
-    this.moveSelection(1, 1);
 
     this.updateSelection();
 
@@ -101,8 +100,7 @@ export default class NameInputScene extends Phaser.Scene {
         const gridRight = startX + rowWidth + cellWidth / 4;
 
         rowTexts[0].setX(gridLeft + rowTexts[0].width / 2);
-        rowTexts[1].setX(this.scale.width / 2);
-        rowTexts[2].setX(gridRight - rowTexts[2].width / 2);
+        rowTexts[1].setX(gridRight - rowTexts[1].width / 2);
         return;
       }
 
@@ -123,8 +121,8 @@ export default class NameInputScene extends Phaser.Scene {
 
       if (event.key === 'Backspace') {
         this.playerNames[this.activePlayer] = currentName.slice(0, -1);
-      } else if (event.key.length === 1 && currentName.length < this.maxNameLength) {
-        this.playerNames[this.activePlayer] = currentName + event.key;
+      } else if (/^[a-zA-Z0-9]$/.test(event.key) && currentName.length < this.maxNameLength) {
+        this.playerNames[this.activePlayer] = currentName + event.key.toUpperCase();
       }
 
       this.updateNamePrompt();
@@ -163,8 +161,6 @@ export default class NameInputScene extends Phaser.Scene {
     } else if (character === 'DELETE') {
       this.playerNames[this.activePlayer] = currentName.slice(0, -1);
       this.updateNamePrompt();
-    } else if (character === 'SPACE') {
-      this.appendCharacter(' ');
     } else {
       this.appendCharacter(character);
     }
