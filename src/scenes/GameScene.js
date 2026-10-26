@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { createCarSpatialAudioSystem } from '../accessibility/audio/createCarSpatialAudioSystem.js';
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
 import Track from '../objects/Track.js';
@@ -62,6 +63,12 @@ export default class GameScene extends Phaser.Scene {
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
     this.createTrack();
+    const accessibilityEnabled =
+      this.registry.get('accessibilityMode') ?? this.registry.get('accessibility enabled') ?? false;
+
+    this.carSpatialAudio = accessibilityEnabled
+      ? createCarSpatialAudioSystem(this, (roadObject) => roadObject instanceof EnemyCar)
+      : null;
     this.createWalls();
     this.createRoadObject('enemy-car');
     this.createRoadObject('coin');
@@ -74,6 +81,10 @@ export default class GameScene extends Phaser.Scene {
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.carSpatialAudio?.destroy();
+      this.carSpatialAudio = null;
+    });
   }
 
   setBackground(img) {
@@ -418,5 +429,13 @@ export default class GameScene extends Phaser.Scene {
     this.hud.update();
 
     this.ItemManager.itemShop();
+
+    this.carSpatialAudio?.update({
+      listenerCar: this.car,
+      roadObjects: this.roadObjects,
+      opponentCar: this.secondCar,
+      roadWidth: this.track1.displayWidth,
+      viewportHeight: this.scale.height,
+    });
   }
 }
