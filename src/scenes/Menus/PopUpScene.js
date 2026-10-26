@@ -359,10 +359,25 @@ export default class PopUpScene extends Phaser.Scene {
     ]);
     dialog.showModal();
 
+    let switchHovered = false;
+    const updateSwitchFeedback = (selected) => {
+      const alpha = selected || switchHovered ? 0.8 : 1;
+      this.tweens.add({
+        targets: [accessibilitySwitch, accessibilityKnob],
+        alpha,
+        duration: 100,
+      });
+    };
+
     this.navigationItems = () => {
       const items = [
         { button: closeButton, action: close, scale: 0.4 * uiScale },
-        { button: accessibilitySwitch, action: toggleAccessibility, scale: 0.37 * uiScale },
+        {
+          button: accessibilitySwitch,
+          action: toggleAccessibility,
+          scale: 0.37 * uiScale,
+          applySelection: updateSwitchFeedback,
+        },
         { button: standardModeButton, action: toggleGameModeDropdown, scale: 0.3 * uiScale },
       ];
 
@@ -379,42 +394,41 @@ export default class PopUpScene extends Phaser.Scene {
     this.selectedIndex = 0;
     this.updateGamepadSelection();
 
-    // Hover-effects for the buttons
+    const bindOverlayHover = (element, object, baseScale) => {
+      const updateScale = (hovered) => {
+        const isSelected = this.navigationItems()[this.selectedIndex]?.button === object;
+        const scale = baseScale * (hovered ? 1.2 : isSelected ? 1.12 : 1);
+        this.tweens.add({ targets: object, scale, duration: 100 });
+      };
+      const onEnter = () => updateScale(true);
+      const onLeave = () => updateScale(false);
+      element.addEventListener('mouseenter', onEnter);
+      element.addEventListener('mouseleave', onLeave);
+      this.events.once('shutdown', () => {
+        element.removeEventListener('mouseenter', onEnter);
+        element.removeEventListener('mouseleave', onLeave);
+      });
+    };
 
-    closeButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: closeButton,
-        scaleX: 0.45 * uiScale,
-        scaleY: 0.45 * uiScale,
-        duration: 100,
-      });
-    });
-    closeButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: closeButton,
-        scaleX: 0.4 * uiScale,
-        scaleY: 0.4 * uiScale,
-        duration: 100,
-      });
+    bindOverlayHover(closeSettingsBtn, closeButton, 0.4 * uiScale);
+    bindOverlayHover(gameModeMenu, standardModeButton, 0.3 * uiScale);
+    bindOverlayHover(christmasModeChoice, christmasModeButton, 0.3 * uiScale);
+
+    const setSwitchHover = (hovered) => {
+      switchHovered = hovered;
+      updateSwitchFeedback(
+        this.navigationItems()[this.selectedIndex]?.button === accessibilitySwitch,
+      );
+    };
+    const onSwitchEnter = () => setSwitchHover(true);
+    const onSwitchLeave = () => setSwitchHover(false);
+    accessibilityToggle.addEventListener('mouseenter', onSwitchEnter);
+    accessibilityToggle.addEventListener('mouseleave', onSwitchLeave);
+    this.events.once('shutdown', () => {
+      accessibilityToggle.removeEventListener('mouseenter', onSwitchEnter);
+      accessibilityToggle.removeEventListener('mouseleave', onSwitchLeave);
     });
 
-    standardModeButton.on('pointerover', () => {
-      this.tweens.add({
-        targets: standardModeButton,
-        scaleX: 0.32 * uiScale,
-        scaleY: 0.32 * uiScale,
-        duration: 100,
-      });
-    });
-
-    standardModeButton.on('pointerout', () => {
-      this.tweens.add({
-        targets: standardModeButton,
-        scaleX: 0.3 * uiScale,
-        scaleY: 0.3 * uiScale,
-        duration: 100,
-      });
-    });
     bindMenuFocusSounds(this, ['close-settings', 'accessible-toggle', 'game-mode-menu']);
   }
   updateGamepadSelection() {
@@ -422,11 +436,16 @@ export default class PopUpScene extends Phaser.Scene {
     this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex, 0, items.length);
 
     items.forEach((item, index) => {
-      this.tweens.add({
-        targets: item.button,
-        scale: index === this.selectedIndex ? item.scale * 1.12 : item.scale,
-        duration: 100,
-      });
+      const selected = index === this.selectedIndex;
+      if (item.applySelection) {
+        item.applySelection(selected);
+      } else {
+        this.tweens.add({
+          targets: item.button,
+          scale: selected ? item.scale * 1.12 : item.scale,
+          duration: 100,
+        });
+      }
     });
   }
 
