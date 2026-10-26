@@ -301,7 +301,7 @@ export default class MenuScene extends Phaser.Scene {
     this.clearMultiplayerOption = () => {
       this.isMultiplayerSelected = false;
       twoPlayerButton.setDepth(0);
-      this.deselectButton(twoPlayerButton - 3);
+      // this.deselectButton(twoPlayerButton - 3);
       scheduleHide();
     };
     multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
@@ -333,12 +333,6 @@ export default class MenuScene extends Phaser.Scene {
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
         this.selectButton(this.play_button);
-
-        this.tweens.add({
-          targets: twoPlayerButton,
-          //y: playOriginalY - 10 * this.scaleFactor,
-          duration: 50,
-        });
       }
     });
 
