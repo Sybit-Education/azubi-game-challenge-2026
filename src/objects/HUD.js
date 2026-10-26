@@ -16,7 +16,7 @@ export default class HUD {
     this.distanceText = scene.add
       .text(margin, margin, '', {
         fontFamily: 'Tiny5',
-        fontSize: `${40 * this.scaleFactor}px`,
+        fontSize: `${50 * this.scaleFactor}px`,
       })
       .setOrigin(0, 0)
       .setDepth(5);
@@ -24,7 +24,7 @@ export default class HUD {
     this.scoreText = scene.add
       .text(margin, margin + 40 * this.scaleFactor, '', {
         fontFamily: 'Tiny5',
-        fontSize: `${40 * this.scaleFactor}px`,
+        fontSize: `${50 * this.scaleFactor}px`,
       })
       .setOrigin(0, 0)
       .setDepth(5);
@@ -34,7 +34,7 @@ export default class HUD {
       this.distanceText2 = scene.add
         .text(scene.scale.width - margin, margin, '', {
           fontFamily: 'Tiny5',
-          fontSize: `${40 * this.scaleFactor}px`,
+          fontSize: `${50 * this.scaleFactor}px`,
         })
         .setOrigin(1, 0)
         .setDepth(5);
@@ -42,7 +42,7 @@ export default class HUD {
       this.scoreText2 = scene.add
         .text(scene.scale.width - margin, margin + 40 * this.scaleFactor, '', {
           fontFamily: 'Tiny5',
-          fontSize: `${40 * this.scaleFactor}px`,
+          fontSize: `${50 * this.scaleFactor}px`,
         })
         .setOrigin(1, 0)
         .setDepth(5);
@@ -81,6 +81,11 @@ export default class HUD {
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
 
+      this.distanceText.setFontSize(40 * this.scaleFactor);
+      this.scoreText.setFontSize(40 * this.scaleFactor);
+
+      this.distanceText2.setFontSize(40 * this.scaleFactor);
+      this.scoreText2.setFontSize(40 * this.scaleFactor);
       this.statsFrame2.clear();
       this.statsFrame2.fillStyle(0x000000, 0.9);
       this.statsFrame2.fillRect(x, y, width, height);
@@ -104,7 +109,7 @@ export default class HUD {
 
   showPowerupTimer(texture, duration = 10000, scale = 0.05, player = 1) {
     const icon = this.scene.add
-      .image(0, 140 * this.scaleFactor, texture)
+      .image(0, 180 * this.scaleFactor, texture)
       .setScale(scale * this.scaleFactor)
       .setDepth(10);
 
