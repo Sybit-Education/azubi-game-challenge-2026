@@ -22,7 +22,6 @@ export default class ItemManager {
     this.invulnerableCar1 = false;
     this.invulnerableCar2 = false;
 
-    this.iceTriggered = false;
     this.originScale = this.scene.car.scale;
   }
 
@@ -403,11 +402,11 @@ export default class ItemManager {
 
     car.iceTriggered = true;
 
-    console.log('ice!');
+    console.log('ice effect started! (saied was here)');
 
-    const zufallszahl = Phaser.Math.Between(0, 1);
+    const direction = Phaser.Math.Between(0, 1);
 
-    if (zufallszahl === 1) {
+    if (direction === 1) {
       this.scene.tweens.add({
         targets: car,
         x: car.x + 300,
@@ -423,6 +422,36 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(1500, () => {
       car.iceTriggered = false;
+    });
+  }
+
+   oilEffect(car) {
+    if (car.oilTriggered) {
+      return;
+    }
+
+    car.oilTriggered = true;
+
+    console.log('oil effect started! (saied was here)');
+
+    const direction = Phaser.Math.Between(0, 1);
+
+    if (direction === 1) {
+      this.scene.tweens.add({
+        targets: car,
+        x: car.x + 300,
+        duration: 1250,
+      });
+    } else {
+      this.scene.tweens.add({
+        targets: car,
+        x: car.x - 300,
+        duration: 1250,
+      });
+    }
+
+    this.scene.time.delayedCall(1500, () => {
+      car.oilTriggered = false;
     });
   }
 

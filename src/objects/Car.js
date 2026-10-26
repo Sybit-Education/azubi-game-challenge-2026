@@ -31,6 +31,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
     this.coinMultiplier = 1;
+    this.iceTriggered = false;
+    this.oilTriggered = false;
   }
 
   move(controls) {

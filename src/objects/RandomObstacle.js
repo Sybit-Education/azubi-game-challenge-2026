@@ -4,7 +4,7 @@ import Obstacle from './Obstacle.js';
 
 export default class RandomObstacle extends Obstacle {
   constructor(scene, x, y, lane) {
-    const randomInt = Phaser.Math.Between(1, 3);
+    const randomInt = Phaser.Math.Between(1, 4);
     const texture = `random-object${randomInt}`;
 
     super(scene, x, y, texture, lane);
