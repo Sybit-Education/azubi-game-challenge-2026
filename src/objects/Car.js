@@ -94,7 +94,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       this.boundaryParticles.setPosition(this.x + this.displayWidth / 2 - 15, this.y - 95);
       this.boundaryParticles.emitting = true;
     } else {
-      this.boundaryParticles.emitting = false;
+    this.boundaryParticles.emitting = false;
     }
   }
 

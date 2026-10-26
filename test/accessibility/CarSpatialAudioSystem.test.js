@@ -38,6 +38,26 @@ class FakeCrashSound {
   }
 }
 
+class FakeScrapeSound {
+  constructor() {
+    this.started = [];
+    this.stopCalls = 0;
+    this.destroyed = false;
+  }
+
+  start(pan) {
+    this.started.push(pan);
+  }
+
+  stop() {
+    this.stopCalls += 1;
+  }
+
+  destroy() {
+    this.destroyed = true;
+  }
+}
+
 test('owns sources for the selected enemy and opponent cars', () => {
   const createdKinds = [];
   const createdSources = [];
@@ -91,10 +111,11 @@ test('owns sources for the selected enemy and opponent cars', () => {
   assert.equal(listenerSource.destroyed, true);
 });
 
-test('keeps a centered listener engine and announces stable lane changes', () => {
+test('keeps a centered listener engine, announces stable lane changes, and updates scrape cues', () => {
   const createdKinds = [];
   const createdSources = [];
   const announcedLanes = [];
+  const scrapeSound = new FakeScrapeSound();
   const laneCue = {
     silenceCalls: 0,
     announce: (lane) => announcedLanes.push(lane),
@@ -105,10 +126,18 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
       this.destroyed = true;
     },
   };
-  const listenerCar = { x: 350, y: 800, active: true };
+  const listenerCar = {
+    x: 350,
+    y: 800,
+    active: true,
+    boundaryParticles: { emitting: false },
+    leftLimit: 240,
+    rightLimit: 760,
+  };
   const system = new CarSpatialAudioSystem({
     isEnemyCar: () => false,
     laneCue,
+    scrapeSound,
     sourceFactory: (kind) => {
       const source = new FakeSpatialSource();
       createdKinds.push(kind);
@@ -131,6 +160,7 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
   assert.deepEqual(createdSources[0].positions[0], { x: 0, y: 0, z: 0 });
   assert.deepEqual(createdSources[0].frequencies, [84]);
   assert.deepEqual(announcedLanes, [1]);
+  assert.equal(scrapeSound.stopCalls, 1);
 
   listenerCar.x = 510;
   system.update({
@@ -145,7 +175,8 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
 
   assert.deepEqual(announcedLanes, [1]);
 
-  listenerCar.x = 521;
+  listenerCar.x = 240;
+  listenerCar.boundaryParticles.emitting = true;
   system.update({
     listenerCar,
     roadObjects: [],
@@ -158,7 +189,8 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
 
   assert.deepEqual(createdKinds, ['listener']);
   assert.deepEqual(createdSources[0].frequencies, [84, 132, 132]);
-  assert.deepEqual(announcedLanes, [1, 2]);
+  assert.deepEqual(announcedLanes, [1, 0]);
+  assert.deepEqual(scrapeSound.started, [-1]);
 
   listenerCar.dead = true;
   system.update({
@@ -173,11 +205,13 @@ test('keeps a centered listener engine and announces stable lane changes', () =>
 
   assert.equal(createdSources[0].destroyed, true);
   assert.equal(laneCue.silenceCalls, 1);
+  assert.equal(scrapeSound.stopCalls, 2);
 
   system.destroy();
 
   assert.equal(laneCue.silenceCalls, 2);
   assert.equal(laneCue.destroyed, true);
+  assert.equal(scrapeSound.destroyed, true);
 });
 
 test('positions crash sounds relative to the listener car', () => {

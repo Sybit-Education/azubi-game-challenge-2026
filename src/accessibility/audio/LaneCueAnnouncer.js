@@ -43,9 +43,12 @@ export class LaneCueAnnouncer {
 
     if (this.speechSynthesis && this.Utterance) {
       this.cancelSpeech();
-      const utterance = new this.Utterance(`Läin ${LANE_NAMES[safeLaneIndex]}`);
+      const hasEnglishVoice = Boolean(this.englishVoice);
+      const utterance = new this.Utterance(
+        hasEnglishVoice ? `Lane ${LANE_NAMES[safeLaneIndex]}` : `Lehn ${LANE_NAMES[safeLaneIndex]}`,
+      );
       utterance.voice = this.englishVoice;
-      utterance.lang = this.englishVoice?.lang ?? 'en-US';
+      utterance.lang = this.englishVoice?.lang ?? 'de-DE';
       utterance.rate = 1.1;
       utterance.volume = 0.75;
       utterance.onend = () => this.finishSpeech(utterance);

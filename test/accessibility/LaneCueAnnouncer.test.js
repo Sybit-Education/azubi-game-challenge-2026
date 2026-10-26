@@ -151,7 +151,10 @@ test('announces a lane with a left-to-right pitch and English speech', () => {
   const announcer = new LaneCueAnnouncer({
     audioContext: context,
     destination,
-    speechSynthesis: { speak: (utterance) => spoken.push(utterance) },
+    speechSynthesis: {
+      getVoices: () => [{ lang: 'en-US', name: 'English US' }],
+      speak: (utterance) => spoken.push(utterance),
+    },
     Utterance: FakeUtterance,
   });
 
@@ -181,6 +184,9 @@ test('replaces stale speech and cancels it when silenced', () => {
   const spoken = [];
   const speechSynthesis = {
     cancelCalls: 0,
+    getVoices() {
+      return [{ lang: 'en-US', name: 'English US' }];
+    },
     cancel() {
       this.cancelCalls += 1;
     },

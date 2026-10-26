@@ -6,11 +6,18 @@ import {
 } from './carSpatialMath.js';
 
 export class CarSpatialAudioSystem {
-  constructor({ sourceFactory, isEnemyCar, laneCue = null, crashSound = null }) {
+  constructor({
+    sourceFactory,
+    isEnemyCar,
+    laneCue = null,
+    crashSound = null,
+    scrapeSound = null,
+  }) {
     this.sourceFactory = sourceFactory;
     this.isEnemyCar = isEnemyCar;
     this.laneCue = laneCue;
     this.crashSound = crashSound;
+    this.scrapeSound = scrapeSound;
     this.candidates = [];
     this.sources = new Map();
     this.listenerSource = null;
@@ -38,6 +45,7 @@ export class CarSpatialAudioSystem {
     this.roadWidth = roadWidth;
     this.viewportHeight = viewportHeight;
     this.updateListener(listenerCar, roadLeftEdge, roadWidth, gameSpeed);
+    this.updateScrape(listenerCar);
     this.candidates.length = 0;
 
     for (const roadObject of roadObjects) {
@@ -93,7 +101,8 @@ export class CarSpatialAudioSystem {
         this.sources.set(target, source);
       }
 
-      source.setPosition(mapCarToAudioPosition(target, listenerCar, roadWidth, viewportHeight));
+      const position = mapCarToAudioPosition(target, listenerCar, roadWidth, viewportHeight);
+      source.setPosition(position);
     }
 
     for (const [target, source] of this.sources) {
@@ -102,6 +111,21 @@ export class CarSpatialAudioSystem {
         this.sources.delete(target);
       }
     }
+  }
+
+  updateScrape(listenerCar) {
+    if (!this.scrapeSound) return;
+
+    if (!listenerCar?.boundaryParticles?.emitting) {
+      this.scrapeSound.stop();
+      return;
+    }
+
+    const leftDistance = Math.abs(listenerCar.x - listenerCar.leftLimit);
+    const rightDistance = Math.abs(listenerCar.x - listenerCar.rightLimit);
+    const pan = leftDistance <= rightDistance ? -1 : 1;
+
+    this.scrapeSound.start(pan);
   }
 
   clear() {
@@ -124,5 +148,6 @@ export class CarSpatialAudioSystem {
     this.viewportHeight = null;
     this.laneCue?.destroy();
     this.crashSound?.destroy();
+    this.scrapeSound?.destroy();
   }
 }

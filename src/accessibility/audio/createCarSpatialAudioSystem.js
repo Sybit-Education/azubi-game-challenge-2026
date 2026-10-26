@@ -4,6 +4,7 @@ import { CarSpatialAudioSystem } from './CarSpatialAudioSystem.js';
 import { CrashSoundPlayer } from './CrashSoundPlayer.js';
 import { getEngineVoice } from './engineVoice.js';
 import { LaneCueAnnouncer } from './LaneCueAnnouncer.js';
+import { ScrapeSoundPlayer } from './ScrapeSoundPlayer.js';
 import { SpatialEngineSource } from './SpatialEngineSource.js';
 
 export function createCarSpatialAudioSystem(scene, isEnemyCar) {
@@ -22,6 +23,7 @@ export function createCarSpatialAudioSystem(scene, isEnemyCar) {
       speechSynthesis: globalThis.speechSynthesis,
       Utterance: globalThis.SpeechSynthesisUtterance,
     }),
+    scrapeSound: new ScrapeSoundPlayer(scene.sound.context, scene.sound.destination),
     sourceFactory: (kind) => {
       const { frequency, targetGain } = getEngineVoice(kind);
 

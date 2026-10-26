@@ -13,6 +13,7 @@ export class SpatialEngineSource {
     this.audible = false;
     this.disconnected = false;
     this.fadeInStartTime = null;
+    this.proximityGainFactor = 1;
 
     this.oscillator = audioContext.createOscillator();
     this.filter = audioContext.createBiquadFilter();
@@ -46,6 +47,13 @@ export class SpatialEngineSource {
 
     const now = this.audioContext.currentTime;
     const smoothing = CAR_AUDIO_CONFIG.smoothingSeconds;
+    const distance = Math.sqrt(x * x + y * y + z * z);
+    const normalizedDistance = Math.min(1, distance / CAR_AUDIO_CONFIG.maxLongitudinalUnits);
+    const gainRange =
+      CAR_AUDIO_CONFIG.proximityGainMaxFactor - CAR_AUDIO_CONFIG.proximityGainMinFactor;
+
+    this.proximityGainFactor =
+      CAR_AUDIO_CONFIG.proximityGainMaxFactor - normalizedDistance * gainRange;
 
     this.panner.positionX.setTargetAtTime(x, now, smoothing);
     this.panner.positionY.setTargetAtTime(y, now, smoothing);
@@ -55,8 +63,18 @@ export class SpatialEngineSource {
       this.audible = true;
       this.fadeInStartTime = now;
       this.setGainAt(0, now);
-      this.gain.gain.linearRampToValueAtTime(this.targetGain, now + CAR_AUDIO_CONFIG.fadeInSeconds);
+      this.gain.gain.linearRampToValueAtTime(
+        this.targetGain * this.proximityGainFactor,
+        now + CAR_AUDIO_CONFIG.fadeInSeconds,
+      );
+      return;
     }
+
+    this.gain.gain.setTargetAtTime(
+      this.targetGain * this.proximityGainFactor,
+      now,
+      CAR_AUDIO_CONFIG.proximitySmoothingSeconds,
+    );
   }
 
   setFrequency(frequency) {
@@ -90,7 +108,7 @@ export class SpatialEngineSource {
       Math.max(0, (time - this.fadeInStartTime) / CAR_AUDIO_CONFIG.fadeInSeconds),
     );
 
-    return this.targetGain * fadeProgress;
+    return this.targetGain * this.proximityGainFactor * fadeProgress;
   }
 
   setGainAt(value, time) {

@@ -132,7 +132,7 @@ test('creates, positions, and disposes a spatial engine graph', () => {
   assert.deepEqual(context.panner.positionX.lastTarget, [2, 5, 0.04]);
   assert.deepEqual(context.panner.positionY.lastTarget, [0, 5, 0.04]);
   assert.deepEqual(context.panner.positionZ.lastTarget, [-12, 5, 0.04]);
-  assert.deepEqual(context.gain.gain.lastRamp, [0.08, 5.25]);
+  assert.deepEqual(context.gain.gain.lastRamp, [0.08204687987072759, 5.25]);
 
   context.currentTime = 6;
 
@@ -143,7 +143,7 @@ test('creates, positions, and disposes a spatial engine graph', () => {
   assert.equal(context.oscillator.stopTime, 6.25);
   assert.equal(context.oscillator.stopCalls, 1);
   assert.equal(context.gain.gain.lastCancel, 6);
-  assert.deepEqual(context.gain.gain.lastValue, [0.08, 6]);
+  assert.deepEqual(context.gain.gain.lastValue, [0.08204687987072759, 6]);
   assert.deepEqual(context.gain.gain.lastRamp, [0, 6.25]);
   assert.notEqual(context.panner.disconnected, true);
 
@@ -164,7 +164,7 @@ test('fades out from the current level when interrupted during fade-in', () => {
   source.destroy();
 
   assert.equal(context.gain.gain.lastCancel, 5.125);
-  assert.deepEqual(context.gain.gain.lastValue, [0.04, 5.125]);
+  assert.deepEqual(context.gain.gain.lastValue, [0.05186666666666667, 5.125]);
   assert.deepEqual(context.gain.gain.lastRamp, [0, 5.375]);
 });
 
@@ -177,7 +177,7 @@ test('supports a quieter source with smooth pitch changes', () => {
 
   source.setPosition({ x: 0, y: 0, z: 0 });
 
-  assert.deepEqual(context.gain.gain.lastRamp, [0.035, 5.25]);
+  assert.deepEqual(context.gain.gain.lastRamp, [0.04725000000000001, 5.25]);
 
   context.currentTime = 5.5;
   source.setFrequency(120);
