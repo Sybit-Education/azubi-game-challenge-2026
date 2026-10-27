@@ -5,6 +5,7 @@ import CoinMultiplier from '../objects/CoinMultiplier.js';
 import EnemyCar from '../objects/EnemyCar.js';
 import ExtraLife from '../objects/ExtraLife.js';
 import Ice from '../objects/Ice.js';
+import Oil from '../objects/Oil.js';
 import Item from '../objects/Item.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import { hitRandomObstacle } from './GameSceneCollisions.js';
@@ -137,6 +138,24 @@ export function createRoadObject(scene, type) {
           scene.ItemManager,
         );
       }
+    } else if (type === 'oil') {
+      roadObject = new Oil(scene, roadObjectX, spawnY, lane);
+      scene.physics.add.overlap(
+        scene.car,
+        roadObject,
+        scene.ItemManager.oilEffect,
+        undefined,
+        scene.ItemManager,
+      );
+      if (scene.secondCar) {
+        scene.physics.add.overlap(
+          scene.secondCar,
+          roadObject,
+          scene.ItemManager.oilEffect,
+          undefined,
+          scene.ItemManager,
+        );
+      }
     } else if (type === 'random-obstacle') {
       roadObject = new RandomObstacle(scene, roadObjectX, spawnY, lane);
       roadObject.body.setSize(roadObject.width, roadObject.height);
@@ -157,6 +176,8 @@ export function createRoadObject(scene, type) {
   } else if (type === 'enemy-car') {
     delay = Phaser.Math.Between(2000, 4000);
   } else if (type === 'ice') {
+    delay = Phaser.Math.Between(6000, 12000);
+  } else if (type === 'oil') {
     delay = Phaser.Math.Between(6000, 12000);
   } else if (type === 'coinMultiplier') {
     delay = Phaser.Math.Between(10000, 20000);

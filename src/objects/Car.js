@@ -37,6 +37,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
     this.coinMultiplier = 1;
+    this.iceTriggered = false;
+    this.oilTriggered = false;
     this.currentLane = startinglane;
     this.laneCooldown = 0;
     this.inputLocked = false;
@@ -46,6 +48,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   // Swap to a light texture, but never over the shield texture.
   setLight(name) {
+    if (!this.active) return;
     if (!this.lights) return;
 
     const key = this.texture.key;
@@ -55,6 +58,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   }
 
   clearLight(name) {
+    if (!this.active) return;
     if (this.lights && this.texture.key === this.lights[name]) {
       this.setTexture(this.baseTexture);
     }

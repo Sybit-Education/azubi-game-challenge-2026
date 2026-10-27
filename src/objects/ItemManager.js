@@ -22,7 +22,6 @@ export default class ItemManager {
     this.invulnerableCar1 = false;
     this.invulnerableCar2 = false;
 
-    this.iceTriggered = false;
     this.originScale = this.scene.car.scale;
   }
 
@@ -218,6 +217,8 @@ export default class ItemManager {
       delay: 16,
       loop: true,
       callback: () => {
+        if (this.scene.car.dead) return;
+
         for (const roadObject of this.scene.roadObjects) {
           if (roadObject.texture?.key !== 'coin') {
             continue;
@@ -251,6 +252,8 @@ export default class ItemManager {
       delay: 16,
       loop: true,
       callback: () => {
+        if (this.scene.secondCar.dead) return;
+
         for (const roadObject of this.scene.roadObjects) {
           if (roadObject.texture?.key !== 'coin') {
             continue;
@@ -420,6 +423,34 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(1500, () => {
       car.iceTriggered = false;
+      car.inputLocked = false;
+    });
+  }
+
+  oilEffect(car) {
+    if (car.oilTriggered) {
+      return;
+    }
+
+    car.oilTriggered = true;
+    car.inputLocked = true;
+
+    console.log('oil!');
+
+    let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
+
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+
+    car.currentLane = targetLane;
+
+    this.scene.tweens.add({
+      targets: car,
+      x: car.lanes[targetLane],
+      duration: 1250,
+    });
+
+    this.scene.time.delayedCall(1500, () => {
+      car.oilTriggered = false;
       car.inputLocked = false;
     });
   }

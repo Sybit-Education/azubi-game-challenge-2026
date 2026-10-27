@@ -12,7 +12,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
-    await document.fonts.load('32px Tiny5');
+    await document.fonts.load('32px Silkscreen');
     const leaderboard = parseLeaderboard().slice(0, 10);
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
@@ -33,7 +33,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Titel Überschrifft "Leaderboard"
     this.title = this.add
       .text(this.scale.width / 2, this.scale.height / 12, 'Leaderboard', {
-        fontFamily: 'Tiny5',
+        fontFamily: 'Silkscreen',
         fontSize: '90px',
         color: '#ffffff',
       })
@@ -45,7 +45,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     // Style for one entry
     const entryStyle = {
-      fontFamily: 'Tiny5',
+      fontFamily: 'Silkscreen',
       fontSize: this.scale.height / 21 + 'px',
       color: '#ffffff',
     };
@@ -78,7 +78,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.resetButton = this.add
       .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
-        fontFamily: 'Tiny5',
+        fontFamily: 'Silkscreen',
         fontSize: '40px',
         color: '#ffffff',
       })
