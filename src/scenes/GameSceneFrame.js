@@ -13,7 +13,6 @@ function updatePlayerOne(scene) {
     currentRoadEdge = 'right';
   }
 
-  const laneChanged = currentLane !== scene.lastPlayerLane;
   const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
 
   if (scene.registry.get('accessibility enabled')) {
@@ -22,8 +21,6 @@ function updatePlayerOne(scene) {
       const pan = currentRoadEdge === 'left' ? -1 : 1;
       scene.sound.play('road-edge-hit', { volume: 0.25, pan });
       scene.sound.play('collision-hit', { volume: 0.15, pan });
-    } else if (laneChanged && !scene.laneAnnouncements.speaks) {
-      scene.gameStatus.textContent = `Lane ${currentLane + 1}`;
     }
   }
 
@@ -103,6 +100,7 @@ function updateTrackAndHud(scene, delta) {
 }
 
 export function updateGameScene(scene, delta) {
+  if (!scene.registry.get('accessibility enabled')) scene.speech.silence();
   scene.InputManager.update();
   scene.elapsedTime += delta;
 

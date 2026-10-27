@@ -287,10 +287,15 @@ test('pause and shutdown stop cues and remove scene listeners', () => {
   assert.equal(listeners.has('sleep'), false);
 });
 
-test('without Web Audio the existing live-region announcements remain available', () => {
+test('without Web Audio the announcer can still use browser speech', () => {
   const { scene } = createScene();
   scene.sound = { locked: false };
+  const spoken = [];
+  scene.speech = {
+    speak: (text) => spoken.push(text),
+    cancel() {},
+  };
   const announcements = new LaneAnnouncements(scene);
-  assert.equal(announcements.speaks, false);
   assert.doesNotThrow(() => announcements.update());
+  assert.deepEqual(spoken, ['Lane one']);
 });

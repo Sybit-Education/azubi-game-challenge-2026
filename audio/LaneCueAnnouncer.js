@@ -1,24 +1,25 @@
 import { LANE_CUE_CONFIG } from './laneCueConfig.js';
+import GameSpeech from './GameSpeech.js';
 
 const LANE_NAMES = Object.freeze(['one', 'two', 'three', 'four']);
 
 export class LaneCueAnnouncer {
-  constructor({ audioContext, destination, speechSynthesis, Utterance }) {
+  constructor({ audioContext, destination, speechSynthesis, Utterance, speech }) {
     this.audioContext = audioContext;
     this.destination = destination;
-    this.speechSynthesis = speechSynthesis;
-    this.Utterance = Utterance;
+    this.ownsSpeech = !speech;
+    this.speech = speech ?? new GameSpeech({ speechSynthesis, Utterance });
     this.activeCues = new Set();
-    this.pendingUtterance = null;
-    this.englishVoice = this.selectEnglishVoice();
-    this.handleVoicesChanged = () => {
-      this.englishVoice = this.selectEnglishVoice();
-    };
-    this.speechSynthesis?.addEventListener?.('voiceschanged', this.handleVoicesChanged);
   }
 
   announce(laneIndex) {
     const safeLaneIndex = Math.min(LANE_CUE_CONFIG.laneCount - 1, Math.max(0, laneIndex));
+    this.playTone(safeLaneIndex);
+    this.speech.speak(`Lane ${LANE_NAMES[safeLaneIndex]}`, { key: 'lane', interrupt: true });
+  }
+
+  playTone(laneIndex) {
+    if (!this.audioContext || !this.destination) return;
     const now = this.audioContext.currentTime;
     const endTime = now + LANE_CUE_CONFIG.laneCueDurationSeconds;
     const oscillator = this.audioContext.createOscillator();
@@ -26,7 +27,7 @@ export class LaneCueAnnouncer {
     const cue = { oscillator, gain };
 
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(LANE_CUE_CONFIG.laneCueFrequencies[safeLaneIndex], now);
+    oscillator.frequency.setValueAtTime(LANE_CUE_CONFIG.laneCueFrequencies[laneIndex], now);
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(
       LANE_CUE_CONFIG.laneCueGain,
@@ -40,45 +41,6 @@ export class LaneCueAnnouncer {
     this.activeCues.add(cue);
     oscillator.start(now);
     oscillator.stop(endTime);
-
-    if (this.speechSynthesis && this.Utterance) {
-      this.cancelSpeech();
-      const hasEnglishVoice = Boolean(this.englishVoice);
-      const utterance = new this.Utterance(
-        hasEnglishVoice ? `Lane ${LANE_NAMES[safeLaneIndex]}` : `Lehn ${LANE_NAMES[safeLaneIndex]}`,
-      );
-      utterance.voice = this.englishVoice;
-      utterance.lang = this.englishVoice?.lang ?? 'de-DE';
-      utterance.rate = 1.1;
-      utterance.volume = 0.75;
-      utterance.onend = () => this.finishSpeech(utterance);
-      utterance.onerror = () => this.finishSpeech(utterance);
-      this.pendingUtterance = utterance;
-      this.speechSynthesis.speak(utterance);
-    }
-  }
-
-  selectEnglishVoice() {
-    const voices = this.speechSynthesis?.getVoices?.() ?? [];
-
-    return (
-      voices.find(({ lang }) => lang?.toLowerCase() === 'en-us') ??
-      voices.find(({ lang }) => lang?.toLowerCase().startsWith('en')) ??
-      null
-    );
-  }
-
-  finishSpeech(utterance) {
-    if (this.pendingUtterance === utterance) {
-      this.pendingUtterance = null;
-    }
-  }
-
-  cancelSpeech() {
-    if (!this.pendingUtterance) return;
-
-    this.speechSynthesis?.cancel?.();
-    this.pendingUtterance = null;
   }
 
   disconnectCue(cue) {
@@ -89,7 +51,7 @@ export class LaneCueAnnouncer {
   }
 
   silence() {
-    this.cancelSpeech();
+    this.speech.cancel('lane');
 
     for (const cue of this.activeCues) {
       cue.oscillator.onended = null;
@@ -103,6 +65,6 @@ export class LaneCueAnnouncer {
 
   destroy() {
     this.silence();
-    this.speechSynthesis?.removeEventListener?.('voiceschanged', this.handleVoicesChanged);
+    if (this.ownsSpeech) this.speech.destroy();
   }
 }

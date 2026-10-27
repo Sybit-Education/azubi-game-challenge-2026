@@ -15,6 +15,7 @@ import { createRoadObject } from './GameSceneRoadObjects.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
+import GameSpeech from '../../audio/GameSpeech.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -125,6 +126,15 @@ export default class GameScene extends Phaser.Scene {
     this.currentLaneDanger = null;
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
+    this.speech = new GameSpeech();
+    const silenceSpeech = () => this.speech.silence();
+    this.events.on('pause', silenceSpeech);
+    this.events.on('sleep', silenceSpeech);
+    this.events.once('shutdown', () => {
+      this.events.off('pause', silenceSpeech);
+      this.events.off('sleep', silenceSpeech);
+      this.speech.destroy();
+    });
     this.coinAnnouncements = new CoinAnnouncements(this);
     this.laneAnnouncements = new LaneAnnouncements(this);
     this.createTrack();
@@ -414,7 +424,8 @@ export default class GameScene extends Phaser.Scene {
   getObstaclesForAudio() {
     return [
       ...this.roadObjects.filter(
-        (object) => object instanceof EnemyCar || object instanceof RandomObstacle,
+        (object) =>
+          !object.isDuck && (object instanceof EnemyCar || object instanceof RandomObstacle),
       ),
       this.car,
       this.secondCar,

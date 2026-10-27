@@ -1,14 +1,9 @@
-const COIN_STEP = 50;
+const COIN_STEP = 5;
 
 export default class CoinAnnouncements {
   constructor(scene) {
     this.scene = scene;
-    this.region = document.getElementById('coin-status');
     this.previousBalances = [0, 0];
-    this.region.textContent = '';
-    scene.events.once('shutdown', () => {
-      this.region.textContent = '';
-    });
   }
 
   update() {
@@ -29,9 +24,8 @@ export default class CoinAnnouncements {
     });
 
     if (!this.scene.registry.get('accessibility enabled')) {
-      this.region.textContent = '';
       return;
     }
-    if (messages.length > 0) this.region.textContent = messages.join('. ');
+    if (messages.length > 0) this.scene.speech.speak(messages.join('. '), { key: 'coins' });
   }
 }

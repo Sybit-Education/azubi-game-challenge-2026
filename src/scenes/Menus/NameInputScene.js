@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
+import { preloadTypingSounds } from '../../../audio/sounds.js';
+import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
 
 export default class NameInputScene extends Phaser.Scene {
   constructor() {
@@ -10,13 +12,17 @@ export default class NameInputScene extends Phaser.Scene {
     this.isMultiplayer = data.isMultiplayer;
   }
 
-  async create() {
+  preload() {
+    preloadTypingSounds(this);
+  }
+
+  create() {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.previousNavigation = { left: false, right: false, up: false, down: false };
 
-    await document.fonts.load('32px Silkscreen');
+    this.typingSound = new TypingSoundPlayer(this);
 
     this.playerNames = [''];
     this.activePlayer = 0;
@@ -107,7 +113,8 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   createKeyboardInput() {
-    this.input.keyboard.on('keydown', (event) => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
       const currentName = this.playerNames[this.activePlayer] || '';
 
       if (event.key === 'Enter') {
@@ -117,11 +124,16 @@ export default class NameInputScene extends Phaser.Scene {
 
       if (event.key === 'Backspace') {
         this.playerNames[this.activePlayer] = currentName.slice(0, -1);
-      } else if (/^[a-zA-Z0-9]$/.test(event.key) && currentName.length < this.maxNameLength) {
-        this.playerNames[this.activePlayer] = currentName + event.key.toUpperCase();
+      } else if (/^[a-zA-Z0-9]$/.test(event.key)) {
+        this.appendCharacter(event.key.toUpperCase());
+        return;
       }
 
       this.updateNamePrompt();
+    };
+    this.input.keyboard.on('keydown', handleKeyDown);
+    this.events.once('shutdown', () => {
+      this.input.keyboard.off('keydown', handleKeyDown);
     });
   }
 
@@ -176,6 +188,7 @@ export default class NameInputScene extends Phaser.Scene {
     if (currentName.length >= this.maxNameLength) return;
 
     this.playerNames[this.activePlayer] = currentName + character;
+    this.typingSound.play();
     this.updateNamePrompt();
   }
 
