@@ -153,7 +153,7 @@ export default class ItemManager {
 
   itemShieldCar1() {
     console.log('schild');
-    this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 1);
+    this.scene.hud.showPowerupTimer('shield', 8000, 0.04, 1);
 
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
@@ -183,7 +183,7 @@ export default class ItemManager {
   }
 
   itemShieldCar2() {
-    this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 2);
+    this.scene.hud.showPowerupTimer('shield', 8000, 0.04, 2);
     if (!this.schildAktivCar2) {
       this.schildAktivCar2 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
