@@ -423,12 +423,13 @@ export default class ItemManager {
     });
   }
 
-   oilEffect(car) {
+  oilEffect(car) {
     if (car.oilTriggered) {
       return;
     }
 
     car.oilTriggered = true;
+    car.inputLocked = true;
 
     console.log('oil effect started! (saied was here)');
 
@@ -448,7 +449,7 @@ export default class ItemManager {
       car.oilTriggered = false;
       car.inputLocked = false;
     });
-   }
+  }
 
   coinBudgetPlus1(multiplier = 1) {
     this.coinBudgetPlayer1 += multiplier;
