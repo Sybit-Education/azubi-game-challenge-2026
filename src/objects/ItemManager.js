@@ -245,7 +245,7 @@ export default class ItemManager {
 
   itemMagnetCar2() {
     this.scene.secondCar.magnetActive = true;
-    this.scene.hud.showPowerupTimer('shield', 10000, 0.2, 2);
+    this.scene.hud.showPowerupTimer('magnet', 10000, 0.2, 2);
     const magnet = this.scene.time.addEvent({
       delay: 16,
       loop: true,
@@ -400,6 +400,7 @@ export default class ItemManager {
       return;
     }
 
+    car.inputLocked = true;
     car.iceTriggered = true;
 
     console.log('ice effect started! (saied was here)');
@@ -419,9 +420,21 @@ export default class ItemManager {
         duration: 1250,
       });
     }
+    let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
+
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+
+    car.currentLane = targetLane;
+
+    this.scene.tweens.add({
+      targets: car,
+      x: car.lanes[targetLane],
+      duration: 1250,
+    });
 
     this.scene.time.delayedCall(1500, () => {
       car.iceTriggered = false;
+      car.inputLocked = false;
     });
   }
 

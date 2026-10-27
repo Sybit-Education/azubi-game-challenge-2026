@@ -29,8 +29,14 @@ export default class StartScene extends Phaser.Scene {
   preload() {
     preloadMenuSounds(this);
     preloadCountdownSound(this);
-    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
-    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
+    this.load.image(
+      'car',
+      'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
+    );
+    this.load.image(
+      'car2',
+      'assets/images/entities/player-skins/player-sprites/sybit-kart-player-2.png',
+    );
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
     this.load.image('background', 'assets/images/map-skins/hintergrund.png');
