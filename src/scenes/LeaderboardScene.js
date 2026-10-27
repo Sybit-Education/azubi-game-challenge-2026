@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import { verifyEntry } from '../utils/leaderboardSecurity.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -13,7 +14,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.InputManager.create();
 
     await document.fonts.load('32px Tiny5');
-    const leaderboard = parseLeaderboard().slice(0, 10);
+    const leaderboard = (await parseLeaderboard()).slice(0, 10);
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
@@ -55,12 +56,13 @@ export default class LeaderboardScene extends Phaser.Scene {
     leaderboard.forEach((entry, index) => {
       const name = entry.name || 'Unbekannt';
       const distance = entry.distance || entry;
+      const displayName = entry.isTampered ? `${name} ⚠ manipuliert` : name;
 
       const text = this.add
         .text(
           this.scale.width / 2,
           200 + index * (this.scale.height / 20),
-          `${index + 1}. ${name} - ${distance} km`,
+          `${index + 1}. ${displayName} - ${distance} km`,
           entryStyle,
         )
         .setOrigin(0.5)
@@ -162,13 +164,14 @@ export default class LeaderboardScene extends Phaser.Scene {
 }
 
 // Loads and parses leaderboard
-export function parseLeaderboard() {
-  const entries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
+export async function parseLeaderboard() {
+  const rawEntries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
     // String only entries are counted as scores
     if (typeof entry === 'string') {
       return {
         name: 'Unbekannt',
         distance: Number(entry),
+        sig: '',
       };
     }
 
@@ -176,8 +179,20 @@ export function parseLeaderboard() {
     return {
       name: entry.name,
       distance: Number(entry.distance),
+      sig: entry.sig,
     };
   });
+
+  const entries = [];
+  for (const entry of rawEntries) {
+    const ok = await verifyEntry(entry);
+    // If WebCrypto is unavailable, we can't compute/verify signatures. In that case
+    // treat entries as unsigned but do not mark them as manipulated to avoid
+    // confusing users with "⚠ manipuliert" everywhere.
+    const isUnsigned = !entry.sig || typeof entry.sig !== 'string' || entry.sig.length === 0;
+    const isTampered = isUnsigned ? false : !ok;
+    entries.push({ ...entry, isTampered });
+  }
 
   const bestByPlayer = new Map();
   entries.forEach((entry) => {

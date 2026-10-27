@@ -10,6 +10,7 @@ import {
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
+import { computeSignature } from '../utils/leaderboardSecurity.js';
 
 export default class GameoverScene extends Phaser.Scene {
   // Constructor
@@ -55,21 +56,37 @@ export default class GameoverScene extends Phaser.Scene {
     await document.fonts.load('32px Tiny5');
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
-    const leaderboard = parseLeaderboard();
+    const leaderboard = await parseLeaderboard();
+
+    // Names of players touched in this session - only entries for these
+    // players get a freshly computed signature. Every other entry keeps
+    // whatever it already had, so tampering with unrelated rows doesn't
+    // get silently "re-trusted" just because the leaderboard was rewritten.
+    const touchedKeys = new Set();
+
     const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim() ?? 'Unbekannt';
+      const playerKey = (name || 'Unbekannt').trim() || 'Unbekannt';
+      touchedKeys.add(playerKey);
 
       const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
       if (existingEntry) {
         existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
       } else {
-        leaderboard.push({ name: name || 'Unbekannt', distance: Number(distance) });
+        leaderboard.push({ name: playerKey, distance: Number(distance) });
       }
     };
 
     savePlayerBest(localStorage.getItem('Playername') || 'Unknown', this.distance);
     if (this.isMultiplayer) {
       savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
+    }
+
+    // Re-sign only the entries we touched this session.
+    for (const entry of leaderboard) {
+      const playerKey = (entry.name || 'Unbekannt').trim() || 'Unbekannt';
+      if (touchedKeys.has(playerKey)) {
+        entry.sig = await computeSignature(entry);
+      }
     }
 
     // Sorts leaderboard
@@ -347,7 +364,14 @@ export default class GameoverScene extends Phaser.Scene {
 
   // On every frame
   update() {
-    this.InputManager.update();
+    // During rare error paths `create()` may not finish (e.g. crypto errors).
+    // Avoid crashing the whole game loop if InputManager wasn't initialized.
+    if (this.InputManager?.update) {
+      this.InputManager.update();
+    } else {
+      return;
+    }
+
     if (this.InputManager.getControlsP1.button1) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
