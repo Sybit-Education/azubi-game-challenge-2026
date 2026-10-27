@@ -10,6 +10,12 @@ export default class NameInputScene extends Phaser.Scene {
     this.isMultiplayer = data.isMultiplayer;
   }
 
+  preload() {
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/images/homepage/default-homepage/background.png',)
+  }
+
   async create() {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
@@ -25,6 +31,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.maxNameLength = 20;
 
     this.scaleFactor = this.scale.height / 1080;
+    this.createParallaxBackground();
 
     // Characters shown in the grid, each nested array is one row
     this.characterGrid = [
@@ -53,6 +60,24 @@ export default class NameInputScene extends Phaser.Scene {
     this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
 
     this.updateNamePrompt();
+  }
+
+  createParallaxBackground() {
+    this.background = this.add
+      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    this.parallaxPointerMove = (pointer) => {
+      this.background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    };
+    this.input.on('pointermove', this.parallaxPointerMove);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off('pointermove', this.parallaxPointerMove);
+    });
   }
 
   createPrompt() {
