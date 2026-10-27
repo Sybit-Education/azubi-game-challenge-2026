@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { setSetting } from '../../settings/gameSettings.js';
 
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
@@ -121,19 +122,35 @@ export default class PopUpScene extends Phaser.Scene {
       .setAlpha(0)
       .setInteractive();
 
+    // Reflect current saved/active game mode in the UI.
+    // Variante B: the active mode is the "main" button (always visible),
+    // the inactive mode is the dropdown alternative (hidden until main is clicked).
+    const currentGameMode = this.registry.get('gameMode') ?? 'standard';
+
+    let activeModeButton = currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
+    let inactiveModeButton =
+      currentGameMode === 'christmas' ? standardModeButton : christmasModeButton;
+
+    // Ensure the "inactive" one starts hidden (as dropdown)
+    inactiveModeButton.setAlpha(0);
+
+    // Ensure the "active" one is visible as main button
+    activeModeButton.setAlpha(1);
+
+    // For positioning logic below: treat activeModeButton as the main button row anchor.
     let hoveringStandard = false;
     let hoveringChristmas = false;
 
-    const closedY = standardModeButton.y;
-    const openY = standardModeButton.y + standardModeButton.displayHeight + 10;
+    const closedY = activeModeButton.y;
+    const openY = activeModeButton.y + activeModeButton.displayHeight + 10;
 
-    const updateChristmasButton = () => {
+    const updateModeDropdown = () => {
       const shouldBeOpen = hoveringStandard || hoveringChristmas;
 
-      this.tweens.killTweensOf(christmasModeButton);
+      this.tweens.killTweensOf(inactiveModeButton);
 
       this.tweens.add({
-        targets: christmasModeButton,
+        targets: inactiveModeButton,
         y: shouldBeOpen ? openY : closedY,
         alpha: shouldBeOpen ? 1 : 0,
         duration: 150,
@@ -141,31 +158,54 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
+    const applyGameMode = (mode) => {
+      this.registry.set('gameMode', mode);
+      setSetting('gameMode', mode);
+
+      // Swap which button is main vs dropdown so the active mode is always on top.
+      activeModeButton = mode === 'christmas' ? christmasModeButton : standardModeButton;
+      inactiveModeButton = mode === 'christmas' ? standardModeButton : christmasModeButton;
+
+      activeModeButton.setAlpha(1);
+      inactiveModeButton.setAlpha(0);
+      inactiveModeButton.y = closedY;
+
+      // Close dropdown after selection.
+      hoveringStandard = false;
+      hoveringChristmas = false;
+    };
+
     const chooseChristmasMode = () => {
-      this.registry.set('gameMode', 'christmas');
+      applyGameMode('christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
       this.scene.start('ChristmasScene');
     };
 
     const chooseStandardMode = () => {
-      //im christmas mode: zurück zu standard
-      if (this.parentSceneKeys.includes('ChristmasScene')) {
-        this.registry.set('gameMode', 'standard');
-        this.scene.stop('ChristmasScene');
-        this.scene.stop('PopUpScene');
-        this.scene.start('MenuScene');
-        return;
-      }
-      hoveringStandard = !hoveringStandard; // auf/zu bei jedem klick
-      updateChristmasButton();
+      applyGameMode('standard');
+      this.scene.stop('ChristmasScene');
+      this.scene.stop('PopUpScene');
+      this.scene.start('MenuScene');
     };
 
-    christmasModeButton.on('pointerdown', chooseChristmasMode);
-    standardModeButton.on('pointerdown', chooseStandardMode);
+    // Clicking the main button toggles the dropdown.
+    activeModeButton.on('pointerdown', () => {
+      hoveringStandard = !hoveringStandard;
+      updateModeDropdown();
+    });
+
+    // Clicking the dropdown selects the other mode.
+    inactiveModeButton.on('pointerdown', () => {
+      if (currentGameMode === 'christmas') {
+        chooseStandardMode();
+      } else {
+        chooseChristmasMode();
+      }
+    });
 
     //defining switch status, "origin x" and "goal x"
-    let accessibilityEnabled = false;
+    let accessibilityEnabled = this.registry.get('accessibilityMode') ?? false;
 
     // Left position
     const switchLeft =
@@ -177,8 +217,11 @@ export default class PopUpScene extends Phaser.Scene {
     const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
     // Sets coordinates
-    Accessibilitycircle.x = switchLeft;
+    Accessibilitycircle.x = accessibilityEnabled ? switchRight : switchLeft;
     Accessibilitycircle.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
+
+    // Ensure visuals reflect persisted state.
+    accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
 
     //prüft ob der switch an oder aus ist, speichert den zustand, wechselt auf den anderen zustand
     //tween für den kreisanimation
@@ -187,6 +230,7 @@ export default class PopUpScene extends Phaser.Scene {
       accessibilityEnabled = !accessibilityEnabled;
 
       this.registry.set('accessibilityMode', accessibilityEnabled);
+      setSetting('accessibilityMode', accessibilityEnabled);
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
       this.tweens.add({
@@ -261,19 +305,21 @@ export default class PopUpScene extends Phaser.Scene {
     const closeSettingsBtn = document.getElementById('close-settings');
     const dialog = document.getElementById('settings-dialog');
     const accessibilityToggle = document.getElementById('accessible-toggle');
-    accessibilityToggle.checked = this.registry.get('accessibility enabled') ?? false;
+    accessibilityToggle.checked = this.registry.get('accessibilityMode') ?? false;
     const gameModeMenu = document.getElementById('game-mode-menu');
     gameModeMenu.value = this.registry.get('gameMode') ?? 'standard';
 
     const closeWindows = close;
 
     const handleAccessibilityChange = () => {
-      this.registry.set('accessibility enabled', accessibilityToggle.checked);
+      this.registry.set('accessibilityMode', accessibilityToggle.checked);
+      setSetting('accessibilityMode', accessibilityToggle.checked);
     };
     accessibilityToggle.addEventListener('change', handleAccessibilityChange);
 
     const handleGameModeChange = () => {
       this.registry.set('gameMode', gameModeMenu.value);
+      setSetting('gameMode', gameModeMenu.value);
       this.scene.stop(gameModeMenu.value === 'christmas' ? 'MenuScene' : 'ChristmasScene');
       this.scene.stop('PopUpScene');
       this.scene.start(gameModeMenu.value === 'christmas' ? 'ChristmasScene' : 'MenuScene');
