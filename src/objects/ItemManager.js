@@ -403,7 +403,7 @@ export default class ItemManager {
     car.inputLocked = true;
     car.iceTriggered = true;
 
-    console.log('ice effect started! (saied was here)');
+    console.log('ice!');
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
@@ -431,7 +431,7 @@ export default class ItemManager {
     car.oilTriggered = true;
     car.inputLocked = true;
 
-    console.log('oil effect started! (saied was here)');
+    console.log('oil!');
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
