@@ -26,10 +26,22 @@ export default class GameScene extends Phaser.Scene {
   //Load images.
   preload() {
     preloadGameplaySounds(this);
-    this.load.image('car', 'assets/images/entities/player-skins/sybit-kart-player-1.png');
-    this.load.image('car2', 'assets/images/entities/player-skins/sybit-kart-player-2.png');
-    this.load.image('winter-car', 'assets/images/entities/player-skins/winter-car-P1.png');
-    this.load.image('winter-car2', 'assets/images/entities/player-skins/winter-car-P2.png');
+    this.load.image(
+      'car',
+      'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
+    );
+    this.load.image(
+      'car2',
+      'assets/images/entities/player-skins/player-sprites/sybit-kart-player-2.png',
+    );
+    this.load.image(
+      'winter-car',
+      'assets/images/entities/player-skins/player-sprites/winter-car-P1.png',
+    );
+    this.load.image(
+      'winter-car2',
+      'assets/images/entities/player-skins/player-sprites/winter-car-P2.png',
+    );
 
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
@@ -52,8 +64,39 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
 
-    this.load.image('carShield', 'assets/images/entities/player-skins/car-shield.png');
-    this.load.image('carShield2', 'assets/images/entities/player-skins/car-shield-2.png');
+    this.load.image(
+      'carShield',
+      'assets/images/entities/player-skins/player-states/car-shield.png',
+    );
+    this.load.image(
+      'carShield2',
+      'assets/images/entities/player-skins/player-states/car-shield-2.png',
+    );
+
+    this.load.image(
+      'blinkLeft',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-1-blink-left.png',
+    );
+    this.load.image(
+      'blinkRight',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-1-blink-right.png',
+    );
+    this.load.image(
+      'blinkLeft2',
+      'assets/images/entities/player-skins/player-states/sybit-player-2-blink-left.png',
+    );
+    this.load.image(
+      'blinkRight2',
+      'assets/images/entities/player-skins/player-states/sybit-player-2-blink-right.png',
+    );
+    this.load.image(
+      'brakeLights',
+      'assets/images/entities/player-skins/player-states/sybit-player-1-brakelights.png',
+    );
+    this.load.image(
+      'brakeLights2',
+      'assets/images/entities/player-skins/player-states/sybit-player-2-brakelights.png',
+    );
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
@@ -66,6 +109,8 @@ export default class GameScene extends Phaser.Scene {
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
   create() {
+    const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     this.secondCar = null;
@@ -102,45 +147,74 @@ export default class GameScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
     // Hotbar
-    this.hotbar = this.add.image(710, 1198, 'hotbar');
-    this.hotbar.setOrigin(0, 0);
-    this.hotbar.setDepth(1000);
-    this.hotbar.setScrollFactor(0);
-    this.hotbar.setScale(0.5);
+    this.hotbar = this.add
+      .image(
+        this.hud.statsBackground.x * scaleFactor,
+        this.hud.statsBackground.displayHeight + 30 * scaleFactor,
+        'hotbar',
+      )
+      .setOrigin(0, 0)
+      .setDepth(1000)
+      .setScrollFactor(0)
+      .setScale(0.5 * scaleFactor);
 
     // Coin Icon Player 1
-    this.hotbarCoin = this.add.image(910, 53, 'hotbar-coin');
-    this.hotbarCoin.setScale(0.5);
-    this.hotbarCoin.setDepth(1000);
-    this.hotbarCoin.setScrollFactor(0);
+    this.hotbarCoin = this.add
+      .image(this.hotbar.displayWidth * 1.1, this.hotbar.y * 1.1, 'hotbar-coin')
+      .setScale(0.7 * scaleFactor)
+      .setOrigin(0, 0)
+      .setDepth(1000)
+      .setScrollFactor(0);
 
     // Coin Number Player 1
-    this.coinText1 = this.add.text(950, 30, this.ItemManager.coinBudgetPlayer1, {
-      fontSize: '34px',
-      color: '#ffffff',
-      fontFamily: 'Silkscreen',
-      stroke: '#000000',
-      strokeThickness: 2,
-    });
+    this.coinText1 = this.add
+      .text(this.hotbarCoin.x * 1.33, this.hotbarCoin.y, this.ItemManager.coinBudgetPlayer1, {
+        fontSize: `${50 * scaleFactor}px`,
+        color: '#ffffff',
+        fontFamily: 'Silkscreen',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setOrigin(0, 0);
 
     this.coinText1.setDepth(1000);
     this.coinText1.setScrollFactor(0);
 
     if (this.isMultiplayer) {
+      this.hotbar2 = this.add
+        .image(this.scale.width - this.hotbar.displayWidth, this.hotbar.y, 'hotbar')
+        .setOrigin(0, 0)
+        .setDepth(1000)
+        .setScrollFactor(0)
+        .setScale(0.5 * scaleFactor);
+
       // Coin Icon Player 2
-      this.hotbarCoin = this.add.image(2500, 53, 'hotbar-coin');
-      this.hotbarCoin.setScale(0.5);
-      this.hotbarCoin.setDepth(1000);
-      this.hotbarCoin.setScrollFactor(0);
+      this.hotbarCoin2 = this.add
+        .image(
+          this.scale.width - this.hotbar2.displayWidth * 1.2 - this.hotbarCoin.displayWidth,
+          this.hotbar.y * 1.1,
+          'hotbar-coin',
+        )
+        .setScale(0.7 * scaleFactor)
+        .setOrigin(0, 0)
+        .setDepth(1000)
+        .setScrollFactor(0);
 
       // Coin Number Player 2
-      this.coinText2 = this.add.text(2540, 30, this.ItemManager.coinBudgetPlayer2, {
-        fontSize: '34px',
-        color: '#ffffff',
-        fontFamily: 'Silkscreen',
-        stroke: '#000000',
-        strokeThickness: 2,
-      });
+      this.coinText2 = this.add
+        .text(
+          this.hotbarCoin2.x + this.hotbarCoin2.displayWidth,
+          this.hotbarCoin2.y,
+          this.ItemManager.coinBudgetPlayer2,
+          {
+            fontSize: `${50 * scaleFactor}px`,
+            color: '#ffffff',
+            fontFamily: 'Silkscreen',
+            stroke: '#000000',
+            strokeThickness: 2,
+          },
+        )
+        .setOrigin(0, 0);
 
       this.coinText2.setDepth(1000);
       this.coinText2.setScrollFactor(0);
@@ -216,14 +290,20 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
-      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.25, 'car2');
+      this.secondCar = new Car(
+        this,
+        this.scale.width / 2 + 90,
+        this.scale.height / 1.25,
+        'car2',
+        2,
+      );
       this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
-      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
@@ -303,7 +383,7 @@ export default class GameScene extends Phaser.Scene {
     this.sound.play('collision-bang', { volume: 0.3 });
     this.sound.play('collision-impact', { volume: 0.3 });
     car.boundaryParticles.emitting = false;
-    car.disableBody(true, true); //hides the dead car
+    car.destroy();
 
     //in multiplayer only game over when both are dead
     if (this.secondCar && !(this.car.dead && this.secondCar.dead)) {
