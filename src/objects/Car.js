@@ -6,10 +6,26 @@ const LIGHT_TEXTURES = {
   car2: { left: 'blinkLeft2', right: 'blinkRight2', brake: 'brakeLights2' },
 };
 
-export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, texture = 'car', startinglane = 1) {
-    super(scene, x, y, texture);
+const CAR_TEXTURES = {
+  car: {base: 'car', christmas: 'winter-car'},
+  car2: {base: 'car2', christmas: 'winter-car2'},
+}
 
+export default class Car extends Phaser.Physics.Arcade.Image {
+  constructor(scene, x, y, texture, startinglane = 1) {
+    const carType = texture;
+    const isChristmas = scene.registry.get('gameMode') === 'christmas';
+    console.log("carType: ", carType)
+    console.log("CAR_TEXTURES entry:", CAR_TEXTURES[carType]);
+
+    if (isChristmas) {
+      texture = CAR_TEXTURES[carType].christmas
+      }
+    else {
+      texture = CAR_TEXTURES[carType].base;
+    }
+
+    super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 

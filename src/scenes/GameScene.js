@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser, { Geom } from 'phaser';
 
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
@@ -60,8 +60,15 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
     this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
     this.load.image('random-object4', 'assets/images/entities/obstacles/random-object-4.png');
+    this.load.image('random-object5', 'assets/images/entities/obstacles/random-object-5.png');
+    this.load.image('random-object6', 'assets/images/entities/obstacles/random-object-6.png');
+    this.load.image('random-object7', 'assets/images/entities/obstacles/random-object-7.png');
 
     this.load.image('boundary-particle', 'assets/images/particles/friction-particle2.png');
+    this.load.image('snowflake1', 'assets/images/particles/snowflake-1.png')
+    this.load.image('snowflake2', 'assets/images/particles/snowflake-2.png')
+    this.load.image('snowflake3', 'assets/images/particles/snowflake-3.png')
+    this.load.image('snowflake4', 'assets/images/particles/snowflake-4.png')
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
@@ -145,6 +152,14 @@ export default class GameScene extends Phaser.Scene {
         : createRoadObject(this, 'oil')
     );
     createRoadObject(this, 'extraLife');
+
+    if (this.registry.get('gameMode') !== 'christmas') {
+        console.log('snow failed!')
+      }
+    else {
+      this.spawnSnow();
+    }
+
     createRoadObject(this, 'random-obstacle');
     this.createHud();
     this.setBackground(
@@ -250,38 +265,6 @@ export default class GameScene extends Phaser.Scene {
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
-  spawnSnow(mode) {
-    this.add.particles(
-      this.scale.width,
-      this.scale.height,
-      white,
-      {
-        x: {
-          min: 100,
-          max: 1000
-        },
-        y: {
-          min: 100,
-          max: 1000
-        },
-
-        speedX: {
-          min: 5,
-          max: 20
-        },
-
-        speedY: {
-          min: 5,
-          max: 20
-        },
-
-        lifespan: 5000,
-
-        frequency: 50
-      }
-    )
-  }
-
   //Separate overlapping player cars after the physics update.
   separateOverlappingCars() {
     if (!this.secondCar || this.car.dead || this.secondCar.dead) return;
@@ -328,7 +311,7 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25, 'car');
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
       this.secondCar = new Car(
@@ -341,7 +324,7 @@ export default class GameScene extends Phaser.Scene {
       this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       this.physics.add.collider(this.car, this.secondCar);
     } else {
-      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25, 'car');
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
@@ -399,6 +382,32 @@ export default class GameScene extends Phaser.Scene {
       this.ItemManager.itemExtraLifeCar2();
     }
   }
+
+  spawnSnow() {
+  let randomSnowflakeChooser = Phaser.Math.Between(1, 4);
+  const snowFlakeTexture = `snowflake${randomSnowflakeChooser}`;
+  this.add.particles(this.scene.width * 1.3 , this.scene.height * 1.3, snowFlakeTexture, {
+    emitZone: {
+      source: Geom,
+      type: 'random',
+      quantity: 70
+    },
+    speedY: { min: 50, max: 70 },
+    speedX: { min: -20, max: 20 },
+    accelerationY: { random: [10, 15] },
+    accelerationX: { random: [10, 15] },
+    lifespan: {
+      min: 8000,
+      max: 10000,
+    },
+    scale: { random: [5, 10] },
+    alpha: { random: [0.1, 0.8] },
+    gravityY: 10,
+    frequency: 10,
+    follow: this.player,
+    followOffset: { x: -this.scene.width * 0.5, y: -this.scene.height - 100},
+  });
+}
 
   collectItem(car, item) {
     if (!item.active) return;
