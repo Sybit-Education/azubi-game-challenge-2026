@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
-import { preloadTypingSounds } from '../../../audio/sounds.js';
+import { preloadMenuSounds, preloadTypingSounds } from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
 
 const COLORS = {
@@ -23,10 +23,8 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   preload() {
+    preloadMenuSounds(this);
     preloadTypingSounds(this);
-  }
-
-  create() {
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -66,7 +64,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.updateSelection();
 
     const nameY = this.scale.height / 2.8;
-    const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
+    const labelX = this.scale.width / 2 - 334 * this.scaleFactor;
     this.add
       .rectangle(
         this.scale.width / 2,
@@ -113,8 +111,8 @@ export default class NameInputScene extends Phaser.Scene {
   createPrompt() {
     this.prompt = this.add
       .text(this.scale.width / 2, this.scale.height / 4.5, 'ENTER YOUR NAME', {
-        fontFamily: 'Tiny5',
-        fontSize: `${80 * this.scaleFactor}px`,
+        fontFamily: 'Silkscreen',
+        fontSize: `${66 * this.scaleFactor}px`,
         color: COLORS.mainText,
       })
       .setOrigin(0.5);
@@ -162,7 +160,7 @@ export default class NameInputScene extends Phaser.Scene {
             x = gridRight - cellWidthInPixels / 2;
           }
           y = startY + 4 * cellHeight + 10 * this.scaleFactor;
-          cellHeightInPixels = 44 * this.scaleFactor;
+          cellHeightInPixels = 56 * this.scaleFactor;
         } else {
           x = gridStartX + columnIndex * cellWidth;
           y = startY + rowIndex * cellHeight;
@@ -176,9 +174,7 @@ export default class NameInputScene extends Phaser.Scene {
           .setDepth(0)
           .setInteractive({ useHandCursor: true });
         cell.on('pointerover', () => {
-          this.selectedRow = rowIndex;
-          this.selectedColumn = columnIndex;
-          this.updateSelection();
+          this.setSelection(rowIndex, columnIndex, true);
         });
         cell.on('pointerdown', (pointer) => {
           if (!pointer.leftButtonDown()) return;
@@ -217,12 +213,13 @@ export default class NameInputScene extends Phaser.Scene {
 
       if (event.key === 'Backspace') {
         this.moveSelectionToCharacter('DELETE');
-        this.playerNames[this.activePlayer] = currentName.slice(0, -1);
+        this.deleteCharacter();
       } else if (/^[a-zA-Z0-9]$/.test(event.key)) {
         const character = event.key.toUpperCase();
         this.moveSelectionToCharacter(character);
         if (currentName.length < this.maxNameLength) {
           this.playerNames[this.activePlayer] = currentName + character;
+          this.typingSound.play();
         }
       }
 
@@ -241,6 +238,22 @@ export default class NameInputScene extends Phaser.Scene {
     this.selectedRow = rowIndex;
     this.selectedColumn = this.characterGrid[rowIndex].indexOf(character);
     this.updateSelection();
+  }
+
+  setSelection(row, column, playFocusSound = false) {
+    const selectionChanged = row !== this.selectedRow || column !== this.selectedColumn;
+    this.selectedRow = row;
+    this.selectedColumn = column;
+    this.updateSelection();
+
+    if (
+      playFocusSound &&
+      selectionChanged &&
+      !this.sound.locked &&
+      this.cache.audio.exists('menu-focus')
+    ) {
+      this.sound.play('menu-focus', { volume: 0.12 });
+    }
   }
 
   submitName() {
@@ -277,16 +290,23 @@ export default class NameInputScene extends Phaser.Scene {
 
   selectCharacter() {
     const character = this.characterGrid[this.selectedRow][this.selectedColumn];
-    const currentName = this.playerNames[this.activePlayer] || '';
 
     if (character === 'END') {
       this.submitName();
     } else if (character === 'DELETE') {
-      this.playerNames[this.activePlayer] = currentName.slice(0, -1);
-      this.updateNamePrompt();
+      this.deleteCharacter();
     } else {
       this.appendCharacter(character);
     }
+  }
+
+  deleteCharacter() {
+    const currentName = this.playerNames[this.activePlayer] || '';
+    if (currentName.length === 0) return;
+
+    this.playerNames[this.activePlayer] = currentName.slice(0, -1);
+    this.typingSound.play();
+    this.updateNamePrompt();
   }
 
   appendCharacter(character) {
@@ -331,14 +351,14 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   moveSelection(dx, dy) {
-    this.selectedRow = Phaser.Math.Wrap(this.selectedRow + dy, 0, this.characterGrid.length);
-    const rowLength = this.characterGrid[this.selectedRow].length;
-    this.selectedColumn =
+    const row = Phaser.Math.Wrap(this.selectedRow + dy, 0, this.characterGrid.length);
+    const rowLength = this.characterGrid[row].length;
+    const column =
       dx === 0
         ? Math.min(this.selectedColumn, rowLength - 1)
         : Phaser.Math.Wrap(this.selectedColumn + dx, 0, rowLength);
 
-    this.updateSelection();
+    this.setSelection(row, column, true);
   }
 
   update() {
