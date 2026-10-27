@@ -167,7 +167,21 @@ export default class NameInputScene extends Phaser.Scene {
         const cell = this.add
           .rectangle(x, y, cellWidthInPixels, cellHeightInPixels, COLORS.keyFill)
           .setStrokeStyle(2 * this.scaleFactor, COLORS.border)
-          .setDepth(0);
+          .setDepth(0)
+          .setInteractive({ useHandCursor: true });
+        cell.on('pointerover', () => {
+          this.selectedRow = rowIndex;
+          this.selectedColumn = columnIndex;
+          this.updateSelection();
+        });
+        cell.on('pointerdown', (pointer) => {
+          if (!pointer.leftButtonDown()) return;
+
+          this.selectedRow = rowIndex;
+          this.selectedColumn = columnIndex;
+          this.updateSelection();
+          this.selectCharacter();
+        });
         rowCells.push(cell);
 
         return this.add
