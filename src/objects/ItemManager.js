@@ -10,9 +10,9 @@ export default class ItemManager {
     this.coinMultiplierOnP1 = false;
     this.coinMultiplierOnP2 = false;
 
-    this.itemShieldPrize = 35;
-    this.itemShrinkPrize = 25;
-    this.itemHeartPrize = 40;
+    this.itemShieldPrize = 25; //35 alt
+    this.itemShrinkPrize = 15; //25 alt
+    this.itemHeartPrize = 30;  //40 alt
 
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
