@@ -1,6 +1,16 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
 
+const COLORS = {
+  grid: 0x520078,
+  border: 0xe32bff,
+  selected: 0xc8ff16,
+  mainText: '#ffffff',
+  secondaryText: '#cdb8e4',
+  keyFill: 0x180a24,
+  selectedText: '#180a24',
+};
+
 export default class NameInputScene extends Phaser.Scene {
   constructor() {
     super('NameInputScene');
@@ -13,7 +23,8 @@ export default class NameInputScene extends Phaser.Scene {
   preload() {
     this.load.image(
       'homepage-hintergrund',
-      'assets/images/homepage/default-homepage/background.png',)
+      'assets/images/homepage/default-homepage/background.png',
+    );
   }
 
   async create() {
@@ -50,13 +61,26 @@ export default class NameInputScene extends Phaser.Scene {
 
     const nameY = this.scale.height / 3;
     const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        nameY,
+        700 * this.scaleFactor,
+        56 * this.scaleFactor,
+        0x180a24,
+        0.8,
+      )
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
+      .setDepth(0);
     const nameStyle = {
       fontFamily: 'Tiny5',
       fontSize: `${32 * this.scaleFactor}px`,
-      color: '#ffffff',
+      color: COLORS.mainText,
     };
 
-    this.labelText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
+    this.labelText = this.add
+      .text(labelX, nameY, '', { ...nameStyle, color: COLORS.secondaryText })
+      .setOrigin(0, 0.5);
     this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
 
     this.updateNamePrompt();
@@ -82,10 +106,10 @@ export default class NameInputScene extends Phaser.Scene {
 
   createPrompt() {
     this.prompt = this.add
-      .text(this.scale.width / 2, this.scale.height / 5, '---    ENTER YOUR NAME    ---', {
+      .text(this.scale.width / 2, this.scale.height / 5, 'ENTER YOUR NAME', {
         fontFamily: 'Tiny5',
-        fontSize: `${48 * this.scaleFactor}px`,
-        color: '#ffffff',
+        fontSize: `${68 * this.scaleFactor}px`,
+        color: COLORS.mainText,
       })
       .setOrigin(0.5);
   }
@@ -96,38 +120,54 @@ export default class NameInputScene extends Phaser.Scene {
     const startY = this.scale.height * 0.48;
 
     this.characterTexts = [];
+    this.characterCells = [];
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        startY + 1.5 * cellHeight,
+        9 * cellWidth,
+        4 * cellHeight,
+        0x180a24,
+        0.45,
+      )
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.grid)
+      .setDepth(-1);
 
     this.characterGrid.forEach((row, rowIndex) => {
       const isLastRow = rowIndex === this.characterGrid.length - 1;
-      const rowTexts = row.map((character) =>
-        this.add
-          .text(0, startY + rowIndex * cellHeight, character, {
+      const rowCells = [];
+      const rowTexts = row.map((character, columnIndex) => {
+        const isActionRow = isLastRow;
+        const x = isActionRow
+          ? this.scale.width / 2 + (columnIndex === 0 ? -190 : 190) * this.scaleFactor
+          : (this.scale.width - 8 * cellWidth) / 2 + columnIndex * cellWidth;
+        const y = isActionRow
+          ? startY + 4 * cellHeight + 10 * this.scaleFactor
+          : startY + rowIndex * cellHeight;
+        const cell = this.add
+          .rectangle(
+            x,
+            y,
+            (isActionRow ? 144 : 52) * this.scaleFactor,
+            (isActionRow ? 44 : 50) * this.scaleFactor,
+            COLORS.keyFill,
+          )
+          .setStrokeStyle(2 * this.scaleFactor, COLORS.border)
+          .setDepth(0);
+        rowCells.push(cell);
+
+        return this.add
+          .text(x, y, character, {
             fontFamily: 'Tiny5',
             fontSize: `${28 * this.scaleFactor}px`,
-            color: '#ffffff',
-            backgroundColor: '#333333',
-            padding: { x: 10, y: 8 },
+            color: COLORS.mainText,
           })
-          .setOrigin(0.5),
-      );
-
-      this.characterTexts.push(rowTexts);
-
-      const rowWidth = (9 - 1) * cellWidth;
-      const startX = (this.scale.width - rowWidth) / 2;
-
-      if (isLastRow) {
-        const gridLeft = startX - cellWidth / 4;
-        const gridRight = startX + rowWidth + cellWidth / 4;
-
-        rowTexts[0].setX(gridLeft + rowTexts[0].width / 2);
-        rowTexts[1].setX(gridRight - rowTexts[1].width / 2);
-        return;
-      }
-
-      rowTexts.forEach((text, columnIndex) => {
-        text.setX(startX + columnIndex * cellWidth);
+          .setOrigin(0.5)
+          .setDepth(1);
       });
+
+      this.characterCells.push(rowCells);
+      this.characterTexts.push(rowTexts);
     });
   }
 
@@ -240,9 +280,10 @@ export default class NameInputScene extends Phaser.Scene {
     this.characterTexts.forEach((row, rowIndex) => {
       row.forEach((textObject, columnIndex) => {
         const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
-        textObject.setColor(isSelected ? '#000000' : '#ffffff');
-        textObject.setBackgroundColor(isSelected ? '#ffffff' : '#333333');
-        textObject.setScale(isSelected ? 1.15 : 1);
+        textObject.setColor(isSelected ? COLORS.selectedText : COLORS.mainText);
+        this.characterCells[rowIndex][columnIndex]
+          .setFillStyle(isSelected ? COLORS.selected : COLORS.keyFill)
+          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border);
       });
     });
   }
