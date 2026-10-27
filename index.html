@@ -3,17 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <title>SybitKart</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Tiny5&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <!-- Body -->
   <body style="margin: 0">
+    <div id="game-status" class="sr-only" role="status" aria-atomic="true"></div>
+
     <main id="accessible-ui" class="accessible-layer">
       <h1 class="sr-only">Sybit Kart</h1>
       <button id="start-game" type="button">play</button>
+      <button id="multiplayer-btn" type="button">multiplayer</button>
       <button id="settings-btn" type="button">Settings</button>
+      <button id="credit-btn" type="button">credits</button>
     </main>
 
     <script type="importmap">
@@ -28,13 +35,21 @@
       <button id="skip-intro" type="button">Skip Intro!</button>
     </section>
 
+    <section id="credits-ui" class="sr-only" hidden>
+      <h2>Credits</h2>
+      <div id="credits-content"></div>
+      <p>Press Eskape to skip</p>
+    </section>
+
     <section id="game-over-ui" class="accessible-layer" hidden>
-      <h2 class="sr-only">game over</h2>
+      <div id="game-over-result">
+        <h2 class="sr-only">game over</h2>
 
-      <p class="sr-only">Score: <span id="final-score"></span> Pts</p>
-      <p class="sr-only">Distance: <span id="final-distance"></span> Km</p>
+        <p class="sr-only">Score: <span id="final-score"></span> Pts</p>
+        <p class="sr-only">Distance: <span id="final-distance"></span> Km</p>
+      </div>
 
-      <button id="retry" type="button">retry</button>
+      <button id="retry" type="button" aria-describedby="game-over-result">retry</button>
       <button id="back-to-home" type="button">mainMenu</button>
     </section>
 
@@ -46,10 +61,23 @@
         <input id="accessible-toggle" type="checkbox" />
 
         <label class="sr-only" for="game-mode-menu">game mode</label>
-        <select id="game-mode-menu">
-          <option value="standard">standard</option>
-          <option value="christmas">Christmas mode</option>
-        </select>
+        <button
+          id="game-mode-menu"
+          type="button"
+          aria-expanded="false"
+          aria-controls="christmas-mode-choice"
+        >
+          game mode
+        </button>
+        <button
+          id="christmas-mode-choice"
+          type="button"
+          aria-label="Christmas mode"
+          hidden
+          disabled
+        >
+          Christmas mode
+        </button>
         <p class="sr-only">press escape to close the settings dialog.</p>
         <button id="close-settings" type="button" autofocus>Close</button>
       </dialog>
@@ -61,9 +89,9 @@
   <!-- Style -->
   <style>
     @font-face {
-      font-family: 'Tiny5';
-      src: url(assets/fonts/Tiny5-Regular.ttf);
-      font-weight: normal;
+      font-family: 'Silkscreen';
+      src: url(assets/fonts/Silkscreen-Regular.ttf);
+      font-weight: 400;
       font-style: normal;
       font-display: swap;
     }
@@ -108,6 +136,20 @@
       font-size: 0;
     }
 
+    /* Modal dialogs make the canvas inert; their HTML controls handle clicks. */
+    #settings-dialog button,
+    #settings-dialog input,
+    #settings-dialog select {
+      pointer-events: auto;
+    }
+
+    #game-mode-menu,
+    #christmas-mode-choice,
+    #accessible-toggle,
+    #close-settings {
+      cursor: pointer;
+    }
+
     .accessible-layer button:focus-visible,
     #settings-dialog button:focus-visible,
     #settings-dialog input:focus-visible,
@@ -134,12 +176,6 @@
     #settings-dialog::backdrop {
       background: transparent;
       pointer-events: none;
-    }
-
-    #settings-dialog select option {
-      color: #000000;
-      background: #ffffff;
-      font-size: 16px;
     }
   </style>
 </html>

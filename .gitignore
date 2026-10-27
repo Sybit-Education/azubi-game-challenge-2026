@@ -6,3 +6,6 @@ npm-debug.log*
 
 # graphify-axet
 .graphify/
+
+# Windows download metadata
+*:Zone.Identifier
