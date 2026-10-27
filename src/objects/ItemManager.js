@@ -405,21 +405,6 @@ export default class ItemManager {
 
     console.log('ice effect started! (saied was here)');
 
-    const direction = Phaser.Math.Between(0, 1);
-
-    if (direction === 1) {
-      this.scene.tweens.add({
-        targets: car,
-        x: car.x + 300,
-        duration: 1250,
-      });
-    } else {
-      this.scene.tweens.add({
-        targets: car,
-        x: car.x - 300,
-        duration: 1250,
-      });
-    }
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
     let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
@@ -447,26 +432,23 @@ export default class ItemManager {
 
     console.log('oil effect started! (saied was here)');
 
-    const direction = Phaser.Math.Between(0, 1);
+    let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
-    if (direction === 1) {
-      this.scene.tweens.add({
-        targets: car,
-        x: car.x + 300,
-        duration: 1250,
-      });
-    } else {
-      this.scene.tweens.add({
-        targets: car,
-        x: car.x - 300,
-        duration: 1250,
-      });
-    }
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+
+    car.currentLane = targetLane;
+
+    this.scene.tweens.add({
+      targets: car,
+      x: car.lanes[targetLane],
+      duration: 1250,
+    });
 
     this.scene.time.delayedCall(1500, () => {
       car.oilTriggered = false;
+      car.inputLocked = false;
     });
-  }
+   }
 
   coinBudgetPlus1(multiplier = 1) {
     this.coinBudgetPlayer1 += multiplier;
