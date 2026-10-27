@@ -26,7 +26,7 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
     this.load.image(
       'AccessibilitySwitchOff',
-      'assets/images/homepage/settings-menu/accessibility-switch-off.png',
+      'assets/images/homepage/settings-menu/switch-off.png',
     );
     this.load.image(
       'StandardModeButton',
