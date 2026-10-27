@@ -218,6 +218,8 @@ export default class ItemManager {
       delay: 16,
       loop: true,
       callback: () => {
+        if (this.scene.car.dead) return;
+
         for (const roadObject of this.scene.roadObjects) {
           if (roadObject.texture?.key !== 'coin') {
             continue;
@@ -251,6 +253,8 @@ export default class ItemManager {
       delay: 16,
       loop: true,
       callback: () => {
+        if (this.scene.secondCar.dead) return;
+
         for (const roadObject of this.scene.roadObjects) {
           if (roadObject.texture?.key !== 'coin') {
             continue;
