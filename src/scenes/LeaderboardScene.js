@@ -78,22 +78,6 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
 
-    this.resetButton = this.add
-      .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
-        fontFamily: 'Tiny5',
-        fontSize: '40px',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5)
-      .setInteractive()
-      .setScale(1 * this.scaleFactor);
-
-    this.resetButton.on('pointerdown', () => {
-      localStorage.removeItem('leaderboard');
-
-      this.scene.restart();
-    });
-
     // On home button listener
     this.backButton.on('pointerdown', () => {
       const gameMode = this.registry.get('gameMode');
