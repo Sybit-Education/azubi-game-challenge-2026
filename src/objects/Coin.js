@@ -6,5 +6,6 @@ export default class Coin extends Collectable {
 
     this.setScale(2 * (scene.scale.height / 1200));
     this.body.setOffset(0, 5); //scale fix
+    this.value = 50;
   }
 }

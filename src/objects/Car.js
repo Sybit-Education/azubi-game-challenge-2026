@@ -1,7 +1,13 @@
 import Phaser from 'phaser';
 
+// Texture keys for the blinkers and brake lights, per car skin.
+const LIGHT_TEXTURES = {
+  car: { left: 'blinkLeft', right: 'blinkRight', brake: 'brakeLights' },
+  car2: { left: 'blinkLeft2', right: 'blinkRight2', brake: 'brakeLights2' },
+};
+
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, texture = 'car') {
+  constructor(scene, x, y, texture = 'car', startinglane = 1) {
     super(scene, x, y, texture);
 
     scene.add.existing(this);
@@ -30,34 +36,110 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
     this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
+    this.coinMultiplier = 1;
+    this.currentLane = startinglane;
+    this.laneCooldown = 0;
+    this.inputLocked = false;
+    this.baseTexture = texture;
+    this.lights = LIGHT_TEXTURES[texture]; // undefined for skins without light sprites
+  }
+
+  // Swap to a light texture, but never over the shield texture.
+  setLight(name) {
+    if (!this.active) return;
+    if (!this.lights) return;
+
+    const key = this.texture.key;
+    if (key !== this.baseTexture && !Object.values(this.lights).includes(key)) return;
+
+    this.setTexture(this.lights[name]);
+  }
+
+  clearLight(name) {
+    if (!this.active) return;
+    if (this.lights && this.texture.key === this.lights[name]) {
+      this.setTexture(this.baseTexture);
+    }
   }
 
   move(controls) {
+    if (this.inputLocked) {
+      return;
+    }
     this.setVelocityX(0);
     this.setVelocityY(0);
-    this.setAngle(0);
     const maxY = this.scene.scale.height + this.displayHeight / 4;
     const maxX = this.displayHeight / 2 - this.displayHeight / 4;
     const roadLeft = this.scene.scale.width / 2 - this.scene.track1.displayWidth / 2;
     const roadRight = this.scene.scale.width / 2 + this.scene.track1.displayWidth / 2;
+    const roadWidth = roadRight - roadLeft;
     this.leftLimit = roadLeft + this.displayWidth / 2 - 27.5;
     this.rightLimit = roadRight - this.displayWidth / 2 + 27.5;
 
     this.x = Phaser.Math.Clamp(this.x, this.leftLimit, this.rightLimit);
     this.y = Phaser.Math.Clamp(this.y, maxX, maxY);
 
+    this.lanes = [
+      roadLeft + roadWidth * 0.125,
+      roadLeft + roadWidth * 0.375,
+      roadLeft + roadWidth * 0.625,
+      roadLeft + roadWidth * 0.875,
+    ];
+
+    if (this.laneCooldown > 0) {
+      this.laneCooldown--;
+    }
     if (controls.left) {
-      //der fragezeichen ist dazu da, dass das game nicht abstürzw enn er die keys nicht findet
-      this.setVelocityX(-500);
-      if (this.x !== this.leftLimit && !controls.right) {
-        this.setAngle(-3);
+      if (controls.left && this.laneCooldown <= 0 && this.currentLane > 0) {
+        this.currentLane--;
+
+        this.setLight('left');
+        this.scene.time.delayedCall(300, () => this.clearLight('left'));
+
+        this.setAngle(-4);
+
+        this.scene.tweens.add({
+          targets: this,
+          x: this.lanes[this.currentLane],
+          duration: 300,
+          ease: 'Sine.easeOut',
+        });
+
+        this.scene.tweens.add({
+          targets: this,
+          angle: 0,
+          duration: 150,
+          delay: 100,
+          ease: 'Sine.easeInOut',
+        });
+        this.laneCooldown = 20;
       }
     }
 
     if (controls.right) {
-      this.setVelocityX(500);
-      if (this.x !== this.rightLimit && !controls.left) {
-        this.setAngle(3);
+      if (controls.right && this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
+        this.currentLane++;
+
+        this.setLight('right');
+        this.scene.time.delayedCall(300, () => this.clearLight('right'));
+
+        this.setAngle(4);
+
+        this.scene.tweens.add({
+          targets: this,
+          x: this.lanes[this.currentLane],
+          duration: 300,
+          ease: 'Sine.easeOut',
+        });
+
+        this.scene.tweens.add({
+          targets: this,
+          angle: 0,
+          duration: 150,
+          delay: 100,
+          ease: 'Sine.easeInOut',
+        });
+        this.laneCooldown = 20;
       }
     }
 
@@ -67,6 +149,10 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
     if (controls.brake) {
       this.setVelocityY(500);
+      // Don't override a running blinker.
+      if (this.texture.key === this.baseTexture) this.setLight('brake');
+    } else {
+      this.clearLight('brake');
     }
 
     //constraint the cars downward and upward movement to not go out of bounds

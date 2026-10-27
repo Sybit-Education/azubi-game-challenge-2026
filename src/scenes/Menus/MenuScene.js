@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 
 import InputManager from '../../objects/InputManager.js';
@@ -12,6 +14,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Pre load images
   preload() {
+    preloadMenuSounds(this);
     this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
@@ -48,7 +51,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   // Create scene
-  async create() {
+  async create(data) {
     await document.fonts.load('32px Tiny5');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
@@ -57,16 +60,20 @@ export default class MenuScene extends Phaser.Scene {
     this.InputManager.create();
 
     const playBtn = document.getElementById('start-game');
+    const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
+    const creditBtn = document.getElementById('credit-btn');
     const menu = document.getElementById('accessible-ui');
     menu.hidden = false;
 
     const startGame = () => {
+      playMenuClick(this);
       this.registry.set('gameMode', 'standard');
       this.scene.start('NameInputScene', { isMultiplayer: false });
     };
 
     const startMultiplayer = () => {
+      playMenuClick(this);
       this.registry.set('isMultiplayer', true);
       this.registry.set('gameMode', 'standard');
       console.log('StartScene gameMode:', this.registry.get('gameMode'));
@@ -75,16 +82,29 @@ export default class MenuScene extends Phaser.Scene {
 
     this.startMultiplayer = startMultiplayer;
     const openSettings = () => {
+      playMenuClick(this);
       this.scene.launch('PopUpScene');
     };
 
+    const openCredits = () => {
+      playMenuClick(this);
+      this.scene.start('CreditsScene');
+    };
+
     playBtn.addEventListener('click', startGame);
-    playBtn.focus();
+    const focusTarget = document.getElementById(data?.focusTarget ?? 'start-game');
+    focusTarget.focus();
+
+    multiplayerBtn.addEventListener('click', startMultiplayer);
+
     settingsBtn.addEventListener('click', openSettings);
+    creditBtn.addEventListener('click', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
+      multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
+      creditBtn.removeEventListener('click', openCredits);
       menu.hidden = true;
     });
 
@@ -223,8 +243,12 @@ export default class MenuScene extends Phaser.Scene {
 
       hideSubmenuEvent = this.time.delayedCall(180, () => {
         hideSubmenuEvent = undefined;
-
-        if (isPlayHovered || isTwoPlayerHovered || this.isMultiplayerSelected) {
+        if (
+          isPlayHovered ||
+          isTwoPlayerHovered ||
+          this.isMultiplayerSelected ||
+          document.activeElement === multiplayerBtn
+        ) {
           return;
         }
 
@@ -240,7 +264,11 @@ export default class MenuScene extends Phaser.Scene {
           duration: 180,
           ease: 'Cubic.easeIn',
           onComplete: () => {
-            if (!isPlayHovered && !isTwoPlayerHovered) {
+            if (
+              !isPlayHovered &&
+              !isTwoPlayerHovered &&
+              document.activeElement !== multiplayerBtn
+            ) {
               twoPlayerButton.setVisible(false);
               twoPlayerButton.setAlpha(1);
             }
@@ -255,7 +283,6 @@ export default class MenuScene extends Phaser.Scene {
       this.tweens.add({
         targets: twoPlayerButton,
         x: this.play_button.x + 325 * this.scaleFactor,
-        y: playOriginalY - 10 * this.scaleFactor,
         scaleX: (0.278 + 0.02) * this.scaleFactor,
         scaleY: (0.278 + 0.02) * this.scaleFactor,
         duration: 220,
@@ -269,29 +296,33 @@ export default class MenuScene extends Phaser.Scene {
     this.selectMultiplayerOption = () => {
       this.isMultiplayerSelected = true;
       revealTwoPlayerButton();
-      twoPlayerButton.setDepth(1);
-      this.selectButton(twoPlayerButton, playOriginalY - 3);
     };
 
     this.clearMultiplayerOption = () => {
       this.isMultiplayerSelected = false;
       twoPlayerButton.setDepth(0);
-      this.deselectButton(twoPlayerButton, playOriginalY - 3);
+      this.deselectButton(twoPlayerButton, 0.278);
       scheduleHide();
     };
+    multiplayerBtn.addEventListener('focus', revealTwoPlayerButton);
+    multiplayerBtn.addEventListener('blur', scheduleHide);
+    this.events.once('shutdown', () => {
+      multiplayerBtn.removeEventListener('focus', revealTwoPlayerButton);
+      multiplayerBtn.removeEventListener('blur', scheduleHide);
+    });
 
     this.play_button.on('pointerover', () => {
       isPlayHovered = true;
       revealTwoPlayerButton();
-      this.selectButton(this.play_button, playOriginalY);
+      this.selectButton(this.play_button);
     });
 
     this.play_button.on('pointerout', () => {
       isPlayHovered = false;
-      this.deselectButton(this.play_button, playOriginalY);
+      this.deselectButton(this.play_button);
 
       if (twoPlayerButton.visible) {
-        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+        this.deselectButton(twoPlayerButton, 0.278);
       }
       scheduleHide();
     });
@@ -301,13 +332,7 @@ export default class MenuScene extends Phaser.Scene {
       twoPlayerButton.setDepth(-1);
       cancelScheduledHide();
       if (!isPlayHovered && isTwoPlayerHovered) {
-        this.selectButton(this.play_button, playOriginalY);
-
-        this.tweens.add({
-          targets: twoPlayerButton,
-          y: playOriginalY - 10 * this.scaleFactor,
-          duration: 50,
-        });
+        this.selectButton(this.play_button);
       }
     });
 
@@ -316,63 +341,61 @@ export default class MenuScene extends Phaser.Scene {
       isPlayHovered = false;
       twoPlayerButton.setDepth(0);
       if (twoPlayerButton.visible) {
-        this.deselectButton(twoPlayerButton, playOriginalY, 0.278);
+        this.deselectButton(twoPlayerButton, 0.278);
       }
       scheduleHide();
       if (!isPlayHovered && !isTwoPlayerHovered) {
-        this.deselectButton(this.play_button, playOriginalY);
+        this.deselectButton(this.play_button);
       }
     });
 
     settings_button.on('pointerover', () => {
-      this.selectButton(settings_button, settingsOriginalY);
+      this.selectButton(settings_button);
     });
 
     settings_button.on('pointerout', () => {
-      this.deselectButton(settings_button, settingsOriginalY);
+      this.deselectButton(settings_button);
     });
 
     creditsButton.on('pointerover', () => {
-      this.selectButton(creditsButton, creditsOriginalY);
+      this.selectButton(creditsButton);
     });
 
     creditsButton.on('pointerout', () => {
-      this.deselectButton(creditsButton, creditsOriginalY);
+      this.deselectButton(creditsButton);
     });
 
     settings_button.on('pointerout', () => {
-      this.deselectButton(settings_button, settingsOriginalY);
+      this.deselectButton(settings_button);
     });
 
     creditsButton.on('pointerout', () => {
-      this.deselectButton(creditsButton, creditsOriginalY);
+      this.deselectButton(creditsButton);
     });
 
     howToPlayButton.on('pointerover', () => {
-      this.selectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
+      this.selectButton(howToPlayButton, howToPlayScale);
     });
 
     howToPlayButton.on('pointerout', () => {
-      this.deselectButton(howToPlayButton, howToPlayOriginalY, howToPlayScale);
+      this.deselectButton(howToPlayButton, howToPlayScale);
     });
 
     // Helper functions for button animations
-    this.selectButton = (button, originalY, scale = 0.3) => {
+    this.selectButton = (button, scale = 0.3) => {
       this.tweens.add({
         targets: button,
         scaleX: (scale + 0.02) * this.scaleFactor,
         scaleY: (scale + 0.02) * this.scaleFactor,
-        y: originalY - 10 * this.scaleFactor,
         duration: 50,
       });
     };
 
-    this.deselectButton = (button, originalY, scale = 0.3) => {
+    this.deselectButton = (button, scale = 0.3) => {
       this.tweens.add({
         targets: button,
         scaleX: scale * this.scaleFactor,
         scaleY: scale * this.scaleFactor,
-        y: originalY,
         duration: 50,
       });
     };
@@ -380,7 +403,9 @@ export default class MenuScene extends Phaser.Scene {
     // Click events
     positionAccessibleControls(this, [
       [playBtn, this.play_button],
+      [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
+      [creditBtn, creditsButton],
     ]);
 
     this.play_button.on('pointerdown', startGame);
@@ -391,9 +416,8 @@ export default class MenuScene extends Phaser.Scene {
 
     settings_button.on('pointerdown', openSettings);
 
-    creditsButton.on('pointerdown', () => {
-      this.scene.start('CreditsScene');
-    });
+    creditsButton.on('pointerdown', openCredits);
+    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
 
     // Menu button array and selected index
     this.menuButtons = [
@@ -409,7 +433,7 @@ export default class MenuScene extends Phaser.Scene {
       {
         button: creditsButton,
         y: creditsOriginalY,
-        action: () => this.scene.start('CreditsScene'),
+        action: openCredits,
       },
     ];
 
@@ -417,7 +441,7 @@ export default class MenuScene extends Phaser.Scene {
     this.previousHorizontalInput = { left: false, right: false };
     this.hasReadHorizontalInput = false;
 
-    this.selectButton(this.menuButtons[0].button, this.menuButtons[0].y);
+    this.selectButton(this.menuButtons[0].button);
   }
 
   update() {
@@ -441,7 +465,6 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
 
@@ -453,7 +476,6 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
     }
@@ -461,7 +483,6 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
 
@@ -473,7 +494,6 @@ export default class MenuScene extends Phaser.Scene {
 
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].y,
         this.menuButtons[this.selectedIndex].scale,
       );
     }
