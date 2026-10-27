@@ -59,7 +59,7 @@ export default class NameInputScene extends Phaser.Scene {
 
     this.updateSelection();
 
-    const nameY = this.scale.height / 3;
+    const nameY = this.scale.height / 2.8;
     const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
     this.add
       .rectangle(
@@ -106,18 +106,23 @@ export default class NameInputScene extends Phaser.Scene {
 
   createPrompt() {
     this.prompt = this.add
-      .text(this.scale.width / 2, this.scale.height / 5, 'ENTER YOUR NAME', {
+      .text(this.scale.width / 2, this.scale.height / 4.5, 'ENTER YOUR NAME', {
         fontFamily: 'Tiny5',
-        fontSize: `${68 * this.scaleFactor}px`,
+        fontSize: `${80 * this.scaleFactor}px`,
         color: COLORS.mainText,
       })
       .setOrigin(0.5);
   }
 
   createCharacterGrid() {
-    const cellWidth = 70 * this.scaleFactor;
+    const cellWidth = 78 * this.scaleFactor;
     const cellHeight = 70 * this.scaleFactor;
+    const keyWidth = 64 * this.scaleFactor;
+    const actionButtonWidth = 144 * this.scaleFactor;
     const startY = this.scale.height * 0.48;
+    const gridStartX = (this.scale.width - 8 * cellWidth) / 2;
+    const gridLeft = gridStartX - keyWidth / 2;
+    const gridRight = gridStartX + 8 * cellWidth + keyWidth / 2;
 
     this.characterTexts = [];
     this.characterCells = [];
@@ -138,20 +143,29 @@ export default class NameInputScene extends Phaser.Scene {
       const rowCells = [];
       const rowTexts = row.map((character, columnIndex) => {
         const isActionRow = isLastRow;
-        const x = isActionRow
-          ? this.scale.width / 2 + (columnIndex === 0 ? -190 : 190) * this.scaleFactor
-          : (this.scale.width - 8 * cellWidth) / 2 + columnIndex * cellWidth;
-        const y = isActionRow
-          ? startY + 4 * cellHeight + 10 * this.scaleFactor
-          : startY + rowIndex * cellHeight;
+        let x;
+        let y;
+        let cellWidthInPixels;
+        let cellHeightInPixels;
+
+        if (isActionRow) {
+          cellWidthInPixels = actionButtonWidth;
+          if (columnIndex === 0) {
+            x = gridLeft + cellWidthInPixels / 2;
+          } else {
+            x = gridRight - cellWidthInPixels / 2;
+          }
+          y = startY + 4 * cellHeight + 10 * this.scaleFactor;
+          cellHeightInPixels = 44 * this.scaleFactor;
+        } else {
+          x = gridStartX + columnIndex * cellWidth;
+          y = startY + rowIndex * cellHeight;
+          cellWidthInPixels = keyWidth;
+          cellHeightInPixels = 60 * this.scaleFactor;
+        }
+
         const cell = this.add
-          .rectangle(
-            x,
-            y,
-            (isActionRow ? 144 : 52) * this.scaleFactor,
-            (isActionRow ? 44 : 50) * this.scaleFactor,
-            COLORS.keyFill,
-          )
+          .rectangle(x, y, cellWidthInPixels, cellHeightInPixels, COLORS.keyFill)
           .setStrokeStyle(2 * this.scaleFactor, COLORS.border)
           .setDepth(0);
         rowCells.push(cell);
@@ -159,7 +173,7 @@ export default class NameInputScene extends Phaser.Scene {
         return this.add
           .text(x, y, character, {
             fontFamily: 'Tiny5',
-            fontSize: `${28 * this.scaleFactor}px`,
+            fontSize: `${(isActionRow ? 32 : 40) * this.scaleFactor}px`,
             color: COLORS.mainText,
           })
           .setOrigin(0.5)
@@ -281,9 +295,11 @@ export default class NameInputScene extends Phaser.Scene {
       row.forEach((textObject, columnIndex) => {
         const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
         textObject.setColor(isSelected ? COLORS.selectedText : COLORS.mainText);
+        textObject.setScale(isSelected ? 1.2 : 1);
         this.characterCells[rowIndex][columnIndex]
           .setFillStyle(isSelected ? COLORS.selected : COLORS.keyFill)
-          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border);
+          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border)
+          .setScale(isSelected ? 1.08 : 1);
       });
     });
   }
