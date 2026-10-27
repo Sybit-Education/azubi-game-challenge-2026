@@ -383,7 +383,7 @@ export default class GameScene extends Phaser.Scene {
     this.sound.play('collision-bang', { volume: 0.3 });
     this.sound.play('collision-impact', { volume: 0.3 });
     car.boundaryParticles.emitting = false;
-    car.disableBody(true, true); //hides the dead car
+    car.destroy();
 
     //in multiplayer only game over when both are dead
     if (this.secondCar && !(this.car.dead && this.secondCar.dead)) {

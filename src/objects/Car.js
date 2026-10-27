@@ -46,6 +46,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
   // Swap to a light texture, but never over the shield texture.
   setLight(name) {
+    if (!this.active) return;
     if (!this.lights) return;
 
     const key = this.texture.key;
@@ -55,6 +56,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
   }
 
   clearLight(name) {
+    if (!this.active) return;
     if (this.lights && this.texture.key === this.lights[name]) {
       this.setTexture(this.baseTexture);
     }
