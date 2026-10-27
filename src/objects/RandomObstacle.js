@@ -10,7 +10,12 @@ export default class RandomObstacle extends Obstacle {
     super(scene, x, y, texture, lane);
 
     this.isDuck = randomInt === 2;
+    this.isBarrier = randomInt === 4;
+    if (this.isBarrier) {
+      this.setScale(0.37);
+    } else {
+      this.setScale(scene.scale.height / 10000);
+    }
     this.duckSoundPlayed = false;
-    this.setScale(scene.scale.height / 10000);
   }
 }
