@@ -116,13 +116,27 @@ export default class NameInputScene extends Phaser.Scene {
       }
 
       if (event.key === 'Backspace') {
+        this.moveSelectionToCharacter('DELETE');
         this.playerNames[this.activePlayer] = currentName.slice(0, -1);
-      } else if (/^[a-zA-Z0-9]$/.test(event.key) && currentName.length < this.maxNameLength) {
-        this.playerNames[this.activePlayer] = currentName + event.key.toUpperCase();
+      } else if (/^[a-zA-Z0-9]$/.test(event.key)) {
+        const character = event.key.toUpperCase();
+        this.moveSelectionToCharacter(character);
+        if (currentName.length < this.maxNameLength) {
+          this.playerNames[this.activePlayer] = currentName + character;
+        }
       }
 
       this.updateNamePrompt();
     });
+  }
+
+  moveSelectionToCharacter(character) {
+    const rowIndex = this.characterGrid.findIndex((row) => row.includes(character));
+    if (rowIndex === -1) return;
+
+    this.selectedRow = rowIndex;
+    this.selectedColumn = this.characterGrid[rowIndex].indexOf(character);
+    this.updateSelection();
   }
 
   submitName() {
