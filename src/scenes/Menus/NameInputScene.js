@@ -3,6 +3,16 @@ import InputManager from '../../objects/InputManager.js';
 import { preloadTypingSounds } from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
 
+const COLORS = {
+  grid: 0x520078,
+  border: 0xe32bff,
+  selected: 0xc8ff16,
+  mainText: '#ffffff',
+  secondaryText: '#cdb8e4',
+  keyFill: 0x180a24,
+  selectedText: '#180a24',
+};
+
 export default class NameInputScene extends Phaser.Scene {
   constructor() {
     super('NameInputScene');
@@ -17,6 +27,13 @@ export default class NameInputScene extends Phaser.Scene {
   }
 
   create() {
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/images/homepage/default-homepage/background.png',
+    );
+  }
+
+  async create() {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
@@ -31,6 +48,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.maxNameLength = 20;
 
     this.scaleFactor = this.scale.height / 1080;
+    this.createParallaxBackground();
 
     // Characters shown in the grid, each nested array is one row
     this.characterGrid = [
@@ -47,68 +65,143 @@ export default class NameInputScene extends Phaser.Scene {
 
     this.updateSelection();
 
-    const nameY = this.scale.height / 3;
+    const nameY = this.scale.height / 2.8;
     const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        nameY,
+        700 * this.scaleFactor,
+        56 * this.scaleFactor,
+        0x180a24,
+        0.8,
+      )
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
+      .setDepth(0);
     const nameStyle = {
       fontFamily: 'Silkscreen',
       fontSize: `${32 * this.scaleFactor}px`,
-      color: '#ffffff',
+      color: COLORS.mainText,
     };
 
-    this.labelText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
+    this.labelText = this.add
+      .text(labelX, nameY, '', { ...nameStyle, color: COLORS.secondaryText })
+      .setOrigin(0, 0.5);
     this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
 
     this.updateNamePrompt();
   }
 
+  createParallaxBackground() {
+    this.background = this.add
+      .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
+      .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
+      .setDepth(-2);
+
+    this.parallaxPointerMove = (pointer) => {
+      this.background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    };
+    this.input.on('pointermove', this.parallaxPointerMove);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off('pointermove', this.parallaxPointerMove);
+    });
+  }
+
   createPrompt() {
     this.prompt = this.add
-      .text(this.scale.width / 2, this.scale.height / 5, '---    ENTER YOUR NAME    ---', {
-        fontFamily: 'Silkscreen',
-        fontSize: `${48 * this.scaleFactor}px`,
-        color: '#ffffff',
+      .text(this.scale.width / 2, this.scale.height / 4.5, 'ENTER YOUR NAME', {
+        fontFamily: 'Tiny5',
+        fontSize: `${80 * this.scaleFactor}px`,
+        color: COLORS.mainText,
       })
       .setOrigin(0.5);
   }
 
   createCharacterGrid() {
-    const cellWidth = 70 * this.scaleFactor;
+    const cellWidth = 78 * this.scaleFactor;
     const cellHeight = 70 * this.scaleFactor;
+    const keyWidth = 64 * this.scaleFactor;
+    const actionButtonWidth = 144 * this.scaleFactor;
     const startY = this.scale.height * 0.48;
+    const gridStartX = (this.scale.width - 8 * cellWidth) / 2;
+    const gridLeft = gridStartX - keyWidth / 2;
+    const gridRight = gridStartX + 8 * cellWidth + keyWidth / 2;
 
     this.characterTexts = [];
+    this.characterCells = [];
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        startY + 1.5 * cellHeight,
+        9 * cellWidth,
+        4 * cellHeight,
+        0x180a24,
+        0.45,
+      )
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.grid)
+      .setDepth(-1);
 
     this.characterGrid.forEach((row, rowIndex) => {
       const isLastRow = rowIndex === this.characterGrid.length - 1;
-      const rowTexts = row.map((character) =>
-        this.add
-          .text(0, startY + rowIndex * cellHeight, character, {
+      const rowCells = [];
+      const rowTexts = row.map((character, columnIndex) => {
+        const isActionRow = isLastRow;
+        let x;
+        let y;
+        let cellWidthInPixels;
+        let cellHeightInPixels;
+
+        if (isActionRow) {
+          cellWidthInPixels = actionButtonWidth;
+          if (columnIndex === 0) {
+            x = gridLeft + cellWidthInPixels / 2;
+          } else {
+            x = gridRight - cellWidthInPixels / 2;
+          }
+          y = startY + 4 * cellHeight + 10 * this.scaleFactor;
+          cellHeightInPixels = 44 * this.scaleFactor;
+        } else {
+          x = gridStartX + columnIndex * cellWidth;
+          y = startY + rowIndex * cellHeight;
+          cellWidthInPixels = keyWidth;
+          cellHeightInPixels = 60 * this.scaleFactor;
+        }
+
+        const cell = this.add
+          .rectangle(x, y, cellWidthInPixels, cellHeightInPixels, COLORS.keyFill)
+          .setStrokeStyle(2 * this.scaleFactor, COLORS.border)
+          .setDepth(0)
+          .setInteractive({ useHandCursor: true });
+        cell.on('pointerover', () => {
+          this.selectedRow = rowIndex;
+          this.selectedColumn = columnIndex;
+          this.updateSelection();
+        });
+        cell.on('pointerdown', (pointer) => {
+          if (!pointer.leftButtonDown()) return;
+
+          this.selectedRow = rowIndex;
+          this.selectedColumn = columnIndex;
+          this.updateSelection();
+          this.selectCharacter();
+        });
+        rowCells.push(cell);
+
+        return this.add
+          .text(x, y, character, {
             fontFamily: 'Silkscreen',
-            fontSize: `${28 * this.scaleFactor}px`,
-            color: '#ffffff',
-            backgroundColor: '#333333',
-            padding: { x: 10, y: 8 },
+            fontSize: `${(isActionRow ? 32 : 40) * this.scaleFactor}px`,
+            color: COLORS.mainText,
           })
-          .setOrigin(0.5),
-      );
-
-      this.characterTexts.push(rowTexts);
-
-      const rowWidth = (9 - 1) * cellWidth;
-      const startX = (this.scale.width - rowWidth) / 2;
-
-      if (isLastRow) {
-        const gridLeft = startX - cellWidth / 4;
-        const gridRight = startX + rowWidth + cellWidth / 4;
-
-        rowTexts[0].setX(gridLeft + rowTexts[0].width / 2);
-        rowTexts[1].setX(gridRight - rowTexts[1].width / 2);
-        return;
-      }
-
-      rowTexts.forEach((text, columnIndex) => {
-        text.setX(startX + columnIndex * cellWidth);
+          .setOrigin(0.5)
+          .setDepth(1);
       });
+
+      this.characterCells.push(rowCells);
+      this.characterTexts.push(rowTexts);
     });
   }
 
@@ -123,10 +216,14 @@ export default class NameInputScene extends Phaser.Scene {
       }
 
       if (event.key === 'Backspace') {
+        this.moveSelectionToCharacter('DELETE');
         this.playerNames[this.activePlayer] = currentName.slice(0, -1);
       } else if (/^[a-zA-Z0-9]$/.test(event.key)) {
-        this.appendCharacter(event.key.toUpperCase());
-        return;
+        const character = event.key.toUpperCase();
+        this.moveSelectionToCharacter(character);
+        if (currentName.length < this.maxNameLength) {
+          this.playerNames[this.activePlayer] = currentName + character;
+        }
       }
 
       this.updateNamePrompt();
@@ -135,6 +232,15 @@ export default class NameInputScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       this.input.keyboard.off('keydown', handleKeyDown);
     });
+  }
+
+  moveSelectionToCharacter(character) {
+    const rowIndex = this.characterGrid.findIndex((row) => row.includes(character));
+    if (rowIndex === -1) return;
+
+    this.selectedRow = rowIndex;
+    this.selectedColumn = this.characterGrid[rowIndex].indexOf(character);
+    this.updateSelection();
   }
 
   submitName() {
@@ -214,9 +320,12 @@ export default class NameInputScene extends Phaser.Scene {
     this.characterTexts.forEach((row, rowIndex) => {
       row.forEach((textObject, columnIndex) => {
         const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
-        textObject.setColor(isSelected ? '#000000' : '#ffffff');
-        textObject.setBackgroundColor(isSelected ? '#ffffff' : '#333333');
-        textObject.setScale(isSelected ? 1.15 : 1);
+        textObject.setColor(isSelected ? COLORS.selectedText : COLORS.mainText);
+        textObject.setScale(isSelected ? 1.2 : 1);
+        this.characterCells[rowIndex][columnIndex]
+          .setFillStyle(isSelected ? COLORS.selected : COLORS.keyFill)
+          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border)
+          .setScale(isSelected ? 1.08 : 1);
       });
     });
   }
