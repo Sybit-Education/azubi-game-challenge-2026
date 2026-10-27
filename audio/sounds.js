@@ -8,6 +8,8 @@ import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
+import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
+import restoreSizeUrl from './gameplay/restore-size.mp3?url';
 import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
@@ -65,6 +67,8 @@ export function preloadCountdownSound(scene) {
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
   loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
+  loadSound(scene, 'coin-multiplier-picked-up', coinMultiplierPickedUpUrl);
+  loadSound(scene, 'restore-size', restoreSizeUrl);
   loadSound(scene, 'collect-magnet', collectMagnetUrl);
   loadSound(scene, 'shield-collected', shieldCollectedUrl);
   loadSound(scene, 'shield-over', shieldOverUrl);

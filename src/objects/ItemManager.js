@@ -38,6 +38,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -50,6 +51,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -64,6 +66,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -77,6 +80,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -445,6 +449,7 @@ export default class ItemManager {
       car.multiplierTimer.remove();
     }
 
+    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.6 });
     console.log('Multiplier enabled');
     this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 1);
 
@@ -462,6 +467,7 @@ export default class ItemManager {
       car.multiplierTimer.remove();
     }
 
+    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.3 });
     console.log('Multiplier enabled');
     this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 2);
     car.coinMultiplier = 2;
