@@ -6,7 +6,7 @@ export default class BootScene extends Phaser.Scene {
   }
 
   async create() {
-    await document.fonts.load('1em Tiny5');
+    await document.fonts.load('1em Silkscreen');
     this.scene.start('MenuScene');
   }
 }

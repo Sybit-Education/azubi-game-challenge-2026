@@ -53,7 +53,7 @@ export default class GameoverScene extends Phaser.Scene {
   // On create
   async create() {
     // Parse leaderboard
-    await document.fonts.load('32px Tiny5');
+    await document.fonts.load('32px Silkscreen');
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     const leaderboard = await parseLeaderboard();
@@ -199,7 +199,7 @@ export default class GameoverScene extends Phaser.Scene {
     // Style for stats
     const statsStyle = {
       fontSize: `${30 * this.scaleFactor}px`,
-      fontFamily: 'Tiny5',
+      fontFamily: 'Silkscreen',
     };
 
     // Header

@@ -16,7 +16,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.InputManager.create();
     this.previousNavigation = { left: false, right: false, up: false, down: false };
 
-    await document.fonts.load('32px Tiny5');
+    await document.fonts.load('32px Silkscreen');
 
     this.playerNames = [''];
     this.activePlayer = 0;
@@ -44,7 +44,7 @@ export default class NameInputScene extends Phaser.Scene {
     const nameY = this.scale.height / 3;
     const labelX = this.scale.width / 2 - 320 * this.scaleFactor;
     const nameStyle = {
-      fontFamily: 'Tiny5',
+      fontFamily: 'Silkscreen',
       fontSize: `${32 * this.scaleFactor}px`,
       color: '#ffffff',
     };
@@ -58,7 +58,7 @@ export default class NameInputScene extends Phaser.Scene {
   createPrompt() {
     this.prompt = this.add
       .text(this.scale.width / 2, this.scale.height / 5, '---    ENTER YOUR NAME    ---', {
-        fontFamily: 'Tiny5',
+        fontFamily: 'Silkscreen',
         fontSize: `${48 * this.scaleFactor}px`,
         color: '#ffffff',
       })
@@ -77,7 +77,7 @@ export default class NameInputScene extends Phaser.Scene {
       const rowTexts = row.map((character) =>
         this.add
           .text(0, startY + rowIndex * cellHeight, character, {
-            fontFamily: 'Tiny5',
+            fontFamily: 'Silkscreen',
             fontSize: `${28 * this.scaleFactor}px`,
             color: '#ffffff',
             backgroundColor: '#333333',
