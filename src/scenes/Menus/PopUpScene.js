@@ -127,7 +127,8 @@ export default class PopUpScene extends Phaser.Scene {
     // the inactive mode is the dropdown alternative (hidden until main is clicked).
     const currentGameMode = this.registry.get('gameMode') ?? 'standard';
 
-    let activeModeButton = currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
+    let activeModeButton =
+      currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
     let inactiveModeButton =
       currentGameMode === 'christmas' ? standardModeButton : christmasModeButton;
 
