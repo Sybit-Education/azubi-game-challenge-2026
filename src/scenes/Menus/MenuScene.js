@@ -52,7 +52,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   async create(data) {
-    await document.fonts.load('32px Tiny5');
+    await document.fonts.load('32px Silkscreen');
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it

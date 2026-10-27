@@ -15,16 +15,16 @@ export default class HUD {
     // Player 1 (top-left)
     this.distanceText = scene.add
       .text(margin, margin, '', {
-        fontFamily: 'Tiny5',
-        fontSize: `${50 * this.scaleFactor}px`,
+        fontFamily: 'Silkscreen',
+        fontSize: `${30 * this.scaleFactor}px`,
       })
       .setOrigin(0, 0)
       .setDepth(5);
 
     this.scoreText = scene.add
       .text(margin, margin + 40 * this.scaleFactor, '', {
-        fontFamily: 'Tiny5',
-        fontSize: `${50 * this.scaleFactor}px`,
+        fontFamily: 'Silkscreen',
+        fontSize: `${30 * this.scaleFactor}px`,
       })
       .setOrigin(0, 0)
       .setDepth(5);
@@ -33,16 +33,16 @@ export default class HUD {
     if (this.secondCar) {
       this.distanceText2 = scene.add
         .text(scene.scale.width - margin, margin, '', {
-          fontFamily: 'Tiny5',
-          fontSize: `${50 * this.scaleFactor}px`,
+          fontFamily: 'Silkscreen',
+          fontSize: `${30 * this.scaleFactor}px`,
         })
         .setOrigin(1, 0)
         .setDepth(5);
 
       this.scoreText2 = scene.add
         .text(scene.scale.width - margin, margin + 40 * this.scaleFactor, '', {
-          fontFamily: 'Tiny5',
-          fontSize: `${50 * this.scaleFactor}px`,
+          fontFamily: 'Silkscreen',
+          fontSize: `${30 * this.scaleFactor}px`,
         })
         .setOrigin(1, 0)
         .setDepth(5);
@@ -54,7 +54,7 @@ export default class HUD {
           'stats-background',
         )
         .setDepth(4)
-        .setScale(0.5 * this.scaleFactor)
+        .setScale(0.3 * this.scaleFactor)
         .setOrigin(0);
       this.statsBackground2.setFlipX(true);
       this.statsBackground2.x -= this.statsBackground2.displayWidth;
