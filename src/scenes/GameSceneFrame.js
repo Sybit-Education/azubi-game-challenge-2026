@@ -13,7 +13,6 @@ function updatePlayerOne(scene) {
     currentRoadEdge = 'right';
   }
 
-  const laneChanged = currentLane !== scene.lastPlayerLane;
   const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
 
   if (scene.registry.get('accessibility enabled')) {
@@ -22,8 +21,6 @@ function updatePlayerOne(scene) {
       const pan = currentRoadEdge === 'left' ? -1 : 1;
       scene.sound.play('road-edge-hit', { volume: 0.25, pan });
       scene.sound.play('collision-hit', { volume: 0.15, pan });
-    } else if (laneChanged) {
-      scene.gameStatus.textContent = `Lane ${currentLane + 1}`;
     }
   }
 
@@ -67,9 +64,11 @@ function updateRoadObjects(scene, delta) {
 }
 
 function updateAudio(scene, delta) {
+  scene.laneAnnouncements.update();
   // Update after movement so sounds use the cars' current positions.
   const carsForAudio = scene.getCarsForAudio();
-  for (const sensor of scene.carSensors) sensor.update(delta, carsForAudio);
+  const obstaclesForAudio = scene.getObstaclesForAudio();
+  for (const sensor of scene.carSensors) sensor.update(delta, obstaclesForAudio);
   scene.carPassBy.update(carsForAudio);
 }
 
@@ -92,6 +91,7 @@ function updateTrackAndHud(scene, delta) {
   scene.track2.move(delta);
   scene.hud.update();
   scene.ItemManager.itemShop();
+  scene.coinAnnouncements.update();
   scene.coinText1.setText(String(scene.ItemManager.coinBudgetPlayer1));
 
   if (scene.isMultiplayer && scene.coinText2) {
@@ -100,6 +100,7 @@ function updateTrackAndHud(scene, delta) {
 }
 
 export function updateGameScene(scene, delta) {
+  if (!scene.registry.get('accessibility enabled')) scene.speech.silence();
   scene.InputManager.update();
   scene.elapsedTime += delta;
 

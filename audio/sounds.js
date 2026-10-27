@@ -1,9 +1,16 @@
 import menuClickUrl from './menu/menuclick.mp3?url';
 import menuFocusUrl from './menu/menu-focus.ogg?url';
+import typingClick1Url from './menu/typing-click-1.wav?url';
+import typingClick2Url from './menu/typing-click-2.wav?url';
+import typingClick3Url from './menu/typing-click-3.wav?url';
+import typingClick4Url from './menu/typing-click-4.wav?url';
 import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
+import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
+import restoreSizeUrl from './gameplay/restore-size.mp3?url';
+import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
@@ -29,6 +36,19 @@ const duckQuackSounds = [
   { key: 'duck-quack-3', url: duckQuack3Url },
 ];
 
+const typingSounds = [
+  { key: 'typing-click-1', url: typingClick1Url },
+  { key: 'typing-click-2', url: typingClick2Url },
+  { key: 'typing-click-3', url: typingClick3Url },
+  { key: 'typing-click-4', url: typingClick4Url },
+];
+
+export const TYPING_SOUND_KEYS = typingSounds.map((sound) => sound.key);
+
+export function preloadTypingSounds(scene) {
+  for (const sound of typingSounds) loadSound(scene, sound.key, sound.url);
+}
+
 export const DUCK_QUACK_SOUND_KEYS = duckQuackSounds.map((sound) => sound.key);
 
 function loadSound(scene, key, fileUrl) {
@@ -47,6 +67,9 @@ export function preloadCountdownSound(scene) {
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
   loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
+  loadSound(scene, 'coin-multiplier-picked-up', coinMultiplierPickedUpUrl);
+  loadSound(scene, 'restore-size', restoreSizeUrl);
+  loadSound(scene, 'collect-magnet', collectMagnetUrl);
   loadSound(scene, 'shield-collected', shieldCollectedUrl);
   loadSound(scene, 'shield-over', shieldOverUrl);
   loadSound(scene, 'car-sensor', sensorBeepUrl);

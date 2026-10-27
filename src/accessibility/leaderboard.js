@@ -1,0 +1,59 @@
+import { positionAccessibleControls } from './positionControls.js';
+import { preserveNativeKeyboard } from './nativeKeyboard.js';
+import { bindMenuFocusSounds } from '../../audio/sounds.js';
+
+export function bindLeaderboardControls(scene, entries, focusTarget) {
+  const layer = document.getElementById('leaderboard-ui');
+  const rows = document.getElementById('leaderboard-entries');
+  const home = document.getElementById('leaderboard-home');
+  const reset = document.getElementById('leaderboard-reset');
+  rows.replaceChildren();
+
+  if (entries.length === 0) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 3;
+    cell.textContent = 'No entries yet';
+    row.append(cell);
+    rows.append(row);
+  }
+
+  entries.forEach((entry, index) => {
+    const row = document.createElement('tr');
+    [index + 1, entry.name, `${entry.distance} km`].forEach((value) => {
+      const cell = document.createElement('td');
+      // Player names come from storage; insert them as text, never HTML.
+      cell.textContent = String(value);
+      row.append(cell);
+    });
+    rows.append(row);
+  });
+
+  const goHome = () => scene.goHome();
+  const resetLeaderboard = () => scene.resetLeaderboard();
+  const handleEscape = (event) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    goHome();
+  };
+
+  home.addEventListener('click', goHome);
+  reset.addEventListener('click', resetLeaderboard);
+  layer.addEventListener('keydown', handleEscape);
+  preserveNativeKeyboard(scene, layer);
+  layer.hidden = false;
+  positionAccessibleControls(scene, [
+    [home, scene.backButton],
+    [reset, scene.resetButton],
+  ]);
+  bindMenuFocusSounds(scene, ['leaderboard-home', 'leaderboard-reset']);
+  document.getElementById(focusTarget ?? 'leaderboard-title').focus();
+
+  scene.events.once('shutdown', () => {
+    home.removeEventListener('click', goHome);
+    reset.removeEventListener('click', resetLeaderboard);
+    layer.removeEventListener('keydown', handleEscape);
+    layer.hidden = true;
+    rows.replaceChildren();
+  });
+}

@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 
+const MAGNET_DURATION_MS = 10000;
+const MAGNET_RANGE = 600;
+
 export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
@@ -13,6 +16,7 @@ export default class ItemManager {
     this.itemShieldPrize = 35;
     this.itemShrinkPrize = 25;
     this.itemHeartPrize = 40;
+    this.itemMagnetPrize = 35;
 
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
@@ -34,6 +38,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -46,6 +51,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -60,6 +66,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -73,6 +80,7 @@ export default class ItemManager {
 
     this.scene.time.delayedCall(10000, () => {
       car.setScale(this.originScale);
+      this.scene.sound.play('restore-size', { volume: 0.3 });
     });
   }
 
@@ -211,73 +219,42 @@ export default class ItemManager {
   }
 
   itemMagnetCar1() {
-    this.scene.car.magnetActive = true;
-    this.scene.hud.showPowerupTimer('magnet', 10000, 0.2, 1);
-    const magnet = this.scene.time.addEvent({
-      delay: 16,
-      loop: true,
-      callback: () => {
-        if (this.scene.car.dead) return;
-
-        for (const roadObject of this.scene.roadObjects) {
-          if (roadObject.texture?.key !== 'coin') {
-            continue;
-          }
-
-          const distance = Phaser.Math.Distance.Between(
-            this.scene.car.x,
-            this.scene.car.y,
-            roadObject.x,
-            roadObject.y,
-          );
-
-          if (distance < 600) {
-            roadObject.x += (this.scene.car.x - roadObject.x) * 0.1;
-            roadObject.y += (this.scene.car.y - roadObject.y) * 0.1;
-          }
-        }
-      },
-    });
-
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.car.magnetActive = false;
-      magnet.remove();
-    });
+    return this.activateMagnet(this.scene.car, 1);
   }
 
   itemMagnetCar2() {
-    this.scene.secondCar.magnetActive = true;
-    this.scene.hud.showPowerupTimer('magnet', 10000, 0.2, 2);
+    return this.activateMagnet(this.scene.secondCar, 2);
+  }
+
+  activateMagnet(car, player) {
+    if (!car || !car.active || car.dead || car.magnetActive) return false;
+
+    car.magnetActive = true;
+    this.scene.sound.play('collect-magnet', { volume: 0.3 });
+    this.scene.hud.showPowerupTimer('magnet', MAGNET_DURATION_MS, 0.2, player);
+
     const magnet = this.scene.time.addEvent({
       delay: 16,
       loop: true,
       callback: () => {
-        if (this.scene.secondCar.dead) return;
+        if (!car.active || car.dead) return;
+        for (const object of this.scene.roadObjects) {
+          if (!object.active || object.texture?.key !== 'coin') continue;
 
-        for (const roadObject of this.scene.roadObjects) {
-          if (roadObject.texture?.key !== 'coin') {
-            continue;
-          }
-
-          const distance = Phaser.Math.Distance.Between(
-            this.scene.secondCar.x,
-            this.scene.secondCar.y,
-            roadObject.x,
-            roadObject.y,
-          );
-
-          if (distance < 600) {
-            roadObject.x += (this.scene.secondCar.x - roadObject.x) * 0.1;
-            roadObject.y += (this.scene.secondCar.y - roadObject.y) * 0.1;
+          const distance = Phaser.Math.Distance.Between(car.x, car.y, object.x, object.y);
+          if (distance < MAGNET_RANGE) {
+            object.x += (car.x - object.x) * 0.1;
+            object.y += (car.y - object.y) * 0.1;
           }
         }
       },
     });
 
-    this.scene.time.delayedCall(10000, () => {
-      this.scene.secondCar.magnetActive = false;
+    this.scene.time.delayedCall(MAGNET_DURATION_MS, () => {
+      car.magnetActive = false;
       magnet.remove();
     });
+    return true;
   }
 
   // Checks health for car 1
@@ -472,6 +449,7 @@ export default class ItemManager {
       car.multiplierTimer.remove();
     }
 
+    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.6 });
     console.log('Multiplier enabled');
     this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 1);
 
@@ -489,6 +467,7 @@ export default class ItemManager {
       car.multiplierTimer.remove();
     }
 
+    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.3 });
     console.log('Multiplier enabled');
     this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 2);
     car.coinMultiplier = 2;
@@ -505,6 +484,7 @@ export default class ItemManager {
     this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
     this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
     this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+    this.key4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.key1) &&
@@ -530,10 +510,19 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemHeartPrize;
     }
 
+    if (
+      Phaser.Input.Keyboard.JustDown(this.key4) &&
+      this.coinBudgetPlayer1 >= this.itemMagnetPrize &&
+      this.itemMagnetCar1()
+    ) {
+      this.coinBudgetPlayer1 -= this.itemMagnetPrize;
+    }
+
     // Hotkeys Player2
     this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
     this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
+    this.numpad4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
 
     if (
       Phaser.Input.Keyboard.JustDown(this.numpad1) &&
@@ -557,6 +546,14 @@ export default class ItemManager {
     ) {
       this.itemExtraLifeCar2();
       this.coinBudgetPlayer2 -= this.itemHeartPrize;
+    }
+
+    if (
+      Phaser.Input.Keyboard.JustDown(this.numpad4) &&
+      this.coinBudgetPlayer2 >= this.itemMagnetPrize &&
+      this.itemMagnetCar2()
+    ) {
+      this.coinBudgetPlayer2 -= this.itemMagnetPrize;
     }
   }
 }
