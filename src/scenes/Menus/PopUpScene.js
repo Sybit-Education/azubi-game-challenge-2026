@@ -35,6 +35,7 @@ export default class PopUpScene extends Phaser.Scene {
   // Phaser lifecycle
   // -------------------------------------------------------------------------
 
+  /** Loads all assets required by the settings panel. */
   preload() {
     preloadMenuSounds(this);
     this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
@@ -59,6 +60,10 @@ export default class PopUpScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * Initialises the settings panel: builds the layout, wires up all
+   * event handlers and opens the HTML dialog.
+   */
   create() {
     this._setupInputManager();
     this._pauseParentScenes();
@@ -82,6 +87,10 @@ export default class PopUpScene extends Phaser.Scene {
     this._html.dialog.showModal();
   }
 
+  /**
+   * Highlights the currently selected navigation item and resets all others.
+   * Called after `selectedIndex` changes.
+   */
   updateGamepadSelection() {
     const items = this.navigationItems;
     this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex, 0, items.length);
@@ -100,6 +109,10 @@ export default class PopUpScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Phaser game loop — polls gamepad/keyboard input each frame and delegates
+   * to the appropriate navigation action.
+   */
   update() {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
@@ -123,11 +136,13 @@ export default class PopUpScene extends Phaser.Scene {
   // Initialisation helpers
   // -------------------------------------------------------------------------
 
+  /** Creates and initialises the InputManager for this scene. */
   _setupInputManager() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
   }
 
+  /** Pauses whichever of MenuScene / ChristmasScene is currently active. */
   _pauseParentScenes() {
     this.parentSceneKeys = ['MenuScene', 'ChristmasScene'].filter((key) =>
       this.scene.isActive(key),
@@ -135,7 +150,11 @@ export default class PopUpScene extends Phaser.Scene {
     this.parentSceneKeys.forEach((key) => this.scene.pause(key));
   }
 
-  /** Centralises all document.getElementById calls. */
+  /**
+   * Returns an object containing all HTML elements the scene interacts with.
+   * Centralises every `document.getElementById` call in one place.
+   * @returns {{ settingsBtn: HTMLElement, closeSettingsBtn: HTMLElement, dialog: HTMLDialogElement, accessibilityToggle: HTMLInputElement, gameModeMenu: HTMLButtonElement, christmasModeChoice: HTMLButtonElement }}
+   */
   _getHtmlElements() {
     return {
       settingsBtn: document.getElementById('settings-btn'),
@@ -147,6 +166,10 @@ export default class PopUpScene extends Phaser.Scene {
     };
   }
 
+  /**
+   * Reads the current game-mode from the registry, derives helper flags
+   * and sets the initial ARIA attributes on the HTML controls.
+   */
   _initGameModeState() {
     const { gameModeMenu, christmasModeChoice } = this._html;
 
@@ -167,6 +190,7 @@ export default class PopUpScene extends Phaser.Scene {
     christmasModeChoice.disabled = true;
   }
 
+  /** Reads the persisted accessibility setting and resets hover/selection flags. */
   _initAccessibilityState() {
     this._accessibilityEnabled = this.registry.get('accessibilityMode') ?? false;
     this._switchHovered = false;
@@ -177,6 +201,13 @@ export default class PopUpScene extends Phaser.Scene {
   // Layout
   // -------------------------------------------------------------------------
 
+  /**
+   * Creates all Phaser game objects (background, buttons, labels, switch)
+   * and computes layout coordinates.
+   * Also populates `this._panelObjects` for slide animations.
+   * @param {number} width  Canvas width in pixels.
+   * @param {number} height Canvas height in pixels.
+   */
   _buildLayout(width, height) {
     const s = this._uiScale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
@@ -289,16 +320,26 @@ export default class PopUpScene extends Phaser.Scene {
   // Game-mode dropdown
   // -------------------------------------------------------------------------
 
+  /** Attaches pointerdown handlers to the active/inactive game-mode buttons. */
   _setupGameModeDropdown() {
     this._activeModeButton.on('pointerdown', () => this._toggleDropdown());
     this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
   }
 
+  /**
+   * Persists the chosen game mode to both the Phaser registry and local settings.
+   * @param {'standard'|'christmas'} mode
+   */
   _applyGameMode(mode) {
     this.registry.set('gameMode', mode);
     setSetting('gameMode', mode);
   }
 
+  /**
+   * Plays the click sound, saves the mode, stops the current scene pair
+   * and starts the appropriate menu scene.
+   * @param {'standard'|'christmas'} mode
+   */
   _switchToMode(mode) {
     playMenuClick(this);
     this._applyGameMode(mode);
@@ -307,10 +348,12 @@ export default class PopUpScene extends Phaser.Scene {
     this.scene.start(mode === 'christmas' ? 'ChristmasScene' : 'MenuScene');
   }
 
+  /** Switches to whichever mode is currently *not* active. */
   _chooseAlternateMode() {
     this._switchToMode(this._isChristmasMode ? 'standard' : 'christmas');
   }
 
+  /** Toggles the game-mode dropdown open/closed and rebuilds navigation items. */
   _toggleDropdown() {
     playMenuClick(this);
     this._isDropdownOpen = !this._isDropdownOpen;
@@ -319,6 +362,7 @@ export default class PopUpScene extends Phaser.Scene {
     this._rebuildNavigationItems();
   }
 
+  /** Syncs ARIA attributes and the hidden/disabled state of the HTML choice button. */
   _updateDropdownHtml() {
     const { gameModeMenu, christmasModeChoice } = this._html;
     gameModeMenu.setAttribute('aria-expanded', String(this._isDropdownOpen));
@@ -326,6 +370,7 @@ export default class PopUpScene extends Phaser.Scene {
     christmasModeChoice.disabled = !this._isDropdownOpen;
   }
 
+  /** Tweens the inactive mode button into or out of the dropdown position. */
   _updateDropdownVisual() {
     const btn = this._inactiveModeButton;
     this.tweens.killTweensOf(btn);
@@ -342,6 +387,10 @@ export default class PopUpScene extends Phaser.Scene {
   // Accessibility switch
   // -------------------------------------------------------------------------
 
+  /**
+   * Measures the switch widget, positions the knob for the current state
+   * and attaches pointerdown listeners.
+   */
   _setupAccessibilitySwitch() {
     const sw = this._accessibilitySwitch;
     const knob = this._accessibilityKnob;
@@ -362,6 +411,10 @@ export default class PopUpScene extends Phaser.Scene {
     knob.on('pointerdown', () => this._toggleAccessibility());
   }
 
+  /**
+   * Tweens the switch and knob to the correct scale and knob position,
+   * taking hover and gamepad-selection state into account.
+   */
   _updateSwitchScale() {
     const scaleFactor = this._switchHovered || this._switchSelected ? HOVER_SCALE_FACTOR : 1;
     const scale = this._switchBaseScale * scaleFactor;
@@ -381,6 +434,11 @@ export default class PopUpScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Persists the accessibility setting, updates the HTML checkbox,
+   * changes the switch texture and re-runs the scale tween.
+   * @param {boolean} enabled
+   */
   _setAccessibilityEnabled(enabled) {
     this._accessibilityEnabled = enabled;
     this.registry.set('accessibilityMode', enabled);
@@ -390,6 +448,7 @@ export default class PopUpScene extends Phaser.Scene {
     this._updateSwitchScale();
   }
 
+  /** Plays the click sound and flips the accessibility setting. */
   _toggleAccessibility() {
     playMenuClick(this);
     this._setAccessibilityEnabled(!this._accessibilityEnabled);
@@ -399,12 +458,17 @@ export default class PopUpScene extends Phaser.Scene {
   // Close / animation
   // -------------------------------------------------------------------------
 
+  /** Binds the X button and keyboard shortcuts (ESC, M) to `_close()`. */
   _setupCloseHandlers() {
     this._closeButton.on('pointerdown', () => this._close());
     this.input.keyboard.once('keydown-ESC', () => this._close());
     this.input.keyboard.once('keydown-M', () => this._close());
   }
 
+  /**
+   * Slides the panel out, fades the dim overlay and stops the scene.
+   * A guard prevents double-invocation.
+   */
   _close() {
     if (this._closing) return;
     playMenuClick(this);
@@ -430,6 +494,10 @@ export default class PopUpScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Fades in the dim backdrop and slides the panel in from the right.
+   * @param {number} width Canvas width — used as the slide offset.
+   */
   _animateIn(width) {
     this.tweens.add({ targets: this._dim, alpha: 1, duration: TWEEN_DURATION_SLOW });
     this._panelObjects.forEach((obj) => (obj.x += width));
@@ -445,6 +513,10 @@ export default class PopUpScene extends Phaser.Scene {
   // HTML event handlers & cleanup
   // -------------------------------------------------------------------------
 
+  /**
+   * Registers all HTML event listeners (change, click, cancel, hover, etc.),
+   * positions the accessible overlay controls and schedules cleanup on shutdown.
+   */
   _setupHtmlEventHandlers() {
     const { dialog, accessibilityToggle, gameModeMenu, christmasModeChoice, closeSettingsBtn } =
       this._html;
@@ -539,6 +611,14 @@ export default class PopUpScene extends Phaser.Scene {
     settingsBtn.focus();
   }
 
+  /**
+   * Mirrors mouse-hover on an HTML overlay element as a scale tween on the
+   * corresponding Phaser game object.
+   * @param {HTMLElement} element    The HTML element to listen on.
+   * @param {Phaser.GameObjects.Image} object The Phaser object to scale.
+   * @param {number} baseScale       The object's resting scale.
+   * @param {number} [hoverScale=1.2] Scale multiplier while hovered.
+   */
   _bindOverlayHover(element, object, baseScale, hoverScale = 1.2) {
     const updateScale = (hovered) => {
       const isSelected = this.navigationItems[this.selectedIndex]?.button === object;
@@ -565,6 +645,7 @@ export default class PopUpScene extends Phaser.Scene {
   // Gamepad / keyboard navigation
   // -------------------------------------------------------------------------
 
+  /** Initialises `selectedIndex` and builds the first `navigationItems` array. */
   _setupGamepadNavigation() {
     this.selectedIndex = 0;
     this._rebuildNavigationItems();
@@ -572,8 +653,9 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   /**
-   * Rebuilds the navigationItems array.
-   * Called once on setup and again whenever the dropdown opens or closes.
+   * Rebuilds `this.navigationItems`.
+   * Called once during setup and again whenever the dropdown opens or closes,
+   * so the gamepad navigation always reflects the current UI state.
    */
   _rebuildNavigationItems() {
     const s = this._uiScale;
