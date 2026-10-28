@@ -14,6 +14,7 @@ import { createRoadObject } from './GameSceneRoadObjects.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
+import ItemAnnouncements from '../accessibility/ItemAnnouncements.js';
 import GameSpeech from '../../audio/GameSpeech.js';
 import Flickereffect from '../scenes/FlickerEffect.js';
 
@@ -137,6 +138,7 @@ export default class GameScene extends Phaser.Scene {
     });
     this.coinAnnouncements = new CoinAnnouncements(this);
     this.laneAnnouncements = new LaneAnnouncements(this);
+    this.itemAnnouncements = new ItemAnnouncements(this);
     this.createTrack();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {

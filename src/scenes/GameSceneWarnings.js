@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import EnemyCar from '../objects/EnemyCar.js';
 import Ice from '../objects/Ice.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
+import { ICE_WARNING_SECONDS } from '../accessibility/warningTiming.js';
 
 function getObstaclesAhead(scene, car, lane) {
   return scene.roadObjects.filter((object) => {
@@ -79,7 +80,7 @@ export function updateIceWarning(scene) {
       if (ice.body.bottom > car.body.top) continue;
 
       const seconds = getTimeUntilObstacle(scene, car, ice);
-      if (!Number.isFinite(seconds) || seconds > 3) continue;
+      if (!Number.isFinite(seconds) || seconds > ICE_WARNING_SECONDS) continue;
       if (nextWarning === null || seconds < nextWarning.seconds) {
         nextWarning = { car, ice, seconds, warned };
       }

@@ -529,6 +529,8 @@ export default class PopUpScene extends Phaser.Scene {
   _setAccessibilityEnabled(enabled) {
     this._accessibilityEnabled = enabled;
     this.registry.set('accessibilityMode', enabled);
+    // Gameplay announcements still read this key; keep both values in sync.
+    this.registry.set('accessibility enabled', enabled);
     setSetting('accessibilityMode', enabled);
     this._html.accessibilityToggle.checked = enabled;
     this._accessibilitySwitch.setTexture(enabled ? 'switchOn' : 'switchOff');
