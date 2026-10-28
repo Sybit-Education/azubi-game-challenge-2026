@@ -23,6 +23,9 @@ const TWEEN_DURATION_FAST = 100;
 const TWEEN_DURATION_MID = 150;
 const TWEEN_DURATION_SLOW = 200;
 
+// Phaser reads native DOM events on window; these must not bubble from the HTML dialog.
+const NATIVE_INPUT_EVENTS = ['mousedown', 'mouseup', 'touchstart', 'touchend', 'keydown', 'keyup'];
+
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
     super('PopUpScene');
@@ -45,10 +48,6 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
     this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
     this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
-    this.load.image(
-      'AccessibilitySwitchOff',
-      'assets/images/homepage/settings-menu/switch-off.png',
-    );
     this.load.image(
       'StandardModeButton',
       'assets/images/homepage/settings-menu/standard-mode-button.png',
@@ -113,10 +112,10 @@ export default class PopUpScene extends Phaser.Scene {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
       this.updateGamepadSelection();
     } else if (controls.button2) {
-      this.navigationItems[this.selectedIndex].action();
+      items[this.selectedIndex].action();
       this.updateGamepadSelection();
     } else if (controls.button4) {
-      this.navigationItems[0].action();
+      items[0].action();
     }
   }
 
@@ -300,28 +299,16 @@ export default class PopUpScene extends Phaser.Scene {
     setSetting('gameMode', mode);
   }
 
-  _chooseChristmasMode() {
+  _switchToMode(mode) {
     playMenuClick(this);
-    this._applyGameMode('christmas');
-    this.scene.stop('MenuScene');
+    this._applyGameMode(mode);
+    this.scene.stop(mode === 'christmas' ? 'MenuScene' : 'ChristmasScene');
     this.scene.stop('PopUpScene');
-    this.scene.start('ChristmasScene');
-  }
-
-  _chooseStandardMode() {
-    playMenuClick(this);
-    this._applyGameMode('standard');
-    this.scene.stop('ChristmasScene');
-    this.scene.stop('PopUpScene');
-    this.scene.start('MenuScene');
+    this.scene.start(mode === 'christmas' ? 'ChristmasScene' : 'MenuScene');
   }
 
   _chooseAlternateMode() {
-    if (this._isChristmasMode) {
-      this._chooseStandardMode();
-    } else {
-      this._chooseChristmasMode();
-    }
+    this._switchToMode(this._isChristmasMode ? 'standard' : 'christmas');
   }
 
   _toggleDropdown() {
@@ -359,14 +346,14 @@ export default class PopUpScene extends Phaser.Scene {
     const sw = this._accessibilitySwitch;
     const knob = this._accessibilityKnob;
 
-    this._switchLeft = sw.x - sw.displayWidth + sw.displayHeight / 2;
-    this._switchRight = sw.x - sw.displayHeight / 2;
     this._switchBaseScale = SCALE_SWITCH * this._uiScale;
     this._switchBaseWidth = sw.displayWidth;
     this._switchBaseHeight = sw.displayHeight;
 
     sw.setTexture(this._accessibilityEnabled ? 'switchOn' : 'switchOff');
-    knob.x = this._accessibilityEnabled ? this._switchRight : this._switchLeft;
+    knob.x = this._accessibilityEnabled
+      ? sw.x - sw.displayHeight / 2
+      : sw.x - sw.displayWidth + sw.displayHeight / 2;
     knob.y = sw.y + sw.displayHeight / 2;
 
     this._html.accessibilityToggle.checked = this._accessibilityEnabled;
@@ -464,18 +451,10 @@ export default class PopUpScene extends Phaser.Scene {
     const s = this._uiScale;
 
     // Prevent Phaser from receiving events that target HTML form controls
-    const nativeInputEvents = [
-      'mousedown',
-      'mouseup',
-      'touchstart',
-      'touchend',
-      'keydown',
-      'keyup',
-    ];
     this._stopPhaserInput = (event) => {
       if (event.target.closest('button, input, select')) event.stopPropagation();
     };
-    nativeInputEvents.forEach((name) => dialog.addEventListener(name, this._stopPhaserInput));
+    NATIVE_INPUT_EVENTS.forEach((name) => dialog.addEventListener(name, this._stopPhaserInput));
 
     // Named handler references kept for cleanup
     this._handleAccessibilityChange = () => {
@@ -548,16 +527,7 @@ export default class PopUpScene extends Phaser.Scene {
       closeSettingsBtn,
       settingsBtn,
     } = this._html;
-    const nativeInputEvents = [
-      'mousedown',
-      'mouseup',
-      'touchstart',
-      'touchend',
-      'keydown',
-      'keyup',
-    ];
-
-    nativeInputEvents.forEach((name) => dialog.removeEventListener(name, this._stopPhaserInput));
+    NATIVE_INPUT_EVENTS.forEach((name) => dialog.removeEventListener(name, this._stopPhaserInput));
     accessibilityToggle.removeEventListener('change', this._handleAccessibilityChange);
     gameModeMenu.removeEventListener('click', this._handleGameModeClick);
     christmasModeChoice.removeEventListener('click', this._handleAlternateModeClick);
