@@ -8,19 +8,19 @@ import { setSetting } from '../../settings/gameSettings.js';
 // ---------------------------------------------------------------------------
 // UI constants
 // ---------------------------------------------------------------------------
-const SCALE_CLOSE_BTN   = 0.4;
-const SCALE_LABEL       = 0.3;
+const SCALE_CLOSE_BTN = 0.4;
+const SCALE_LABEL = 0.3;
 const SCALE_LABEL_LARGE = 0.35;
-const SCALE_SWITCH      = 0.37;
+const SCALE_SWITCH = 0.37;
 const SCALE_CLOSE_LABEL = 0.66;
-const SCALE_MODE_BTN    = 0.3;
+const SCALE_MODE_BTN = 0.3;
 
-const DIM_ALPHA           = 0.48;
-const ROW_GAP_BASE        = 120;
-const DROPDOWN_GAP        = 10;
-const HOVER_SCALE_FACTOR  = 1.06;
+const DIM_ALPHA = 0.48;
+const ROW_GAP_BASE = 120;
+const DROPDOWN_GAP = 10;
+const HOVER_SCALE_FACTOR = 1.06;
 const TWEEN_DURATION_FAST = 100;
-const TWEEN_DURATION_MID  = 150;
+const TWEEN_DURATION_MID = 150;
 const TWEEN_DURATION_SLOW = 200;
 
 export default class PopUpScene extends Phaser.Scene {
@@ -34,18 +34,30 @@ export default class PopUpScene extends Phaser.Scene {
 
   preload() {
     preloadMenuSounds(this);
-    this.load.image('settingsBackground',     'assets/images/homepage/settings-menu/background.png');
-    this.load.image('settingsLabel',          'assets/images/homepage/settings-menu/settings.png');
-    this.load.image('xButton',                'assets/images/homepage/settings-menu/x.png');
-    this.load.image('Accessibility Mode',     'assets/images/homepage/settings-menu/accessibility-mode.png');
-    this.load.image('switchOn',               'assets/images/homepage/settings-menu/switch-on.png');
-    this.load.image('switchOff',              'assets/images/homepage/settings-menu/switch-off.png');
-    this.load.image('switchCircle',           'assets/images/homepage/settings-menu/switch-circle.png');
-    this.load.image('Game Mode',              'assets/images/homepage/settings-menu/game-mode-label.png');
-    this.load.image('AccessibilitySwitchOff', 'assets/images/homepage/settings-menu/switch-off.png');
-    this.load.image('StandardModeButton',     'assets/images/homepage/settings-menu/standard-mode-button.png');
-    this.load.image('closeLabel',             'assets/images/homepage/settings-menu/close-label.png');
-    this.load.image('christmasmode',          'assets/images/homepage/settings-menu/christmas-mode-button.png');
+    this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
+    this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
+    this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
+    this.load.image(
+      'Accessibility Mode',
+      'assets/images/homepage/settings-menu/accessibility-mode.png',
+    );
+    this.load.image('switchOn', 'assets/images/homepage/settings-menu/switch-on.png');
+    this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
+    this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
+    this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
+    this.load.image(
+      'AccessibilitySwitchOff',
+      'assets/images/homepage/settings-menu/switch-off.png',
+    );
+    this.load.image(
+      'StandardModeButton',
+      'assets/images/homepage/settings-menu/standard-mode-button.png',
+    );
+    this.load.image('closeLabel', 'assets/images/homepage/settings-menu/close-label.png');
+    this.load.image(
+      'christmasmode',
+      'assets/images/homepage/settings-menu/christmas-mode-button.png',
+    );
   }
 
   create() {
@@ -81,8 +93,8 @@ export default class PopUpScene extends Phaser.Scene {
         item.applySelection(selected);
       } else {
         this.tweens.add({
-          targets:  item.button,
-          scale:    selected ? item.scale * HOVER_SCALE_FACTOR : item.scale,
+          targets: item.button,
+          scale: selected ? item.scale * HOVER_SCALE_FACTOR : item.scale,
           duration: TWEEN_DURATION_FAST,
         });
       }
@@ -92,7 +104,7 @@ export default class PopUpScene extends Phaser.Scene {
   update() {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
-    const items    = this.navigationItems;
+    const items = this.navigationItems;
 
     if (controls.button1) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
@@ -127,11 +139,11 @@ export default class PopUpScene extends Phaser.Scene {
   /** Centralises all document.getElementById calls. */
   _getHtmlElements() {
     return {
-      settingsBtn:         document.getElementById('settings-btn'),
-      closeSettingsBtn:    document.getElementById('close-settings'),
-      dialog:              document.getElementById('settings-dialog'),
+      settingsBtn: document.getElementById('settings-btn'),
+      closeSettingsBtn: document.getElementById('close-settings'),
+      dialog: document.getElementById('settings-dialog'),
       accessibilityToggle: document.getElementById('accessible-toggle'),
-      gameModeMenu:        document.getElementById('game-mode-menu'),
+      gameModeMenu: document.getElementById('game-mode-menu'),
       christmasModeChoice: document.getElementById('christmas-mode-choice'),
     };
   }
@@ -141,7 +153,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     this._currentGameMode = this.registry.get('gameMode') ?? 'standard';
     this._isChristmasMode = this._currentGameMode === 'christmas';
-    this._isDropdownOpen  = false;
+    this._isDropdownOpen = false;
 
     gameModeMenu.setAttribute(
       'aria-label',
@@ -152,14 +164,14 @@ export default class PopUpScene extends Phaser.Scene {
       'aria-label',
       `${this._isChristmasMode ? 'Standard' : 'Christmas'} mode`,
     );
-    christmasModeChoice.hidden   = true;
+    christmasModeChoice.hidden = true;
     christmasModeChoice.disabled = true;
   }
 
   _initAccessibilityState() {
     this._accessibilityEnabled = this.registry.get('accessibilityMode') ?? false;
-    this._switchHovered        = false;
-    this._switchSelected       = false;
+    this._switchHovered = false;
+    this._switchSelected = false;
   }
 
   // -------------------------------------------------------------------------
@@ -167,19 +179,19 @@ export default class PopUpScene extends Phaser.Scene {
   // -------------------------------------------------------------------------
 
   _buildLayout(width, height) {
-    const s       = this._uiScale;
+    const s = this._uiScale;
     const padding = Math.max(24, Math.min(width, height) * 0.06);
-    const rowGap  = ROW_GAP_BASE * s;
-    const row1Y   = height * 0.2;
-    const row2Y   = row1Y + rowGap;
-    const row3Y   = row2Y + rowGap * 2;
+    const rowGap = ROW_GAP_BASE * s;
+    const row1Y = height * 0.2;
+    const row2Y = row1Y + rowGap;
+    const row3Y = row2Y + rowGap * 2;
 
-    const background        = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
+    const background = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
     background.displayWidth = width / 2.5;
 
-    const popupLeft   = background.x - background.displayWidth / 2;
-    const popupRight  = background.x + background.displayWidth / 2;
-    const leftColumn  = popupLeft  + padding;
+    const popupLeft = background.x - background.displayWidth / 2;
+    const popupRight = background.x + background.displayWidth / 2;
+    const leftColumn = popupLeft + padding;
     const rightColumn = popupRight - padding;
 
     // Dim backdrop — clicking outside closes the panel
@@ -246,13 +258,18 @@ export default class PopUpScene extends Phaser.Scene {
       .setAlpha(0)
       .setInteractive();
 
-    this._activeModeButton   = this._isChristmasMode ? this._christmasModeButton : this._standardModeButton;
-    this._inactiveModeButton = this._isChristmasMode ? this._standardModeButton  : this._christmasModeButton;
+    this._activeModeButton = this._isChristmasMode
+      ? this._christmasModeButton
+      : this._standardModeButton;
+    this._inactiveModeButton = this._isChristmasMode
+      ? this._standardModeButton
+      : this._christmasModeButton;
     this._inactiveModeButton.setAlpha(0);
     this._activeModeButton.setAlpha(1);
 
     this._dropdownClosedY = this._standardModeButton.y;
-    this._dropdownOpenY   = this._standardModeButton.y + this._standardModeButton.displayHeight + DROPDOWN_GAP;
+    this._dropdownOpenY =
+      this._standardModeButton.y + this._standardModeButton.displayHeight + DROPDOWN_GAP;
 
     // Collect all panel objects for the slide-in/out animation
     this._panelObjects = [
@@ -274,7 +291,7 @@ export default class PopUpScene extends Phaser.Scene {
   // -------------------------------------------------------------------------
 
   _setupGameModeDropdown() {
-    this._activeModeButton.on('pointerdown',   () => this._toggleDropdown());
+    this._activeModeButton.on('pointerdown', () => this._toggleDropdown());
     this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
   }
 
@@ -318,7 +335,7 @@ export default class PopUpScene extends Phaser.Scene {
   _updateDropdownHtml() {
     const { gameModeMenu, christmasModeChoice } = this._html;
     gameModeMenu.setAttribute('aria-expanded', String(this._isDropdownOpen));
-    christmasModeChoice.hidden   = !this._isDropdownOpen;
+    christmasModeChoice.hidden = !this._isDropdownOpen;
     christmasModeChoice.disabled = !this._isDropdownOpen;
   }
 
@@ -326,11 +343,11 @@ export default class PopUpScene extends Phaser.Scene {
     const btn = this._inactiveModeButton;
     this.tweens.killTweensOf(btn);
     this.tweens.add({
-      targets:  btn,
-      y:        this._isDropdownOpen ? this._dropdownOpenY : this._dropdownClosedY,
-      alpha:    this._isDropdownOpen ? 1 : 0,
+      targets: btn,
+      y: this._isDropdownOpen ? this._dropdownOpenY : this._dropdownClosedY,
+      alpha: this._isDropdownOpen ? 1 : 0,
       duration: TWEEN_DURATION_MID,
-      ease:     'Power2',
+      ease: 'Power2',
     });
   }
 
@@ -339,13 +356,13 @@ export default class PopUpScene extends Phaser.Scene {
   // -------------------------------------------------------------------------
 
   _setupAccessibilitySwitch() {
-    const sw   = this._accessibilitySwitch;
+    const sw = this._accessibilitySwitch;
     const knob = this._accessibilityKnob;
 
-    this._switchLeft      = sw.x - sw.displayWidth  + sw.displayHeight / 2;
-    this._switchRight     = sw.x - sw.displayHeight / 2;
-    this._switchBaseScale  = SCALE_SWITCH * this._uiScale;
-    this._switchBaseWidth  = sw.displayWidth;
+    this._switchLeft = sw.x - sw.displayWidth + sw.displayHeight / 2;
+    this._switchRight = sw.x - sw.displayHeight / 2;
+    this._switchBaseScale = SCALE_SWITCH * this._uiScale;
+    this._switchBaseWidth = sw.displayWidth;
     this._switchBaseHeight = sw.displayHeight;
 
     sw.setTexture(this._accessibilityEnabled ? 'switchOn' : 'switchOff');
@@ -354,21 +371,27 @@ export default class PopUpScene extends Phaser.Scene {
 
     this._html.accessibilityToggle.checked = this._accessibilityEnabled;
 
-    sw.on('pointerdown',   () => this._toggleAccessibility());
+    sw.on('pointerdown', () => this._toggleAccessibility());
     knob.on('pointerdown', () => this._toggleAccessibility());
   }
 
   _updateSwitchScale() {
     const scaleFactor = this._switchHovered || this._switchSelected ? HOVER_SCALE_FACTOR : 1;
-    const scale       = this._switchBaseScale * scaleFactor;
-    const sw          = this._accessibilitySwitch;
+    const scale = this._switchBaseScale * scaleFactor;
+    const sw = this._accessibilitySwitch;
     const knobX = this._accessibilityEnabled
       ? sw.x - (this._switchBaseHeight * scaleFactor) / 2
       : sw.x - this._switchBaseWidth * scaleFactor + (this._switchBaseHeight * scaleFactor) / 2;
     const knobY = sw.y + (this._switchBaseHeight * scaleFactor) / 2;
 
-    this.tweens.add({ targets: sw,                      scale,              duration: TWEEN_DURATION_FAST });
-    this.tweens.add({ targets: this._accessibilityKnob, x: knobX, y: knobY, scale, duration: TWEEN_DURATION_FAST });
+    this.tweens.add({ targets: sw, scale, duration: TWEEN_DURATION_FAST });
+    this.tweens.add({
+      targets: this._accessibilityKnob,
+      x: knobX,
+      y: knobY,
+      scale,
+      duration: TWEEN_DURATION_FAST,
+    });
   }
 
   _setAccessibilityEnabled(enabled) {
@@ -392,7 +415,7 @@ export default class PopUpScene extends Phaser.Scene {
   _setupCloseHandlers() {
     this._closeButton.on('pointerdown', () => this._close());
     this.input.keyboard.once('keydown-ESC', () => this._close());
-    this.input.keyboard.once('keydown-M',   () => this._close());
+    this.input.keyboard.once('keydown-M', () => this._close());
   }
 
   _close() {
@@ -400,14 +423,14 @@ export default class PopUpScene extends Phaser.Scene {
     playMenuClick(this);
     this._closing = true;
     this.tweens.add({
-      targets:  this._panelObjects,
-      x:        `+=${this.scale.width}`,
+      targets: this._panelObjects,
+      x: `+=${this.scale.width}`,
       duration: TWEEN_DURATION_SLOW,
-      ease:     'Cubic.easeIn',
+      ease: 'Cubic.easeIn',
     });
     this.tweens.add({
-      targets:  this._dim,
-      alpha:    0,
+      targets: this._dim,
+      alpha: 0,
       duration: TWEEN_DURATION_SLOW,
       onComplete: () => {
         this.scene.stop();
@@ -424,10 +447,10 @@ export default class PopUpScene extends Phaser.Scene {
     this.tweens.add({ targets: this._dim, alpha: 1, duration: TWEEN_DURATION_SLOW });
     this._panelObjects.forEach((obj) => (obj.x += width));
     this.tweens.add({
-      targets:  this._panelObjects,
-      x:        `-=${width}`,
+      targets: this._panelObjects,
+      x: `-=${width}`,
       duration: TWEEN_DURATION_SLOW,
-      ease:     'Cubic.easeOut',
+      ease: 'Cubic.easeOut',
     });
   }
 
@@ -436,11 +459,19 @@ export default class PopUpScene extends Phaser.Scene {
   // -------------------------------------------------------------------------
 
   _setupHtmlEventHandlers() {
-    const { dialog, accessibilityToggle, gameModeMenu, christmasModeChoice, closeSettingsBtn } = this._html;
+    const { dialog, accessibilityToggle, gameModeMenu, christmasModeChoice, closeSettingsBtn } =
+      this._html;
     const s = this._uiScale;
 
     // Prevent Phaser from receiving events that target HTML form controls
-    const nativeInputEvents = ['mousedown', 'mouseup', 'touchstart', 'touchend', 'keydown', 'keyup'];
+    const nativeInputEvents = [
+      'mousedown',
+      'mouseup',
+      'touchstart',
+      'touchend',
+      'keydown',
+      'keyup',
+    ];
     this._stopPhaserInput = (event) => {
       if (event.target.closest('button, input, select')) event.stopPropagation();
     };
@@ -451,24 +482,43 @@ export default class PopUpScene extends Phaser.Scene {
       playMenuClick(this);
       this._setAccessibilityEnabled(accessibilityToggle.checked);
     };
-    this._handleGameModeClick      = () => this._toggleDropdown();
+    this._handleGameModeClick = () => this._toggleDropdown();
     this._handleAlternateModeClick = () => this._chooseAlternateMode();
-    this._handleCloseClick         = () => this._close();
-    this._handleCancel             = (e) => { e.preventDefault(); this._close(); };
+    this._handleCloseClick = () => this._close();
+    this._handleCancel = (e) => {
+      e.preventDefault();
+      this._close();
+    };
 
     accessibilityToggle.addEventListener('change', this._handleAccessibilityChange);
-    gameModeMenu.addEventListener('click',         this._handleGameModeClick);
-    christmasModeChoice.addEventListener('click',  this._handleAlternateModeClick);
-    closeSettingsBtn.addEventListener('click',     this._handleCloseClick);
-    dialog.addEventListener('cancel',             this._handleCancel);
+    gameModeMenu.addEventListener('click', this._handleGameModeClick);
+    christmasModeChoice.addEventListener('click', this._handleAlternateModeClick);
+    closeSettingsBtn.addEventListener('click', this._handleCloseClick);
+    dialog.addEventListener('cancel', this._handleCancel);
 
     // Hover effects that mirror the Phaser button scale
-    this._bindOverlayHover(closeSettingsBtn,    this._closeButton,        SCALE_CLOSE_BTN * s);
-    this._bindOverlayHover(gameModeMenu,        this._activeModeButton,   SCALE_MODE_BTN  * s, HOVER_SCALE_FACTOR);
-    this._bindOverlayHover(christmasModeChoice, this._inactiveModeButton, SCALE_MODE_BTN  * s, HOVER_SCALE_FACTOR);
+    this._bindOverlayHover(closeSettingsBtn, this._closeButton, SCALE_CLOSE_BTN * s);
+    this._bindOverlayHover(
+      gameModeMenu,
+      this._activeModeButton,
+      SCALE_MODE_BTN * s,
+      HOVER_SCALE_FACTOR,
+    );
+    this._bindOverlayHover(
+      christmasModeChoice,
+      this._inactiveModeButton,
+      SCALE_MODE_BTN * s,
+      HOVER_SCALE_FACTOR,
+    );
 
-    const onSwitchEnter = () => { this._switchHovered = true;  this._updateSwitchScale(); };
-    const onSwitchLeave = () => { this._switchHovered = false; this._updateSwitchScale(); };
+    const onSwitchEnter = () => {
+      this._switchHovered = true;
+      this._updateSwitchScale();
+    };
+    const onSwitchLeave = () => {
+      this._switchHovered = false;
+      this._updateSwitchScale();
+    };
     accessibilityToggle.addEventListener('mouseenter', onSwitchEnter);
     accessibilityToggle.addEventListener('mouseleave', onSwitchLeave);
     this._cleanupSwitchHover = () => {
@@ -477,9 +527,9 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     positionAccessibleControls(this, [
-      [closeSettingsBtn,    this._closeButton],
+      [closeSettingsBtn, this._closeButton],
       [accessibilityToggle, this._accessibilitySwitch],
-      [gameModeMenu,        this._activeModeButton],
+      [gameModeMenu, this._activeModeButton],
       [christmasModeChoice, this._inactiveModeButton],
     ]);
 
@@ -490,15 +540,29 @@ export default class PopUpScene extends Phaser.Scene {
 
   /** Single consolidated cleanup — called once on scene shutdown. */
   _cleanup() {
-    const { dialog, accessibilityToggle, gameModeMenu, christmasModeChoice, closeSettingsBtn, settingsBtn } = this._html;
-    const nativeInputEvents = ['mousedown', 'mouseup', 'touchstart', 'touchend', 'keydown', 'keyup'];
+    const {
+      dialog,
+      accessibilityToggle,
+      gameModeMenu,
+      christmasModeChoice,
+      closeSettingsBtn,
+      settingsBtn,
+    } = this._html;
+    const nativeInputEvents = [
+      'mousedown',
+      'mouseup',
+      'touchstart',
+      'touchend',
+      'keydown',
+      'keyup',
+    ];
 
     nativeInputEvents.forEach((name) => dialog.removeEventListener(name, this._stopPhaserInput));
     accessibilityToggle.removeEventListener('change', this._handleAccessibilityChange);
-    gameModeMenu.removeEventListener('click',         this._handleGameModeClick);
-    christmasModeChoice.removeEventListener('click',  this._handleAlternateModeClick);
-    closeSettingsBtn.removeEventListener('click',     this._handleCloseClick);
-    dialog.removeEventListener('cancel',             this._handleCancel);
+    gameModeMenu.removeEventListener('click', this._handleGameModeClick);
+    christmasModeChoice.removeEventListener('click', this._handleAlternateModeClick);
+    closeSettingsBtn.removeEventListener('click', this._handleCloseClick);
+    dialog.removeEventListener('cancel', this._handleCancel);
     this._cleanupSwitchHover?.();
 
     dialog.close();
@@ -508,9 +572,13 @@ export default class PopUpScene extends Phaser.Scene {
   _bindOverlayHover(element, object, baseScale, hoverScale = 1.2) {
     const updateScale = (hovered) => {
       const isSelected = this.navigationItems[this.selectedIndex]?.button === object;
-      const scale = baseScale * (hovered
-        ? Math.max(hoverScale, isSelected ? HOVER_SCALE_FACTOR : 1)
-        : isSelected ? HOVER_SCALE_FACTOR : 1);
+      const scale =
+        baseScale *
+        (hovered
+          ? Math.max(hoverScale, isSelected ? HOVER_SCALE_FACTOR : 1)
+          : isSelected
+            ? HOVER_SCALE_FACTOR
+            : 1);
       this.tweens.add({ targets: object, scale, duration: TWEEN_DURATION_FAST });
     };
     const onEnter = () => updateScale(true);
@@ -540,24 +608,28 @@ export default class PopUpScene extends Phaser.Scene {
   _rebuildNavigationItems() {
     const s = this._uiScale;
     this.navigationItems = [
-      { button: this._closeButton,         action: () => this._close(),            scale: SCALE_CLOSE_BTN * s },
+      { button: this._closeButton, action: () => this._close(), scale: SCALE_CLOSE_BTN * s },
       {
         button: this._accessibilitySwitch,
         action: () => this._toggleAccessibility(),
-        scale:  this._switchBaseScale,
+        scale: this._switchBaseScale,
         applySelection: (selected) => {
           this._switchSelected = selected;
           this._updateSwitchScale();
         },
       },
-      { button: this._activeModeButton,    action: () => this._toggleDropdown(),   scale: SCALE_MODE_BTN * s },
+      {
+        button: this._activeModeButton,
+        action: () => this._toggleDropdown(),
+        scale: SCALE_MODE_BTN * s,
+      },
     ];
 
     if (this._isDropdownOpen) {
       this.navigationItems.push({
         button: this._inactiveModeButton,
         action: () => this._chooseAlternateMode(),
-        scale:  SCALE_MODE_BTN * s,
+        scale: SCALE_MODE_BTN * s,
       });
     }
   }
