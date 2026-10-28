@@ -9,6 +9,21 @@ import Oil from '../objects/Oil.js';
 import Item from '../objects/Item.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import { hitRandomObstacle } from './GameSceneCollisions.js';
+import { ICE_WARNING_SECONDS, MAX_PICKUP_WARNING_SECONDS } from '../accessibility/warningTiming.js';
+
+function getSpawnY(scene, type) {
+  if (!scene.registry.get('accessibility enabled')) return -200;
+
+  const warningSeconds =
+    type === 'ice' ? ICE_WARNING_SECONDS : type === 'item' ? MAX_PICKUP_WARNING_SECONDS : 0;
+  if (warningSeconds === 0) return -200;
+
+  // Start farther ahead so the warning has time to finish before the object arrives.
+  // Include the acceleration expected during the warning window, plus a size buffer.
+  const speed = Math.min(1600, 700 + (scene.elapsedTime + warningSeconds * 1000) * 0.005);
+  const pixelsPerSecond = speed * (scene.scale.height / 1200);
+  return Math.min(-200, scene.car.body.top - pixelsPerSecond * warningSeconds - 200);
+}
 
 function addPlayerCollider(scene, roadObject, callback) {
   for (const car of [scene.car, scene.secondCar].filter(Boolean)) {
@@ -31,7 +46,7 @@ export function createRoadObject(scene, type) {
   const roadLeftEdge = scene.scale.width / 2 - scene.track1.displayWidth / 2;
   const lane = Phaser.Math.Between(0, laneCount - 1);
   const roadObjectX = roadLeftEdge + lane * laneWidth + laneWidth / 2;
-  const spawnY = -200;
+  const spawnY = getSpawnY(scene, type);
 
   if (positionFree(scene, lane, spawnY)) {
     let roadObject;
