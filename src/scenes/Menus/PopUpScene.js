@@ -336,21 +336,96 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   /**
-   * Plays the click sound, saves the mode, stops the current scene pair
-   * and starts the appropriate menu scene.
+   * Saves the mode, swaps the background scene and updates PopUpScene in-place.
+   * PopUpScene stays open — no full reload needed.
    * @param {'standard'|'christmas'} mode
    */
   _switchToMode(mode) {
     playMenuClick(this);
     this._applyGameMode(mode);
-    this.scene.stop(mode === 'christmas' ? 'MenuScene' : 'ChristmasScene');
-    this.scene.stop('PopUpScene');
-    this.scene.start(mode === 'christmas' ? 'ChristmasScene' : 'MenuScene');
+
+    // Swap the background scene behind PopUpScene
+    const oldParent = this._isChristmasMode ? 'ChristmasScene' : 'MenuScene';
+    const newParent = this._isChristmasMode ? 'MenuScene' : 'ChristmasScene';
+
+    this.scene.stop(oldParent);
+    this.scene.launch(newParent);
+
+    // Pause the new parent once it has finished its own create() cycle,
+    // so it doesn't process input while PopUpScene is in the foreground.
+    const newScene = this.scene.get(newParent);
+    newScene.events.once('create', () => {
+      if (this.scene.isActive(newParent)) this.scene.pause(newParent);
+    });
+
+    this.parentSceneKeys = [newParent];
+
+    // Update mode state and refresh the UI in-place
+    this._isChristmasMode = mode === 'christmas';
+    this._updateModeButtons();
   }
 
   /** Switches to whichever mode is currently *not* active. */
   _chooseAlternateMode() {
     this._switchToMode(this._isChristmasMode ? 'standard' : 'christmas');
+  }
+
+  /**
+   * Swaps the active/inactive game-mode buttons, updates ARIA labels,
+   * repositions the HTML overlay controls and rebuilds gamepad navigation.
+   * Called after a mode switch while PopUpScene remains open.
+   */
+  _updateModeButtons() {
+    const { gameModeMenu, christmasModeChoice, closeSettingsBtn, accessibilityToggle } = this._html;
+
+    // Close dropdown first if it was open
+    if (this._isDropdownOpen) {
+      this._isDropdownOpen = false;
+      this._updateDropdownHtml();
+      this._updateDropdownVisual();
+    }
+
+    // Remove old Phaser pointerdown handlers
+    this._activeModeButton.off('pointerdown');
+    this._inactiveModeButton.off('pointerdown');
+
+    // Swap references
+    [this._activeModeButton, this._inactiveModeButton] =
+      [this._inactiveModeButton, this._activeModeButton];
+
+    // Update visibility and position
+    this._activeModeButton.setAlpha(1);
+    this._inactiveModeButton.setAlpha(0).setY(this._dropdownClosedY);
+
+    // Re-attach Phaser pointerdown
+    this._activeModeButton.on('pointerdown',   () => this._toggleDropdown());
+    this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
+
+    // Recalculate dropdown positions from the new active button
+    this._dropdownClosedY = this._activeModeButton.y;
+    this._dropdownOpenY   = this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
+
+    // Update ARIA labels
+    gameModeMenu.setAttribute(
+      'aria-label',
+      `Game mode: ${this._isChristmasMode ? 'Christmas' : 'standard'}`,
+    );
+    christmasModeChoice.setAttribute(
+      'aria-label',
+      `${this._isChristmasMode ? 'Standard' : 'Christmas'} mode`,
+    );
+
+    // Reposition accessible HTML overlay controls
+    positionAccessibleControls(this, [
+      [closeSettingsBtn,    this._closeButton],
+      [accessibilityToggle, this._accessibilitySwitch],
+      [gameModeMenu,        this._activeModeButton],
+      [christmasModeChoice, this._inactiveModeButton],
+    ]);
+
+    // Rebuild and reset gamepad navigation
+    this._rebuildNavigationItems();
+    this.updateGamepadSelection();
   }
 
   /** Toggles the game-mode dropdown open/closed and rebuilds navigation items. */
@@ -549,17 +624,17 @@ export default class PopUpScene extends Phaser.Scene {
     closeSettingsBtn.addEventListener('click', this._handleCloseClick);
     dialog.addEventListener('cancel', this._handleCancel);
 
-    // Hover effects that mirror the Phaser button scale
+    // Hover effects — pass getters so the correct button is used after a mode swap
     this._bindOverlayHover(closeSettingsBtn, this._closeButton, SCALE_CLOSE_BTN * s);
     this._bindOverlayHover(
       gameModeMenu,
-      this._activeModeButton,
+      () => this._activeModeButton,
       SCALE_MODE_BTN * s,
       HOVER_SCALE_FACTOR,
     );
     this._bindOverlayHover(
       christmasModeChoice,
-      this._inactiveModeButton,
+      () => this._inactiveModeButton,
       SCALE_MODE_BTN * s,
       HOVER_SCALE_FACTOR,
     );
@@ -616,13 +691,18 @@ export default class PopUpScene extends Phaser.Scene {
   /**
    * Mirrors mouse-hover on an HTML overlay element as a scale tween on the
    * corresponding Phaser game object.
+   * Accepts either a direct object reference or a getter `() => object`,
+   * so the correct button is used even after a mode swap.
    * @param {HTMLElement} element    The HTML element to listen on.
-   * @param {Phaser.GameObjects.Image} object The Phaser object to scale.
+   * @param {Phaser.GameObjects.Image|function} objectOrGetter The Phaser object (or getter).
    * @param {number} baseScale       The object's resting scale.
    * @param {number} [hoverScale=1.2] Scale multiplier while hovered.
    */
-  _bindOverlayHover(element, object, baseScale, hoverScale = 1.2) {
+  _bindOverlayHover(element, objectOrGetter, baseScale, hoverScale = 1.2) {
+    const getObject = () =>
+      typeof objectOrGetter === 'function' ? objectOrGetter() : objectOrGetter;
     const updateScale = (hovered) => {
+      const object = getObject();
       const isSelected = this.navigationItems[this.selectedIndex]?.button === object;
       const scale =
         baseScale *
