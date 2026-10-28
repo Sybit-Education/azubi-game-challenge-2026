@@ -149,9 +149,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Reflect current saved/active game mode in the UI.
     // Variante B: the active mode is the "main" button (always visible),
-    // the inactive mode is the dropdown alternative (hidden until main is clicked).
-    const currentGameMode = this.registry.get('gameMode') ?? 'standard';
-
+    // the inactive mode is the dropdown alternative (hidden until main is clicked)
     let activeModeButton =
       currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
     let inactiveModeButton =
@@ -163,13 +161,9 @@ export default class PopUpScene extends Phaser.Scene {
     // Ensure the "active" one is visible as main button
     activeModeButton.setAlpha(1);
 
-    // For positioning logic below: treat activeModeButton as the main button row anchor.
-    let hoveringStandard = false;
-    let hoveringChristmas = false;
-
     const closedY = standardModeButton.y;
     const openY = standardModeButton.y + standardModeButton.displayHeight + 10;
-
+    let isGameModeDropdownOpen = false;
     const updateGameModeDropdown = () => {
       gameModeMenu.setAttribute('aria-expanded', String(isGameModeDropdownOpen));
       christmasModeChoice.hidden = !isGameModeDropdownOpen;
