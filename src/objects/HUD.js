@@ -68,7 +68,7 @@ export default class HUD {
           'stats-background',
         )
         .setDepth(4)
-        .setScale(0.3 * this.scaleFactor)
+        .setScale(0.5 * this.scaleFactor)
         .setOrigin(0);
       this.statsBackground2.setFlipX(true);
       this.statsBackground2.x -= this.statsBackground2.displayWidth;
@@ -109,11 +109,11 @@ export default class HUD {
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
 
-      this.distanceText.setFontSize(40 * this.scaleFactor);
-      this.scoreText.setFontSize(40 * this.scaleFactor);
+      this.distanceText.setFontSize(30 * this.scaleFactor);
+      this.scoreText.setFontSize(30 * this.scaleFactor);
 
-      this.distanceText2.setFontSize(40 * this.scaleFactor);
-      this.scoreText2.setFontSize(40 * this.scaleFactor);
+      this.distanceText2.setFontSize(30 * this.scaleFactor);
+      this.scoreText2.setFontSize(30 * this.scaleFactor);
       this.statsFrame2.clear();
       this.statsFrame2.fillStyle(0x000000, 0.9);
       this.statsFrame2.fillRect(x, y, width, height);
