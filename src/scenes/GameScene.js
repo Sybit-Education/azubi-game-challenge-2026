@@ -105,6 +105,7 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
+    this.load.image('hotbarMultiplayer', 'assets/images/race-track-assets/hotbarMultiplayer.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
     this.load.image('shield', 'assets/images/hud-icons/shield.png');
     this.load.image('shrink', 'assets/images/hud-icons/shrink.png');
@@ -167,19 +168,17 @@ export default class GameScene extends Phaser.Scene {
     );
     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
-    // Hotbar
     this.hotbar = this.add
       .image(
         this.hud.statsBackground.x * scaleFactor,
         this.hud.statsBackground.displayHeight + 30 * scaleFactor,
-        'hotbar',
+        this.isMultiplayer ? 'hotbarMultiplayer' : 'hotbar',
       )
       .setOrigin(0, 0)
       .setDepth(1000)
       .setScrollFactor(0)
       .setScale(0.5 * scaleFactor);
 
-    // Coin Icon Player 1
     this.hotbarCoin = this.add
       .image(this.hotbar.displayWidth * 1.1, this.hotbar.y * 1.1, 'hotbar-coin')
       .setScale(0.7 * scaleFactor)
@@ -187,7 +186,6 @@ export default class GameScene extends Phaser.Scene {
       .setDepth(1000)
       .setScrollFactor(0);
 
-    // Coin Number Player 1
     this.coinText1 = this.add
       .text(this.hotbarCoin.x * 1.33, this.hotbarCoin.y, this.ItemManager.coinBudgetPlayer1, {
         fontSize: `${50 * scaleFactor}px`,
@@ -196,14 +194,13 @@ export default class GameScene extends Phaser.Scene {
         stroke: '#000000',
         strokeThickness: 2,
       })
-      .setOrigin(0, 0);
-
-    this.coinText1.setDepth(1000);
-    this.coinText1.setScrollFactor(0);
+      .setOrigin(0, 0)
+      .setDepth(1000)
+      .setScrollFactor(0);
 
     if (this.isMultiplayer) {
       this.hotbar2 = this.add
-        .image(this.scale.width - this.hotbar.displayWidth, this.hotbar.y, 'hotbar')
+        .image(this.scale.width - this.hotbar.displayWidth, this.hotbar.y, 'hotbarMultiplayer')
         .setOrigin(0, 0)
         .setDepth(1000)
         .setScrollFactor(0)
@@ -235,10 +232,9 @@ export default class GameScene extends Phaser.Scene {
             strokeThickness: 2,
           },
         )
-        .setOrigin(0, 0);
-
-      this.coinText2.setDepth(1000);
-      this.coinText2.setScrollFactor(0);
+        .setOrigin(0, 0)
+        .setDepth(1000)
+        .setScrollFactor(0);
     }
 
     const canvas = this.game.canvas;
