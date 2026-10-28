@@ -4,6 +4,12 @@ import Phaser from 'phaser';
 const LIGHT_TEXTURES = {
   car: { left: 'blinkLeft', right: 'blinkRight', brake: 'brakeLights' },
   car2: { left: 'blinkLeft2', right: 'blinkRight2', brake: 'brakeLights2' },
+  'winter-car': { left: 'winterBlinkLeft', right: 'winterBlinkRight', brake: 'winterBrakeLights' },
+  'winter-car2': {
+    left: 'winterBlinkLeft2',
+    right: 'winterBlinkRight2',
+    brake: 'winterBrakeLights2',
+  },
 };
 
 const CAR_TEXTURES = {
