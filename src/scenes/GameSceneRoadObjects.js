@@ -102,6 +102,7 @@ export function createRoadObject(scene, type) {
       roadObject = new EnemyCar(scene, roadObjectX, spawnY, lane);
       roadObject.body.setSize(roadObject.width, roadObject.height);
       roadObject.body.setImmovable(true);
+      roadObject.setDepth(100000);
       scene.physics.add.collider(
         scene.car,
         roadObject,
@@ -174,7 +175,7 @@ export function createRoadObject(scene, type) {
   } else if (type === 'item') {
     delay = Phaser.Math.Between(5000, 10000);
   } else if (type === 'enemy-car') {
-    delay = Phaser.Math.Between(2000, 4000);
+    delay = Phaser.Math.Between(1000, 2000);
   } else if (type === 'ice') {
     delay = Phaser.Math.Between(6000, 12000);
   } else if (type === 'oil') {
