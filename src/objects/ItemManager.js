@@ -14,6 +14,12 @@ export default class ItemManager {
     this.itemShrinkPrize = 25;
     this.itemHeartPrize = 40;
 
+    if (this.scene.isMultiplayer) {
+      this.itemShieldPrize = 25;
+      this.itemShrinkPrize = 15;
+      this.itemHeartPrize = 30;
+    }
+
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
 
