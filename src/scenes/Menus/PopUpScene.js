@@ -145,14 +145,27 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setScale(0.3 * uiScale)
       .setAlpha(0)
-      .setInteractive({ useHandCursor: true });
+      .setInteractive();
 
-    // Variante B: the active mode is the main button, the other mode is the dropdown choice.
-    // We implement it by swapping textures so the layout stays the same (main button is standardModeButton).
-    standardModeButton.setTexture(isChristmasMode ? 'christmasmode' : 'StandardModeButton');
-    christmasModeButton.setTexture(isChristmasMode ? 'StandardModeButton' : 'christmasmode');
+    // Reflect current saved/active game mode in the UI.
+    // Variante B: the active mode is the "main" button (always visible),
+    // the inactive mode is the dropdown alternative (hidden until main is clicked).
+    const currentGameMode = this.registry.get('gameMode') ?? 'standard';
 
-    let isGameModeDropdownOpen = false;
+    let activeModeButton =
+      currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
+    let inactiveModeButton =
+      currentGameMode === 'christmas' ? standardModeButton : christmasModeButton;
+
+    // Ensure the "inactive" one starts hidden (as dropdown)
+    inactiveModeButton.setAlpha(0);
+
+    // Ensure the "active" one is visible as main button
+    activeModeButton.setAlpha(1);
+
+    // For positioning logic below: treat activeModeButton as the main button row anchor.
+    let hoveringStandard = false;
+    let hoveringChristmas = false;
 
     const closedY = standardModeButton.y;
     const openY = standardModeButton.y + standardModeButton.displayHeight + 10;
