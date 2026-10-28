@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
+import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -7,12 +9,23 @@ export default class LeaderboardScene extends Phaser.Scene {
     super('LeaderboardScene');
   }
 
-  // On create
-  async create() {
+  preload() {
+    preloadMenuSounds(this);
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/images/homepage/default-homepage/background.png',
+    );
+    this.load.image(
+      'leaderboard-homepage-btn',
+      'assets/images/gameover-scene-assets/back-to-menu-button.png',
+    );
+  }
+
+  // BootScene loads the font before menus become available.
+  create(data) {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
-    await document.fonts.load('32px Tiny5');
     const leaderboard = parseLeaderboard().slice(0, 10);
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
@@ -33,19 +46,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     // Titel Überschrifft "Leaderboard"
     this.title = this.add
       .text(this.scale.width / 2, this.scale.height / 12, 'Leaderboard', {
-        fontFamily: 'Tiny5',
+        fontFamily: 'Silkscreen',
         fontSize: '90px',
         color: '#ffffff',
       })
       .setOrigin(0.5)
       .setScale(1 * this.scaleFactor);
 
-    // Debug logging
-    console.debug(leaderboard);
-
     // Style for one entry
     const entryStyle = {
-      fontFamily: 'Tiny5',
+      fontFamily: 'Silkscreen',
       fontSize: this.scale.height / 21 + 'px',
       color: '#ffffff',
     };
@@ -54,7 +64,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     leaderboard.forEach((entry, index) => {
       const name = entry.name || 'Unbekannt';
-      const distance = entry.distance || entry;
+      const distance = entry.distance;
 
       const text = this.add
         .text(
@@ -78,7 +88,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.resetButton = this.add
       .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
-        fontFamily: 'Tiny5',
+        fontFamily: 'Silkscreen',
         fontSize: '40px',
         color: '#ffffff',
       })
@@ -86,22 +96,10 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setInteractive()
       .setScale(1 * this.scaleFactor);
 
-    this.resetButton.on('pointerdown', () => {
-      localStorage.removeItem('leaderboard');
-
-      this.scene.restart();
-    });
+    this.resetButton.on('pointerdown', () => this.resetLeaderboard());
 
     // On home button listener
-    this.backButton.on('pointerdown', () => {
-      const gameMode = this.registry.get('gameMode');
-
-      if (gameMode === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
-    });
+    this.backButton.on('pointerdown', () => this.goHome());
     // Hover effect
     this.backButton.on('pointerover', () => {
       this.tweens.add({
@@ -122,22 +120,34 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     //listener for resizing
     this.scale.on('resize', this.resize, this);
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
+    });
 
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
     });
+    bindLeaderboardControls(this, leaderboard, data?.focusTarget);
+  }
+
+  goHome() {
+    playMenuClick(this);
+    const menu = this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
+    this.scene.start(menu, { focusTarget: 'leaderboard-btn' });
+  }
+
+  resetLeaderboard() {
+    playMenuClick(this);
+    localStorage.removeItem('leaderboard');
+    this.scene.restart({ focusTarget: 'leaderboard-title' });
   }
 
   update() {
     this.InputManager.update();
 
     if (this.InputManager.getControlsP1.button4) {
-      if (this.registry.get('gameMode') === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
+      this.goHome();
     }
   }
 
@@ -152,6 +162,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.title.setPosition(width / 2, height / 12).setFontSize(90 * scaleFactor);
 
     this.backButton.setPosition(width / 2, height / 1.3).setScale(0.4 * scaleFactor);
+    this.resetButton.setPosition(width / 2, height / 1.15).setScale(scaleFactor);
 
     this.leaderboardEntries.forEach((entry, index) => {
       entry.setPosition(width / 2, 200 * scaleFactor + index * (height / 20));
@@ -163,9 +174,17 @@ export default class LeaderboardScene extends Phaser.Scene {
 
 // Loads and parses leaderboard
 export function parseLeaderboard() {
-  const entries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(stored)) return [];
+
+  const entries = stored.map((entry) => {
     // String only entries are counted as scores
-    if (typeof entry === 'string') {
+    if (typeof entry === 'string' || typeof entry === 'number') {
       return {
         name: 'Unbekannt',
         distance: Number(entry),
@@ -174,13 +193,14 @@ export function parseLeaderboard() {
 
     // Parses entity
     return {
-      name: entry.name,
-      distance: Number(entry.distance),
+      name: typeof entry?.name === 'string' ? entry.name.trim() || 'Unbekannt' : 'Unbekannt',
+      distance: entry?.distance == null ? NaN : Number(entry.distance),
     };
   });
 
   const bestByPlayer = new Map();
   entries.forEach((entry) => {
+    if (!Number.isFinite(entry.distance) || entry.distance < 0) return;
     const playerKey = entry.name?.trim()?.toLowerCase() ?? 'unknown';
 
     const previousBest = bestByPlayer.get(playerKey);

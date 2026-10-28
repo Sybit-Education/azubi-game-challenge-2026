@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <title>SybitKart</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap" rel="stylesheet" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Silkscreen:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Tiny5&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -21,6 +20,7 @@
       <button id="start-game" type="button">play</button>
       <button id="multiplayer-btn" type="button">multiplayer</button>
       <button id="settings-btn" type="button">Settings</button>
+      <button id="leaderboard-btn" type="button">Leaderboard</button>
       <button id="credit-btn" type="button">credits</button>
     </main>
 
@@ -52,6 +52,30 @@
 
       <button id="retry" type="button" aria-describedby="game-over-result">retry</button>
       <button id="back-to-home" type="button">mainMenu</button>
+    </section>
+
+    <section
+      id="leaderboard-ui"
+      class="accessible-layer"
+      hidden
+      aria-labelledby="leaderboard-title"
+    >
+      <h2 id="leaderboard-title" class="sr-only" tabindex="-1">Leaderboard</h2>
+      <table class="sr-only">
+        <caption>
+          Top 10 distances
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Player</th>
+            <th scope="col">Distance</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-entries"></tbody>
+      </table>
+      <button id="leaderboard-home" type="button">Main menu</button>
+      <button id="leaderboard-reset" type="button">Reset Leaderboard</button>
     </section>
 
     <section id="settings-section">
@@ -90,9 +114,9 @@
   <!-- Style -->
   <style>
     @font-face {
-      font-family: 'Tiny5';
-      src: url(assets/fonts/Tiny5-Regular.ttf);
-      font-weight: normal;
+      font-family: 'Silkscreen';
+      src: url(assets/fonts/Silkscreen-Regular.ttf);
+      font-weight: 400;
       font-style: normal;
       font-display: swap;
     }

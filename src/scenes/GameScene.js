@@ -12,6 +12,10 @@ import ItemManager from '../objects/ItemManager.js';
 import InputManager from '../objects/InputManager.js';
 import { updateGameScene } from './GameSceneFrame.js';
 import { createRoadObject } from './GameSceneRoadObjects.js';
+import RandomObstacle from '../objects/RandomObstacle.js';
+import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
+import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
+import GameSpeech from '../../audio/GameSpeech.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -53,11 +57,13 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('coin', 'assets/images/entities/coin.png');
     this.load.image('coinMultiplier', 'assets/images/entities/coin-multiplier.png');
     this.load.image('item', 'assets/images/entities/mystery-box.png');
-    this.load.image('ice', 'assets/images/entities/obstacles/ice.png');
+    this.load.image('ice-obstacle', 'assets/images/entities/obstacles/ice-obstacle.png');
+    this.load.image('oil-obstacle', 'assets/images/entities/obstacles/oil-obstacle.png');
     this.load.image('extraLife', 'assets/images/entities/extra-life.png');
     this.load.image('random-object1', 'assets/images/entities/obstacles/random-object-1.png');
     this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
     this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
+    this.load.image('random-object4', 'assets/images/entities/obstacles/random-object-4.png');
 
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
@@ -120,6 +126,17 @@ export default class GameScene extends Phaser.Scene {
     this.currentLaneDanger = null;
     this.createPlayer();
     this.ItemManager = new ItemManager(this);
+    this.speech = new GameSpeech();
+    const silenceSpeech = () => this.speech.silence();
+    this.events.on('pause', silenceSpeech);
+    this.events.on('sleep', silenceSpeech);
+    this.events.once('shutdown', () => {
+      this.events.off('pause', silenceSpeech);
+      this.events.off('sleep', silenceSpeech);
+      this.speech.destroy();
+    });
+    this.coinAnnouncements = new CoinAnnouncements(this);
+    this.laneAnnouncements = new LaneAnnouncements(this);
     this.createTrack();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
@@ -137,7 +154,11 @@ export default class GameScene extends Phaser.Scene {
     createRoadObject(this, 'coin');
     createRoadObject(this, 'coinMultiplier');
     createRoadObject(this, 'item');
-    createRoadObject(this, 'ice');
+    if (
+      this.registry.get('gameMode') === 'christmas'
+        ? createRoadObject(this, 'ice')
+        : createRoadObject(this, 'oil')
+    );
     createRoadObject(this, 'extraLife');
     createRoadObject(this, 'random-obstacle');
     this.createHud();
@@ -398,6 +419,17 @@ export default class GameScene extends Phaser.Scene {
       score2: this.secondCar ? this.secondCar.score : null,
       isMultiplayer: this.isMultiplayer,
     }); // Change to DeathScene once there is one
+  }
+
+  getObstaclesForAudio() {
+    return [
+      ...this.roadObjects.filter(
+        (object) =>
+          !object.isDuck && (object instanceof EnemyCar || object instanceof RandomObstacle),
+      ),
+      this.car,
+      this.secondCar,
+    ];
   }
 
   getCarsForAudio() {

@@ -8,7 +8,11 @@ function getObstaclesAhead(scene, car, lane) {
   return scene.roadObjects.filter((object) => {
     const isObstacle = object instanceof EnemyCar || object instanceof RandomObstacle;
     return (
-      object.active && isObstacle && object.lane === lane && object.body.bottom <= car.body.top
+      object.active &&
+      !object.isDuck &&
+      isObstacle &&
+      object.lane === lane &&
+      object.body.bottom <= car.body.top
     );
   });
 }
