@@ -105,6 +105,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0)
       .setInteractive()
       .setAlpha(0);
+    dim.on('pointerdown', () => close());
 
     const settingsLabel = this.add
       .image(background.x, background.y * -1 + padding, 'settingsLabel')
@@ -336,7 +337,14 @@ export default class PopUpScene extends Phaser.Scene {
     // Phaser also listens on window. Input in the HTML dialog must not
     // trigger the visual controls a second time. Do not use preventDefault:
     // native checkbox and keyboard behavior must keep working.
-    const nativeInputEvents = ['mousedown', 'mouseup', 'touchstart', 'touchend', 'keydown', 'keyup'];
+    const nativeInputEvents = [
+      'mousedown',
+      'mouseup',
+      'touchstart',
+      'touchend',
+      'keydown',
+      'keyup',
+    ];
     const stopPhaserInput = (event) => {
       const formControl = event.target.closest('button, input, select');
       if (formControl) event.stopPropagation();
