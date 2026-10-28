@@ -1,4 +1,4 @@
-import Phaser, { Geom } from 'phaser';
+import Phaser from 'phaser';
 
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
@@ -69,10 +69,10 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('random-object7', 'assets/images/entities/obstacles/random-object-7.png');
 
     this.load.image('boundary-particle', 'assets/images/particles/friction-particle2.png');
-    this.load.image('snowflake1', 'assets/images/particles/snowflake-1.png')
-    this.load.image('snowflake2', 'assets/images/particles/snowflake-2.png')
-    this.load.image('snowflake3', 'assets/images/particles/snowflake-3.png')
-    this.load.image('snowflake4', 'assets/images/particles/snowflake-4.png')
+    this.load.image('snowflake1', 'assets/images/particles/snowflake-1.png');
+    this.load.image('snowflake2', 'assets/images/particles/snowflake-2.png');
+    this.load.image('snowflake3', 'assets/images/particles/snowflake-3.png');
+    this.load.image('snowflake4', 'assets/images/particles/snowflake-4.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
@@ -109,6 +109,30 @@ export default class GameScene extends Phaser.Scene {
     this.load.image(
       'brakeLights2',
       'assets/images/entities/player-skins/player-states/sybit-player-2-brakelights.png',
+    );
+    this.load.image(
+      'winterBlinkRight',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-right.png',
+    );
+    this.load.image(
+      'winterBlinkLeft',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-left.png',
+    );
+    this.load.image(
+      'winterBrakeLights',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-brakelights.png',
+    );
+    this.load.image(
+      'winterBlinkLeft2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-left.png',
+    );
+    this.load.image(
+      'winterBlinkRight2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-right.png',
+    );
+    this.load.image(
+      'winterBrakeLights2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-brakelights.png',
     );
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
@@ -169,9 +193,8 @@ export default class GameScene extends Phaser.Scene {
     createRoadObject(this, 'extraLife');
 
     if (this.registry.get('gameMode') !== 'christmas') {
-        console.log('snow failed!')
-      }
-    else {
+      console.log('snow failed!');
+    } else {
       this.spawnSnow();
     }
 
@@ -399,30 +422,28 @@ export default class GameScene extends Phaser.Scene {
   }
 
   spawnSnow() {
-  const screenWidth = this.scale.width;
-
-  const snowFlakeEffect = this.add.particles(0, 0, 'snowflake3', {
-    emitZone: {
-      source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
-      type: 'random',
-    },
-    speedY: { min: 50, max: 100 },
-    speedX: { min: -20, max: 20 },
-    accelerationY: { random: [10, 15] },
-    accelerationX: { random: [10, 15] },
-    lifespan: {
-      min: 8000,
-      max: 10000,
-    },
-    scale: { random: [0.030, 0.080] },
-    alpha: { random: [0.3, 0.8] },
-    gravityY: 10,
-    frequency: 10,
-    //follow: this.player,
-    // followOffset: { x: -this.scene.width * 0.5, y: -this.scene.height - 100},
-  });
-  console.log("Location of Snowflakes: " + "X: ", snowFlakeEffect.x, "Y: ", snowFlakeEffect.y)
-}
+    const snowFlakeEffect = this.add.particles(0, 0, 'snowflake3', {
+      emitZone: {
+        source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
+        type: 'random',
+      },
+      speedY: { min: 50, max: 100 },
+      speedX: { min: -20, max: 20 },
+      accelerationY: { random: [10, 15] },
+      accelerationX: { random: [10, 15] },
+      lifespan: {
+        min: 8000,
+        max: 10000,
+      },
+      scale: { random: [0.03, 0.08] },
+      alpha: { random: [0.3, 0.8] },
+      gravityY: 10,
+      frequency: 10,
+      //follow: this.player,
+      // followOffset: { x: -this.scene.width * 0.5, y: -this.scene.height - 100},
+    });
+    console.log('Location of Snowflakes: ' + 'X: ', snowFlakeEffect.x, 'Y: ', snowFlakeEffect.y);
+  }
 
   collectItem(car, item) {
     if (!item.active) return;
