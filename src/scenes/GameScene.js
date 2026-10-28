@@ -316,7 +316,7 @@ export default class GameScene extends Phaser.Scene {
 
       this.secondCar = new Car(
         this,
-        this.scale.width / 2 + 90,
+        this.scale.width / 2 + 140,
         this.scale.height / 1.25,
         'car2',
         2,
