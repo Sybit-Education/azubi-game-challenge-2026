@@ -393,6 +393,11 @@ export default class PopUpScene extends Phaser.Scene {
     [this._activeModeButton, this._inactiveModeButton] =
       [this._inactiveModeButton, this._activeModeButton];
 
+    // Kill any lingering tweens (e.g. from a dropdown close tween that was
+    // still running on what is now the active button)
+    this.tweens.killTweensOf(this._activeModeButton);
+    this.tweens.killTweensOf(this._inactiveModeButton);
+
     // Update visibility and position
     this._activeModeButton.setAlpha(1);
     this._inactiveModeButton.setAlpha(0).setY(this._dropdownClosedY);
