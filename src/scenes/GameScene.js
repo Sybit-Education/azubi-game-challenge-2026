@@ -400,6 +400,8 @@ export default class GameScene extends Phaser.Scene {
 
     //only the car that got hit dies
     car.dead = true;
+    this.hud.greyOut(car === this.car ? 1 : 2);
+
     this.sound.play('collision-hit', { volume: 0.3 });
     this.sound.play('collision-bang', { volume: 0.3 });
     this.sound.play('collision-impact', { volume: 0.3 });

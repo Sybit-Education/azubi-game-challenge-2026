@@ -29,6 +29,20 @@ export default class HUD {
       .setOrigin(0, 0)
       .setDepth(5);
 
+    this.death = scene.add
+      .text(margin, margin, '', {
+        fontFamily: 'Tiny5',
+        fontSize: `${150 * this.scaleFactor}px`,
+      })
+      .setOrigin(0, 0)
+      .setDepth(500)
+      .setText('DEAD')
+      .setColor('red')
+      .setStroke('black', 10)
+      .setRotation(0.1)
+      .setAlpha(0.6)
+      .setVisible(false);
+
     // Player 2 (top-right)
     if (this.secondCar) {
       this.distanceText2 = scene.add
@@ -58,6 +72,20 @@ export default class HUD {
         .setOrigin(0);
       this.statsBackground2.setFlipX(true);
       this.statsBackground2.x -= this.statsBackground2.displayWidth;
+
+      this.death2 = scene.add
+        .text(margin, margin, '', {
+          fontFamily: 'Tiny5',
+          fontSize: `${150 * this.scaleFactor}px`,
+        })
+        .setOrigin(0, 0)
+        .setDepth(500)
+        .setText('DEAD')
+        .setColor('red')
+        .setStroke('black', 10)
+        .setRotation(0.1)
+        .setAlpha(0.6)
+        .setVisible(false);
     }
 
     this.statsBackground = this.scene.add
@@ -93,9 +121,22 @@ export default class HUD {
       this.statsFrame2.lineStyle(10, 0x000000, 1);
       this.statsFrame2.strokeRect(x2, y, width, height);
       this.statsFrame2.setDepth(1);
+      this.death
+        .setPosition(this.statsBackground.displayWidth / 2, this.statsBackground.displayHeight / 2)
+        .setOrigin(0.5);
+      this.death2
+        .setPosition(
+          this.scene.scale.width - this.statsBackground2.displayWidth / 2,
+          this.statsBackground2.displayHeight / 2,
+        )
+        .setOrigin(0.5);
     } else {
       this.distanceText.setText(`Distance: ${this.car.calculate_km()} km`);
       this.scoreText.setText(`Score: ${this.car.score}`);
+      this.death.setPosition(
+        this.statsBackground.displayWidth / 2,
+        this.statsBackground.displayHeight / 2,
+      );
     }
 
     this.statsFrame.clear();
@@ -105,6 +146,42 @@ export default class HUD {
     this.statsFrame.lineStyle(10, 0x000000, 1);
     this.statsFrame.strokeRect(x, y, width, height);
     this.statsFrame.setDepth(1);
+  }
+
+  greyOut(player) {
+    const parts =
+      player === 1
+        ? [this.statsBackground, this.distanceText, this.scoreText]
+        : [this.statsBackground2, this.distanceText2, this.scoreText2];
+
+    if (player === 1) {
+      parts.push(this.scene.hotbar, this.scene.hotbarCoin, this.scene.coinText1);
+      this.showDeathOverlay(1);
+    } else {
+      parts.push(this.scene.hotbar2, this.scene.hotbarCoin2, this.scene.coinText2);
+      this.showDeathOverlay(2);
+    }
+
+    this.scene.tweens.add({
+      targets: parts.filter(Boolean),
+      alpha: 0.4,
+      duration: 300,
+      ease: 'Sine.easeOut',
+    });
+  }
+
+  showDeathOverlay(player) {
+    const death = player === 1 ? this.death : this.death2;
+
+    death.setVisible(true).setScale(0).setAlpha(0);
+
+    this.scene.tweens.add({
+      targets: death,
+      scale: 1,
+      alpha: 0.6,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
   }
 
   showPowerupTimer(texture, duration = 10000, scale = 0.05, player = 1) {
