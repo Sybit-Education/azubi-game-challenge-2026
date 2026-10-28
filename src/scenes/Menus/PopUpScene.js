@@ -42,20 +42,20 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
     this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
     this.load.image(
-      'Accessibility Mode',
+      'accessibilityModeLabel',
       'assets/images/homepage/settings-menu/accessibility-mode.png',
     );
     this.load.image('switchOn', 'assets/images/homepage/settings-menu/switch-on.png');
     this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
     this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
-    this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
+    this.load.image('gameModeLabel', 'assets/images/homepage/settings-menu/game-mode-label.png');
     this.load.image(
-      'StandardModeButton',
+      'standardModeButton',
       'assets/images/homepage/settings-menu/standard-mode-button.png',
     );
     this.load.image('closeLabel', 'assets/images/homepage/settings-menu/close-label.png');
     this.load.image(
-      'christmasmode',
+      'christmasModeButton',
       'assets/images/homepage/settings-menu/christmas-mode-button.png',
     );
   }
@@ -247,12 +247,12 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     const accessibilityLabel = this.add
-      .image(leftColumn, row1Y, 'Accessibility Mode')
+      .image(leftColumn, row1Y, 'accessibilityModeLabel')
       .setScale(SCALE_LABEL_LARGE * s)
       .setOrigin(0);
 
     const gamemodeLabel = this.add
-      .image(leftColumn, row2Y, 'Game Mode')
+      .image(leftColumn, row2Y, 'gameModeLabel')
       .setScale(SCALE_LABEL_LARGE * s)
       .setOrigin(0);
 
@@ -276,13 +276,13 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Game-mode buttons — active one is shown, inactive one slides down as dropdown
     this._standardModeButton = this.add
-      .image(rightColumn, row2Y, 'StandardModeButton')
+      .image(rightColumn, row2Y, 'standardModeButton')
       .setScale(SCALE_MODE_BTN * s)
       .setOrigin(1, 0)
       .setInteractive({ useHandCursor: true });
 
     this._christmasModeButton = this.add
-      .image(rightColumn, row2Y, 'christmasmode')
+      .image(rightColumn, row2Y, 'christmasModeButton')
       .setOrigin(1, 0)
       .setScale(SCALE_MODE_BTN * s)
       .setAlpha(0)
