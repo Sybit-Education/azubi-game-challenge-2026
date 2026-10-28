@@ -76,6 +76,7 @@ export default class PopUpScene extends Phaser.Scene {
     this._initGameModeState();
     this._initAccessibilityState();
 
+    this._closing = false;
     this._buildLayout(width, height);
     this._setupGameModeDropdown();
     this._setupAccessibilitySwitch();
@@ -173,8 +174,8 @@ export default class PopUpScene extends Phaser.Scene {
   _initGameModeState() {
     const { gameModeMenu, christmasModeChoice } = this._html;
 
-    this._currentGameMode = this.registry.get('gameMode') ?? 'standard';
-    this._isChristmasMode = this._currentGameMode === 'christmas';
+    const currentGameMode = this.registry.get('gameMode') ?? 'standard';
+    this._isChristmasMode = currentGameMode === 'christmas';
     this._isDropdownOpen = false;
 
     gameModeMenu.setAttribute(
@@ -242,7 +243,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Static decorative labels
     const settingsLabel = this.add
-      .image(background.x, background.y * -1 + padding, 'settingsLabel')
+      .image(background.x, padding, 'settingsLabel')
       .setScale(SCALE_LABEL * s)
       .setOrigin(0.5);
 
@@ -297,9 +298,8 @@ export default class PopUpScene extends Phaser.Scene {
     this._inactiveModeButton.setAlpha(0);
     this._activeModeButton.setAlpha(1);
 
-    this._dropdownClosedY = this._standardModeButton.y;
-    this._dropdownOpenY =
-      this._standardModeButton.y + this._standardModeButton.displayHeight + DROPDOWN_GAP;
+    this._dropdownClosedY = this._activeModeButton.y;
+    this._dropdownOpenY   = this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
 
     // Collect all panel objects for the slide-in/out animation
     this._panelObjects = [
@@ -424,6 +424,8 @@ export default class PopUpScene extends Phaser.Scene {
       : sw.x - this._switchBaseWidth * scaleFactor + (this._switchBaseHeight * scaleFactor) / 2;
     const knobY = sw.y + (this._switchBaseHeight * scaleFactor) / 2;
 
+    this.tweens.killTweensOf(sw);
+    this.tweens.killTweensOf(this._accessibilityKnob);
     this.tweens.add({ targets: sw, scale, duration: TWEEN_DURATION_FAST });
     this.tweens.add({
       targets: this._accessibilityKnob,
