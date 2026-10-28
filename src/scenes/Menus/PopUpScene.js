@@ -299,7 +299,8 @@ export default class PopUpScene extends Phaser.Scene {
     this._activeModeButton.setAlpha(1);
 
     this._dropdownClosedY = this._activeModeButton.y;
-    this._dropdownOpenY   = this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
+    this._dropdownOpenY =
+      this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
 
     // Collect all panel objects for the slide-in/out animation
     this._panelObjects = [
@@ -390,8 +391,10 @@ export default class PopUpScene extends Phaser.Scene {
     this._inactiveModeButton.off('pointerdown');
 
     // Swap references
-    [this._activeModeButton, this._inactiveModeButton] =
-      [this._inactiveModeButton, this._activeModeButton];
+    [this._activeModeButton, this._inactiveModeButton] = [
+      this._inactiveModeButton,
+      this._activeModeButton,
+    ];
 
     // Kill any lingering tweens (e.g. from a dropdown close tween that was
     // still running on what is now the active button)
@@ -403,12 +406,13 @@ export default class PopUpScene extends Phaser.Scene {
     this._inactiveModeButton.setAlpha(0).setY(this._dropdownClosedY);
 
     // Re-attach Phaser pointerdown
-    this._activeModeButton.on('pointerdown',   () => this._toggleDropdown());
+    this._activeModeButton.on('pointerdown', () => this._toggleDropdown());
     this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
 
     // Recalculate dropdown positions from the new active button
     this._dropdownClosedY = this._activeModeButton.y;
-    this._dropdownOpenY   = this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
+    this._dropdownOpenY =
+      this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
 
     // Update ARIA labels
     gameModeMenu.setAttribute(
@@ -422,9 +426,9 @@ export default class PopUpScene extends Phaser.Scene {
 
     // Reposition accessible HTML overlay controls
     positionAccessibleControls(this, [
-      [closeSettingsBtn,    this._closeButton],
+      [closeSettingsBtn, this._closeButton],
       [accessibilityToggle, this._accessibilitySwitch],
-      [gameModeMenu,        this._activeModeButton],
+      [gameModeMenu, this._activeModeButton],
       [christmasModeChoice, this._inactiveModeButton],
     ]);
 
