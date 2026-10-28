@@ -85,6 +85,7 @@ export default class ItemManager {
     }
 
     this.animateCarScale(car, this.originScale * 0.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
 
     this.shrinkTimerP1 = this.scene.time.delayedCall(10100, () => {
       this.animateCarScale(car, this.originScale);
@@ -109,6 +110,7 @@ export default class ItemManager {
     }
 
     this.animateCarScale(car, this.originScale * 0.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
 
     this.shrinkTimerP2 = this.scene.time.delayedCall(10100, () => {
       this.animateCarScale(car, this.originScale);
@@ -134,7 +136,7 @@ export default class ItemManager {
     }
 
     this.animateCarScale(car, this.originScale * 1.5);
-    this.scene.sound.play('plant-grow', { volume: 0.3 });
+    this.scene.sound.play('change-size', { volume: 0.3 });
 
     this.growTimerP1 = this.scene.time.delayedCall(10000, () => {
       this.animateCarScale(car, this.originScale);
@@ -161,7 +163,7 @@ export default class ItemManager {
     }
 
     this.animateCarScale(car, this.originScale * 1.5);
-    this.scene.sound.play('plant-grow', { volume: 0.3 });
+    this.scene.sound.play('change-size', { volume: 0.3 });
 
     this.growTimerP2 = this.scene.time.delayedCall(10000, () => {
       this.animateCarScale(car, this.originScale);
