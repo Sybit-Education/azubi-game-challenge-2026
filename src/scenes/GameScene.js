@@ -111,6 +111,31 @@ export default class GameScene extends Phaser.Scene {
       'brakeLights2',
       'assets/images/entities/player-skins/player-states/sybit-player-2-brakelights.png',
     );
+    this.load.image(
+      'winterBlinkRight',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-right.png',
+    );
+    this.load.image(
+      'winterBlinkLeft',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-left.png',
+    );
+    this.load.image(
+      'winterBrakeLights',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-brakelights.png',
+    );
+    this.load.image(
+      'winterBlinkLeft2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-left.png',
+    );
+    this.load.image(
+      'winterBlinkRight2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-right.png',
+    );
+    this.load.image(
+      'winterBrakeLights2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-brakelights.png',
+    );
+
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
