@@ -56,6 +56,14 @@ export default class ChristmasScene extends Phaser.Scene {
       'homepage-how-to-play',
       'assets/images/homepage/default-homepage/how-to-play-button.png',
     );
+    this.load.image(
+      'homepage-credits',
+      'assets/images/homepage/default-homepage/credits-button.png',
+    );
+    this.load.image(
+      'homepage-leaderboard-btn',
+      'assets/images/gameover-scene-assets/leaderboard-button.png',
+    );
   }
 
   // Create scene
