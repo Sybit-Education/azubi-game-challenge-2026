@@ -108,16 +108,16 @@ export default class HUD {
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
 
-      this.distanceText.setFontSize(40 * this.scaleFactor);
-      this.scoreText.setFontSize(40 * this.scaleFactor);
+      this.distanceText.setFontSize(30 * this.scaleFactor);
+      this.scoreText.setFontSize(30 * this.scaleFactor);
 
-      this.distanceText2.setFontSize(40 * this.scaleFactor);
-      this.scoreText2.setFontSize(40 * this.scaleFactor);
       const x2 = this.statsBackground2.x;
       const y2 = this.statsBackground2.y;
       const width2 = this.statsBackground2.displayWidth;
       const height2 = this.statsBackground2.displayHeight;
 
+      this.distanceText2.setFontSize(30 * this.scaleFactor);
+      this.scoreText2.setFontSize(30 * this.scaleFactor);
       this.statsFrame2.clear();
       this.statsFrame2.fillStyle(0x000000, 0.9);
       this.statsFrame2.fillRect(x2, y2, width2, height2);
