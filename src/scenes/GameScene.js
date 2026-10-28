@@ -322,7 +322,7 @@ export default class GameScene extends Phaser.Scene {
         2,
       );
       this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
-      this.physics.add.collider(this.car, this.secondCar);
+      //this.physics.add.collider(this.car, this.secondCar);
     } else {
       this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
