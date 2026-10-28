@@ -4,6 +4,7 @@ import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { setSetting } from '../../settings/gameSettings.js';
 
 export default class PopUpScene extends Phaser.Scene {
   constructor() {
@@ -25,7 +26,7 @@ export default class PopUpScene extends Phaser.Scene {
     this.load.image('Game Mode', 'assets/images/homepage/settings-menu/game-mode-label.png');
     this.load.image(
       'AccessibilitySwitchOff',
-      'assets/images/homepage/settings-menu/accessibility-switch-off.png',
+      'assets/images/homepage/settings-menu/switch-off.png',
     );
     this.load.image(
       'StandardModeButton',
@@ -57,7 +58,10 @@ export default class PopUpScene extends Phaser.Scene {
     const accessibilityToggle = document.getElementById('accessible-toggle');
     const gameModeMenu = document.getElementById('game-mode-menu');
     const christmasModeChoice = document.getElementById('christmas-mode-choice');
-    const isChristmasMode = this.parentSceneKeys.includes('ChristmasScene');
+
+    const currentGameMode = this.registry.get('gameMode') ?? 'standard';
+    const isChristmasMode = currentGameMode === 'christmas';
+
     gameModeMenu.setAttribute(
       'aria-label',
       `Game mode: ${isChristmasMode ? 'Christmas' : 'standard'}`,
@@ -101,6 +105,7 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0)
       .setInteractive()
       .setAlpha(0);
+    dim.on('pointerdown', () => close());
 
     const settingsLabel = this.add
       .image(background.x, background.y * -1 + padding, 'settingsLabel')
@@ -111,7 +116,6 @@ export default class PopUpScene extends Phaser.Scene {
       .image(leftColumn, row1Y, 'Accessibility Mode')
       .setScale(0.35 * uiScale)
       .setOrigin(0);
-    //rowY += Math.max(48, 58 * uiScale);
 
     // The visual switch and HTML checkbox share the same saved state.
     const accessibilitySwitch = this.add
@@ -126,7 +130,6 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setInteractive({ useHandCursor: true });
 
-    //rowY += Math.max(90, 112 * uiScale);
     const gamemodeLabel = this.add
       .image(leftColumn, row2Y, 'Game Mode')
       .setScale(0.35 * uiScale)
@@ -143,24 +146,33 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setScale(0.3 * uiScale)
       .setAlpha(0)
-      .setInteractive({ useHandCursor: true });
+      .setInteractive();
 
-    standardModeButton.setTexture(isChristmasMode ? 'christmasmode' : 'StandardModeButton');
-    christmasModeButton.setTexture(isChristmasMode ? 'StandardModeButton' : 'christmasmode');
+    // Reflect current saved/active game mode in the UI.
+    // Variante B: the active mode is the "main" button (always visible),
+    // the inactive mode is the dropdown alternative (hidden until main is clicked)
+    let activeModeButton =
+      currentGameMode === 'christmas' ? christmasModeButton : standardModeButton;
+    let inactiveModeButton =
+      currentGameMode === 'christmas' ? standardModeButton : christmasModeButton;
 
-    let isGameModeDropdownOpen = false;
+    // Ensure the "inactive" one starts hidden (as dropdown)
+    inactiveModeButton.setAlpha(0);
+
+    // Ensure the "active" one is visible as main button
+    activeModeButton.setAlpha(1);
 
     const closedY = standardModeButton.y;
     const openY = standardModeButton.y + standardModeButton.displayHeight + 10;
-
+    let isGameModeDropdownOpen = false;
     const updateGameModeDropdown = () => {
       gameModeMenu.setAttribute('aria-expanded', String(isGameModeDropdownOpen));
       christmasModeChoice.hidden = !isGameModeDropdownOpen;
       christmasModeChoice.disabled = !isGameModeDropdownOpen;
-      this.tweens.killTweensOf(christmasModeButton);
+      this.tweens.killTweensOf(inactiveModeButton);
 
       this.tweens.add({
-        targets: christmasModeButton,
+        targets: inactiveModeButton,
         y: isGameModeDropdownOpen ? openY : closedY,
         alpha: isGameModeDropdownOpen ? 1 : 0,
         duration: 150,
@@ -168,9 +180,14 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
+    const applyGameMode = (mode) => {
+      this.registry.set('gameMode', mode);
+      setSetting('gameMode', mode);
+    };
+
     const chooseChristmasMode = () => {
       playMenuClick(this);
-      this.registry.set('gameMode', 'christmas');
+      applyGameMode('christmas');
       this.scene.stop('MenuScene');
       this.scene.stop('PopUpScene');
       this.scene.start('ChristmasScene');
@@ -178,7 +195,7 @@ export default class PopUpScene extends Phaser.Scene {
 
     const chooseStandardMode = () => {
       playMenuClick(this);
-      this.registry.set('gameMode', 'standard');
+      applyGameMode('standard');
       this.scene.stop('ChristmasScene');
       this.scene.stop('PopUpScene');
       this.scene.start('MenuScene');
@@ -189,14 +206,14 @@ export default class PopUpScene extends Phaser.Scene {
       isGameModeDropdownOpen = !isGameModeDropdownOpen;
       updateGameModeDropdown();
     };
+
     const chooseAlternateMode = isChristmasMode ? chooseStandardMode : chooseChristmasMode;
 
-    christmasModeButton.on('pointerdown', chooseAlternateMode);
-    standardModeButton.on('pointerdown', toggleGameModeDropdown);
+    activeModeButton.on('pointerdown', toggleGameModeDropdown);
+    inactiveModeButton.on('pointerdown', chooseAlternateMode);
 
     // Load the saved state and remember the switch knob's two positions.
-    let accessibilityEnabled =
-      this.registry.get('accessibility enabled') ?? this.registry.get('accessibilityMode') ?? false;
+    let accessibilityEnabled = this.registry.get('accessibilityMode') ?? false;
 
     // Left position
     const switchLeft =
@@ -207,7 +224,6 @@ export default class PopUpScene extends Phaser.Scene {
     // Right position
     const switchRight = accessibilitySwitch.x - accessibilitySwitch.displayHeight / 2;
 
-    // Sets coordinates
     accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
     accessibilityKnob.x = accessibilityEnabled ? switchRight : switchLeft;
     accessibilityKnob.y = accessibilitySwitch.y + accessibilitySwitch.displayHeight / 2;
@@ -241,13 +257,11 @@ export default class PopUpScene extends Phaser.Scene {
       });
     };
 
-    // Mouse, keyboard and gamepad use the same function to change the state.
-
     const setAccessibilityEnabled = (enabled) => {
       accessibilityEnabled = enabled;
-      this.registry.set('accessibility enabled', accessibilityEnabled);
-      // Other game code still uses this legacy key. Keep both keys in sync.
       this.registry.set('accessibilityMode', accessibilityEnabled);
+      setSetting('accessibilityMode', accessibilityEnabled);
+
       accessibilityToggle.checked = accessibilityEnabled;
 
       accessibilitySwitch.setTexture(accessibilityEnabled ? 'switchOn' : 'switchOff');
@@ -267,8 +281,6 @@ export default class PopUpScene extends Phaser.Scene {
       .setScale(0.66 * uiScale)
       .setOrigin(0.5);
 
-    // Slide the panel in from the right edge. The dim overlay stays in place.
-    //added an array of all the elements. add element here, to animate
     const panel = [
       accessibilityKnob,
       background,
@@ -378,8 +390,8 @@ export default class PopUpScene extends Phaser.Scene {
     positionAccessibleControls(this, [
       [closeSettingsBtn, closeButton],
       [accessibilityToggle, accessibilitySwitch],
-      [gameModeMenu, standardModeButton],
-      [christmasModeChoice, christmasModeButton],
+      [gameModeMenu, activeModeButton],
+      [christmasModeChoice, inactiveModeButton],
     ]);
     dialog.showModal();
 
@@ -395,12 +407,12 @@ export default class PopUpScene extends Phaser.Scene {
             updateSwitchScale();
           },
         },
-        { button: standardModeButton, action: toggleGameModeDropdown, scale: 0.3 * uiScale },
+        { button: activeModeButton, action: toggleGameModeDropdown, scale: 0.3 * uiScale },
       ];
 
       if (isGameModeDropdownOpen) {
         items.push({
-          button: christmasModeButton,
+          button: inactiveModeButton,
           action: chooseAlternateMode,
           scale: 0.3 * uiScale,
         });
@@ -430,8 +442,8 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     bindOverlayHover(closeSettingsBtn, closeButton, 0.4 * uiScale);
-    bindOverlayHover(gameModeMenu, standardModeButton, 0.3 * uiScale, 1.06);
-    bindOverlayHover(christmasModeChoice, christmasModeButton, 0.3 * uiScale, 1.06);
+    bindOverlayHover(gameModeMenu, activeModeButton, 0.3 * uiScale, 1.06);
+    bindOverlayHover(christmasModeChoice, inactiveModeButton, 0.3 * uiScale, 1.06);
 
     const setSwitchHover = (hovered) => {
       switchHovered = hovered;
