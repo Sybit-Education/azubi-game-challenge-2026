@@ -406,7 +406,12 @@ export default class ItemManager {
     this.scene.gameOver(car);
   }
 
-  lebenCheckCar2(car) {
+  lebenCheckCar2(car, object) {
+    if (object.texture.key === 'random-object2') {
+      this.yeet(object);
+      return;
+    }
+
     if (this.invulnerableCar2) {
       return;
     }
@@ -418,7 +423,6 @@ export default class ItemManager {
       this.useExtraLifeCar2(car);
       return;
     }
-
     this.scene.gameOver(car);
   }
 
