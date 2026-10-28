@@ -37,7 +37,7 @@ export default class StartScene extends Phaser.Scene {
       'car2',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-2.png',
     );
-
+    
     this.load.image(
       'winter-car',
       'assets/images/entities/player-skins/player-sprites/winter-car-P1.png',

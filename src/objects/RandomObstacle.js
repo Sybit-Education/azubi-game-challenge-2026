@@ -4,11 +4,14 @@ import Obstacle from './Obstacle.js';
 
 export default class RandomObstacle extends Obstacle {
   constructor(scene, x, y, lane) {
+
     let randomInt;
-    if (scene.registry.get('gameMode') === 'christmas') {
+    if (scene.registry.get('gameMode') === "christmas") {
       randomInt = Phaser.Math.Between(5, 7);
-    } else {
-      randomInt = Phaser.Math.Between(1, 4);
+    } 
+
+    else {
+      randomInt = Phaser.Math.Between(1, 4)
     }
 
     const texture = `random-object${randomInt}`;
@@ -23,13 +26,21 @@ export default class RandomObstacle extends Obstacle {
 
     if (this.isBarrier) {
       this.setScale(0.37);
-    } else if (this.isDeer) {
+    } 
+    
+    else if (this.isDeer) {
       this.setScale(1.4);
-    } else if (this.isGnome) {
+    }
+
+    else if (this.isGnome) {
       this.setScale(2.2);
-    } else if (this.isSleigh) {
-      this.setScale(0.4);
-    } else {
+    }
+
+    else if (this.isSleigh) {
+      this.setScale(0.40);
+    }
+      
+    else {
       this.setScale(scene.scale.height / 10000);
     }
     this.duckSoundPlayed = false;
