@@ -399,15 +399,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   spawnSnow() {
-  let randomSnowflakeChooser = Phaser.Math.Between(1, 4);
-  const snowFlakeTexture = `snowflake${randomSnowflakeChooser}`;
-  this.add.particles(this.scene.width * 1.3 , this.scene.height * 1.3, snowFlakeTexture, {
+  const screenWidth = this.scale.width;
+
+  const snowFlakeEffect = this.add.particles(0, 0, 'snowflake3', {
     emitZone: {
-      source: Geom,
+      source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
       type: 'random',
-      quantity: 70
     },
-    speedY: { min: 50, max: 70 },
+    speedY: { min: 50, max: 100 },
     speedX: { min: -20, max: 20 },
     accelerationY: { random: [10, 15] },
     accelerationX: { random: [10, 15] },
@@ -415,13 +414,14 @@ export default class GameScene extends Phaser.Scene {
       min: 8000,
       max: 10000,
     },
-    scale: { random: [5, 10] },
-    alpha: { random: [0.1, 0.8] },
+    scale: { random: [0.030, 0.080] },
+    alpha: { random: [0.3, 0.8] },
     gravityY: 10,
     frequency: 10,
-    follow: this.player,
-    followOffset: { x: -this.scene.width * 0.5, y: -this.scene.height - 100},
+    //follow: this.player,
+    // followOffset: { x: -this.scene.width * 0.5, y: -this.scene.height - 100},
   });
+  console.log("Location of Snowflakes: " + "X: ", snowFlakeEffect.x, "Y: ", snowFlakeEffect.y)
 }
 
   collectItem(car, item) {
