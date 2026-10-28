@@ -4,6 +4,7 @@ import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
+import { preserveNativeKeyboard } from '../../accessibility/nativeKeyboard.js';
 
 export default class ChristmasScene extends Phaser.Scene {
   // Constructor
@@ -67,6 +68,7 @@ export default class ChristmasScene extends Phaser.Scene {
     const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
     const creditBtn = document.getElementById('credit-btn');
+    const leaderboardBtn = document.getElementById('leaderboard-btn');
 
     const startGame = () => {
       playMenuClick(this);
@@ -89,6 +91,14 @@ export default class ChristmasScene extends Phaser.Scene {
     };
 
     playBtn.addEventListener('click', startGame);
+    const openLeaderboard = () => {
+      playMenuClick(this);
+      this.registry.set('gameMode', 'christmas');
+      this.scene.start('LeaderboardScene');
+    };
+    leaderboardBtn.addEventListener('click', openLeaderboard);
+    preserveNativeKeyboard(this, leaderboardBtn);
+
     const openCredits = () => {
       playMenuClick(this);
       this.registry.set('gameMode', 'christmas');
@@ -362,9 +372,7 @@ export default class ChristmasScene extends Phaser.Scene {
     });
 
     // Leaderboard click listener
-    leaderboardButton.on('pointerdown', () => {
-      this.scene.start('LeaderboardScene');
-    });
+    leaderboardButton.on('pointerdown', openLeaderboard);
 
     leaderboardButton.on('pointerover', () => {
       this.tweens.add({
@@ -425,6 +433,7 @@ export default class ChristmasScene extends Phaser.Scene {
       [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
       [creditBtn, creditsButton],
+      [leaderboardBtn, leaderboardButton],
     ]);
 
     play_button.on('pointerdown', startGame);
@@ -440,9 +449,16 @@ export default class ChristmasScene extends Phaser.Scene {
       multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
       creditBtn.removeEventListener('click', openCredits);
+      leaderboardBtn.removeEventListener('click', openLeaderboard);
       menu.hidden = true;
     });
-    bindMenuFocusSounds(this, ['start-game', 'multiplayer-btn', 'settings-btn', 'credit-btn']);
+    bindMenuFocusSounds(this, [
+      'start-game',
+      'multiplayer-btn',
+      'settings-btn',
+      'credit-btn',
+      'leaderboard-btn',
+    ]);
 
     this.menuButtons = [
       { button: play_button, action: startSinglePlayer },
@@ -457,7 +473,7 @@ export default class ChristmasScene extends Phaser.Scene {
       {
         button: leaderboardButton,
         scale: 0.24,
-        action: () => this.scene.start('LeaderboardScene'),
+        action: openLeaderboard,
       },
       {
         button: creditsButton,
