@@ -80,12 +80,22 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image(
       'carShield',
-      'assets/images/entities/player-skins/player-states/car-shield.png',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-1-shield.png',
     );
     this.load.image(
       'carShield2',
-      'assets/images/entities/player-skins/player-states/car-shield-2.png',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-2-shield.png',
     );
+
+    this.load.image(
+      'carShieldChristmas',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-winter-P1-shield.png'
+    )
+
+    this.load.image(
+      'carShieldChristmas2',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-winter-P2-shield.png'
+    )
 
     this.load.image(
       'blinkLeft',
@@ -135,7 +145,6 @@ export default class GameScene extends Phaser.Scene {
       'winterBrakeLights2',
       'assets/images/entities/player-skins/player-states/winter-car-P2-brakelights.png',
     );
-
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
@@ -442,7 +451,7 @@ export default class GameScene extends Phaser.Scene {
           max: 10000,
         },
         scale: { random: [0.03, 0.08] },
-        alpha: 0.6,
+        alpha: 0.4,
         gravityY: 10,
         frequency: 10,
       })

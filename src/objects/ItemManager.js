@@ -165,7 +165,12 @@ export default class ItemManager {
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
-      this.scene.car.setTexture('carShield');
+     
+      if (this.scene.registry.get("gameMode") === 'christmas') {
+        this.scene.car.setTexture('carShieldChristmas')
+      } else {
+        this.scene.car.setTexture('carShield')
+      }
 
       this.scene.time.delayedCall(4500, () => {
         this.scene.tweens.add({
@@ -184,7 +189,12 @@ export default class ItemManager {
         this.scene.tweens.killTweensOf(this.scene.car);
         this.scene.car.alpha = 1;
 
-        this.scene.car.setTexture('car');
+        if (this.scene.registry.get("gameMode") === 'christmas') {
+        this.scene.car.setTexture('winter-car')
+        } else {
+        this.scene.secondCar.setTexture('car');
+        }
+
       });
     }
   }
@@ -194,8 +204,11 @@ export default class ItemManager {
     if (!this.schildAktivCar2) {
       this.schildAktivCar2 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
-      this.scene.secondCar.setTexture('carShield2');
-
+      if (this.scene.registry.get("gameMode") === 'christmas') {
+        this.scene.car.setTexture('carShieldChristmas2')
+      } else {
+        this.scene.car.setTexture('carShield2');
+      }
       this.scene.time.delayedCall(4500, () => {
         this.scene.tweens.add({
           targets: this.scene.secondCar,
@@ -212,8 +225,12 @@ export default class ItemManager {
 
         this.scene.tweens.killTweensOf(this.scene.secondCar);
         this.scene.secondCar.alpha = 1;
-
+        
+        if (this.scene.registry.get("gameMode") === 'christmas') {
+        this.scene.car.setTexture('winter-car2')
+        } else {
         this.scene.secondCar.setTexture('car2');
+        }
       });
     }
   }
