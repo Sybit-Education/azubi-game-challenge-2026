@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser, { Geom } from 'phaser';
 
 import Car from '../objects/Car.js';
 import EnemyCar from '../objects/EnemyCar.js';
@@ -422,6 +422,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   spawnSnow() {
+    const screenWidth = this.scale.width;
+
     const snowFlakeEffect = this.add.particles(0, 0, 'snowflake3', {
       emitZone: {
         source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
