@@ -9,3 +9,9 @@ npm-debug.log*
 
 # Windows download metadata
 *:Zone.Identifier
+.axet-plugin/
+.claude/
+.codex/
+.copilot/
+.gemini/
+.opencode/
