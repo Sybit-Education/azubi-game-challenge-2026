@@ -399,27 +399,29 @@ export default class GameScene extends Phaser.Scene {
   }
 
   spawnSnow() {
-    this.emitter = this.add.particles(0, 0, 'snowflakeAtlas', {
-      emitZone: {
-        source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
-        type: 'random',
-      },
-      frame: ['snowflake1', 'snowflake2', 'snowflake3', 'snowflake4'],
-      frameQuantity: 1,
-      randomFrame: true,
-      speedY: { min: 50, max: 100 },
-      speedX: { min: -20, max: 20 },
-      accelerationY: { random: [10, 15] },
-      accelerationX: { random: [10, 15] },
-      lifespan: {
-        min: 8000,
-        max: 10000,
-      },
-      scale: { random: [0.03, 0.08] },
-      alpha: 0.6,
-      gravityY: 10,
-      frequency: 10,
-    }).setDepth(100);
+    this.emitter = this.add
+      .particles(0, 0, 'snowflakeAtlas', {
+        emitZone: {
+          source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
+          type: 'random',
+        },
+        frame: ['snowflake1', 'snowflake2', 'snowflake3', 'snowflake4'],
+        frameQuantity: 1,
+        randomFrame: true,
+        speedY: { min: 50, max: 100 },
+        speedX: { min: -20, max: 20 },
+        accelerationY: { random: [10, 15] },
+        accelerationX: { random: [10, 15] },
+        lifespan: {
+          min: 8000,
+          max: 10000,
+        },
+        scale: { random: [0.03, 0.08] },
+        alpha: 0.6,
+        gravityY: 10,
+        frequency: 10,
+      })
+      .setDepth(100);
   }
 
   collectItem(car, item) {

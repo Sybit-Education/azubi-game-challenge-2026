@@ -7,21 +7,20 @@ const LIGHT_TEXTURES = {
 };
 
 const CAR_TEXTURES = {
-  car: {base: 'car', christmas: 'winter-car'},
-  car2: {base: 'car2', christmas: 'winter-car2'},
-}
+  car: { base: 'car', christmas: 'winter-car' },
+  car2: { base: 'car2', christmas: 'winter-car2' },
+};
 
 export default class Car extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, texture, startinglane = 1) {
     const carType = texture;
     const isChristmas = scene.registry.get('gameMode') === 'christmas';
-    console.log("carType: ", carType)
-    console.log("CAR_TEXTURES entry:", CAR_TEXTURES[carType]);
+    console.log('carType: ', carType);
+    console.log('CAR_TEXTURES entry:', CAR_TEXTURES[carType]);
 
     if (isChristmas) {
-      texture = CAR_TEXTURES[carType].christmas
-      }
-    else {
+      texture = CAR_TEXTURES[carType].christmas;
+    } else {
       texture = CAR_TEXTURES[carType].base;
     }
 
