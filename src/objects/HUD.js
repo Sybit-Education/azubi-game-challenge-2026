@@ -68,7 +68,7 @@ export default class HUD {
           'stats-background',
         )
         .setDepth(4)
-        .setScale(0.3 * this.scaleFactor)
+        .setScale(0.5 * this.scaleFactor)
         .setOrigin(0);
       this.statsBackground2.setFlipX(true);
       this.statsBackground2.x -= this.statsBackground2.displayWidth;
@@ -97,7 +97,6 @@ export default class HUD {
 
   update() {
     const x = this.statsBackground.x;
-    const x2 = this.statsBackground.x;
     const y = this.statsBackground.y;
     const width = this.statsBackground.displayWidth;
     const height = this.statsBackground.displayHeight;
@@ -114,12 +113,17 @@ export default class HUD {
 
       this.distanceText2.setFontSize(40 * this.scaleFactor);
       this.scoreText2.setFontSize(40 * this.scaleFactor);
+      const x2 = this.statsBackground2.x;
+      const y2 = this.statsBackground2.y;
+      const width2 = this.statsBackground2.displayWidth;
+      const height2 = this.statsBackground2.displayHeight;
+
       this.statsFrame2.clear();
       this.statsFrame2.fillStyle(0x000000, 0.9);
-      this.statsFrame2.fillRect(x, y, width, height);
+      this.statsFrame2.fillRect(x2, y2, width2, height2);
 
       this.statsFrame2.lineStyle(10, 0x000000, 1);
-      this.statsFrame2.strokeRect(x2, y, width, height);
+      this.statsFrame2.strokeRect(x2, y2, width2, height2);
       this.statsFrame2.setDepth(1);
       this.death
         .setPosition(this.statsBackground.displayWidth / 2, this.statsBackground.displayHeight / 2)
