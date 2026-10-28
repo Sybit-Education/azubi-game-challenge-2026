@@ -31,6 +31,21 @@ export default class ItemManager {
     this.cargrowP1 = false;
     this.cargrowP2 = false;
     this.originScale = this.scene.car.scale;
+    this.carScaleTweens = new WeakMap();
+  }
+
+  animateCarScale(car, scale) {
+    this.carScaleTweens.get(car)?.stop();
+
+    const tween = this.scene.tweens.add({
+      targets: car,
+      scaleX: scale,
+      scaleY: scale,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+
+    this.carScaleTweens.set(car, tween);
   }
 
   removeOldPowerupTimer(texture, player) {
@@ -63,10 +78,10 @@ export default class ItemManager {
       this.shrinkTimerP1.remove();
     }
 
-    car.setScale(this.originScale * 0.5);
+    this.animateCarScale(car, this.originScale * 0.5);
 
     this.shrinkTimerP1 = this.scene.time.delayedCall(10100, () => {
-      car.setScale(this.originScale);
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
       this.shrinkTimerP1 = null;
       this.carshrinkP1 = false;
@@ -87,10 +102,10 @@ export default class ItemManager {
       this.shrinkTimerP2.remove();
     }
 
-    car.setScale(this.originScale * 0.5);
+    this.animateCarScale(car, this.originScale * 0.5);
 
     this.shrinkTimerP2 = this.scene.time.delayedCall(10100, () => {
-      car.setScale(this.originScale);
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
       this.shrinkTimerP2 = null;
       this.carshrinkP2 = false;
@@ -112,11 +127,11 @@ export default class ItemManager {
       this.growTimerP1.remove();
     }
 
-    car.setScale(this.originScale * 1.5);
+    this.animateCarScale(car, this.originScale * 1.5);
     this.scene.sound.play('plant-grow', { volume: 0.3 });
 
     this.growTimerP1 = this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
 
       this.growTimerP1 = null;
@@ -139,11 +154,11 @@ export default class ItemManager {
       this.growTimerP2.remove();
     }
 
-    car.setScale(this.originScale * 1.5);
+    this.animateCarScale(car, this.originScale * 1.5);
     this.scene.sound.play('plant-grow', { volume: 0.3 });
 
     this.growTimerP2 = this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
 
       this.growTimerP2 = null;
