@@ -7,6 +7,7 @@ import {
   playMenuClick,
   bindMenuFocusSounds,
 } from '../../audio/sounds.js';
+import { safePlay } from '../../audio/safePlay.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
@@ -103,21 +104,21 @@ export default class StartScene extends Phaser.Scene {
   // countdown
   countdown() {
     this.showNumber('start-count-3');
-    this.sound.play('countdown-3', { volume: 0.8 });
+    safePlay(this, 'countdown-3', { volume: 0.8 });
 
     this.time.delayedCall(900, () => {
       this.showNumber('start-count-2');
-      this.sound.play('countdown-2', { volume: 0.8 });
+      safePlay(this, 'countdown-2', { volume: 0.8 });
     });
 
     this.time.delayedCall(1800, () => {
       this.showNumber('start-count-1');
-      this.sound.play('countdown-1', { volume: 0.8 });
+      safePlay(this, 'countdown-1', { volume: 0.8 });
     });
 
     this.time.delayedCall(2700, () => {
       this.showNumber('start-go');
-      this.sound.play('countdown-go', { volume: 0.8 });
+      safePlay(this, 'countdown-go', { volume: 0.8 });
 
       this.car.startAnim();
       if (this.secondCar) {
