@@ -417,6 +417,10 @@ export default class PopUpScene extends Phaser.Scene {
     this._activeModeButton.on('pointerdown', () => this._toggleDropdown());
     this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
 
+    // Keep the main row fixed, even after repeated mode switches.
+    this._dropdownOpenY =
+      this._dropdownClosedY + this._activeModeButton.displayHeight + DROPDOWN_GAP;
+
     // Update ARIA labels
     gameModeMenu.setAttribute(
       'aria-label',

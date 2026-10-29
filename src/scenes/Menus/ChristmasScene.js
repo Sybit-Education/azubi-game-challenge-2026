@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
 
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+import { preloadSceneMusic, playSceneMusic } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 import { preserveNativeKeyboard } from '../../accessibility/nativeKeyboard.js';
@@ -15,6 +16,7 @@ export default class ChristmasScene extends Phaser.Scene {
   // Pre load images
   preload() {
     preloadMenuSounds(this);
+    preloadSceneMusic(this, 'christmas-menu-music');
     this.load.image('christmas-homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     //this.load.image('playButton', 'assets/images/button-template.png');
     this.load.image(
@@ -68,6 +70,7 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Create scene
   create(data) {
+    playSceneMusic(this, 'christmas-menu-music', 0.09);
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     //html Menus erneut für diese Scene herholen.
