@@ -270,9 +270,8 @@ export default class GameScene extends Phaser.Scene {
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
-    background.setDepth(-10);
+    background.setDepth(-10);// Set depth to -10 to ensure it is behind other objects
     return background;
-    // Set depth to -10 to ensure it is behind other objects
   }
 
   //Separate overlapping player cars after the physics update.
