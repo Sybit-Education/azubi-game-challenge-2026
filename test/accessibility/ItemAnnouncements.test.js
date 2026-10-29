@@ -117,3 +117,25 @@ for (const reason of ['disabled', 'dead']) {
     );
   });
 }
+
+for (const interrupted of [false, true]) {
+  test(`destroyed player 1 cancels item speech (interrupted: ${interrupted})`, () => {
+    const { scene, spoken, box, announcer } = createScenario();
+    const target = box(1, 200);
+    scene.roadObjects = [target];
+    announcer.update();
+    if (interrupted) scene.speech.speak('Lane two', { key: 'lane', interrupt: true });
+
+    scene.car.dead = true;
+    scene.car.body = null;
+    assert.doesNotThrow(() => announcer.update());
+    assert.equal(announcer.currentBox, null);
+    assert.equal(announcer.isBoxAhead(target), false);
+    if (interrupted) {
+      spoken[1].onend();
+      assert.equal(spoken.length, 2);
+    } else {
+      assert.equal(scene.speech.current, null);
+    }
+  });
+}

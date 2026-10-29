@@ -18,11 +18,15 @@ function getSpawnY(scene, type) {
     type === 'ice' ? ICE_WARNING_SECONDS : type === 'item' ? MAX_PICKUP_WARNING_SECONDS : 0;
   if (warningSeconds === 0) return -200;
 
+  // Extra lead time belongs to player 1; player 2 continues with normal spawns.
+  const car = scene.car;
+  if (!car || car.dead || !car.body) return -200;
+
   // Start farther ahead so the warning has time to finish before the object arrives.
   // Include the acceleration expected during the warning window, plus a size buffer.
   const speed = Math.min(1600, 700 + (scene.elapsedTime + warningSeconds * 1000) * 0.005);
   const pixelsPerSecond = speed * (scene.scale.height / 1200);
-  return Math.min(-200, scene.car.body.top - pixelsPerSecond * warningSeconds - 200);
+  return Math.min(-200, car.body.top - pixelsPerSecond * warningSeconds - 200);
 }
 
 function addPlayerCollider(scene, roadObject, callback) {
