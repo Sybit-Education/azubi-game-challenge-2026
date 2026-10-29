@@ -42,6 +42,15 @@ export default class InputManager {
     const axisX2 = padP2?.axes?.[0]?.getValue() ?? 0;
     const axisY2 = padP2?.axes?.[1]?.getValue() ?? 0;
 
+    const dpadLeftP1 = padP1?.buttons?.[14]?.pressed ?? false;
+    const dpadRightP1 = padP1?.buttons?.[15]?.pressed ?? false;
+    const dpadUpP1 = padP1?.buttons?.[12]?.pressed ?? false;
+    const dpadDownP1 = padP1?.buttons?.[13]?.pressed ?? false;
+    const dpadLeftP2 = padP2?.buttons?.[14]?.pressed ?? false;
+    const dpadRightP2 = padP2?.buttons?.[15]?.pressed ?? false;
+    const dpadUpP2 = padP2?.buttons?.[12]?.pressed ?? false;
+    const dpadDownP2 = padP2?.buttons?.[13]?.pressed ?? false;
+
     // Check button states for both players, defaulting to false if the gamepad isn't connected
     const button1P1 = padP1?.buttons?.[0]?.pressed ?? false;
     const button2P1 = padP1?.buttons?.[1]?.pressed ?? false;
@@ -65,8 +74,10 @@ export default class InputManager {
     const button4P2isDown = this.hasUpdated && button4P2 && !this.previousButtonP2[3];
 
     this.getControlsP1 = {
-      left: this.keys.leftP1.isDown || axisX1 < -deadzone,
-      right: this.keys.rightP1.isDown || axisX1 > deadzone,
+      left: this.keys.leftP1.isDown || axisX1 < -deadzone || dpadLeftP1,
+      right: this.keys.rightP1.isDown || axisX1 > deadzone || dpadRightP1,
+      up: this.keys.upP1.isDown || axisY1 < -deadzone || dpadUpP1,
+      down: this.keys.downP1.isDown || axisY1 > deadzone || dpadDownP1,
       accelerate: this.keys.upP1.isDown || axisY1 < -deadzone,
       brake: this.keys.downP1.isDown || axisY1 > deadzone,
       button1: button1P1isDown,
@@ -76,8 +87,10 @@ export default class InputManager {
     };
 
     this.getControlsP2 = {
-      left: this.keys.leftP2.isDown || axisX2 < -deadzone,
-      right: this.keys.rightP2.isDown || axisX2 > deadzone,
+      left: this.keys.leftP2.isDown || axisX2 < -deadzone || dpadLeftP2,
+      right: this.keys.rightP2.isDown || axisX2 > deadzone || dpadRightP2,
+      up: this.keys.upP2.isDown || axisY2 < -deadzone || dpadUpP2,
+      down: this.keys.downP2.isDown || axisY2 > deadzone || dpadDownP2,
       accelerate: this.keys.upP2.isDown || axisY2 < -deadzone,
       brake: this.keys.downP2.isDown || axisY2 > deadzone,
       button1: button1P2isDown,

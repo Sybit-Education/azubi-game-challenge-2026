@@ -118,14 +118,19 @@ export default class PopUpScene extends Phaser.Scene {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems;
+    const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
+    const downPressed = controls.down && this._hasReadVerticalInput && !this._previousDown;
+    this._previousUp = controls.up;
+    this._previousDown = controls.down;
+    this._hasReadVerticalInput = true;
 
-    if (controls.button1) {
+    if (upPressed) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
       this.updateGamepadSelection();
-    } else if (controls.button3) {
+    } else if (downPressed) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
       this.updateGamepadSelection();
-    } else if (controls.button2) {
+    } else if (controls.button3) {
       items[this.selectedIndex].action();
       this.updateGamepadSelection();
     } else if (controls.button4) {
@@ -739,6 +744,9 @@ export default class PopUpScene extends Phaser.Scene {
   /** Initialises `selectedIndex` and builds the first `navigationItems` array. */
   _setupGamepadNavigation() {
     this.selectedIndex = 0;
+    this._previousUp = false;
+    this._previousDown = false;
+    this._hasReadVerticalInput = false;
     this._rebuildNavigationItems();
     this.updateGamepadSelection();
   }

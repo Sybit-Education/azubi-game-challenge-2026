@@ -394,15 +394,15 @@ export default class GameoverScene extends Phaser.Scene {
 
   // On every frame
   update() {
-    // During rare error paths `create()` may not finish (e.g. crypto errors).
-    // Avoid crashing the whole game loop if InputManager wasn't initialized.
-    if (this.InputManager?.update) {
-      this.InputManager.update();
-    } else {
-      return;
-    }
+    this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
+    const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
+    const downPressed = controls.down && this._hasReadVerticalInput && !this._previousDown;
+    this._previousUp = controls.up;
+    this._previousDown = controls.down;
+    this._hasReadVerticalInput = true;
 
-    if (this.InputManager.getControlsP1.button1) {
+    if (upPressed) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
         this.Buttons[this.selectedIndex].y,
@@ -419,7 +419,7 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button3) {
+    if (downPressed) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
         this.Buttons[this.selectedIndex].y,
@@ -436,8 +436,10 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button2) {
+    if (controls.button3) {
       this.Buttons[this.selectedIndex].action?.();
+    } else if (controls.button4) {
+      this.Buttons[1].action?.();
     }
   }
 

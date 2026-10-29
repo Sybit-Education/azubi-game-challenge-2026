@@ -86,10 +86,13 @@ export default class LoadingScene extends Phaser.Scene {
     this.randomComment = this.add.image(centerX, centerY, randomComment).setOrigin(0.5);
 
     this.scale.on('resize', this.resize, this);
-
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
+    });
+
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
     });
 
     const barWidth = this.scale.width / 2.5;
@@ -162,9 +165,9 @@ export default class LoadingScene extends Phaser.Scene {
 
     if (
       this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP1.button3 ||
       this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button2
+      this.InputManager.getControlsP2.button3
     ) {
       this.scene.start('StartScene', {
         isMultiplayer: this.isMultiplayer,
