@@ -1,4 +1,5 @@
 import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
+import { safePlay } from '../../audio/safePlay.js';
 
 function updatePlayerOne(scene) {
   if (scene.car.dead) return;
@@ -19,8 +20,10 @@ function updatePlayerOne(scene) {
     if (edgeChanged && currentRoadEdge !== null) {
       scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
       const pan = currentRoadEdge === 'left' ? -1 : 1;
-      scene.sound.play('road-edge-hit', { volume: 0.25, pan });
-      scene.sound.play('collision-hit', { volume: 0.15, pan });
+
+      // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
+      safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
+      safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
     }
   }
 
