@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 import { verifyEntry } from '../utils/leaderboardSecurity.js';
+import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
+import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -8,12 +10,23 @@ export default class LeaderboardScene extends Phaser.Scene {
     super('LeaderboardScene');
   }
 
-  // On create
-  async create() {
+  preload() {
+    preloadMenuSounds(this);
+    this.load.image(
+      'homepage-hintergrund',
+      'assets/images/homepage/default-homepage/background.png',
+    );
+    this.load.image(
+      'leaderboard-homepage-btn',
+      'assets/images/gameover-scene-assets/back-to-menu-button.png',
+    );
+  }
+
+  // BootScene loads the font before menus become available.
+  async create(data) {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
-    await document.fonts.load('32px Silkscreen');
     const leaderboard = (await parseLeaderboard()).slice(0, 10);
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
@@ -52,7 +65,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     leaderboard.forEach((entry, index) => {
       const name = entry.name || 'Unbekannt';
-      const distance = entry.distance || entry;
+      const distance = entry.distance;
       const displayName = entry.isTampered ? `${name} ⚠ manipuliert` : name;
 
       const text = this.add
@@ -76,15 +89,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     // On home button listener
-    this.backButton.on('pointerdown', () => {
-      const gameMode = this.registry.get('gameMode');
-
-      if (gameMode === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
-    });
+    this.backButton.on('pointerdown', () => this.goHome());
     // Hover effect
     this.backButton.on('pointerover', () => {
       this.tweens.add({
@@ -105,22 +110,28 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     //listener for resizing
     this.scale.on('resize', this.resize, this);
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
+    });
 
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
     });
+    bindLeaderboardControls(this, leaderboard, data?.focusTarget);
+  }
+
+  goHome() {
+    playMenuClick(this);
+    const menu = this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
+    this.scene.start(menu, { focusTarget: 'leaderboard-btn' });
   }
 
   update() {
     this.InputManager.update();
 
     if (this.InputManager.getControlsP1.button4) {
-      if (this.registry.get('gameMode') === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
+      this.goHome();
     }
   }
 
@@ -146,11 +157,17 @@ export default class LeaderboardScene extends Phaser.Scene {
 
 // Loads and parses leaderboard
 export async function parseLeaderboard() {
-  const raw = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(stored)) return [];
 
-  const rawEntries = raw.map((entry) => {
-    // Legacy support: old versions stored only a string distance.
-    if (typeof entry === 'string') {
+  const rawEntries = stored.map((entry) => {
+    // String only entries are counted as scores
+    if (typeof entry === 'string' || typeof entry === 'number') {
       return {
         name: 'Unbekannt',
         distance: Number(entry),
@@ -162,8 +179,8 @@ export async function parseLeaderboard() {
 
     // Normal entry object (new format expects score + token).
     return {
-      name: entry?.name,
-      distance: Number(entry?.distance),
+      name: typeof entry?.name === 'string' ? entry.name.trim() || 'Unbekannt' : 'Unbekannt',
+      distance: entry?.distance == null ? NaN : Number(entry.distance),
       score: Number(entry?.score ?? 0),
       token: String(entry?.token ?? ''),
       sig: entry?.sig,
@@ -179,6 +196,7 @@ export async function parseLeaderboard() {
 
   const bestByPlayer = new Map();
   entries.forEach((entry) => {
+    if (!Number.isFinite(entry.distance) || entry.distance < 0) return;
     const playerKey = entry.name?.trim()?.toLowerCase() ?? 'unknown';
 
     const previousBest = bestByPlayer.get(playerKey);

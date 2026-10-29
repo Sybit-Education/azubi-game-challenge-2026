@@ -1,3 +1,11 @@
+Titel: Keyboard Typing Fast (vier bearbeitete Tastenklicks)
+Quelle: https://pixabay.com/sound-effects/film-special-effects-keyboard-typing-fast-371229/
+Lizenz: Pixabay Content License
+
+Titel: Vintage sound, VHS rewind user interface (Magnet-SFX, bearbeitet)
+Quelle: https://pixabay.com/sound-effects/film-special-effects-vintage-sound-vhs-rewind-user-interface-528747/
+Lizenz: Pixabay Content License
+
 Titel: Winter Storm Ambience
 Quelle: https://pixabay.com/sound-effects/nature-winter-storm-ambience-283339/
 Lizenz: Pixabay Content License
@@ -33,3 +41,6 @@ Lizenz: CC0 1.0
 Titel: Car passing by.wav
 Quelle: https://freesound.org/people/961_Studios/sounds/244407/
 Lizenz: CC0 1.0
+
+Tietel: collect-magnet.wav
+Quelle: https://pixabay.com/de/sound-effects/film-spezialeffekte-vintage-sound-vhs-rewind-user-interface-528747/

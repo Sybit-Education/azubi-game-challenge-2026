@@ -13,7 +13,6 @@ function updatePlayerOne(scene) {
     currentRoadEdge = 'right';
   }
 
-  const laneChanged = currentLane !== scene.lastPlayerLane;
   const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
 
   if (scene.registry.get('accessibility enabled')) {
@@ -22,8 +21,6 @@ function updatePlayerOne(scene) {
       const pan = currentRoadEdge === 'left' ? -1 : 1;
       scene.sound.play('road-edge-hit', { volume: 0.25, pan });
       scene.sound.play('collision-hit', { volume: 0.15, pan });
-    } else if (laneChanged) {
-      scene.gameStatus.textContent = `Lane ${currentLane + 1}`;
     }
   }
 
@@ -67,10 +64,39 @@ function updateRoadObjects(scene, delta) {
 }
 
 function updateAudio(scene, delta) {
+  scene.laneAnnouncements.update();
   // Update after movement so sounds use the cars' current positions.
   const carsForAudio = scene.getCarsForAudio();
-  for (const sensor of scene.carSensors) sensor.update(delta, carsForAudio);
+  const obstaclesForAudio = scene.getObstaclesForAudio();
+  for (const sensor of scene.carSensors) sensor.update(delta, obstaclesForAudio);
   scene.carPassBy.update(carsForAudio);
+}
+
+function updateOverlapCheck(scene) {
+  if (!scene.secondCar || scene.secondCar.dead) return; // single player has no second car
+
+  let onTop = false;
+
+  scene.physics.overlap(
+    scene.car,
+    scene.secondCar,
+    () => {
+      // only runs when they overlap at least 50%
+      onTop = true;
+    },
+    (a, b) => {
+      const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
+      const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
+      const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
+      return overlapPercent >= 0.5;
+    },
+  );
+
+  // shield and extra life already blink the alpha, don't fight them
+  if (scene.ItemManager.schildAktivCar2 || scene.ItemManager.invulnerableCar2) return;
+
+  const targetAlpha = onTop ? 0.5 : 1;
+  scene.secondCar.alpha += (targetAlpha - scene.secondCar.alpha) * 0.1; // 10% closer each frame
 }
 
 function updateTrackAndHud(scene, delta) {
@@ -92,6 +118,7 @@ function updateTrackAndHud(scene, delta) {
   scene.track2.move(delta);
   scene.hud.update();
   scene.ItemManager.itemShop();
+  scene.coinAnnouncements.update();
   scene.coinText1.setText(String(scene.ItemManager.coinBudgetPlayer1));
 
   if (scene.isMultiplayer && scene.coinText2) {
@@ -100,12 +127,14 @@ function updateTrackAndHud(scene, delta) {
 }
 
 export function updateGameScene(scene, delta) {
+  if (!scene.registry.get('accessibility enabled')) scene.speech.silence();
   scene.InputManager.update();
   scene.elapsedTime += delta;
 
   updatePlayerOne(scene);
   updateRoadEdgeScrape(scene);
   updatePlayerTwo(scene);
+  updateOverlapCheck(scene);
   updateRoadObjects(scene, delta);
   updateAudio(scene, delta);
   updateTrackAndHud(scene, delta);

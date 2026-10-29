@@ -1,9 +1,16 @@
 import menuClickUrl from './menu/menuclick.mp3?url';
 import menuFocusUrl from './menu/menu-focus.ogg?url';
+import typingClick1Url from './menu/typing-click-1.wav?url';
+import typingClick2Url from './menu/typing-click-2.wav?url';
+import typingClick3Url from './menu/typing-click-3.wav?url';
+import typingClick4Url from './menu/typing-click-4.wav?url';
 import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
+import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
+import restoreSizeUrl from './gameplay/restore-size.mp3?url';
+import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
@@ -12,7 +19,7 @@ import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
 import carPassByHighwayUrl from './gameplay/car-pass-by-961-studios-spatial.wav?url';
-import plantGrowUrl from './gameplay/plant-grow.wav?url';
+import changeSizeUrl from './gameplay/change-size.wav?url';
 import collisionHitUrl from './gameplay/collision-hit.wav?url';
 import collisionImpactUrl from './gameplay/collision-impact.mp3?url';
 import collisionBangUrl from './gameplay/collision-bang.mp3?url';
@@ -28,6 +35,19 @@ const duckQuackSounds = [
   { key: 'duck-quack-2', url: duckQuack2Url },
   { key: 'duck-quack-3', url: duckQuack3Url },
 ];
+
+const typingSounds = [
+  { key: 'typing-click-1', url: typingClick1Url },
+  { key: 'typing-click-2', url: typingClick2Url },
+  { key: 'typing-click-3', url: typingClick3Url },
+  { key: 'typing-click-4', url: typingClick4Url },
+];
+
+export const TYPING_SOUND_KEYS = typingSounds.map((sound) => sound.key);
+
+export function preloadTypingSounds(scene) {
+  for (const sound of typingSounds) loadSound(scene, sound.key, sound.url);
+}
 
 export const DUCK_QUACK_SOUND_KEYS = duckQuackSounds.map((sound) => sound.key);
 
@@ -47,13 +67,16 @@ export function preloadCountdownSound(scene) {
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
   loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
+  loadSound(scene, 'coin-multiplier-picked-up', coinMultiplierPickedUpUrl);
+  loadSound(scene, 'restore-size', restoreSizeUrl);
+  loadSound(scene, 'collect-magnet', collectMagnetUrl);
   loadSound(scene, 'shield-collected', shieldCollectedUrl);
   loadSound(scene, 'shield-over', shieldOverUrl);
   loadSound(scene, 'car-sensor', sensorBeepUrl);
   loadSound(scene, 'car-pass-by', carPassByUrl);
   loadSound(scene, 'car-pass-by-johnnyfarmer', carPassByJohnnyUrl);
   loadSound(scene, 'car-pass-by-961-studios', carPassByHighwayUrl);
-  loadSound(scene, 'plant-grow', plantGrowUrl);
+  loadSound(scene, 'change-size', changeSizeUrl);
   loadSound(scene, 'collision-hit', collisionHitUrl);
   loadSound(scene, 'collision-impact', collisionImpactUrl);
   loadSound(scene, 'collision-bang', collisionBangUrl);
