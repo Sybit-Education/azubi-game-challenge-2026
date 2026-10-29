@@ -86,10 +86,13 @@ export default class LoadingScene extends Phaser.Scene {
     this.randomComment = this.add.image(centerX, centerY, randomComment).setOrigin(0.5);
 
     this.scale.on('resize', this.resize, this);
-
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
+    });
+
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
     });
 
     const barWidth = this.scale.width / 2.5;
