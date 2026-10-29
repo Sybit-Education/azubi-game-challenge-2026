@@ -470,8 +470,7 @@ export default class MenuScene extends Phaser.Scene {
       controls.left && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
     const downPressed =
       controls.down && this.hasReadVerticalInput && !this.previousVerticalInput.down;
-    const upPressed =
-      controls.up && this.hasReadVerticalInput && !this.previousVerticalInput.up;
+    const upPressed = controls.up && this.hasReadVerticalInput && !this.previousVerticalInput.up;
     this.previousHorizontalInput.left = controls.left;
     this.previousHorizontalInput.right = controls.right;
     this.previousVerticalInput.up = controls.up;

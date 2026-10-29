@@ -339,14 +339,9 @@ export default class NameInputScene extends Phaser.Scene {
         this.labelText.x + this.labelText.width + 8 * this.scaleFactor,
         this.labelText.y,
       );
-    const availableNameWidth =
-      this.nameFieldWidth -
-      this.labelText.width -
-      40 * this.scaleFactor;
+    const availableNameWidth = this.nameFieldWidth - this.labelText.width - 40 * this.scaleFactor;
     if (this.nameText.width > availableNameWidth) {
-      this.nameText.setFontSize(
-        this.nameFontSize * (availableNameWidth / this.nameText.width),
-      );
+      this.nameText.setFontSize(this.nameFontSize * (availableNameWidth / this.nameText.width));
     }
     this.updateSelection();
   }
@@ -369,19 +364,11 @@ export default class NameInputScene extends Phaser.Scene {
         cell.input.cursor = isDisabledEnter ? 'default' : 'pointer';
         cell
           .setFillStyle(
-            isDisabledEnter
-              ? COLORS.disabledFill
-              : isSelected
-                ? COLORS.selected
-                : COLORS.keyFill,
+            isDisabledEnter ? COLORS.disabledFill : isSelected ? COLORS.selected : COLORS.keyFill,
           )
           .setStrokeStyle(
             2 * this.scaleFactor,
-            isDisabledEnter
-              ? COLORS.disabledFill
-              : isSelected
-                ? COLORS.selected
-                : COLORS.border,
+            isDisabledEnter ? COLORS.disabledFill : isSelected ? COLORS.selected : COLORS.border,
           )
           .setScale(isSelected && !isDisabledEnter ? 1.08 : 1);
       });
