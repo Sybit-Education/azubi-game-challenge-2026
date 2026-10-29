@@ -7,7 +7,7 @@ import {
   playMenuClick,
   bindMenuFocusSounds,
 } from '../../audio/sounds.js';
-import { safePlay } from '../../../audio/safePlay.js';
+import { safePlay } from '../../audio/safePlay.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 
