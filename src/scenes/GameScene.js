@@ -450,12 +450,12 @@ export default class GameScene extends Phaser.Scene {
           min: 8000,
           max: 10000,
         },
-        scale: { random: [0.03, 0.08] },
+        scale: { min: 0.2, max: 0.4 },
         alpha: 0.4,
         gravityY: 10,
-        frequency: 10,
+        frequency: 20,
       })
-      .setDepth(100);
+      .setDepth(9999);
   }
 
   collectItem(car, item) {
@@ -526,7 +526,6 @@ export default class GameScene extends Phaser.Scene {
     const roadWidth = this.track1.displayWidth;
     const roadLeft = this.track1.x - roadWidth / 2;
     const laneWidth = roadWidth / laneCount;
-
     const positionOnRoad = car.x - roadLeft;
     const laneIndex = Math.floor(positionOnRoad / laneWidth);
 
