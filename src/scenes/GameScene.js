@@ -89,7 +89,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image(
       'carShieldChristmas',
-      'assets/images/entities/player-skins/player-states/sybit-kart-player-winter-P1-shield.png'
+      'assets/images/entities/player-skins/player-states/winter-car-player-1-shield.png'
     )
 
     this.load.image(

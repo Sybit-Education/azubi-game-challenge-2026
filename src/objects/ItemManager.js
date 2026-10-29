@@ -7,7 +7,7 @@ export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
 
-    this.coinBudgetPlayer1 = 0;
+    this.coinBudgetPlayer1 = 35;
     this.coinBudgetPlayer2 = 0;
 
     this.coinMultiplierOnP1 = false;
@@ -159,17 +159,22 @@ export default class ItemManager {
   }
 
   itemShieldCar1() {
-    console.log('schild');
+    console.log('shield!');
     this.scene.hud.showPowerupTimer('shield', 4500, 0.04, 1);
 
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
+      
+      const oldWidth = this.scene.car.displayWidth;
+      const oldHeight = this.scene.car.displayHeight;
      
       if (this.scene.registry.get("gameMode") === 'christmas') {
         this.scene.car.setTexture('carShieldChristmas')
+        this.scene.car.setDisplaySize(oldWidth, oldHeight);
       } else {
         this.scene.car.setTexture('carShield')
+        this.scene.car.setDisplaySize(oldWidth, oldHeight);
       }
 
       this.scene.time.delayedCall(4500, () => {
@@ -190,9 +195,11 @@ export default class ItemManager {
         this.scene.car.alpha = 1;
 
         if (this.scene.registry.get("gameMode") === 'christmas') {
-        this.scene.car.setTexture('winter-car')
+          this.scene.car.setTexture('winter-car');
+          this.scene.car.setDisplaySize(oldWidth, oldHeight);
         } else {
-        this.scene.secondCar.setTexture('car');
+          this.scene.car.setTexture('car');
+          this.scene.car.setDisplaySize(oldWidth, oldHeight);
         }
 
       });
@@ -204,14 +211,20 @@ export default class ItemManager {
     if (!this.schildAktivCar2) {
       this.schildAktivCar2 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
+      const car = this.scene.secondCar;
+      const oldWidth = car.displayWidth;
+      const oldHeight = car.displayHeight;
+
       if (this.scene.registry.get("gameMode") === 'christmas') {
-        this.scene.car.setTexture('carShieldChristmas2')
+        car.setTexture('carShieldChristmas2');
       } else {
-        this.scene.car.setTexture('carShield2');
+        car.setTexture('carShield2');
       }
+      car.setDisplaySize(oldWidth, oldHeight);
+
       this.scene.time.delayedCall(4500, () => {
         this.scene.tweens.add({
-          targets: this.scene.secondCar,
+          targets: car,
           alpha: 0.2,
           duration: 700,
           yoyo: true,
@@ -223,14 +236,15 @@ export default class ItemManager {
         this.schildAktivCar2 = false;
         this.scene.sound.play('shield-over', { volume: 0.3 });
 
-        this.scene.tweens.killTweensOf(this.scene.secondCar);
-        this.scene.secondCar.alpha = 1;
+        this.scene.tweens.killTweensOf(car);
+        car.alpha = 1;
         
         if (this.scene.registry.get("gameMode") === 'christmas') {
-        this.scene.car.setTexture('winter-car2')
+          car.setTexture('winter-car2');
         } else {
-        this.scene.secondCar.setTexture('car2');
+          car.setTexture('car2');
         }
+        car.setDisplaySize(oldWidth, oldHeight);
       });
     }
   }

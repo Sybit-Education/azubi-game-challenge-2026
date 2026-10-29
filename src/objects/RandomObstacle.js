@@ -4,6 +4,7 @@ import Obstacle from './Obstacle.js';
 
 export default class RandomObstacle extends Obstacle {
   constructor(scene, x, y, lane) {
+    const scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
     let randomInt;
     if (scene.registry.get('gameMode') === 'christmas') {
       randomInt = Phaser.Math.Between(5, 7);
@@ -22,13 +23,13 @@ export default class RandomObstacle extends Obstacle {
     this.isSleigh = randomInt === 7;
 
     if (this.isBarrier) {
-      this.setScale(0.37);
+      this.setScale(0.37 * scaleFactor);
     } else if (this.isDeer) {
-      this.setScale(1.4);
+      this.setScale(1.4 * scaleFactor);
     } else if (this.isGnome) {
-      this.setScale(2.2);
+      this.setScale(2.2 * scaleFactor);
     } else if (this.isSleigh) {
-      this.setScale(0.4);
+      this.setScale(0.4 * scaleFactor);
     } else {
       this.setScale(scene.scale.height / 10000);
     }
