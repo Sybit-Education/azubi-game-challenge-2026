@@ -385,6 +385,12 @@ export default class GameScene extends Phaser.Scene {
     this.sound.play('collect-coin', { volume: 0.3 });
     coin.destroy();
     car.increase_score(value);
+
+    if (car === this.car) {
+      this.ItemManager.coinBudgetPlus1(car.coinMultiplier);
+    } else if (car === this.secondCar) {
+      this.ItemManager.coinBudgetPlus2(car.coinMultiplier);
+    }
   }
 
   collectExtraLife(car, item) {
