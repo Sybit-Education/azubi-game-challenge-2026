@@ -10,6 +10,8 @@ export default class ItemAnnouncements {
 
   isBoxAhead(box) {
     const car = this.scene.car;
+    if (car.dead || !car.body) return false;
+
     return Boolean(
       box instanceof Item &&
       box.active &&
@@ -59,21 +61,22 @@ export default class ItemAnnouncements {
   update() {
     const scene = this.scene;
 
-    // Cancel even a running announcement once its target is no longer ahead.
-    if (this.currentBox && !this.isBoxAhead(this.currentBox)) {
-      scene.speech.cancel('item');
-      this.currentBox = null;
-    }
-
     if (
       !scene.registry.get('accessibility enabled') ||
       scene.car.dead ||
+      !scene.car.body ||
       scene.sound.locked ||
       !scene.speech.available
     ) {
       scene.speech.cancel('item');
       this.currentBox = null;
       return;
+    }
+
+    // Check the player first: destroying a car also removes its physics body.
+    if (this.currentBox && !this.isBoxAhead(this.currentBox)) {
+      scene.speech.cancel('item');
+      this.currentBox = null;
     }
 
     const next = this.getNextMysteryBox();

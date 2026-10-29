@@ -148,9 +148,8 @@ export default class GameScene extends Phaser.Scene {
     this.iceWarning = this.sound.add('ice-warning', { volume: 0.3 });
     this.warnedIce = new WeakMap();
 
-    // Each player car gets its own proximity sensor.
+    // Accessibility cues belong to player 1; player 2 uses the visual game.
     this.carSensors = [new CarSensor(this, this.car)];
-    if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
     this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
     createRoadObject(this, 'enemy-car');
     createRoadObject(this, 'coin');
