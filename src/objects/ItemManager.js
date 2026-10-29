@@ -687,7 +687,8 @@ export default class ItemManager {
 
     if (
       (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
-      this.coinBudgetPlayer1 >= this.itemHeartPrize
+      this.coinBudgetPlayer1 >= this.itemHeartPrize && 
+      !this.extraLifeActiveCar1
     ) {
       this.itemExtraLifeCar1();
       this.coinBudgetPlayer1 -= this.itemHeartPrize;
@@ -719,7 +720,8 @@ export default class ItemManager {
 
     if (
       (Phaser.Input.Keyboard.JustDown(this.numpad3) || controlsP2.button3) &&
-      this.coinBudgetPlayer2 >= this.itemHeartPrize
+      this.coinBudgetPlayer2 >= this.itemHeartPrize &&
+      !this.extraLifeActiveCar2
     ) {
       this.itemExtraLifeCar2();
       this.coinBudgetPlayer2 -= this.itemHeartPrize;
