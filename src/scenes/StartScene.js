@@ -103,22 +103,24 @@ export default class StartScene extends Phaser.Scene {
 
   // countdown
   countdown() {
-    this.showNumber('start-count-3');
+    // Play sound first, then update the visual. This reduces the chance that object creation
+    // and texture upload in the same tick delays the very first SFX (the "3").
     safePlay(this, 'countdown-3', { volume: 0.8 });
+    this.showNumber('start-count-3');
 
     this.time.delayedCall(900, () => {
-      this.showNumber('start-count-2');
       safePlay(this, 'countdown-2', { volume: 0.8 });
+      this.showNumber('start-count-2');
     });
 
     this.time.delayedCall(1800, () => {
-      this.showNumber('start-count-1');
       safePlay(this, 'countdown-1', { volume: 0.8 });
+      this.showNumber('start-count-1');
     });
 
     this.time.delayedCall(2700, () => {
-      this.showNumber('start-go');
       safePlay(this, 'countdown-go', { volume: 0.8 });
+      this.showNumber('start-go');
 
       this.car.startAnim();
       if (this.secondCar) {
