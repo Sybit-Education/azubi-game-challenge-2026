@@ -110,6 +110,10 @@ export default class LoadingScene extends Phaser.Scene {
         isMultiplayer: this.isMultiplayer,
       });
     });
+
+    // Note: We intentionally do not "prewarm" (play/stop) sounds here, because audio can be
+    // locked until the first user gesture. Preloading ensures assets are fetched; playback
+    // will be available after unlock via user interaction in the menu/game.
   }
 
   resize(gameSize) {

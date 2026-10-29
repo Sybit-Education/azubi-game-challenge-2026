@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import { loadLeaderboard } from '../utils/leaderboardSecurity.js';
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
 import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
 
@@ -22,11 +23,13 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   // BootScene loads the font before menus become available.
-  create(data) {
+  async create(data) {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
-    const leaderboard = parseLeaderboard().slice(0, 10);
+    const result = await loadLeaderboard();
+    const leaderboard = result.entries.slice(0, 10);
+    this.isLeaderboardTampered = result.isTampered;
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     // Background image
@@ -45,11 +48,17 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     // Titel Überschrifft "Leaderboard"
     this.title = this.add
-      .text(this.scale.width / 2, this.scale.height / 12, 'Leaderboard', {
-        fontFamily: 'Silkscreen',
-        fontSize: '90px',
-        color: '#ffffff',
-      })
+      .text(
+        this.scale.width / 2,
+        this.scale.height / 12,
+        this.isLeaderboardTampered ? 'Leaderboard\n⚠ manipuliert' : 'Leaderboard',
+        {
+          fontFamily: 'Silkscreen',
+          fontSize: this.isLeaderboardTampered ? '60px' : '90px',
+          color: '#ffffff',
+          align: 'center',
+        },
+      )
       .setOrigin(0.5)
       .setScale(1 * this.scaleFactor);
 
@@ -65,12 +74,13 @@ export default class LeaderboardScene extends Phaser.Scene {
     leaderboard.forEach((entry, index) => {
       const name = entry.name || 'Unbekannt';
       const distance = entry.distance;
+      const displayName = entry.isTampered ? `${name} ⚠ manipuliert` : name;
 
       const text = this.add
         .text(
           this.scale.width / 2,
           200 + index * (this.scale.height / 20),
-          `${index + 1}. ${name} - ${distance} km`,
+          `${index + 1}. ${displayName} - ${distance} km`,
           entryStyle,
         )
         .setOrigin(0.5)
@@ -85,18 +95,6 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setScale(0.4 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
-
-    this.resetButton = this.add
-      .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
-        fontFamily: 'Silkscreen',
-        fontSize: '40px',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5)
-      .setInteractive()
-      .setScale(1 * this.scaleFactor);
-
-    this.resetButton.on('pointerdown', () => this.resetLeaderboard());
 
     // On home button listener
     this.backButton.on('pointerdown', () => this.goHome());
@@ -128,19 +126,13 @@ export default class LeaderboardScene extends Phaser.Scene {
       width: this.scale.width,
       height: this.scale.height,
     });
-    bindLeaderboardControls(this, leaderboard, data?.focusTarget);
+    bindLeaderboardControls(this, leaderboard, data?.focusTarget, this.isLeaderboardTampered);
   }
 
   goHome() {
     playMenuClick(this);
     const menu = this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
     this.scene.start(menu, { focusTarget: 'leaderboard-btn' });
-  }
-
-  resetLeaderboard() {
-    playMenuClick(this);
-    localStorage.removeItem('leaderboard');
-    this.scene.restart({ focusTarget: 'leaderboard-title' });
   }
 
   update() {
@@ -159,10 +151,11 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.background.setPosition(width / 2, height / 2).setDisplaySize(width, height);
 
-    this.title.setPosition(width / 2, height / 12).setFontSize(90 * scaleFactor);
+    this.title
+      .setPosition(width / 2, height / 12)
+      .setFontSize((this.isLeaderboardTampered ? 60 : 90) * scaleFactor);
 
     this.backButton.setPosition(width / 2, height / 1.3).setScale(0.4 * scaleFactor);
-    this.resetButton.setPosition(width / 2, height / 1.15).setScale(scaleFactor);
 
     this.leaderboardEntries.forEach((entry, index) => {
       entry.setPosition(width / 2, 200 * scaleFactor + index * (height / 20));
@@ -173,41 +166,6 @@ export default class LeaderboardScene extends Phaser.Scene {
 }
 
 // Loads and parses leaderboard
-export function parseLeaderboard() {
-  let stored;
-  try {
-    stored = JSON.parse(localStorage.getItem('leaderboard') || '[]');
-  } catch {
-    return [];
-  }
-  if (!Array.isArray(stored)) return [];
-
-  const entries = stored.map((entry) => {
-    // String only entries are counted as scores
-    if (typeof entry === 'string' || typeof entry === 'number') {
-      return {
-        name: 'Unbekannt',
-        distance: Number(entry),
-      };
-    }
-
-    // Parses entity
-    return {
-      name: typeof entry?.name === 'string' ? entry.name.trim() || 'Unbekannt' : 'Unbekannt',
-      distance: entry?.distance == null ? NaN : Number(entry.distance),
-    };
-  });
-
-  const bestByPlayer = new Map();
-  entries.forEach((entry) => {
-    if (!Number.isFinite(entry.distance) || entry.distance < 0) return;
-    const playerKey = entry.name?.trim()?.toLowerCase() ?? 'unknown';
-
-    const previousBest = bestByPlayer.get(playerKey);
-    if (!previousBest || entry.distance > previousBest.distance) {
-      bestByPlayer.set(playerKey, entry);
-    }
-  });
-
-  return [...bestByPlayer.values()].sort((a, b) => b.distance - a.distance);
+export async function parseLeaderboard() {
+  return (await loadLeaderboard()).entries;
 }
