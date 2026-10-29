@@ -45,7 +45,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.activePlayer = 0;
     this.selectedRow = 0;
     this.selectedColumn = 0;
-    this.maxNameLength = 18;
+    this.maxNameLength = 20;
 
     this.scaleFactor = this.scale.height / 1080;
     this.createParallaxBackground();
@@ -67,11 +67,13 @@ export default class NameInputScene extends Phaser.Scene {
 
     const nameY = this.scale.height / 2.8;
     const labelX = this.scale.width / 2 - 334 * this.scaleFactor;
+    this.nameFieldWidth = 700 * this.scaleFactor;
+    this.nameFontSize = 32 * this.scaleFactor;
     this.add
       .rectangle(
         this.scale.width / 2,
         nameY,
-        700 * this.scaleFactor,
+        this.nameFieldWidth,
         56 * this.scaleFactor,
         0x180a24,
         0.8,
@@ -80,7 +82,7 @@ export default class NameInputScene extends Phaser.Scene {
       .setDepth(0);
     const nameStyle = {
       fontFamily: 'Silkscreen',
-      fontSize: `${32 * this.scaleFactor}px`,
+      fontSize: `${this.nameFontSize}px`,
       color: COLORS.mainText,
     };
 
@@ -332,10 +334,20 @@ export default class NameInputScene extends Phaser.Scene {
     this.labelText.setText(label);
     this.nameText
       .setText(currentName)
+      .setFontSize(this.nameFontSize)
       .setPosition(
         this.labelText.x + this.labelText.width + 8 * this.scaleFactor,
         this.labelText.y,
       );
+    const availableNameWidth =
+      this.nameFieldWidth -
+      this.labelText.width -
+      40 * this.scaleFactor;
+    if (this.nameText.width > availableNameWidth) {
+      this.nameText.setFontSize(
+        this.nameFontSize * (availableNameWidth / this.nameText.width),
+      );
+    }
     this.updateSelection();
   }
 
