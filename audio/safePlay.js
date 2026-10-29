@@ -1,27 +1,32 @@
 /**
  * Small helper to make SFX playback more robust:
- * - no-op if sound is locked (before first user gesture)
+ * - no-op before the first user gesture
+ * - schedules sounds even while a suspended AudioContext is resuming
  * - no-op if the audio key is not in cache
  * - optional cooldown to prevent spamming the same SFX too frequently
  *
- * Usage:
- *   safePlay(this, 'menu-click', { volume: 0.3, cooldownMs: 80 })
+ * A true result only means the request was forwarded to Phaser, not that playback
+ * succeeded or was audible. Resume failures are intentionally ignored.
+ *
+ * @param {import('phaser').Scene | null | undefined} scene - Scene providing the sound manager and audio cache.
+ * @param {string} key - Key of a preloaded audio asset.
+ * @param {import('phaser').Types.Sound.SoundConfig & { cooldownMs?: number }} [config={}] - Playback settings and optional per-scene cooldown.
+ * @returns {boolean} Whether the request passed the guards and was forwarded to Phaser.
+ * @example
+ * safePlay(this, 'menu-click', { volume: 0.3, cooldownMs: 80 });
  */
 export function safePlay(scene, key, config = {}) {
   const { cooldownMs = 0, ...playConfig } = config;
 
   if (!scene || !scene.sound) return false;
 
-  // Try to unlock/resume audio on first playback attempt.
-  // Some browsers report `locked=false` but the AudioContext is still suspended.
+  const userActivation = globalThis.navigator?.userActivation;
+  if (userActivation ? !userActivation.hasBeenActive : scene.sound.locked) return false;
+
   const ctx = scene.sound.context;
-  if (ctx && ctx.state === 'suspended' && typeof ctx.resume === 'function') {
-    // Fire-and-forget; resume may require a user gesture.
+  if (ctx && ctx.state !== 'running' && typeof ctx.resume === 'function') {
     ctx.resume().catch(() => {});
   }
-
-  if (scene.sound.locked) return false;
-  if (ctx && ctx.state === 'suspended') return false;
 
   if (!scene.cache?.audio?.exists?.(key)) return false;
 

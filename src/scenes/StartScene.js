@@ -17,16 +17,28 @@ import Border from '../objects/Wall.js';
 import StartingBanner from '../objects/StartingBanner.js';
 import StartingLine from '../objects/StartingLine.js';
 
+/** Displays the starting grid and coordinates the countdown before gameplay. */
 export default class StartScene extends Phaser.Scene {
   constructor() {
     super('StartScene');
   }
 
+  /**
+   * Receives the game-mode flags for this scene run.
+   *
+   * @param {{ isMultiplayer?: boolean, isChristmas?: boolean }} [data] - Flags forwarded to gameplay.
+   * @returns {void}
+   */
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
     this.isChristmas = data?.isChristmas ?? false;
   }
 
+  /**
+   * Queues intro sounds, vehicles, scenery and countdown images for loading.
+   *
+   * @returns {void}
+   */
   preload() {
     preloadMenuSounds(this);
     preloadCountdownSounds(this);
@@ -50,11 +62,17 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('start-go', 'assets/images/race-track-assets/go-label.png');
   }
 
+  /**
+   * Builds the starting grid, binds skip controls and requests the countdown.
+   *
+   * @returns {void}
+   */
   create() {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
     this.leaving = false;
+    this.countdownStarted = false;
     this.secondCar = null;
     this.number = null;
 
@@ -98,15 +116,104 @@ export default class StartScene extends Phaser.Scene {
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
     );
     this.spawnStartingBanner();
-    this.time.delayedCall(1500, () => this.countdown());
+    this.countdown();
   }
 
-  // countdown
+  /**
+   * Requests the countdown once, after checking cached audio and audio readiness.
+   * Pending unlock and state-change listeners are removed on start or shutdown.
+   *
+   * @returns {void}
+   */
   countdown() {
-    // Ensure the first "3" beep is scheduled on the next tick so the audio buffer is definitely
-    // available and the AudioContext has had a chance to resume/unlock.
+    if (this.leaving || this.countdownStarted) return;
+    this.countdownStarted = true;
+
+    const keys = ['countdown-3', 'countdown-2', 'countdown-1', 'countdown-go'];
+    const missingKeys = keys.filter((key) => !this.cache.audio.exists(key));
+    if (missingKeys.length > 0) {
+      console.warn('Countdown audio missing:', missingKeys);
+      return;
+    }
+
+    const context = this.sound.context;
+    let cancelled = false;
+    const cleanup = () => {
+      cancelled = true;
+      this.sound.off('unlocked', begin);
+      context?.removeEventListener('statechange', begin);
+      this.events.off('shutdown', cleanup);
+    };
+    const begin = () => {
+      if (cancelled || this.leaving || this.sound.locked) return;
+      if (context && context.state !== 'running') return;
+      cleanup();
+      this.prepareCountdownAudio();
+    };
+
+    this.events.once('shutdown', cleanup);
+    this.sound.on('unlocked', begin);
+    context?.addEventListener('statechange', begin);
+    if (context?.state === 'suspended') {
+      context
+        .resume()
+        .then(begin)
+        .catch(() => {});
+    }
+    begin();
+  }
+
+  /**
+   * Renders 1.5 seconds of digital silence before starting the countdown.
+   * Without Web Audio, a scene timer preserves the intro delay instead. The
+   * temporary source is stopped on shutdown; output keep-alive is separate.
+   *
+   * @returns {void}
+   */
+  prepareCountdownAudio() {
+    const context = this.sound.context;
+    if (!context) {
+      this.time.delayedCall(1500, () => this.playCountdown());
+      return;
+    }
+
+    const source = context.createBufferSource();
+    source.buffer = context.createBuffer(
+      1,
+      Math.ceil(context.sampleRate * 1.5),
+      context.sampleRate,
+    );
+    source.connect(this.sound.destination);
+
+    const cleanup = () => {
+      source.onended = null;
+      source.disconnect();
+      this.events.off('shutdown', cancel);
+    };
+    const cancel = () => {
+      cleanup();
+      source.stop();
+    };
+    source.onended = () => {
+      cleanup();
+      if (!this.leaving) this.playCountdown();
+    };
+    this.events.once('shutdown', cancel);
+    source.start();
+  }
+
+  /**
+   * Starts the first sound and image, then schedules the remaining countdown.
+   * Cars accelerate at Go. Scheduling aborts if Phaser rejects the first sound.
+   *
+   * @returns {void}
+   */
+  playCountdown() {
+    if (!this.sound.play('countdown-3', { volume: 0.8 })) {
+      console.warn('Countdown audio could not start.');
+      return;
+    }
     this.showNumber('start-count-3');
-    this.time.delayedCall(0, () => safePlay(this, 'countdown-3', { volume: 0.8 }));
 
     this.time.delayedCall(900, () => {
       safePlay(this, 'countdown-2', { volume: 0.8 });
@@ -132,12 +239,23 @@ export default class StartScene extends Phaser.Scene {
     bindMenuFocusSounds(this, ['skip-intro']);
   }
 
+  /**
+   * Fits the chosen background texture behind the starting grid.
+   *
+   * @param {string} img - Key of the loaded background texture.
+   * @returns {void}
+   */
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
     background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
   }
 
+  /**
+   * Creates one or two cars according to the multiplayer flag.
+   *
+   * @returns {void}
+   */
   createPlayer() {
     if (this.isMultiplayer) {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2);
@@ -154,11 +272,21 @@ export default class StartScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Creates the two vertically stacked road segments.
+   *
+   * @returns {void}
+   */
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
   }
 
+  /**
+   * Scales and positions the starting banner and line relative to the road.
+   *
+   * @returns {void}
+   */
   spawnStartingBanner() {
     const s = this.scale.height / 900; // 900 = höhe, auf der die werte gepasst haben
     const roadWidth = this.track1.displayWidth;
@@ -179,6 +307,11 @@ export default class StartScene extends Phaser.Scene {
     checkerboard.setDepth(5);
   }
 
+  /**
+   * Places matching border pairs alongside both road segments.
+   *
+   * @returns {void}
+   */
   createWalls() {
     const screenCenterX = this.scale.width / 2;
     const roadHalfWidth = this.track1.displayWidth / 2;
@@ -200,6 +333,12 @@ export default class StartScene extends Phaser.Scene {
     this.walls = [wall1, wall2, wall3, wall4];
   }
 
+  /**
+   * Replaces the previous countdown image with the selected texture.
+   *
+   * @param {string} key - Key of a loaded countdown image.
+   * @returns {void}
+   */
   showNumber(key) {
     if (this.number) {
       this.number.destroy();
@@ -209,6 +348,11 @@ export default class StartScene extends Phaser.Scene {
     this.number.setDepth(22);
   }
 
+  /**
+   * Stops countdown sounds and requests gameplay once, preserving mode flags.
+   *
+   * @returns {void}
+   */
   goToGame() {
     if (this.leaving) {
       return;
@@ -225,6 +369,11 @@ export default class StartScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Checks for a completed start animation or a player request to skip the intro.
+   *
+   * @returns {void}
+   */
   update() {
     if (this.car.y <= -300) {
       this.goToGame();
