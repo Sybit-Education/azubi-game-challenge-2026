@@ -190,20 +190,20 @@ export default class ItemManager {
   itemExtraLifeCar1() {
     console.log('extralife collected');
     this.scene.hud.displayExtraLife(1);
+    this.scene.sound.play('collect-extra-life', { volume: 0.3 });
 
     if (!this.extraLifeActiveCar1) {
       this.extraLifeActiveCar1 = true;
-      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
   itemExtraLifeCar2() {
     console.log('extralife collected');
     this.scene.hud.displayExtraLife(2);
+    this.scene.sound.play('collect-extra-life', { volume: 0.3 });
 
     if (!this.extraLifeActiveCar2) {
       this.extraLifeActiveCar2 = true;
-      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
