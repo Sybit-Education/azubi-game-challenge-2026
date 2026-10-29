@@ -168,20 +168,17 @@ export default class GameScene extends Phaser.Scene {
 
     const backgroundkey =
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background';
-      this.backgroundNormal =
-      this.setBackground(backgroundkey);
-      if (backgroundkey === 'background') {
-        this.backgroundFlash = this.add.image(0, 0, 'background-flash').setOrigin(0, 0);
-        this.backgroundFlash.setDisplaySize(this.scale.width, this.scale.height);
-        this.backgroundFlash.setDepth(-9);
-        this.backgroundFlash.setVisible(false);
-        this.flickerEffect = new Flickereffect(this, this.backgroundNormal, this.backgroundFlash);
-        this.flickerEffect.start();
-      }
+    this.backgroundNormal = this.setBackground(backgroundkey);
+    if (backgroundkey === 'background') {
+      this.backgroundFlash = this.add.image(0, 0, 'background-flash').setOrigin(0, 0);
+      this.backgroundFlash.setDisplaySize(this.scale.width, this.scale.height);
+      this.backgroundFlash.setDepth(-9);
+      this.backgroundFlash.setVisible(false);
+      this.flickerEffect = new Flickereffect(this, this.backgroundNormal, this.backgroundFlash);
+      this.flickerEffect.start();
+    }
 
-
-
-     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
     this.hotbar = this.add
       .image(
@@ -273,7 +270,7 @@ export default class GameScene extends Phaser.Scene {
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
-    background.setDepth(-10); 
+    background.setDepth(-10);
     return background;
     // Set depth to -10 to ensure it is behind other objects
   }

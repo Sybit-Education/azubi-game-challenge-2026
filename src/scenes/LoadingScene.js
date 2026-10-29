@@ -74,9 +74,9 @@ export default class LoadingScene extends Phaser.Scene {
     this.randomComment = this.add.image(centerX, centerY, randomComment).setOrigin(0.5);
 
     this.scale.on('resize', this.resize, this);
-   this.resize({
-   width: this.scale.width,
-   height: this.scale.height,
+    this.resize({
+      width: this.scale.width,
+      height: this.scale.height,
     });
 
     this.events.once('shutdown', () => {
@@ -84,20 +84,16 @@ export default class LoadingScene extends Phaser.Scene {
     });
 
     const barWidth = this.scale.width / 2.5;
-  
-
-
-  
 
     this.tweens.add({
-    targets: this.fillBar,
-    width: barWidth,
-    duration: 3000,
-    onComplete: () => {
+      targets: this.fillBar,
+      width: barWidth,
+      duration: 3000,
+      onComplete: () => {
         console.log('Loading Tween fertig');
 
         this.scene.start('StartScene', {
-            isMultiplayer: this.isMultiplayer,
+          isMultiplayer: this.isMultiplayer,
         });
       },
     });
