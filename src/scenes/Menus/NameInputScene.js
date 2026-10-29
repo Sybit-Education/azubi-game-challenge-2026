@@ -104,7 +104,6 @@ export default class NameInputScene extends Phaser.Scene {
       .setOrigin(0.5)
       .on('pointerdown', this.backToHomeFunction, this);
 
-    this.input.keyboard.on('keydown-ESC', this.backToHomeFunction, this);
   }
 
   playMenuClick(scene) {
@@ -419,7 +418,7 @@ export default class NameInputScene extends Phaser.Scene {
 
     const controls = this.InputManager.getControlsP1;
     if (controls.button4) {
-      this.scene.start('MenuScene');
+      this.backToHomeFunction();
       return;
     }
     if (controls.button1) {

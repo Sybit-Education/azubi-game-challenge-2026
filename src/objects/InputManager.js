@@ -20,6 +20,7 @@ export default class InputManager {
       leftP2: Phaser.Input.Keyboard.KeyCodes.LEFT,
       rightP2: Phaser.Input.Keyboard.KeyCodes.RIGHT,
       select: Phaser.Input.Keyboard.KeyCodes.ENTER,
+      escape: Phaser.Input.Keyboard.KeyCodes.ESC,
     });
   }
 
@@ -55,7 +56,7 @@ export default class InputManager {
     const button1P1 = padP1?.buttons?.[0]?.pressed ?? false;
     const button2P1 = padP1?.buttons?.[1]?.pressed ?? false;
     const button3P1 = padP1?.buttons?.[2]?.pressed ?? false;
-    const button4P1 = padP1?.buttons?.[3]?.pressed ?? false;
+    const button4P1 = (padP1?.buttons?.[3]?.pressed ?? false) || this.keys.escape.isDown;
     const button1P2 = padP2?.buttons?.[0]?.pressed ?? false;
     const button2P2 = padP2?.buttons?.[1]?.pressed ?? false;
     const button3P2 = padP2?.buttons?.[2]?.pressed ?? false;
