@@ -687,7 +687,7 @@ export default class ItemManager {
 
     if (
       (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
-      this.coinBudgetPlayer1 >= this.itemHeartPrize && 
+      this.coinBudgetPlayer1 >= this.itemHeartPrize &&
       !this.extraLifeActiveCar1
     ) {
       this.itemExtraLifeCar1();
