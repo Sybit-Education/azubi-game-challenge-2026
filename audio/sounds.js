@@ -19,7 +19,7 @@ import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
 import carPassByHighwayUrl from './gameplay/car-pass-by-961-studios-spatial.wav?url';
-import plantGrowUrl from './gameplay/plant-grow.wav?url';
+import changeSizeUrl from './gameplay/change-size.wav?url';
 import collisionHitUrl from './gameplay/collision-hit.wav?url';
 import collisionImpactUrl from './gameplay/collision-impact.mp3?url';
 import collisionBangUrl from './gameplay/collision-bang.mp3?url';
@@ -76,7 +76,7 @@ export function preloadGameplaySounds(scene) {
   loadSound(scene, 'car-pass-by', carPassByUrl);
   loadSound(scene, 'car-pass-by-johnnyfarmer', carPassByJohnnyUrl);
   loadSound(scene, 'car-pass-by-961-studios', carPassByHighwayUrl);
-  loadSound(scene, 'plant-grow', plantGrowUrl);
+  loadSound(scene, 'change-size', changeSizeUrl);
   loadSound(scene, 'collision-hit', collisionHitUrl);
   loadSound(scene, 'collision-impact', collisionImpactUrl);
   loadSound(scene, 'collision-bang', collisionBangUrl);
