@@ -16,6 +16,7 @@ import RandomObstacle from '../objects/RandomObstacle.js';
 import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
 import GameSpeech from '../../audio/GameSpeech.js';
+import Flickereffect from '../scenes/FlickerEffect.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -68,6 +69,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
+    this.load.image('background-flash', 'assets/images/map-skins/background-sybit-city-off.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
 
     this.load.image(
@@ -162,10 +164,23 @@ export default class GameScene extends Phaser.Scene {
     createRoadObject(this, 'extraLife');
     createRoadObject(this, 'random-obstacle');
     this.createHud();
-    this.setBackground(
-      this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
-    );
-    this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
+
+    const backgroundkey =
+      this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background';
+      this.backgroundNormal =
+      this.setBackground(backgroundkey);
+      if (backgroundkey === 'background') {
+        this.backgroundFlash = this.add.image(0, 0, 'background-flash').setOrigin(0, 0);
+        this.backgroundFlash.setDisplaySize(this.scale.width, this.scale.height);
+        this.backgroundFlash.setDepth(-9);
+        this.backgroundFlash.setVisible(false);
+        this.flickerEffect = new Flickereffect(this, this.backgroundNormal, this.backgroundFlash);
+        this.flickerEffect.start();
+      }
+
+
+
+     this.events.on(Phaser.Scenes.Events.POST_UPDATE, this.separateOverlappingCars, this);
 
     // Hotbar
     this.hotbar = this.add
@@ -262,7 +277,9 @@ export default class GameScene extends Phaser.Scene {
   setBackground(img) {
     const background = this.add.image(0, 0, img).setOrigin(0, 0);
     background.setDisplaySize(this.scale.width, this.scale.height);
-    background.setDepth(-10); // Set depth to -10 to ensure it is behind other objects
+    background.setDepth(-10); 
+    return background;
+    // Set depth to -10 to ensure it is behind other objects
   }
 
   //Separate overlapping player cars after the physics update.
