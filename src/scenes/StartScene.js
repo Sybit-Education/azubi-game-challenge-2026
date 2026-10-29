@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 import {
   preloadMenuSounds,
-  preloadCountdownSound,
+  preloadCountdownSounds,
   playMenuClick,
   bindMenuFocusSounds,
 } from '../../audio/sounds.js';
@@ -28,7 +28,7 @@ export default class StartScene extends Phaser.Scene {
 
   preload() {
     preloadMenuSounds(this);
-    preloadCountdownSound(this);
+    preloadCountdownSounds(this);
     this.load.image(
       'car',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
@@ -100,19 +100,31 @@ export default class StartScene extends Phaser.Scene {
     this.time.delayedCall(1500, () => this.countdown());
   }
 
-  //countdown
+  // countdown
   countdown() {
     this.showNumber('start-count-3');
-    this.sound.play('countdown');
-    this.time.delayedCall(900, () => this.showNumber('start-count-2'));
-    this.time.delayedCall(1800, () => this.showNumber('start-count-1'));
+    this.sound.play('countdown-3', { volume: 0.8 });
+
+    this.time.delayedCall(900, () => {
+      this.showNumber('start-count-2');
+      this.sound.play('countdown-2', { volume: 0.8 });
+    });
+
+    this.time.delayedCall(1800, () => {
+      this.showNumber('start-count-1');
+      this.sound.play('countdown-1', { volume: 0.8 });
+    });
+
     this.time.delayedCall(2700, () => {
       this.showNumber('start-go');
+      this.sound.play('countdown-go', { volume: 0.8 });
+
       this.car.startAnim();
       if (this.secondCar) {
         this.secondCar.startAnim();
       }
     });
+
     this.time.delayedCall(4000, () => this.number.destroy());
     bindMenuFocusSounds(this, ['skip-intro']);
   }
@@ -200,6 +212,10 @@ export default class StartScene extends Phaser.Scene {
     }
     this.leaving = true;
     this.sound.stopByKey('countdown');
+    this.sound.stopByKey('countdown-3');
+    this.sound.stopByKey('countdown-2');
+    this.sound.stopByKey('countdown-1');
+    this.sound.stopByKey('countdown-go');
     this.scene.start('GameScene', {
       isMultiplayer: this.isMultiplayer,
       isChristmas: this.isChristmas,

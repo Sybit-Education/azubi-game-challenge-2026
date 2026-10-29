@@ -14,7 +14,10 @@ import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
-import countdownUrl from './gameplay/countdown.mp3?url';
+import countdown3Url from './gameplay/splits/countdown-3.wav?url';
+import countdown2Url from './gameplay/splits/countdown-2.wav?url';
+import countdown1Url from './gameplay/splits/countdown-1.wav?url';
+import countdownGoUrl from './gameplay/splits/countdown-go.wav?url';
 import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
@@ -60,8 +63,11 @@ function loadSound(scene, key, fileUrl) {
   scene.load.audio(key, url);
 }
 
-export function preloadCountdownSound(scene) {
-  loadSound(scene, 'countdown', countdownUrl);
+export function preloadCountdownSounds(scene) {
+  loadSound(scene, 'countdown-3', countdown3Url);
+  loadSound(scene, 'countdown-2', countdown2Url);
+  loadSound(scene, 'countdown-1', countdown1Url);
+  loadSound(scene, 'countdown-go', countdownGoUrl);
 }
 
 export function preloadGameplaySounds(scene) {

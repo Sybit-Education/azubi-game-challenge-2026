@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import {
+  preloadCountdownSounds,
+  preloadGameplaySounds,
+  preloadMenuSounds,
+  preloadTypingSounds,
+} from '../../audio/sounds.js';
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +17,12 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    // Preload audio early to avoid first-play decode stutter and timing jitter later.
+    preloadMenuSounds(this);
+    preloadGameplaySounds(this);
+    preloadTypingSounds(this);
+    preloadCountdownSounds(this);
+
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
