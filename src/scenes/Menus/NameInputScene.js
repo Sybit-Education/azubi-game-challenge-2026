@@ -376,17 +376,11 @@ export default class NameInputScene extends Phaser.Scene {
       return;
     }
 
-    const gamepad = this.input.gamepad;
-    const pad = gamepad?.enabled ? gamepad.getPad(0) : null;
-    const connectedPad = pad?.pad?.connected ? pad : null;
-    const axisX = connectedPad?.axes?.[0]?.getValue() ?? 0;
-    const axisY = connectedPad?.axes?.[1]?.getValue() ?? 0;
-    const deadzone = 0.2;
     const directions = {
-      left: axisX < -deadzone,
-      right: axisX > deadzone,
-      up: axisY < -deadzone,
-      down: axisY > deadzone,
+      left: controls.left,
+      right: controls.right,
+      up: controls.up,
+      down: controls.down,
     };
     const justPressed = {
       left: directions.left && !this.previousNavigation.left,
