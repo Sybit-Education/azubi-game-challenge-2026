@@ -103,7 +103,6 @@ export default class NameInputScene extends Phaser.Scene {
       .setScale(0.1 * this.scaleFactor)
       .setOrigin(0.5)
       .on('pointerdown', this.backToHomeFunction, this);
-
   }
 
   playMenuClick(scene) {
