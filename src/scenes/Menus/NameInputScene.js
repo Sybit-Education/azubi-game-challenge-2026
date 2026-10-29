@@ -415,10 +415,10 @@ export default class NameInputScene extends Phaser.Scene {
     }
 
     const directions = {
-      left: controls.left,
-      right: controls.right,
-      up: controls.up,
-      down: controls.down,
+      left: controls.left && !this.InputManager.keys.leftP1.isDown,
+      right: controls.right && !this.InputManager.keys.rightP1.isDown,
+      up: controls.up && !this.InputManager.keys.upP1.isDown,
+      down: controls.down && !this.InputManager.keys.downP1.isDown,
     };
     const justPressed = {
       left: directions.left && !this.previousNavigation.left,
