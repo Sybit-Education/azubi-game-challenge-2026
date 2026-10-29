@@ -349,6 +349,8 @@ export default class PopUpScene extends Phaser.Scene {
   _switchToMode(mode) {
     playMenuClick(this);
     this._applyGameMode(mode);
+    this.sound.play('christmas-whoosh', { volume: 0.2 });
+    this.sound.play('winter-wind', { volume: 0.1 });
 
     // Swap the background scene behind PopUpScene
     const oldParent = this._isChristmasMode ? 'ChristmasScene' : 'MenuScene';
