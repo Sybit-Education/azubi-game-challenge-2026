@@ -14,10 +14,11 @@ Die aktuelle Version (vom `main`-Branch) ist live spielbar: [https://sybit-educa
 4. [Spielmodi](#spielmodi)
 5. [Leaderboard](#leaderboard)
 6. [Barrierefreiheit](#barrierefreiheit)
-7. [Entwicklung](#entwicklung)
-8. [Projektstruktur](#projektstruktur)
-9. [Team](#team)
-10. [Challenge-Vorlage](#challenge-vorlage)
+7. [Betrieb am Stand (Laptop + TV)](#betrieb-am-stand)
+8. [Entwicklung](#entwicklung)
+9. [Projektstruktur](#projektstruktur)
+10. [Team](#team)
+11. [Challenge-Vorlage](#challenge-vorlage)
 
 <a id="spielprinzip"></a>
 
@@ -96,6 +97,63 @@ Das Spiel soll von allen gespielt werden können:
 - **Gamepad:** Hauptmenü, Einstellungen, Countdown und Game Over lassen sich mit dem Gamepad bedienen. Die Namenseingabe und das Leaderboard brauchen bisher Tastatur oder Maus.
 - **Noch offen:** Der Schalter „Accessibility Mode“ in den Einstellungen ist bisher nur vorbereitet und ändert noch nichts am Spiel.
 
+<a id="betrieb-am-stand"></a>
+
+## Betrieb am Stand (Laptop + TV)
+
+**Empfehlung:** Das Spiel auf dem Laptop lokal aus einem fertigen Build starten, den TV per HDMI anschließen und einen aktuellen Chrome- oder Edge-Browser verwenden. Am Stand nicht den Entwicklungsserver (`npm run dev`) verwenden. Der TV ist nur der Bildschirm; ein eigener Rechner oder Browser auf dem TV ist nicht nötig.
+
+### Einmalig vorbereiten
+
+1. Das Projekt wie unter [Entwicklung](#entwicklung) herunterladen und Node.js installieren. Die für den Stand vorgesehene Version auschecken.
+2. Im Projektordner die Abhängigkeiten installieren und das Spiel bauen:
+
+```bash
+npm install
+npm run build
+```
+
+Den Build vor der Veranstaltung mit Internetzugang vorbereiten; bei fehlenden Bildern oder Sounds auch `git lfs pull` ausführen und erneut bauen. Nach Code- oder Asset-Änderungen ist immer ein neuer Build nötig.
+
+### Bei jedem Start
+
+Im Projektordner ausführen und das Terminal während der Veranstaltung geöffnet lassen:
+
+```bash
+npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
+```
+
+Anschließend auf dem Laptop diese Adresse öffnen:
+
+**http://127.0.0.1:4173/azubi-game-challenge-2026/**
+
+`--host 127.0.0.1` beschränkt den Zugriff auf den Laptop. `--strictPort` verhindert einen unbemerkten Portwechsel: Ist Port `4173` belegt, zuerst den bisherigen Server prüfen und gegebenenfalls beenden, statt einen anderen Port zu verwenden. Mit `Strg+C` im Terminal wird der Server beendet.
+
+> `vite preview` dient hier nur zur lokalen Wiedergabe des Builds auf dem Stand-Laptop. Es ist kein für öffentlichen Produktionsbetrieb vorgesehener Webserver. Für eine öffentliche Bereitstellung einen statischen Webserver oder das bestehende GitHub-Pages-Deployment verwenden. Die HTML-Datei im Build nicht direkt per Doppelklick öffnen.
+
+### Laptop und TV einrichten
+
+- Laptop ans Netzteil anschließen. Für die Veranstaltungsdauer automatischen Ruhezustand, Bildschirmschoner und Bildschirmabschaltung deaktivieren; den Laptop geöffnet lassen.
+- TV per HDMI verbinden und den passenden HDMI-Eingang wählen. Wenn verfügbar, den **Spielemodus** des TVs aktivieren, um Eingabeverzögerungen zu reduzieren.
+- Zunächst **Bildschirme duplizieren** wählen, damit die Betreuung dasselbe Bild sieht. Bei falschem Seitenverhältnis alternativ nur den TV verwenden. Eine gemeinsam unterstützte Auflösung, zum Beispiel `1920 × 1080` bei `60 Hz`, einstellen.
+- Am TV eine Darstellung ohne Overscan wählen (je nach Hersteller „Original“, „Just Scan“ oder „Bildschirmanpassung“), damit Menüs und Spielränder nicht abgeschnitten werden.
+- Browser-Zoom mit `Strg+0` auf `100 %` setzen und mit `F11` Vollbild einschalten. Einmal ins Spiel klicken, damit Eingaben und Audio funktionieren.
+- HDMI/TV als Audioausgabe wählen, Lautstärke testen und Benachrichtigungen ausschalten. Gamepads vor dem Start verbinden; Namenseingabe und Leaderboard auch mit Tastatur/Maus testen.
+
+### Leaderboard und Schutz vor Manipulation
+
+Immer dasselbe **Browserprofil und dieselbe Adresse einschließlich Port** verwenden. `localhost`, `127.0.0.1`, andere Ports und die GitHub-Pages-Adresse haben getrennte Browser-Speicher. Ein dort scheinbar leeres Leaderboard bedeutet nicht, dass die bisherigen Ergebnisse gelöscht wurden.
+
+Kein privates/InPrivate-Fenster, Gastprofil oder automatisch gelöschtes Kiosk-Profil verwenden, wenn Ergebnisse über einen Browser-Neustart erhalten bleiben sollen. Browserdaten nicht löschen; der lokale Build sichert das Leaderboard nicht mit. Vor der Veranstaltung mit einem Testeintrag prüfen, dass er nach Schließen und erneutem Öffnen des Browsers erhalten bleibt.
+
+**Vollbild ist keine Zugriffssperre.** Für einen unbeaufsichtigten Stand einen administrativ eingerichteten Kiosk-Browser verwenden, DevTools über Browserrichtlinien sperren und den Zugriff auf Betriebssystem und freie Tastenkombinationen einschränken. In verwaltetem Chrome/Edge lässt sich dafür unter anderem `DeveloperToolsAvailability = 2` setzen; die tatsächlich angewendeten Richtlinien vor Ort prüfen. Kiosk-Modus allein sperrt DevTools nicht zuverlässig und kann je nach Konfiguration Browserdaten beim Beenden löschen.
+
+Die clientseitigen Signaturen machen bestimmte Manipulationen sichtbar, verhindern aber weder das Löschen des Speichers noch alle Cheats. Bei frei zugänglicher Tastatur den Stand betreuen; für verbindliche Wettbewerbsergebnisse ist eine serverseitige Prüfung und Speicherung nötig.
+
+### Kurzer Check vor Einlass
+
+Eine Runde allein und zu zweit spielen: Bild vollständig sichtbar, Lenkung und Gamepads funktionieren, Ton kommt vom TV, Namen lassen sich eingeben und Ergebnisse erscheinen im Leaderboard. Auch Browser-Neustart und den Betrieb ohne Internet einmal vorab testen. Während der Veranstaltung keine ungeprüften Updates einspielen.
+
 <a id="entwicklung"></a>
 
 ## Entwicklung
@@ -109,7 +167,7 @@ npm install
 npm run dev
 ```
 
-Der Entwicklungsserver läuft auf `http://localhost:5173`.
+Der Entwicklungsserver läuft standardmäßig auf `http://localhost:3000/azubi-game-challenge-2026/`. Ist der Port belegt, zeigt Vite im Terminal den tatsächlich verwendeten Port an.
 
 ### Entwicklungsumgebung einrichten
 
@@ -120,7 +178,7 @@ Es gibt zwei Möglichkeiten. GitHub Codespaces läuft vollständig im Browser un
 1. Öffnet die Repository-Seite auf GitHub und klickt auf **Code**.
 2. Wählt den Tab **Codespaces** und klickt auf **Create codespace on main**.
 3. Wartet, bis der Browser-Editor geöffnet ist. Die Abhängigkeiten werden automatisch mit `npm ci` installiert (Node.js 22).
-4. Startet im Terminal das Spiel mit `npm run dev` und klickt bei der Meldung zum Port `5173` auf **Open in Browser**.
+4. Startet im Terminal das Spiel mit `npm run dev` und klickt bei der Meldung zum Port `3000` auf **Open in Browser**.
 
 #### Lokal unter Windows
 

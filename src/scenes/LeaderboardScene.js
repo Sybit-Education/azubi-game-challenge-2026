@@ -41,9 +41,6 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(1 * this.scaleFactor);
 
-    // Debug logging
-    console.debug(leaderboard);
-
     // Style for one entry
     const entryStyle = {
       fontFamily: 'Silkscreen',
@@ -77,22 +74,6 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setScale(0.4 * this.scaleFactor)
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
-
-    this.resetButton = this.add
-      .text(this.scale.width / 2, this.scale.height / 1.15, 'Reset Leaderboard', {
-        fontFamily: 'Silkscreen',
-        fontSize: '40px',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5)
-      .setInteractive()
-      .setScale(1 * this.scaleFactor);
-
-    this.resetButton.on('pointerdown', () => {
-      localStorage.removeItem('leaderboard');
-
-      this.scene.restart();
-    });
 
     // On home button listener
     this.backButton.on('pointerdown', () => {
@@ -165,32 +146,34 @@ export default class LeaderboardScene extends Phaser.Scene {
 
 // Loads and parses leaderboard
 export async function parseLeaderboard() {
-  const rawEntries = JSON.parse(localStorage.getItem('leaderboard') || '[]').map((entry) => {
-    // String only entries are counted as scores
+  const raw = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+
+  const rawEntries = raw.map((entry) => {
+    // Legacy support: old versions stored only a string distance.
     if (typeof entry === 'string') {
       return {
         name: 'Unbekannt',
         distance: Number(entry),
+        score: 0,
+        token: '',
         sig: '',
       };
     }
 
-    // Parses entity
+    // Normal entry object (new format expects score + token).
     return {
-      name: entry.name,
-      distance: Number(entry.distance),
-      sig: entry.sig,
+      name: entry?.name,
+      distance: Number(entry?.distance),
+      score: Number(entry?.score ?? 0),
+      token: String(entry?.token ?? ''),
+      sig: entry?.sig,
     };
   });
 
   const entries = [];
   for (const entry of rawEntries) {
-    const ok = await verifyEntry(entry);
-    // If WebCrypto is unavailable, we can't compute/verify signatures. In that case
-    // treat entries as unsigned but do not mark them as manipulated to avoid
-    // confusing users with "⚠ manipuliert" everywhere.
-    const isUnsigned = !entry.sig || typeof entry.sig !== 'string' || entry.sig.length === 0;
-    const isTampered = isUnsigned ? false : !ok;
+    const res = await verifyEntry(entry);
+    const isTampered = !res.valid;
     entries.push({ ...entry, isTampered });
   }
 
@@ -204,5 +187,5 @@ export async function parseLeaderboard() {
     }
   });
 
-  return [...bestByPlayer.values()].sort((a, b) => b.distance - a.distance);
+  return [...bestByPlayer.values()].sort((a, b) => b.distance - a.distance || b.score - a.score);
 }

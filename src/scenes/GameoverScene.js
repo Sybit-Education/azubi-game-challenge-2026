@@ -10,7 +10,7 @@ import {
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { parseLeaderboard } from './LeaderboardScene.js';
-import { computeSignature } from '../utils/leaderboardSecurity.js';
+import { signEntry, createSessionToken } from '../utils/leaderboardSecurity.js';
 
 export default class GameoverScene extends Phaser.Scene {
   // Constructor
@@ -58,45 +58,82 @@ export default class GameoverScene extends Phaser.Scene {
 
     const leaderboard = await parseLeaderboard();
 
-    // Names of players touched in this session - only entries for these
-    // players get a freshly computed signature. Every other entry keeps
-    // whatever it already had, so tampering with unrelated rows doesn't
-    // get silently "re-trusted" just because the leaderboard was rewritten.
-    const touchedKeys = new Set();
+    // Session token: stable for this browser tab, unknown to an attacker
+    // opening a fresh tab or window.  It is included in the HMAC so any entry
+    // forged without it will fail signature verification.
+    const sessionToken = createSessionToken();
 
-    const savePlayerBest = (name, distance) => {
+    /**
+     * Upserts the player's best result into the in-memory leaderboard array
+     * and returns the final entry object (not yet signed).
+     */
+    const upsertPlayerBest = (name, distance, score) => {
       const playerKey = (name || 'Unbekannt').trim() || 'Unbekannt';
-      touchedKeys.add(playerKey);
+      const dist = Number(distance) || 0;
+      const sc = Number(score) || 0;
 
-      const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
-      if (existingEntry) {
-        existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
-      } else {
-        leaderboard.push({ name: playerKey, distance: Number(distance) });
+      const existing = leaderboard.find(
+        (e) => (e.name ?? 'Unbekannt').trim().toLowerCase() === playerKey.toLowerCase(),
+      );
+
+      if (existing) {
+        // Tampered entries are replaced by the real run so they are never re-signed as-is
+        const isBetter =
+          dist > existing.distance || (dist === existing.distance && sc > existing.score);
+        if (!existing.isTampered && !isBetter) return null;
+        existing.distance = dist;
+        existing.score = sc;
+        existing.token = sessionToken;
+        return existing;
       }
+
+      const newEntry = { name: playerKey, distance: dist, score: sc, token: sessionToken };
+      leaderboard.push(newEntry);
+      return newEntry;
     };
 
-    savePlayerBest(localStorage.getItem('Playername') || 'Unknown', this.distance);
+    // Collect all entries that need (re-)signing this session
+    const toSign = [];
+
+    const p1Entry = upsertPlayerBest(
+      localStorage.getItem('Playername') || 'Unknown',
+      this.distance,
+      this.score,
+    );
+    if (p1Entry) toSign.push(p1Entry);
+
     if (this.isMultiplayer) {
-      savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
+      const p2Entry = upsertPlayerBest(
+        localStorage.getItem('Playername2') || 'Unknown',
+        this.distance2,
+        this.score2,
+      );
+      if (p2Entry) toSign.push(p2Entry);
     }
 
-    // Re-sign only the entries we touched this session.
-    for (const entry of leaderboard) {
-      const playerKey = (entry.name || 'Unbekannt').trim() || 'Unbekannt';
-      if (touchedKeys.has(playerKey)) {
-        entry.sig = await computeSignature(entry);
-      }
+    // Re-sign only the entries touched this session
+    for (const entry of toSign) {
+      const signed = await signEntry(entry);
+      entry.sig = signed.sig;
+      entry.isTampered = false;
     }
 
-    // Sorts leaderboard
-    leaderboard.sort((a, b) => b.distance - a.distance);
+    // Sort descending by distance, then by score as tiebreaker
+    leaderboard.sort((a, b) => b.distance - a.distance || b.score - a.score);
 
-    // Saves each player's best distance; the leaderboard scene displays only the top 10.
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-
-    // Debug log leader
-    console.debug(leaderboard);
+    // Persist to localStorage
+    localStorage.setItem(
+      'leaderboard',
+      JSON.stringify(
+        leaderboard.map(({ name, distance, score, token, sig }) => ({
+          name,
+          distance,
+          score,
+          token,
+          sig,
+        })),
+      ),
+    );
 
     // Wrapper variables
     this.width = this.scale.width;
