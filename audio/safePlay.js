@@ -11,7 +11,18 @@ export function safePlay(scene, key, config = {}) {
   const { cooldownMs = 0, ...playConfig } = config;
 
   if (!scene || !scene.sound) return false;
+
+  // Try to unlock/resume audio on first playback attempt.
+  // Some browsers report `locked=false` but the AudioContext is still suspended.
+  const ctx = scene.sound.context;
+  if (ctx && ctx.state === 'suspended' && typeof ctx.resume === 'function') {
+    // Fire-and-forget; resume may require a user gesture.
+    ctx.resume().catch(() => {});
+  }
+
   if (scene.sound.locked) return false;
+  if (ctx && ctx.state === 'suspended') return false;
+
   if (!scene.cache?.audio?.exists?.(key)) return false;
 
   if (cooldownMs > 0) {
