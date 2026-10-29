@@ -39,6 +39,11 @@ Team Lead
   
 Stephan Strittmatter
 
+Advisors
+
+Jevgenij Huebert-Weizenegger
+Jonathan Kern
+
 Development
 
 Hans Solon
@@ -96,6 +101,7 @@ Thanks for playing!
     const creditHeadings = [
       'SYBIT KART',
       'Team Lead',
+      'Advisors',
       'Development',
       'Art & Graphics',
       'UI/UX Design',
