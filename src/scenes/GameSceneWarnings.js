@@ -55,7 +55,14 @@ export function updateLaneDanger(scene) {
 }
 
 export function updateIceWarning(scene) {
-  if (!scene.registry.get('accessibility enabled')) {
+  const car = scene.car;
+  if (
+    !scene.registry.get('accessibility enabled') ||
+    !car ||
+    !car.active ||
+    car.dead ||
+    !car.body?.enable
+  ) {
     if (scene.iceWarning.isPlaying) scene.iceWarning.stop();
     return;
   }
@@ -64,26 +71,22 @@ export function updateIceWarning(scene) {
   if (scene.sound.locked || scene.iceWarning.isPlaying) return;
 
   let nextWarning = null;
-  for (const car of [scene.car, scene.secondCar]) {
-    if (!car || !car.active || car.dead || !car.body?.enable) continue;
+  let warned = scene.warnedIce.get(car);
+  if (!warned) {
+    warned = new WeakSet();
+    scene.warnedIce.set(car, warned);
+  }
 
-    let warned = scene.warnedIce.get(car);
-    if (!warned) {
-      warned = new WeakSet();
-      scene.warnedIce.set(car, warned);
-    }
+  const lane = scene.getPlayerLane(car);
+  for (const ice of scene.roadObjects) {
+    if (!(ice instanceof Ice) || !ice.active || !ice.body?.enable) continue;
+    if (ice.lane !== lane || warned.has(ice)) continue;
+    if (ice.body.bottom > car.body.top) continue;
 
-    const lane = scene.getPlayerLane(car);
-    for (const ice of scene.roadObjects) {
-      if (!(ice instanceof Ice) || !ice.active || !ice.body?.enable) continue;
-      if (ice.lane !== lane || warned.has(ice)) continue;
-      if (ice.body.bottom > car.body.top) continue;
-
-      const seconds = getTimeUntilObstacle(scene, car, ice);
-      if (!Number.isFinite(seconds) || seconds > ICE_WARNING_SECONDS) continue;
-      if (nextWarning === null || seconds < nextWarning.seconds) {
-        nextWarning = { car, ice, seconds, warned };
-      }
+    const seconds = getTimeUntilObstacle(scene, car, ice);
+    if (!Number.isFinite(seconds) || seconds > ICE_WARNING_SECONDS) continue;
+    if (nextWarning === null || seconds < nextWarning.seconds) {
+      nextWarning = { car, ice, seconds, warned };
     }
   }
 
