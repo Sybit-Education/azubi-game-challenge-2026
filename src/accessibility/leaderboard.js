@@ -2,10 +2,12 @@ import { positionAccessibleControls } from './positionControls.js';
 import { preserveNativeKeyboard } from './nativeKeyboard.js';
 import { bindMenuFocusSounds } from '../../audio/sounds.js';
 
-export function bindLeaderboardControls(scene, entries, focusTarget) {
+export function bindLeaderboardControls(scene, entries, focusTarget, isTampered = false) {
   const layer = document.getElementById('leaderboard-ui');
+  const title = document.getElementById('leaderboard-title');
   const rows = document.getElementById('leaderboard-entries');
   const home = document.getElementById('leaderboard-home');
+  title.textContent = isTampered ? 'Leaderboard - manipuliert' : 'Leaderboard';
   rows.replaceChildren();
 
   if (entries.length === 0) {

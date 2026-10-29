@@ -9,8 +9,12 @@ import {
 } from '../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
-import { parseLeaderboard } from './LeaderboardScene.js';
-import { signEntry, createSessionToken } from '../utils/leaderboardSecurity.js';
+import {
+  signEntry,
+  createSessionToken,
+  loadLeaderboard,
+  saveLeaderboard,
+} from '../utils/leaderboardSecurity.js';
 
 export default class GameoverScene extends Phaser.Scene {
   // Constructor
@@ -56,7 +60,7 @@ export default class GameoverScene extends Phaser.Scene {
     await document.fonts.load('32px Silkscreen');
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
-    const leaderboard = await parseLeaderboard();
+    const { entries: leaderboard, isTampered } = await loadLeaderboard();
 
     // Session token: stable for this browser tab, unknown to an attacker
     // opening a fresh tab or window.  It is included in the HMAC so any entry
@@ -122,18 +126,7 @@ export default class GameoverScene extends Phaser.Scene {
     leaderboard.sort((a, b) => b.distance - a.distance || b.score - a.score);
 
     // Persist to localStorage
-    localStorage.setItem(
-      'leaderboard',
-      JSON.stringify(
-        leaderboard.map(({ name, distance, score, token, sig }) => ({
-          name,
-          distance,
-          score,
-          token,
-          sig,
-        })),
-      ),
-    );
+    await saveLeaderboard(leaderboard, { isTampered });
 
     // Wrapper variables
     this.width = this.scale.width;

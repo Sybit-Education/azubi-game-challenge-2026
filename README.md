@@ -85,6 +85,10 @@ Mit gesammelten Münzen könnt ihr im Rennen Items kaufen: ein Schild für 20 M�
 
 Das Leaderboard zeigt die zehn besten Distanzen. Pro Name zählt nur das beste Ergebnis.
 
+Gespeichert wird es unter `sybitkart:leaderboard` als `{ version, entries, sig }`. Zusätzlich zu den Einzelergebnissen ist die gesamte Liste signiert, einschließlich ihrer Reihenfolge. Bestehende Daten unter `leaderboard` werden automatisch übernommen; ungültige Einzelsignaturen bleiben dabei ungültig. Eine erkannte Manipulation der Liste wird auch bei leerer Liste angezeigt und bleibt nach weiteren Spielen sichtbar. Vollständiges Löschen der Browserdaten oder das Zurückspielen einer alten gültigen Liste lässt sich damit nicht zuverlässig erkennen; die Signaturen ersetzen keinen serverseitigen Cheat-Schutz.
+
+Eine schrittweise Erklärung mit Beispielen gibt es unter [Leaderboard-Signaturen verstehen](docs/leaderboard-signaturen.md).
+
 > ⚠️ Die Einträge werden im `localStorage` des Browsers gespeichert. Sie gelten also nur für den Rechner und den Browser, auf dem gespielt wurde. Wer die Browserdaten löscht, löscht auch das Leaderboard.
 
 <a id="barrierefreiheit"></a>

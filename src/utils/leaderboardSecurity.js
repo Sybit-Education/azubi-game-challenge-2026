@@ -103,17 +103,20 @@ function _buildMessage(entry) {
 
 // ─── Internal signing (NOT exported) ─────────────────────────────────────────
 async function _sign(entry) {
+  return _signMessage(_buildMessage(entry));
+}
+
+async function _signMessage(message) {
   const subtle = _subtle();
   const key = await _getKey();
 
   if (!subtle || !key) {
     // Fallback: keyed FNV over the full message.  Weak, but better than nothing
     // when WebCrypto is unavailable (plain-http kiosk, old browser).
-    const msg = _buildMessage(entry);
-    return `fnv1a32:${_fnv1a32(_secret() + '|' + msg)}`;
+    return `fnv1a32:${_fnv1a32(_secret() + '|' + message)}`;
   }
 
-  const buf = await subtle.sign('HMAC', key, new TextEncoder().encode(_buildMessage(entry)));
+  const buf = await subtle.sign('HMAC', key, new TextEncoder().encode(message));
   return `hmac256:${_toHex(buf)}`;
 }
 
@@ -204,4 +207,106 @@ export async function verifyEntry(entry) {
   }
 
   return { valid: true, reason: 'ok' };
+}
+
+export async function signLeaderboard(entries) {
+  const board = { version: 1, entries: JSON.parse(JSON.stringify(entries)) };
+  const message = JSON.stringify(['sybitkart:leaderboard', board.version, board.entries]);
+  return { ...board, sig: await _signMessage(message) };
+}
+
+export async function verifyLeaderboard(board) {
+  if (!board || board.version !== 1 || !Array.isArray(board.entries)) {
+    return { valid: false, reason: 'invalid leaderboard format' };
+  }
+  if (typeof board.sig !== 'string' || board.sig.length === 0) {
+    return { valid: false, reason: 'missing signature' };
+  }
+  const message = JSON.stringify(['sybitkart:leaderboard', board.version, board.entries]);
+  const expected = await _signMessage(message);
+  return expected === board.sig
+    ? { valid: true, reason: 'ok' }
+    : { valid: false, reason: 'signature mismatch' };
+}
+
+const LEADERBOARD_STORAGE_KEY = 'sybitkart:leaderboard';
+const LEGACY_LEADERBOARD_STORAGE_KEY = 'leaderboard';
+
+export async function saveLeaderboard(entries, { isTampered = false } = {}) {
+  const persistentEntries = entries.map(({ name, distance, score, token, sig }) => ({
+    name,
+    distance,
+    score,
+    token,
+    sig,
+  }));
+  // Never re-establish trust after a detected whole-board modification.
+  const board = isTampered
+    ? { version: 1, entries: persistentEntries, sig: '' }
+    : await signLeaderboard(persistentEntries);
+  localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(board));
+}
+
+export async function loadLeaderboard() {
+  let current;
+  let board;
+  try {
+    current = localStorage.getItem(LEADERBOARD_STORAGE_KEY);
+    const raw = current ?? localStorage.getItem(LEGACY_LEADERBOARD_STORAGE_KEY);
+    if (raw === null) return { entries: [], isTampered: false };
+    board = JSON.parse(raw);
+  } catch {
+    return { entries: [], isTampered: true };
+  }
+
+  if (current === null) {
+    if (!Array.isArray(board)) return { entries: [], isTampered: true };
+    board = await signLeaderboard(board);
+    try {
+      localStorage.setItem(LEADERBOARD_STORAGE_KEY, JSON.stringify(board));
+      localStorage.removeItem(LEGACY_LEADERBOARD_STORAGE_KEY);
+    } catch {
+      return _readLeaderboard(board);
+    }
+  }
+
+  return _readLeaderboard(board);
+}
+
+async function _readLeaderboard(board) {
+  const isTampered = !(await verifyLeaderboard(board)).valid;
+  if (!Array.isArray(board?.entries)) return { entries: [], isTampered: true };
+
+  const bestByPlayer = new Map();
+  for (const rawEntry of board.entries) {
+    const entry =
+      typeof rawEntry === 'string' || typeof rawEntry === 'number'
+        ? { name: 'Unbekannt', distance: Number(rawEntry), score: 0, token: '', sig: '' }
+        : {
+            name:
+              typeof rawEntry?.name === 'string'
+                ? rawEntry.name.trim() || 'Unbekannt'
+                : 'Unbekannt',
+            distance: rawEntry?.distance == null ? NaN : Number(rawEntry.distance),
+            score: Number(rawEntry?.score ?? 0),
+            token: String(rawEntry?.token ?? ''),
+            sig: rawEntry?.sig,
+          };
+    entry.isTampered = !(await verifyEntry(entry)).valid;
+    if (!Number.isFinite(entry.distance) || entry.distance < 0) continue;
+    const playerKey = entry.name.toLowerCase();
+    const previousBest = bestByPlayer.get(playerKey);
+    if (
+      !previousBest ||
+      entry.distance > previousBest.distance ||
+      (entry.distance === previousBest.distance && entry.score > previousBest.score)
+    ) {
+      bestByPlayer.set(playerKey, entry);
+    }
+  }
+
+  const entries = [...bestByPlayer.values()].sort(
+    (first, second) => second.distance - first.distance || second.score - first.score,
+  );
+  return { entries, isTampered };
 }
