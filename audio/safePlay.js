@@ -8,10 +8,7 @@
  *   safePlay(this, 'menu-click', { volume: 0.3, cooldownMs: 80 })
  */
 export function safePlay(scene, key, config = {}) {
-  const {
-    cooldownMs = 0,
-    ...playConfig
-  } = config;
+  const { cooldownMs = 0, ...playConfig } = config;
 
   if (!scene || !scene.sound) return false;
   if (scene.sound.locked) return false;
