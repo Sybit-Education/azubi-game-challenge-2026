@@ -5,19 +5,22 @@ export default class ItemAnnouncements {
   constructor(scene) {
     this.scene = scene;
     this.announcedBoxes = new WeakSet();
+    this.currentBox = null;
+  }
+
+  isBoxAhead(box) {
+    const car = this.scene.car;
+    return Boolean(
+      box instanceof Item &&
+      box.active &&
+      box.body?.enable &&
+      box.body.bottom <= car.body.top &&
+      this.scene.roadObjects.includes(box),
+    );
   }
 
   getMysteryBoxesAhead() {
-    const car = this.scene.car;
-
-    return this.scene.roadObjects.filter((object) => {
-      return (
-        object instanceof Item &&
-        object.active &&
-        object.body?.enable &&
-        object.body.bottom <= car.body.top
-      );
-    });
+    return this.scene.roadObjects.filter((object) => this.isBoxAhead(object));
   }
 
   getTimeUntilBox(box) {
@@ -40,6 +43,7 @@ export default class ItemAnnouncements {
     let next = null;
 
     for (const box of boxes) {
+      if (this.announcedBoxes.has(box)) continue;
       const seconds = this.getTimeUntilBox(box);
 
       if (!Number.isFinite(seconds)) continue;
@@ -51,8 +55,15 @@ export default class ItemAnnouncements {
 
     return next;
   }
+
   update() {
     const scene = this.scene;
+
+    // Cancel even a running announcement once its target is no longer ahead.
+    if (this.currentBox && !this.isBoxAhead(this.currentBox)) {
+      scene.speech.cancel('item');
+      this.currentBox = null;
+    }
 
     if (
       !scene.registry.get('accessibility enabled') ||
@@ -60,13 +71,14 @@ export default class ItemAnnouncements {
       scene.sound.locked ||
       !scene.speech.available
     ) {
+      scene.speech.cancel('item');
+      this.currentBox = null;
       return;
     }
 
     const next = this.getNextMysteryBox();
 
     if (!next || next.seconds > getPickupWarningSeconds(next.box.speed)) return;
-    if (this.announcedBoxes.has(next.box)) return;
 
     if (scene.currentLaneDanger || scene.iceWarning.isPlaying || scene.speech.current) {
       return;
@@ -74,7 +86,13 @@ export default class ItemAnnouncements {
 
     const laneNumber = next.box.lane + 1;
 
-    scene.speech.speak(`Mystery box, lane ${laneNumber}`, { key: 'item' });
+    this.currentBox = next.box;
+    scene.speech.speak(`Mystery box, lane ${laneNumber}`, {
+      key: 'item',
+      // GameSpeech rechecks this before resuming an interrupted announcement.
+      isValid: () =>
+        scene.registry.get('accessibility enabled') && !scene.car.dead && this.isBoxAhead(next.box),
+    });
 
     this.announcedBoxes.add(next.box);
   }
