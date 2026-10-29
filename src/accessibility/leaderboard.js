@@ -2,11 +2,12 @@ import { positionAccessibleControls } from './positionControls.js';
 import { preserveNativeKeyboard } from './nativeKeyboard.js';
 import { bindMenuFocusSounds } from '../../audio/sounds.js';
 
-export function bindLeaderboardControls(scene, entries, focusTarget) {
+export function bindLeaderboardControls(scene, entries, focusTarget, isTampered = false) {
   const layer = document.getElementById('leaderboard-ui');
+  const title = document.getElementById('leaderboard-title');
   const rows = document.getElementById('leaderboard-entries');
   const home = document.getElementById('leaderboard-home');
-  const reset = document.getElementById('leaderboard-reset');
+  title.textContent = isTampered ? 'Leaderboard - manipuliert' : 'Leaderboard';
   rows.replaceChildren();
 
   if (entries.length === 0) {
@@ -20,7 +21,8 @@ export function bindLeaderboardControls(scene, entries, focusTarget) {
 
   entries.forEach((entry, index) => {
     const row = document.createElement('tr');
-    [index + 1, entry.name, `${entry.distance} km`].forEach((value) => {
+    const displayName = entry.isTampered ? `${entry.name} ⚠ manipuliert` : entry.name;
+    [index + 1, displayName, `${entry.distance} km`].forEach((value) => {
       const cell = document.createElement('td');
       // Player names come from storage; insert them as text, never HTML.
       cell.textContent = String(value);
@@ -30,7 +32,6 @@ export function bindLeaderboardControls(scene, entries, focusTarget) {
   });
 
   const goHome = () => scene.goHome();
-  const resetLeaderboard = () => scene.resetLeaderboard();
   const handleEscape = (event) => {
     if (event.key !== 'Escape') return;
     event.preventDefault();
@@ -38,20 +39,15 @@ export function bindLeaderboardControls(scene, entries, focusTarget) {
   };
 
   home.addEventListener('click', goHome);
-  reset.addEventListener('click', resetLeaderboard);
   layer.addEventListener('keydown', handleEscape);
   preserveNativeKeyboard(scene, layer);
   layer.hidden = false;
-  positionAccessibleControls(scene, [
-    [home, scene.backButton],
-    [reset, scene.resetButton],
-  ]);
-  bindMenuFocusSounds(scene, ['leaderboard-home', 'leaderboard-reset']);
+  positionAccessibleControls(scene, [[home, scene.backButton]]);
+  bindMenuFocusSounds(scene, ['leaderboard-home']);
   document.getElementById(focusTarget ?? 'leaderboard-title').focus();
 
   scene.events.once('shutdown', () => {
     home.removeEventListener('click', goHome);
-    reset.removeEventListener('click', resetLeaderboard);
     layer.removeEventListener('keydown', handleEscape);
     layer.hidden = true;
     rows.replaceChildren();

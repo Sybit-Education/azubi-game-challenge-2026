@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import {
+  preloadCountdownSound,
+  preloadGameplaySounds,
+  preloadMenuSounds,
+  preloadTypingSounds,
+} from '../../audio/sounds.js';
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +17,12 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    // Preload audio early to avoid first-play decode stutter and timing jitter later.
+    preloadMenuSounds(this);
+    preloadGameplaySounds(this);
+    preloadTypingSounds(this);
+    preloadCountdownSound(this);
+
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -98,6 +110,10 @@ export default class LoadingScene extends Phaser.Scene {
         isMultiplayer: this.isMultiplayer,
       });
     });
+
+    // Note: We intentionally do not "prewarm" (play/stop) sounds here, because audio can be
+    // locked until the first user gesture. Preloading ensures assets are fetched; playback
+    // will be available after unlock via user interaction in the menu/game.
   }
 
   resize(gameSize) {
