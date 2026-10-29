@@ -11,6 +11,8 @@ const COLORS = {
   secondaryText: '#cdb8e4',
   keyFill: 0x180a24,
   selectedText: '#180a24',
+  disabledFill: 0x55515b,
+  disabledText: '#8e8993',
 };
 
 export default class NameInputScene extends Phaser.Scene {
@@ -54,7 +56,7 @@ export default class NameInputScene extends Phaser.Scene {
       ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
       ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0'],
       ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['DELETE', 'END'],
+      ['DELETE', 'ENTER'],
     ];
 
     this.createPrompt();
@@ -291,7 +293,7 @@ export default class NameInputScene extends Phaser.Scene {
   selectCharacter() {
     const character = this.characterGrid[this.selectedRow][this.selectedColumn];
 
-    if (character === 'END') {
+    if (character === 'ENTER') {
       this.submitName();
     } else if (character === 'DELETE') {
       this.deleteCharacter();
@@ -334,18 +336,40 @@ export default class NameInputScene extends Phaser.Scene {
         this.labelText.x + this.labelText.width + 8 * this.scaleFactor,
         this.labelText.y,
       );
+    this.updateSelection();
   }
 
   updateSelection() {
+    const hasName = (this.playerNames[this.activePlayer] || '').trim().length > 0;
     this.characterTexts.forEach((row, rowIndex) => {
       row.forEach((textObject, columnIndex) => {
         const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
-        textObject.setColor(isSelected ? COLORS.selectedText : COLORS.mainText);
-        textObject.setScale(isSelected ? 1.2 : 1);
+        const isDisabledEnter = textObject.text === 'ENTER' && !hasName;
+        textObject.setColor(
+          isDisabledEnter
+            ? COLORS.disabledText
+            : isSelected
+              ? COLORS.selectedText
+              : COLORS.mainText,
+        );
+        textObject.setScale(isSelected && !isDisabledEnter ? 1.2 : 1);
         this.characterCells[rowIndex][columnIndex]
-          .setFillStyle(isSelected ? COLORS.selected : COLORS.keyFill)
-          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border)
-          .setScale(isSelected ? 1.08 : 1);
+          .setFillStyle(
+            isDisabledEnter
+              ? COLORS.disabledFill
+              : isSelected
+                ? COLORS.selected
+                : COLORS.keyFill,
+          )
+          .setStrokeStyle(
+            2 * this.scaleFactor,
+            isDisabledEnter
+              ? COLORS.disabledFill
+              : isSelected
+                ? COLORS.selected
+                : COLORS.border,
+          )
+          .setScale(isSelected && !isDisabledEnter ? 1.08 : 1);
       });
     });
   }
