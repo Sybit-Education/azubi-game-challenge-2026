@@ -9,7 +9,6 @@ import { preloadGameplaySounds } from '../../audio/sounds.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
 import ItemManager from '../objects/ItemManager.js';
-import InputManager from '../objects/InputManager.js';
 import { updateGameScene } from './GameSceneFrame.js';
 import { createRoadObject } from './GameSceneRoadObjects.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
@@ -118,8 +117,6 @@ export default class GameScene extends Phaser.Scene {
   create() {
     const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
-    this.InputManager = new InputManager(this);
-    this.InputManager.create();
     this.secondCar = null;
 
     this.elapsedTime = 0;
