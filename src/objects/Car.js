@@ -26,7 +26,14 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         },
         rotate: () => (this.x < this.scene.scale.width / 2 ? 17 : 0),
         lifespan: 500,
-        scale: { start: 0.7, end: 0.3 },
+        // shrinks from 0.7 to 0.3 like before, but also follows the car's size
+        scale: {
+          onEmit: () => 0.7 * this.getSizeFactor(),
+          onUpdate: (_particle, _key, lifeProgress) => {
+            const particleScale = Phaser.Math.Linear(0.7, 0.3, lifeProgress);
+            return particleScale * this.getSizeFactor();
+          },
+        },
         alpha: { start: 1, end: 0 },
         frequency: 70,
         emitting: false,
@@ -34,6 +41,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       })
       .setDepth(11);
     this.setScale(0.66 * (scene.scale.height / 1200)); //scale fix
+    this.normalScale = this.scale; // used to size the boundary particles when the car grows/shrinks
     this.body.setSize(this.width, this.height);
     this.setDepth(10); // Set depth to 10 to ensure it is above other objects
     this.coinMultiplier = 1;
@@ -42,6 +50,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     this.currentLane = startinglane;
     this.laneCooldown = 0;
     this.inputLocked = false;
+    this.touchingWall = null; // 'left' / 'right' while stuck at the wall after bumpWall
     this.baseTexture = texture;
     this.lights = LIGHT_TEXTURES[texture]; // undefined for skins without light sprites
   }
@@ -115,6 +124,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
           ease: 'Sine.easeInOut',
         });
         this.laneCooldown = 20;
+      } else if (this.laneCooldown <= 0 && this.currentLane === 0) {
+        this.bumpWall('left');
       }
     }
 
@@ -142,6 +153,8 @@ export default class Car extends Phaser.Physics.Arcade.Image {
           ease: 'Sine.easeInOut',
         });
         this.laneCooldown = 20;
+      } else if (this.laneCooldown <= 0 && this.currentLane === this.lanes.length - 1) {
+        this.bumpWall('right');
       }
     }
 
@@ -174,12 +187,92 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     }
   }
 
+  // crash into the wall on the outer lanes, then go back to the same lane
+  // uses the same tween values as a lane switch
+  bumpWall(side) {
+    const wallX = side === 'left' ? this.leftLimit : this.rightLimit;
+    const dir = side === 'left' ? -1 : 1;
+    const laneX = this.lanes[this.currentLane];
+    const stuckTime = 400; // how long the car stays at the wall as punishment
+
+    // stop a lane switch that is still running (e.g. hitting ice mid lane switch),
+    // otherwise both tweens fight over x. Only x/angle, so shield blinking etc. keeps running
+    for (const tween of this.scene.tweens.getTweensOf(this)) {
+      if (tween.data?.some((data) => data.key === 'x' || data.key === 'angle')) {
+        tween.stop();
+      }
+    }
+
+    // drive into the wall
+    this.setAngle(4 * dir);
+
+    this.scene.tweens.add({
+      targets: this,
+      x: wallX,
+      duration: 150,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        // car touches the wall here, sparks run until it leaves
+        this.touchingWall = side;
+
+        this.scene.time.delayedCall(stuckTime, () => {
+          this.touchingWall = null;
+
+          // drive back to the lane
+          this.setAngle(-4 * dir);
+
+          this.scene.tweens.add({
+            targets: this,
+            x: laneX,
+            duration: 150,
+            ease: 'Sine.easeOut',
+            // free the controls as soon as the car is back in its lane
+            onComplete: () => (this.laneCooldown = 0),
+          });
+
+          this.scene.tweens.add({
+            targets: this,
+            angle: 0,
+            duration: 150,
+            delay: 100,
+            ease: 'Sine.easeInOut',
+          });
+        });
+      },
+    });
+
+    this.scene.tweens.add({
+      targets: this,
+      angle: 0,
+      duration: 150,
+      delay: 100,
+      ease: 'Sine.easeInOut',
+    });
+
+    // no lane changes while the car is on the wall
+    this.laneCooldown = Infinity;
+  }
+
+  // 1 normally, 0.5 when shrunk, 1.5 when grown
+  getSizeFactor() {
+    return this.scale / this.normalScale;
+  }
+
   update_boundary_particles() {
-    if (this.x === this.leftLimit) {
-      this.boundaryParticles.setPosition(this.x - this.displayWidth / 2 + 15, this.y - 95);
+    const size = this.getSizeFactor();
+
+    // touchingWall is set by bumpWall, because the tween can end a tiny bit off the exact limit
+    if (this.x === this.leftLimit || this.touchingWall === 'left') {
+      this.boundaryParticles.setPosition(
+        this.x - this.displayWidth / 2 + 15 * size,
+        this.y - 95 * size,
+      );
       this.boundaryParticles.emitting = true;
-    } else if (this.x === this.rightLimit) {
-      this.boundaryParticles.setPosition(this.x + this.displayWidth / 2 - 15, this.y - 95);
+    } else if (this.x === this.rightLimit || this.touchingWall === 'right') {
+      this.boundaryParticles.setPosition(
+        this.x + this.displayWidth / 2 - 15 * size,
+        this.y - 95 * size,
+      );
       this.boundaryParticles.emitting = true;
     } else {
       this.boundaryParticles.emitting = false;

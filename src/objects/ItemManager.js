@@ -541,15 +541,25 @@ export default class ItemManager {
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
-    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, -1, car.lanes.length);
 
-    car.currentLane = targetLane;
+    // lane -1 or 4 doesn't exist, so the car slides into the wall instead
+    // bumpWall blocks lane changes on its own until the car is back, so no input lock needed
+    if (targetLane === -1) {
+      car.inputLocked = false;
+      car.bumpWall('left');
+    } else if (targetLane === car.lanes.length) {
+      car.inputLocked = false;
+      car.bumpWall('right');
+    } else {
+      car.currentLane = targetLane;
 
-    this.scene.tweens.add({
-      targets: car,
-      x: car.lanes[targetLane],
-      duration: 1250,
-    });
+      this.scene.tweens.add({
+        targets: car,
+        x: car.lanes[targetLane],
+        duration: 1250,
+      });
+    }
 
     this.scene.time.delayedCall(1500, () => {
       car.iceTriggered = false;
@@ -569,15 +579,25 @@ export default class ItemManager {
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
-    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, -1, car.lanes.length);
 
-    car.currentLane = targetLane;
+    // lane -1 or 4 doesn't exist, so the car slides into the wall instead
+    // bumpWall blocks lane changes on its own until the car is back, so no input lock needed
+    if (targetLane === -1) {
+      car.inputLocked = false;
+      car.bumpWall('left');
+    } else if (targetLane === car.lanes.length) {
+      car.inputLocked = false;
+      car.bumpWall('right');
+    } else {
+      car.currentLane = targetLane;
 
-    this.scene.tweens.add({
-      targets: car,
-      x: car.lanes[targetLane],
-      duration: 1250,
-    });
+      this.scene.tweens.add({
+        targets: car,
+        x: car.lanes[targetLane],
+        duration: 1250,
+      });
+    }
 
     this.scene.time.delayedCall(1500, () => {
       car.oilTriggered = false;
