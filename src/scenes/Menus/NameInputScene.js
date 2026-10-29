@@ -45,7 +45,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.activePlayer = 0;
     this.selectedRow = 0;
     this.selectedColumn = 0;
-    this.maxNameLength = 20;
+    this.maxNameLength = 18;
 
     this.scaleFactor = this.scale.height / 1080;
     this.createParallaxBackground();
@@ -353,7 +353,9 @@ export default class NameInputScene extends Phaser.Scene {
               : COLORS.mainText,
         );
         textObject.setScale(isSelected && !isDisabledEnter ? 1.2 : 1);
-        this.characterCells[rowIndex][columnIndex]
+        const cell = this.characterCells[rowIndex][columnIndex];
+        cell.input.cursor = isDisabledEnter ? 'default' : 'pointer';
+        cell
           .setFillStyle(
             isDisabledEnter
               ? COLORS.disabledFill
