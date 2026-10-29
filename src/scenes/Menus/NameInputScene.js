@@ -353,7 +353,7 @@ export default class NameInputScene extends Phaser.Scene {
 
   // Submits name
   submitName() {
-    const currentName = (this.playerNames[this.activePlayer] || '').strip();
+    const currentName = (this.playerNames[this.activePlayer] || '').trim();
 
     // Name is empty
     if (currentName.length === 0) {
