@@ -11,6 +11,8 @@ const COLORS = {
   secondaryText: '#cdb8e4',
   keyFill: 0x180a24,
   selectedText: '#180a24',
+  disabledFill: 0x55515b,
+  disabledText: '#8e8993',
 };
 
 export default class NameInputScene extends Phaser.Scene {
@@ -54,7 +56,7 @@ export default class NameInputScene extends Phaser.Scene {
       ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
       ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0'],
       ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['DELETE', 'END'],
+      ['DELETE', 'ENTER'],
     ];
 
     this.createPrompt();
@@ -65,11 +67,13 @@ export default class NameInputScene extends Phaser.Scene {
 
     const nameY = this.scale.height / 2.8;
     const labelX = this.scale.width / 2 - 334 * this.scaleFactor;
+    this.nameFieldWidth = 700 * this.scaleFactor;
+    this.nameFontSize = 32 * this.scaleFactor;
     this.add
       .rectangle(
         this.scale.width / 2,
         nameY,
-        700 * this.scaleFactor,
+        this.nameFieldWidth,
         56 * this.scaleFactor,
         0x180a24,
         0.8,
@@ -78,7 +82,7 @@ export default class NameInputScene extends Phaser.Scene {
       .setDepth(0);
     const nameStyle = {
       fontFamily: 'Silkscreen',
-      fontSize: `${32 * this.scaleFactor}px`,
+      fontSize: `${this.nameFontSize}px`,
       color: COLORS.mainText,
     };
 
@@ -291,7 +295,7 @@ export default class NameInputScene extends Phaser.Scene {
   selectCharacter() {
     const character = this.characterGrid[this.selectedRow][this.selectedColumn];
 
-    if (character === 'END') {
+    if (character === 'ENTER') {
       this.submitName();
     } else if (character === 'DELETE') {
       this.deleteCharacter();
@@ -330,22 +334,43 @@ export default class NameInputScene extends Phaser.Scene {
     this.labelText.setText(label);
     this.nameText
       .setText(currentName)
+      .setFontSize(this.nameFontSize)
       .setPosition(
         this.labelText.x + this.labelText.width + 8 * this.scaleFactor,
         this.labelText.y,
       );
+    const availableNameWidth = this.nameFieldWidth - this.labelText.width - 40 * this.scaleFactor;
+    if (this.nameText.width > availableNameWidth) {
+      this.nameText.setFontSize(this.nameFontSize * (availableNameWidth / this.nameText.width));
+    }
+    this.updateSelection();
   }
 
   updateSelection() {
+    const hasName = (this.playerNames[this.activePlayer] || '').trim().length > 0;
     this.characterTexts.forEach((row, rowIndex) => {
       row.forEach((textObject, columnIndex) => {
         const isSelected = rowIndex === this.selectedRow && columnIndex === this.selectedColumn;
-        textObject.setColor(isSelected ? COLORS.selectedText : COLORS.mainText);
-        textObject.setScale(isSelected ? 1.2 : 1);
-        this.characterCells[rowIndex][columnIndex]
-          .setFillStyle(isSelected ? COLORS.selected : COLORS.keyFill)
-          .setStrokeStyle(2 * this.scaleFactor, isSelected ? COLORS.selected : COLORS.border)
-          .setScale(isSelected ? 1.08 : 1);
+        const isDisabledEnter = textObject.text === 'ENTER' && !hasName;
+        textObject.setColor(
+          isDisabledEnter
+            ? COLORS.disabledText
+            : isSelected
+              ? COLORS.selectedText
+              : COLORS.mainText,
+        );
+        textObject.setScale(isSelected && !isDisabledEnter ? 1.2 : 1);
+        const cell = this.characterCells[rowIndex][columnIndex];
+        cell.input.cursor = isDisabledEnter ? 'default' : 'pointer';
+        cell
+          .setFillStyle(
+            isDisabledEnter ? COLORS.disabledFill : isSelected ? COLORS.selected : COLORS.keyFill,
+          )
+          .setStrokeStyle(
+            2 * this.scaleFactor,
+            isDisabledEnter ? COLORS.disabledFill : isSelected ? COLORS.selected : COLORS.border,
+          )
+          .setScale(isSelected && !isDisabledEnter ? 1.08 : 1);
       });
     });
   }
@@ -376,17 +401,11 @@ export default class NameInputScene extends Phaser.Scene {
       return;
     }
 
-    const gamepad = this.input.gamepad;
-    const pad = gamepad?.enabled ? gamepad.getPad(0) : null;
-    const connectedPad = pad?.pad?.connected ? pad : null;
-    const axisX = connectedPad?.axes?.[0]?.getValue() ?? 0;
-    const axisY = connectedPad?.axes?.[1]?.getValue() ?? 0;
-    const deadzone = 0.2;
     const directions = {
-      left: axisX < -deadzone,
-      right: axisX > deadzone,
-      up: axisY < -deadzone,
-      down: axisY > deadzone,
+      left: controls.left && !this.InputManager.keys.leftP1.isDown,
+      right: controls.right && !this.InputManager.keys.rightP1.isDown,
+      up: controls.up && !this.InputManager.keys.upP1.isDown,
+      down: controls.down && !this.InputManager.keys.downP1.isDown,
     };
     const justPressed = {
       left: directions.left && !this.previousNavigation.left,
@@ -406,7 +425,7 @@ export default class NameInputScene extends Phaser.Scene {
       this.moveSelection(0, 1);
     }
 
-    if (controls.button2) {
+    if (controls.button3) {
       this.selectCharacter();
     }
   }

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from './InputManager.js';
 
 const MAGNET_DURATION_MS = 10000;
 const MAGNET_RANGE = 600;
@@ -6,6 +7,18 @@ const MAGNET_RANGE = 600;
 export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
+    this.inputManager = new InputManager(scene);
+    this.inputManager.create();
+    scene.InputManager = this.inputManager;
+
+    this.key1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+    this.key2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+    this.key3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+    this.key4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+    this.numpad1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
+    this.numpad2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
+    this.numpad3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
+    this.numpad4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
 
     this.coinBudgetPlayer1 = 0;
     this.coinBudgetPlayer2 = 0;
@@ -653,14 +666,11 @@ export default class ItemManager {
   }
 
   itemShop() {
-    // Hotkeys Player1
-    this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
-    this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
-    this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
-    this.key4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+    const controlsP1 = this.inputManager.getControlsP1;
+    const controlsP2 = this.inputManager.getControlsP2;
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key1) &&
+      (Phaser.Input.Keyboard.JustDown(this.key1) || controlsP1.button1) &&
       this.coinBudgetPlayer1 >= this.itemShieldPrize
     ) {
       this.itemShieldCar1();
@@ -668,7 +678,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key2) &&
+      (Phaser.Input.Keyboard.JustDown(this.key2) || controlsP1.button2) &&
       this.coinBudgetPlayer1 >= this.itemShrinkPrize
     ) {
       this.itemShrinkCar1();
@@ -676,7 +686,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key3) &&
+      (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
       this.coinBudgetPlayer1 >= this.itemHeartPrize
     ) {
       this.itemExtraLifeCar1();
@@ -691,14 +701,8 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemMagnetPrize;
     }
 
-    // Hotkeys Player2
-    this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
-    this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
-    this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
-    this.numpad4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
-
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad1) &&
+      (Phaser.Input.Keyboard.JustDown(this.numpad1) || controlsP2.button1) &&
       this.coinBudgetPlayer2 >= this.itemShieldPrize
     ) {
       this.itemShieldCar2();
@@ -706,7 +710,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad2) &&
+      (Phaser.Input.Keyboard.JustDown(this.numpad2) || controlsP2.button2) &&
       this.coinBudgetPlayer2 >= this.itemShrinkPrize
     ) {
       this.itemShrinkCar2();
@@ -714,7 +718,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad3) &&
+      (Phaser.Input.Keyboard.JustDown(this.numpad3) || controlsP2.button3) &&
       this.coinBudgetPlayer2 >= this.itemHeartPrize
     ) {
       this.itemExtraLifeCar2();
