@@ -103,10 +103,10 @@ export default class StartScene extends Phaser.Scene {
 
   // countdown
   countdown() {
-    // Play sound first, then update the visual. This reduces the chance that object creation
-    // and texture upload in the same tick delays the very first SFX (the "3").
-    safePlay(this, 'countdown-3', { volume: 0.8 });
+    // Ensure the first "3" beep is scheduled on the next tick so the audio buffer is definitely
+    // available and the AudioContext has had a chance to resume/unlock.
     this.showNumber('start-count-3');
+    this.time.delayedCall(0, () => safePlay(this, 'countdown-3', { volume: 0.8 }));
 
     this.time.delayedCall(900, () => {
       safePlay(this, 'countdown-2', { volume: 0.8 });
