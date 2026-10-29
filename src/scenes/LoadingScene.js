@@ -90,7 +90,6 @@ export default class LoadingScene extends Phaser.Scene {
       width: barWidth,
       duration: 3000,
       onComplete: () => {
-
         this.scene.start('StartScene', {
           isMultiplayer: this.isMultiplayer,
         });
