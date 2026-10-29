@@ -521,7 +521,7 @@ export default class MenuScene extends Phaser.Scene {
         this.menuButtons[this.selectedIndex].scale,
       );
     }
-    if (controls.button2) {
+    if (controls.button3) {
       if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
         this.startMultiplayer();
       } else {

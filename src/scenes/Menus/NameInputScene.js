@@ -400,7 +400,7 @@ export default class NameInputScene extends Phaser.Scene {
       this.moveSelection(0, 1);
     }
 
-    if (controls.button2) {
+    if (controls.button3) {
       this.selectCharacter();
     }
   }

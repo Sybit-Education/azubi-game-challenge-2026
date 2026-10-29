@@ -389,7 +389,7 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (controls.button2) {
+    if (controls.button3) {
       this.Buttons[this.selectedIndex].action?.();
     } else if (controls.button4) {
       this.Buttons[1].action?.();

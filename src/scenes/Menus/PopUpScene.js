@@ -130,7 +130,7 @@ export default class PopUpScene extends Phaser.Scene {
     } else if (downPressed) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
       this.updateGamepadSelection();
-    } else if (controls.button2) {
+    } else if (controls.button3) {
       items[this.selectedIndex].action();
       this.updateGamepadSelection();
     } else if (controls.button4) {

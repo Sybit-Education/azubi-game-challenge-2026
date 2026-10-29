@@ -146,9 +146,9 @@ export default class LoadingScene extends Phaser.Scene {
 
     if (
       this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP1.button3 ||
       this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button2
+      this.InputManager.getControlsP2.button3
     ) {
       this.scene.start('StartScene', {
         isMultiplayer: this.isMultiplayer,

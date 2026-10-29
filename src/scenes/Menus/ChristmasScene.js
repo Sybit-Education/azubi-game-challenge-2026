@@ -565,7 +565,7 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     }
 
-    if (controls.button2) {
+    if (controls.button3) {
       if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
         this.startMultiplayer();
       } else {
