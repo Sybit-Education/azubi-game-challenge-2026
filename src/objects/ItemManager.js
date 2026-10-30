@@ -343,7 +343,9 @@ export default class ItemManager {
     this.scene.car.alpha = 1;
 
     this.schildAktivCar1 = true;
-    this.scene.car.setTexture('carShield');
+    this.scene.car.setTexture(
+      this.scene.registry.get("gameMode") === 'christmas' ? 'carShieldChristmas' : 'carShield'
+    );
     this.scene.sound.play('shield-collected', { volume: 0.3 });
 
     this.shieldBlinkTimerCar1 = this.scene.time.delayedCall(4500, () => {
@@ -363,7 +365,9 @@ export default class ItemManager {
       this.shieldBlinkTweenCar1 = null;
       this.schildAktivCar1 = false;
       this.scene.car.alpha = 1;
-      this.scene.car.setTexture('car');
+      this.scene.car.setTexture(
+        this.scene.registry.get("gameMode") === 'christmas' ? 'winter-car' : 'car'
+      );
 
       this.scene.sound.play('shield-over', { volume: 0.3 });
 
@@ -423,7 +427,9 @@ export default class ItemManager {
     this.scene.secondCar.alpha = 1;
 
     this.schildAktivCar2 = true;
-    this.scene.secondCar.setTexture('carShield2');
+    this.scene.secondCar.setTexture(
+      this.scene.registry.get("gameMode") === 'christmas' ? 'carShieldChristmas2' : 'carShield2'
+    );
     this.scene.sound.play('shield-collected', { volume: 0.3 });
 
     this.shieldBlinkTimerCar2 = this.scene.time.delayedCall(4500, () => {
@@ -443,7 +449,9 @@ export default class ItemManager {
       this.shieldBlinkTweenCar2 = null;
       this.schildAktivCar2 = false;
       this.scene.secondCar.alpha = 1;
-      this.scene.secondCar.setTexture('car2');
+      this.scene.secondCar.setTexture(
+        this.scene.registry.get("gameMode") === 'christmas' ? 'winter-car2' : 'car2'
+      );
 
       this.scene.sound.play('shield-over', { volume: 0.3 });
 
