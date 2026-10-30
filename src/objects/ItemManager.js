@@ -8,7 +8,7 @@ export default class ItemManager {
     this.scene = scene;
 
     this.coinBudgetPlayer1 = 35;
-    this.coinBudgetPlayer2 = 0;
+    this.coinBudgetPlayer2 = 35;
 
     this.coinMultiplierOnP1 = false;
     this.coinMultiplierOnP2 = false;
