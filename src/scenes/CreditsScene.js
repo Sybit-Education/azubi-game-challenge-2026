@@ -13,6 +13,7 @@ export default class CreditsScene extends Phaser.Scene {
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
     );
+    this.load.image('return-button', 'assets/images/homepage/return-button.png');
   }
 
   create() {
@@ -88,7 +89,7 @@ Thanks for playing!
     creditsContent.textContent = creditText;
     creditsUI.hidden = false;
 
-    let skipText = 'Press ESC to exit or SPACE to toggle pause';
+    let skipText = 'Press SPACE to Toggle pause';
 
     this.width = this.scale.width;
     this.height = this.scale.height;
@@ -159,7 +160,12 @@ Thanks for playing!
       this.scene.start(menuScene, { focusTarget: 'credit-btn' });
     };
 
-    this.input.keyboard.on('keydown-ESC', this.returnToMenu);
+    this.returnButton = this.add
+      .image(200 * this.scaleFactor, 50 * this.scaleFactor, 'return-button')
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.1 * this.scaleFactor)
+      .setOrigin(0.5)
+      .on('pointerdown', this.returnToMenu);
 
     this.scroll = this.tweens.add({
       targets: creditTextContainer,
@@ -175,10 +181,13 @@ Thanks for playing!
 
     this.setupPauseOnSpace();
 
-    const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {
-      fontSize: '24px',
-      color: '#FEFEFE',
-    });
+    const skipTextElement = this.add
+      .text(this.width - 40 * this.scaleFactor, this.height - 70 * this.scaleFactor, skipText, {
+        fontSize: `${20 * this.scaleFactor}px`,
+        fontFamily: 'Silkscreen',
+        color: '#FEFEFE',
+      })
+      .setOrigin(1, 0);
 
     this.tweens.add({
       targets: skipTextElement,
