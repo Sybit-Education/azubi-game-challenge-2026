@@ -4,12 +4,33 @@ import Phaser from 'phaser';
 const LIGHT_TEXTURES = {
   car: { left: 'blinkLeft', right: 'blinkRight', brake: 'brakeLights' },
   car2: { left: 'blinkLeft2', right: 'blinkRight2', brake: 'brakeLights2' },
+  'winter-car': { left: 'winterBlinkLeft', right: 'winterBlinkRight', brake: 'winterBrakeLights' },
+  'winter-car2': {
+    left: 'winterBlinkLeft2',
+    right: 'winterBlinkRight2',
+    brake: 'winterBrakeLights2',
+  },
+};
+
+const CAR_TEXTURES = {
+  car: { base: 'car', christmas: 'winter-car' },
+  car2: { base: 'car2', christmas: 'winter-car2' },
 };
 
 export default class Car extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, texture = 'car', startinglane = 1) {
-    super(scene, x, y, texture);
+  constructor(scene, x, y, texture, startinglane = 1) {
+    const carType = texture;
+    const isChristmas = scene.registry.get('gameMode') === 'christmas';
+    console.log('carType: ', carType);
+    console.log('CAR_TEXTURES entry:', CAR_TEXTURES[carType]);
 
+    if (isChristmas) {
+      texture = CAR_TEXTURES[carType].christmas;
+    } else {
+      texture = CAR_TEXTURES[carType].base;
+    }
+
+    super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
@@ -28,9 +49,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         lifespan: 500,
         // shrinks from 0.7 to 0.3 like before, but also follows the car's size
         scale: {
-          onEmit: () => 0.7 * this.getSizeFactor(),
+          onEmit: () => 0.08 * this.getSizeFactor(),
           onUpdate: (_particle, _key, lifeProgress) => {
-            const particleScale = Phaser.Math.Linear(0.7, 0.3, lifeProgress);
+            const particleScale = Phaser.Math.Linear(0.08, 0.05, lifeProgress);
             return particleScale * this.getSizeFactor();
           },
         },

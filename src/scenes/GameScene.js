@@ -64,8 +64,16 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('random-object2', 'assets/images/entities/obstacles/random-object-2.png');
     this.load.image('random-object3', 'assets/images/entities/obstacles/random-object-3.png');
     this.load.image('random-object4', 'assets/images/entities/obstacles/random-object-4.png');
+    this.load.image('random-object5', 'assets/images/entities/obstacles/random-object-5.png');
+    this.load.image('random-object6', 'assets/images/entities/obstacles/random-object-6.png');
+    this.load.image('random-object7', 'assets/images/entities/obstacles/random-object-7.png');
 
-    this.load.image('boundary-particle', 'assets/images/particles/image-001.png');
+    this.load.image('boundary-particle', 'assets/images/particles/friction-particle2.png');
+    this.load.atlas(
+      'snowflakeAtlas',
+      'assets/images/particles/snowflake-atlas.png',
+      'assets/images/particles/snowflake-atlas.json',
+    );
 
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-flash', 'assets/images/map-skins/background-sybit-city-off.png');
@@ -73,11 +81,21 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image(
       'carShield',
-      'assets/images/entities/player-skins/player-states/car-shield.png',
+      'assets/images/entities/player-skins/player-states/sybit-kart-player-1-shield.png',
     );
     this.load.image(
       'carShield2',
-      'assets/images/entities/player-skins/player-states/car-shield-2.png',
+      'assets/images/entities/player-skins/player-states/sybit-player-2-shield.png',
+    );
+
+    this.load.image(
+      'carShieldChristmas',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-shield.png',
+    );
+
+    this.load.image(
+      'carShieldChristmas2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-shield.png',
     );
 
     this.load.image(
@@ -103,6 +121,30 @@ export default class GameScene extends Phaser.Scene {
     this.load.image(
       'brakeLights2',
       'assets/images/entities/player-skins/player-states/sybit-player-2-brakelights.png',
+    );
+    this.load.image(
+      'winterBlinkRight',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-right.png',
+    );
+    this.load.image(
+      'winterBlinkLeft',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-blink-left.png',
+    );
+    this.load.image(
+      'winterBrakeLights',
+      'assets/images/entities/player-skins/player-states/winter-car-P1-brakelights.png',
+    );
+    this.load.image(
+      'winterBlinkLeft2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-left.png',
+    );
+    this.load.image(
+      'winterBlinkRight2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-blink-right.png',
+    );
+    this.load.image(
+      'winterBrakeLights2',
+      'assets/images/entities/player-skins/player-states/winter-car-P2-brakelights.png',
     );
 
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
@@ -160,6 +202,13 @@ export default class GameScene extends Phaser.Scene {
         : createRoadObject(this, 'oil')
     );
     createRoadObject(this, 'extraLife');
+
+    if (this.registry.get('gameMode') !== 'christmas') {
+      console.log('snow failed!');
+    } else {
+      this.spawnSnow();
+    }
+
     createRoadObject(this, 'random-obstacle');
     this.createHud();
 
@@ -317,7 +366,7 @@ export default class GameScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25, 'car');
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix (hitbox slightly smaller to be more forgiving, else, game too hard)
 
       this.secondCar = new Car(
@@ -330,7 +379,7 @@ export default class GameScene extends Phaser.Scene {
       this.secondCar.body.setSize(this.secondCar.width * 0.8, this.secondCar.height * 0.9); //scale fix
       //this.physics.add.collider(this.car, this.secondCar);
     } else {
-      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25);
+      this.car = new Car(this, this.scale.width / 2 - 130, this.scale.height / 1.25, 'car');
       this.car.body.setSize(this.car.width * 0.8, this.car.height * 0.9); //scale fix
     }
   }
@@ -404,6 +453,32 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+  spawnSnow() {
+    this.emitter = this.add
+      .particles(0, 0, 'snowflakeAtlas', {
+        emitZone: {
+          source: new Phaser.Geom.Rectangle(0, -50, this.scale.width, 10),
+          type: 'random',
+        },
+        frame: ['snowflake1', 'snowflake2', 'snowflake3', 'snowflake4'],
+        frameQuantity: 1,
+        randomFrame: true,
+        speedY: { min: 50, max: 100 },
+        speedX: { min: -20, max: 20 },
+        accelerationY: { random: [10, 15] },
+        accelerationX: { random: [10, 15] },
+        lifespan: {
+          min: 8000,
+          max: 10000,
+        },
+        scale: { min: 0.2, max: 0.4 },
+        alpha: 0.4,
+        gravityY: 10,
+        frequency: 20,
+      })
+      .setDepth(9999);
+  }
+
   collectItem(car, item) {
     if (!item.active) return;
 
@@ -474,7 +549,6 @@ export default class GameScene extends Phaser.Scene {
     const roadWidth = this.track1.displayWidth;
     const roadLeft = this.track1.x - roadWidth / 2;
     const laneWidth = roadWidth / laneCount;
-
     const positionOnRoad = car.x - roadLeft;
     const laneIndex = Math.floor(positionOnRoad / laneWidth);
 
