@@ -128,7 +128,7 @@ export default class StartScene extends Phaser.Scene {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2);
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
-      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2');
+      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2', 2);
       this.secondCar.body.setSize(
         this.secondCar.displayWidth * 1.25,
         this.secondCar.displayHeight * 1.25,
@@ -142,6 +142,14 @@ export default class StartScene extends Phaser.Scene {
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+    const laneCount = 4;
+    const laneWidth = this.track1.displayWidth / laneCount;
+    const roadLeft = this.track1.x - this.track1.displayWidth / 2;
+
+    for (const car of [this.car, this.secondCar]) {
+      if (!car) continue;
+      car.x = roadLeft + (car.currentLane + 0.5) * laneWidth;
+    }
   }
 
   spawnStartingBanner() {
