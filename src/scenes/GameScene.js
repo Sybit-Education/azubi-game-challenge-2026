@@ -338,6 +338,15 @@ export default class GameScene extends Phaser.Scene {
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+    const laneCount = 4;
+    const laneWidth = this.track1.displayWidth / laneCount;
+    const roadLeft = this.track1.x - this.track1.displayWidth / 2;
+
+    for (const car of [this.car, this.secondCar]) {
+      if (!car) continue;
+      car.x = roadLeft + (car.currentLane + 0.5) * laneWidth;
+    }
+
     this.lastPlayerLane = this.getPlayerLane(this.car);
     this.gameStatus = document.getElementById('game-status');
     this.gameStatus.textContent = '';
@@ -376,6 +385,12 @@ export default class GameScene extends Phaser.Scene {
     this.sound.play('collect-coin', { volume: 0.3 });
     coin.destroy();
     car.increase_score(value);
+
+    if (car === this.car) {
+      this.ItemManager.coinBudgetPlus1(car.coinMultiplier);
+    } else if (car === this.secondCar) {
+      this.ItemManager.coinBudgetPlus2(car.coinMultiplier);
+    }
   }
 
   collectExtraLife(car, item) {
