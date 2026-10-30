@@ -545,10 +545,9 @@ export default class PopUpScene extends Phaser.Scene {
   // Close / animation
   // -------------------------------------------------------------------------
 
-  /** Binds the X button and M keyboard shortcut to `_close()`. */
+  /** Binds the X button to `_close()`. */
   _setupCloseHandlers() {
     this._closeButton.on('pointerdown', () => this._close());
-    this.input.keyboard.once('keydown-M', () => this._close());
   }
 
   /**
@@ -622,6 +621,9 @@ export default class PopUpScene extends Phaser.Scene {
     this._handleGameModeClick = () => this._toggleDropdown();
     this._handleAlternateModeClick = () => this._chooseAlternateMode();
     this._handleCloseClick = () => this._close();
+    this._handleModeShortcut = (event) => {
+      if (event.key.toLowerCase() === 'm') this._close();
+    };
     this._handleCancel = (e) => {
       e.preventDefault();
       this._close();
@@ -631,6 +633,7 @@ export default class PopUpScene extends Phaser.Scene {
     gameModeMenu.addEventListener('click', this._handleGameModeClick);
     christmasModeChoice.addEventListener('click', this._handleAlternateModeClick);
     closeSettingsBtn.addEventListener('click', this._handleCloseClick);
+    dialog.addEventListener('keydown', this._handleModeShortcut);
     dialog.addEventListener('cancel', this._handleCancel);
 
     // Hover effects — pass getters so the correct button is used after a mode swap
@@ -690,6 +693,7 @@ export default class PopUpScene extends Phaser.Scene {
     gameModeMenu.removeEventListener('click', this._handleGameModeClick);
     christmasModeChoice.removeEventListener('click', this._handleAlternateModeClick);
     closeSettingsBtn.removeEventListener('click', this._handleCloseClick);
+    dialog.removeEventListener('keydown', this._handleModeShortcut);
     dialog.removeEventListener('cancel', this._handleCancel);
     this._cleanupSwitchHover?.();
 
