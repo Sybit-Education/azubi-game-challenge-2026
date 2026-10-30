@@ -42,12 +42,12 @@ Stephan Strittmatter
 
 Development
 
-Hans Solon
-Davyd Mozghov
-Berat Dalgic
 Agwad Alsayed
-Saied Tablis
+Berat Dalgic
+Davyd Mozghov
+Hans Solon
 Jamin Ibrahimovic
+Saied Tablis
 Tobias Jentzsch
 
 Art & Graphics
@@ -58,18 +58,17 @@ Sofya Skripova
 
 UI/UX Design
 
-Sofya Skripova
-Saied Tablis
 Luisa Krasniqi
+Saied Tablis
+Sofya Skripova
 
 
 Audio
 
-Sofya Skripova
-Jamin Ibrahimovic
 Agwad Alsayed
+Jamin Ibrahimovic
 Julian Thiemann
-
+Sofya Skripova
 
 Accessibility
 
