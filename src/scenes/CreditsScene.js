@@ -40,6 +40,11 @@ Team Lead
   
 Stephan Strittmatter
 
+Advisors
+
+Jevgenij Huebert-Weizenegger
+Jonathan Kern
+
 Development
 
 Agwad Alsayed
@@ -96,6 +101,7 @@ Thanks for playing!
     const creditHeadings = [
       'SYBIT KART',
       'Team Lead',
+      'Advisors',
       'Development',
       'Art & Graphics',
       'UI/UX Design',
@@ -179,8 +185,6 @@ Thanks for playing!
       },
     });
 
-    this.setupPauseOnSpace();
-
     const skipTextElement = this.add
       .text(this.width - 40 * this.scaleFactor, this.height - 70 * this.scaleFactor, pauseHint, {
         fontSize: `${20 * this.scaleFactor}px`,
@@ -203,12 +207,6 @@ Thanks for playing!
     });
   }
 
-  setupPauseOnSpace() {
-    const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    spaceKey.on('down', this.toggleScrollPause, this);
-    this.events.once('shutdown', () => spaceKey.off('down', this.toggleScrollPause, this));
-  }
-
   toggleScrollPause() {
     if (!this.scroll) return;
 
@@ -227,7 +225,7 @@ Thanks for playing!
 
     if (controls.button4) {
       this.returnToMenu();
-    } else if (controls.button1) {
+    } else if (controls.space) {
       this.toggleScrollPause();
     }
   }

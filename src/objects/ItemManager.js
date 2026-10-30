@@ -228,14 +228,15 @@ export default class ItemManager {
 
   itemShield(player) {
     const texture = 'shield';
+    const christmas = this.scene.registry.get('gameMode') === 'christmas';
     let car = this.scene.car;
-    let carTexture = 'car';
-    let shieldTexture = 'carShield';
+    let carTexture = christmas ? 'winter-car' : 'car';
+    let shieldTexture = christmas ? 'carShieldChristmas' : 'carShield';
 
     if (player === 2) {
       car = this.scene.secondCar;
-      carTexture = 'car2';
-      shieldTexture = 'carShield2';
+      carTexture = christmas ? 'winter-car2' : 'car2';
+      shieldTexture = christmas ? 'carShieldChristmas2' : 'carShield2';
     }
 
     this.removeOldPowerupTimer(texture, player);
@@ -258,7 +259,12 @@ export default class ItemManager {
     } else {
       this.schildAktivCar2 = true;
     }
+
+    // shield texture has a different size, so keep the car as big as it was
+    const oldWidth = car.displayWidth;
+    const oldHeight = car.displayHeight;
     car.setTexture(shieldTexture);
+    car.setDisplaySize(oldWidth, oldHeight);
     this.scene.sound.play('shield-collected', { volume: 0.3 });
 
     car.shieldBlinkTimer = this.scene.time.delayedCall(4500, () => {
@@ -282,7 +288,12 @@ export default class ItemManager {
         this.schildAktivCar2 = false;
       }
       car.alpha = 1;
+
+      // size is checked again here in case the car shrank or grew during the shield
+      const width = car.displayWidth;
+      const height = car.displayHeight;
       car.setTexture(carTexture);
+      car.setDisplaySize(width, height);
 
       this.scene.sound.play('shield-over', { volume: 0.3 });
 

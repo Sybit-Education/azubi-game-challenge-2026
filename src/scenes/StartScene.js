@@ -37,6 +37,16 @@ export default class StartScene extends Phaser.Scene {
       'car2',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-2.png',
     );
+
+    this.load.image(
+      'winter-car',
+      'assets/images/entities/player-skins/player-sprites/winter-car-P1.png',
+    );
+    this.load.image(
+      'winter-car2',
+      'assets/images/entities/player-skins/player-sprites/winter-car-P2.png',
+    );
+
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
     this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
@@ -125,7 +135,7 @@ export default class StartScene extends Phaser.Scene {
 
   createPlayer() {
     if (this.isMultiplayer) {
-      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2);
+      this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2, 'car');
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
       this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2', 2);
@@ -134,7 +144,7 @@ export default class StartScene extends Phaser.Scene {
         this.secondCar.displayHeight * 1.25,
       );
     } else {
-      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.2);
+      this.car = new Car(this, this.scale.width / 2, this.scale.height / 1.2, 'car');
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
     }
   }
