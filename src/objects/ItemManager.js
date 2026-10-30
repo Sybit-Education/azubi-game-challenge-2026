@@ -560,7 +560,7 @@ export default class ItemManager {
   }
 
   itemRandom1() {
-    const random = 4; //Phaser.Math.Between(1, 5);
+    const random = Phaser.Math.Between(1, 5);
 
     if (random === 1) {
       return this.itemShrinkCar1();
