@@ -48,7 +48,7 @@ export function createRoadObject(scene, type) {
       scene.physics.add.overlap(
         scene.car,
         roadObject,
-        scene.ItemManager.multiplyCoins1,
+        scene.ItemManager.multiplyCoins,
         undefined,
         scene.ItemManager,
       );
@@ -57,7 +57,7 @@ export function createRoadObject(scene, type) {
         scene.physics.add.overlap(
           scene.secondCar,
           roadObject,
-          scene.ItemManager.multiplyCoins2,
+          scene.ItemManager.multiplyCoins,
           undefined,
           scene.ItemManager,
         );
@@ -92,7 +92,7 @@ export function createRoadObject(scene, type) {
       scene.physics.add.collider(
         scene.car,
         roadObject,
-        scene.ItemManager.lebenCheckCar1,
+        scene.ItemManager.lebenCheck,
         undefined,
         scene.ItemManager,
       );
@@ -101,7 +101,7 @@ export function createRoadObject(scene, type) {
         scene.physics.add.collider(
           scene.secondCar,
           roadObject,
-          scene.ItemManager.lebenCheckCar2,
+          scene.ItemManager.lebenCheck,
           undefined,
           scene.ItemManager,
         );

@@ -31,9 +31,7 @@ export function hitRandomObstacle(scene, car, obstacle) {
   // A duck only quacks once, even when the collision lasts a few frames.
   playDuckSound(scene, obstacle);
 
-  if (car === scene.car) {
-    scene.ItemManager.lebenCheckCar1(car, obstacle);
-  } else if (car === scene.secondCar) {
-    scene.ItemManager.lebenCheckCar2(car, obstacle);
+  if (car === scene.car || car === scene.secondCar) {
+    scene.ItemManager.lebenCheck(car, obstacle);
   }
 }
