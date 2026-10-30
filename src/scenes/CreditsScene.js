@@ -160,9 +160,7 @@ Thanks for playing!
       previousText = text;
     });
 
-    creditTextContainer.setSize(this.width * 0.8, lineY);
-
-    const returnToMenu = () => {
+    this.returnToMenu = () => {
       playMenuClick(this);
       const menuScene =
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
@@ -170,7 +168,7 @@ Thanks for playing!
       this.scene.start(menuScene, { focusTarget: 'credit-btn' });
     };
 
-    this.input.keyboard.on('keydown-ESC', returnToMenu);
+    this.input.keyboard.on('keydown-SPACE', this.returnToMenu);
 
     this.scroll = this.tweens.add({
       targets: creditTextContainer,
@@ -199,8 +197,7 @@ Thanks for playing!
 
     this.events.once('shutdown', () => {
       creditsUI.hidden = true;
-      this.input.keyboard.off('keydown-SPACE', returnToMenu);
-      this.input.keyboard.off('keydown-ESC', returnToMenu);
+      this.input.keyboard.off('keydown-SPACE', this.returnToMenu);
     });
   }
 
@@ -208,11 +205,7 @@ Thanks for playing!
     this.InputManager.update();
 
     if (this.InputManager.getControlsP1.button4) {
-      if (this.registry.get('gameMode') === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
+      this.returnToMenu();
     }
   }
 }

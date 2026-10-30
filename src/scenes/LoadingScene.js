@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import {
+  preloadCountdownSound,
+  preloadGameplaySounds,
+  preloadMenuSounds,
+  preloadTypingSounds,
+} from '../../audio/sounds.js';
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -11,6 +17,12 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    // Preload audio early to avoid first-play decode stutter and timing jitter later.
+    preloadMenuSounds(this);
+    preloadGameplaySounds(this);
+    preloadTypingSounds(this);
+    preloadCountdownSound(this);
+
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -74,10 +86,13 @@ export default class LoadingScene extends Phaser.Scene {
     this.randomComment = this.add.image(centerX, centerY, randomComment).setOrigin(0.5);
 
     this.scale.on('resize', this.resize, this);
-
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
+    });
+
+    this.events.once('shutdown', () => {
+      this.scale.off('resize', this.resize, this);
     });
 
     const barWidth = this.scale.width / 2.5;
@@ -98,6 +113,10 @@ export default class LoadingScene extends Phaser.Scene {
         isMultiplayer: this.isMultiplayer,
       });
     });
+
+    // Note: We intentionally do not "prewarm" (play/stop) sounds here, because audio can be
+    // locked until the first user gesture. Preloading ensures assets are fetched; playback
+    // will be available after unlock via user interaction in the menu/game.
   }
 
   resize(gameSize) {
@@ -146,9 +165,9 @@ export default class LoadingScene extends Phaser.Scene {
 
     if (
       this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP1.button3 ||
       this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button2
+      this.InputManager.getControlsP2.button3
     ) {
       this.scene.start('StartScene', {
         isMultiplayer: this.isMultiplayer,
