@@ -549,10 +549,9 @@ export default class PopUpScene extends Phaser.Scene {
   // Close / animation
   // -------------------------------------------------------------------------
 
-  /** Binds the X button and keyboard shortcuts (ESC, M) to `_close()`. */
+  /** Binds the X button and M keyboard shortcut to `_close()`. */
   _setupCloseHandlers() {
     this._closeButton.on('pointerdown', () => this._close());
-    this.input.keyboard.once('keydown-ESC', () => this._close());
     this.input.keyboard.once('keydown-M', () => this._close());
   }
 

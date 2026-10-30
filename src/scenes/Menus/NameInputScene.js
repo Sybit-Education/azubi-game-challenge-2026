@@ -37,6 +37,8 @@ export default class NameInputScene extends Phaser.Scene {
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
     );
+
+    this.load.image('return-button', 'assets/images/homepage/return-button.png');
   }
 
   // Create
@@ -79,6 +81,8 @@ export default class NameInputScene extends Phaser.Scene {
     // Update display grid
     this.updateSelection();
 
+    const returnButtonX = 200 * this.scaleFactor;
+    const returnButtonY = 50 * this.scaleFactor;
     const nameY = this.scale.height / 2.8;
     const labelX = this.scale.width / 2 - 334 * this.scaleFactor;
     this.nameFieldWidth = 700 * this.scaleFactor;
@@ -114,9 +118,28 @@ export default class NameInputScene extends Phaser.Scene {
 
     // Update input
     this.updateNamePrompt();
+
+    this.returnButton = this.add
+      .image(returnButtonX, returnButtonY, 'return-button')
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.1 * this.scaleFactor)
+      .setOrigin(0.5)
+      .on('pointerdown', this.backToHomeFunction, this);
   }
 
-  // Creates parallax background
+  playMenuClick(scene) {
+    if (!scene.cache.audio.exists('menu-click')) return;
+    // Phaser's sound manager belongs to the game, so scene changes do not cut off clicks.
+    scene.sound.play('menu-click', { volume: 0.3 });
+  }
+
+  backToHomeFunction = () => {
+    this.playMenuClick(this);
+    this.scene.start(
+      this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
+    );
+  };
+
   createParallaxBackground() {
     this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
@@ -553,7 +576,7 @@ export default class NameInputScene extends Phaser.Scene {
 
     // Back
     if (controls.button4) {
-      this.scene.start('MenuScene');
+      this.backToHomeFunction();
       return;
     }
 
