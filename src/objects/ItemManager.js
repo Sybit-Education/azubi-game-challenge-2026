@@ -294,15 +294,15 @@ export default class ItemManager {
     if (!this.schildAktivCar1) {
       this.schildAktivCar1 = true;
       this.scene.sound.play('shield-collected', { volume: 0.3 });
-      
+
       const oldWidth = this.scene.car.displayWidth;
       const oldHeight = this.scene.car.displayHeight;
-     
-      if (this.scene.registry.get("gameMode") === 'christmas') {
-        this.scene.car.setTexture('carShieldChristmas')
+
+      if (this.scene.registry.get('gameMode') === 'christmas') {
+        this.scene.car.setTexture('carShieldChristmas');
         this.scene.car.setDisplaySize(oldWidth, oldHeight);
       } else {
-        this.scene.car.setTexture('carShield')
+        this.scene.car.setTexture('carShield');
         this.scene.car.setDisplaySize(oldWidth, oldHeight);
       }
 
@@ -323,14 +323,13 @@ export default class ItemManager {
         this.scene.tweens.killTweensOf(this.scene.car);
         this.scene.car.alpha = 1;
 
-        if (this.scene.registry.get("gameMode") === 'christmas') {
+        if (this.scene.registry.get('gameMode') === 'christmas') {
           this.scene.car.setTexture('winter-car');
           this.scene.car.setDisplaySize(oldWidth, oldHeight);
         } else {
           this.scene.car.setTexture('car');
           this.scene.car.setDisplaySize(oldWidth, oldHeight);
         }
-
       });
     }
 
@@ -344,7 +343,7 @@ export default class ItemManager {
 
     this.schildAktivCar1 = true;
     this.scene.car.setTexture(
-      this.scene.registry.get("gameMode") === 'christmas' ? 'carShieldChristmas' : 'carShield'
+      this.scene.registry.get('gameMode') === 'christmas' ? 'carShieldChristmas' : 'carShield',
     );
     this.scene.sound.play('shield-collected', { volume: 0.3 });
 
@@ -366,7 +365,7 @@ export default class ItemManager {
       this.schildAktivCar1 = false;
       this.scene.car.alpha = 1;
       this.scene.car.setTexture(
-        this.scene.registry.get("gameMode") === 'christmas' ? 'winter-car' : 'car'
+        this.scene.registry.get('gameMode') === 'christmas' ? 'winter-car' : 'car',
       );
 
       this.scene.sound.play('shield-over', { volume: 0.3 });
@@ -385,7 +384,7 @@ export default class ItemManager {
       const oldWidth = car.displayWidth;
       const oldHeight = car.displayHeight;
 
-      if (this.scene.registry.get("gameMode") === 'christmas') {
+      if (this.scene.registry.get('gameMode') === 'christmas') {
         car.setTexture('carShieldChristmas2');
       } else {
         car.setTexture('carShield2');
@@ -408,8 +407,8 @@ export default class ItemManager {
 
         this.scene.tweens.killTweensOf(car);
         car.alpha = 1;
-        
-        if (this.scene.registry.get("gameMode") === 'christmas') {
+
+        if (this.scene.registry.get('gameMode') === 'christmas') {
           car.setTexture('winter-car2');
         } else {
           car.setTexture('car2');
@@ -428,7 +427,7 @@ export default class ItemManager {
 
     this.schildAktivCar2 = true;
     this.scene.secondCar.setTexture(
-      this.scene.registry.get("gameMode") === 'christmas' ? 'carShieldChristmas2' : 'carShield2'
+      this.scene.registry.get('gameMode') === 'christmas' ? 'carShieldChristmas2' : 'carShield2',
     );
     this.scene.sound.play('shield-collected', { volume: 0.3 });
 
@@ -450,7 +449,7 @@ export default class ItemManager {
       this.schildAktivCar2 = false;
       this.scene.secondCar.alpha = 1;
       this.scene.secondCar.setTexture(
-        this.scene.registry.get("gameMode") === 'christmas' ? 'winter-car2' : 'car2'
+        this.scene.registry.get('gameMode') === 'christmas' ? 'winter-car2' : 'car2',
       );
 
       this.scene.sound.play('shield-over', { volume: 0.3 });

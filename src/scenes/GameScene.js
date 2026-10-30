@@ -90,13 +90,13 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image(
       'carShieldChristmas',
-      'assets/images/entities/player-skins/player-states/winter-car-P1-shield.png'
-    )
+      'assets/images/entities/player-skins/player-states/winter-car-P1-shield.png',
+    );
 
     this.load.image(
       'carShieldChristmas2',
-      'assets/images/entities/player-skins/player-states/winter-car-P2-shield.png'
-    )
+      'assets/images/entities/player-skins/player-states/winter-car-P2-shield.png',
+    );
 
     this.load.image(
       'blinkLeft',
