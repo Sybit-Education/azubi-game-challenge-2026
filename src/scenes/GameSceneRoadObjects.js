@@ -173,7 +173,7 @@ export function createRoadObject(scene, type) {
   if (type === 'coin') {
     delay = Phaser.Math.Between(500, 2000);
   } else if (type === 'item') {
-    delay = Phaser.Math.Between(5000, 10000);
+    delay = Phaser.Math.Between(500, 1000);
   } else if (type === 'enemy-car') {
     delay = Phaser.Math.Between(1000, 2000);
   } else if (type === 'ice') {

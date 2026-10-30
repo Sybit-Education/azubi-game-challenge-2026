@@ -37,6 +37,8 @@ export default class ItemManager {
       this.itemHeartPrize = 30;
     }
 
+    this.nauseaTweenActive = false;
+    this.nauseaCount = 0;
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
 
@@ -488,6 +490,18 @@ export default class ItemManager {
 
   itemNausea() {
     console.log('Nausea');
+
+    if (this.nauseaTweenActive) {
+      this.nauseaCount++;
+      return;
+    }
+
+    this.startNauseaTween();
+  }
+
+  startNauseaTween() {
+    this.nauseaTweenActive = true;
+
     this.scene.tweens.add({
       targets: this.scene.cameras.main,
       rotation: 0.05,
@@ -495,6 +509,17 @@ export default class ItemManager {
       duration: 500,
       yoyo: true,
       repeat: 2.5,
+      onComplete: () => {
+        this.scene.cameras.main.rotation = 0;
+        this.scene.cameras.main.zoom = 1;
+
+        if (this.nauseaCount > 0) {
+          this.nauseaCount--;
+          this.startNauseaTween();
+        } else {
+          this.nauseaTweenActive = false;
+        }
+      },
     });
   }
 
@@ -535,7 +560,7 @@ export default class ItemManager {
   }
 
   itemRandom1() {
-    const random = Phaser.Math.Between(1, 5);
+    const random = 4; //Phaser.Math.Between(1, 5);
 
     if (random === 1) {
       return this.itemShrinkCar1();
