@@ -88,7 +88,7 @@ Thanks for playing!
     creditsContent.textContent = creditText;
     creditsUI.hidden = false;
 
-    let skipText = 'Press SPACE to Toggle pause';
+    const pauseHint = 'Press SPACE to Pause';
 
     this.width = this.scale.width;
     this.height = this.scale.height;
@@ -109,6 +109,7 @@ Thanks for playing!
     let lineY = 0;
     let previousText = '';
     let addedBlankLine = false;
+    let thanksText;
 
     const creditLines = creditText.trim().split('\n');
     creditLines.forEach((line, index) => {
@@ -134,16 +135,17 @@ Thanks for playing!
             ? 50 * this.scaleFactor
             : bodyFontSize;
 
-      creditTextContainer.add(
-        this.add
-          .text(0, lineY, text, {
-            fontSize: `${fontSize}px`,
-            fontFamily: 'Silkscreen',
-            color: '#FEFEFE',
-            align: 'center',
-          })
-          .setOrigin(0.5, 0),
-      );
+      const creditLine = this.add
+        .text(0, lineY, text, {
+          fontSize: `${fontSize}px`,
+          fontFamily: 'Silkscreen',
+          color: '#FEFEFE',
+          align: 'center',
+        })
+        .setOrigin(0.5, 0);
+      creditTextContainer.add(creditLine);
+      if (text === 'Thanks for playing!') thanksText = creditLine;
+
       lineY += fontSize * 1.2;
       if (text === 'SYBIT KART') {
         lineY += bodyFontSize * 3;
@@ -168,25 +170,25 @@ Thanks for playing!
 
     this.scroll = this.tweens.add({
       targets: creditTextContainer,
-      y: this.height * 0.75 - lineY,
+      y: this.height / 2 - thanksText.y - thanksText.displayHeight / 2,
 
       duration: 20000,
       ease: 'Linear',
       onComplete: () => {
-        console.log('completed', this.time.now);
-        this.returnToMenu();
+        this.time.delayedCall(2500, this.returnToMenu);
       },
     });
 
     this.setupPauseOnSpace();
 
     const skipTextElement = this.add
-      .text(this.width - 40 * this.scaleFactor, this.height - 70 * this.scaleFactor, skipText, {
+      .text(this.width - 40 * this.scaleFactor, this.height - 70 * this.scaleFactor, pauseHint, {
         fontSize: `${20 * this.scaleFactor}px`,
         fontFamily: 'Silkscreen',
         color: '#FEFEFE',
       })
       .setOrigin(1, 0);
+    this.pauseHintText = skipTextElement;
 
     this.tweens.add({
       targets: skipTextElement,
@@ -212,8 +214,10 @@ Thanks for playing!
 
     if (this.scroll.isPaused()) {
       this.scroll.resume();
+      this.pauseHintText.setText('Press SPACE to Pause');
     } else {
       this.scroll.pause();
+      this.pauseHintText.setText('Press SPACE to Resume');
     }
   }
 
