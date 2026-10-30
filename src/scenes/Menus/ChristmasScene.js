@@ -515,23 +515,15 @@ export default class ChristmasScene extends Phaser.Scene {
     const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
     const axisX = padP1?.axes?.[0]?.getValue() ?? 0;
     const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
-    const menuLeft =
-      axisX < -0.2 ||
-      (padP1?.buttons?.[14]?.pressed ?? false);
-    const menuRight =
-      axisX > 0.2 ||
-      (padP1?.buttons?.[15]?.pressed ?? false);
-    const menuUp =
-      axisY < -0.2 ||
-      (padP1?.buttons?.[12]?.pressed ?? false);
-    const menuDown =
-      axisY > 0.2 ||
-      (padP1?.buttons?.[13]?.pressed ?? false);
+    const menuLeft = axisX < -0.2 || (padP1?.buttons?.[14]?.pressed ?? false);
+    const menuRight = axisX > 0.2 || (padP1?.buttons?.[15]?.pressed ?? false);
+    const menuUp = axisY < -0.2 || (padP1?.buttons?.[12]?.pressed ?? false);
+    const menuDown = axisY > 0.2 || (padP1?.buttons?.[13]?.pressed ?? false);
     const rightPressed =
       menuRight && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
-    const leftPressed = menuLeft && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
-    const downPressed =
-      menuDown && this.hasReadVerticalInput && !this.previousVerticalInput.down;
+    const leftPressed =
+      menuLeft && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
+    const downPressed = menuDown && this.hasReadVerticalInput && !this.previousVerticalInput.down;
     const upPressed = menuUp && this.hasReadVerticalInput && !this.previousVerticalInput.up;
     this.previousHorizontalInput.left = menuLeft;
     this.previousHorizontalInput.right = menuRight;

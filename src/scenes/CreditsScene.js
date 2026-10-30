@@ -151,7 +151,11 @@ Thanks for playing!
           .setOrigin(0.5, 0),
       );
       lineY += fontSize * 1.2;
-      if (creditHeadings.includes(text) && text !== 'SYBIT KART' && text !== 'Thanks for playing!') {
+      if (
+        creditHeadings.includes(text) &&
+        text !== 'SYBIT KART' &&
+        text !== 'Thanks for playing!'
+      ) {
         lineY += bodyFontSize;
       }
       if (text === 'SYBIT KART') {
