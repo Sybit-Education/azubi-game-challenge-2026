@@ -436,9 +436,9 @@ export default class GameScene extends Phaser.Scene {
     car.increase_score(value);
 
     if (car === this.car) {
-      this.ItemManager.coinBudgetPlus1(car.coinMultiplier);
+      this.ItemManager.coinBudgetPlus(1, car.coinMultiplier);
     } else if (car === this.secondCar) {
-      this.ItemManager.coinBudgetPlus2(car.coinMultiplier);
+      this.ItemManager.coinBudgetPlus(2, car.coinMultiplier);
     }
   }
 
@@ -447,9 +447,9 @@ export default class GameScene extends Phaser.Scene {
 
     item.destroy();
     if (car === this.car) {
-      this.ItemManager.itemExtraLifeCar1();
+      this.ItemManager.itemExtraLife(1);
     } else if (car === this.secondCar) {
-      this.ItemManager.itemExtraLifeCar2();
+      this.ItemManager.itemExtraLife(2);
     }
   }
 
@@ -484,9 +484,9 @@ export default class GameScene extends Phaser.Scene {
 
     item.destroy();
     if (car === this.car) {
-      this.ItemManager.itemRandom1();
+      this.ItemManager.itemRandom(1);
     } else if (car === this.secondCar) {
-      this.ItemManager.itemRandom2();
+      this.ItemManager.itemRandom(2);
     }
   }
 
