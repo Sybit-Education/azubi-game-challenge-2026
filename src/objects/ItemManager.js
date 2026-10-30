@@ -20,8 +20,8 @@ export default class ItemManager {
     this.numpad3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
     this.numpad4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
 
-    this.coinBudgetPlayer1 = 35;
-    this.coinBudgetPlayer2 = 35;
+    this.coinBudgetPlayer1 = 0;
+    this.coinBudgetPlayer2 = 0;
 
     this.coinMultiplierOnP1 = false;
     this.coinMultiplierOnP2 = false;
