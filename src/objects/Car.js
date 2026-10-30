@@ -49,9 +49,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         lifespan: 500,
         // shrinks from 0.7 to 0.3 like before, but also follows the car's size
         scale: {
-          onEmit: () => 0.7 * this.getSizeFactor(),
+          onEmit: () => 0.08 * this.getSizeFactor(),
           onUpdate: (_particle, _key, lifeProgress) => {
-            const particleScale = Phaser.Math.Linear(0.7, 0.3, lifeProgress);
+            const particleScale = Phaser.Math.Linear(0.08, 0.05, lifeProgress);
             return particleScale * this.getSizeFactor();
           },
         },
