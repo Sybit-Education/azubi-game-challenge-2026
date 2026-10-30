@@ -9,7 +9,12 @@ import {
 } from '../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
-import { parseLeaderboard } from './LeaderboardScene.js';
+import {
+  signEntry,
+  createSessionToken,
+  loadLeaderboard,
+  saveLeaderboard,
+} from '../utils/leaderboardSecurity.js';
 
 export default class GameoverScene extends Phaser.Scene {
   // Constructor
@@ -55,31 +60,73 @@ export default class GameoverScene extends Phaser.Scene {
     await document.fonts.load('32px Silkscreen');
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
-    const leaderboard = parseLeaderboard();
-    const savePlayerBest = (name, distance) => {
-      const playerKey = name.trim() ?? 'Unbekannt';
+    const { entries: leaderboard, isTampered } = await loadLeaderboard();
 
-      const existingEntry = leaderboard.find((entry) => (entry.name || 'Unbekannt') === playerKey);
-      if (existingEntry) {
-        existingEntry.distance = Math.max(existingEntry.distance, Number(distance));
-      } else {
-        leaderboard.push({ name: name || 'Unbekannt', distance: Number(distance) });
+    // Session token: stable for this browser tab, unknown to an attacker
+    // opening a fresh tab or window.  It is included in the HMAC so any entry
+    // forged without it will fail signature verification.
+    const sessionToken = createSessionToken();
+
+    /**
+     * Upserts the player's best result into the in-memory leaderboard array
+     * and returns the final entry object (not yet signed).
+     */
+    const upsertPlayerBest = (name, distance, score) => {
+      const playerKey = (name || 'Unbekannt').trim() || 'Unbekannt';
+      const dist = Number(distance) || 0;
+      const sc = Number(score) || 0;
+
+      const existing = leaderboard.find(
+        (e) => (e.name ?? 'Unbekannt').trim().toLowerCase() === playerKey.toLowerCase(),
+      );
+
+      if (existing) {
+        // Tampered entries are replaced by the real run so they are never re-signed as-is
+        const isBetter =
+          dist > existing.distance || (dist === existing.distance && sc > existing.score);
+        if (!existing.isTampered && !isBetter) return null;
+        existing.distance = dist;
+        existing.score = sc;
+        existing.token = sessionToken;
+        return existing;
       }
+
+      const newEntry = { name: playerKey, distance: dist, score: sc, token: sessionToken };
+      leaderboard.push(newEntry);
+      return newEntry;
     };
 
-    savePlayerBest(localStorage.getItem('Playername') || 'Unknown', this.distance);
+    // Collect all entries that need (re-)signing this session
+    const toSign = [];
+
+    const p1Entry = upsertPlayerBest(
+      localStorage.getItem('Playername') || 'Unknown',
+      this.distance,
+      this.score,
+    );
+    if (p1Entry) toSign.push(p1Entry);
+
     if (this.isMultiplayer) {
-      savePlayerBest(localStorage.getItem('Playername2') || 'Unknown', this.distance2);
+      const p2Entry = upsertPlayerBest(
+        localStorage.getItem('Playername2') || 'Unknown',
+        this.distance2,
+        this.score2,
+      );
+      if (p2Entry) toSign.push(p2Entry);
     }
 
-    // Sorts leaderboard
-    leaderboard.sort((a, b) => b.distance - a.distance);
+    // Re-sign only the entries touched this session
+    for (const entry of toSign) {
+      const signed = await signEntry(entry);
+      entry.sig = signed.sig;
+      entry.isTampered = false;
+    }
 
-    // Saves each player's best distance; the leaderboard scene displays only the top 10.
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+    // Sort descending by distance, then by score as tiebreaker
+    leaderboard.sort((a, b) => b.distance - a.distance || b.score - a.score);
 
-    // Debug log leader
-    console.debug(leaderboard);
+    // Persist to localStorage
+    await saveLeaderboard(leaderboard, { isTampered });
 
     // Wrapper variables
     this.width = this.scale.width;
@@ -348,7 +395,14 @@ export default class GameoverScene extends Phaser.Scene {
   // On every frame
   update() {
     this.InputManager.update();
-    if (this.InputManager.getControlsP1.button1) {
+    const controls = this.InputManager.getControlsP1;
+    const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
+    const downPressed = controls.down && this._hasReadVerticalInput && !this._previousDown;
+    this._previousUp = controls.up;
+    this._previousDown = controls.down;
+    this._hasReadVerticalInput = true;
+
+    if (upPressed) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
         this.Buttons[this.selectedIndex].y,
@@ -365,7 +419,7 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button3) {
+    if (downPressed) {
       this.deselectButton(
         this.Buttons[this.selectedIndex].button,
         this.Buttons[this.selectedIndex].y,
@@ -382,8 +436,10 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (this.InputManager.getControlsP1.button2) {
+    if (controls.button3) {
       this.Buttons[this.selectedIndex].action?.();
+    } else if (controls.button4) {
+      this.Buttons[1].action?.();
     }
   }
 

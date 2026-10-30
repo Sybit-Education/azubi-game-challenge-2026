@@ -85,7 +85,7 @@ export default class CreditsScene extends Phaser.Scene {
       ease: 'Linear',
     });
 
-    const returnToMenu = () => {
+    this.returnToMenu = () => {
       playMenuClick(this);
       const menuScene =
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
@@ -93,8 +93,7 @@ export default class CreditsScene extends Phaser.Scene {
       this.scene.start(menuScene, { focusTarget: 'credit-btn' });
     };
 
-    this.input.keyboard.on('keydown-SPACE', returnToMenu);
-    this.input.keyboard.on('keydown-ESC', returnToMenu);
+    this.input.keyboard.on('keydown-SPACE', this.returnToMenu);
 
     const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {
       fontSize: '24px',
@@ -111,8 +110,7 @@ export default class CreditsScene extends Phaser.Scene {
 
     this.events.once('shutdown', () => {
       creditsUI.hidden = true;
-      this.input.keyboard.off('keydown-SPACE', returnToMenu);
-      this.input.keyboard.off('keydown-ESC', returnToMenu);
+      this.input.keyboard.off('keydown-SPACE', this.returnToMenu);
     });
   }
 
@@ -120,11 +118,7 @@ export default class CreditsScene extends Phaser.Scene {
     this.InputManager.update();
 
     if (this.InputManager.getControlsP1.button4) {
-      if (this.registry.get('gameMode') === 'christmas') {
-        this.scene.start('ChristmasScene');
-      } else {
-        this.scene.start('MenuScene');
-      }
+      this.returnToMenu();
     }
   }
 }

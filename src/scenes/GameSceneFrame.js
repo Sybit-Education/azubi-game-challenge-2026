@@ -1,4 +1,5 @@
 import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
+import { safePlay } from '../../audio/safePlay.js';
 
 function updatePlayerOne(scene) {
   if (scene.car.dead) return;
@@ -19,8 +20,10 @@ function updatePlayerOne(scene) {
     if (edgeChanged && currentRoadEdge !== null) {
       scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
       const pan = currentRoadEdge === 'left' ? -1 : 1;
-      scene.sound.play('road-edge-hit', { volume: 0.25, pan });
-      scene.sound.play('collision-hit', { volume: 0.15, pan });
+
+      // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
+      safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
+      safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
     }
   }
 
@@ -72,6 +75,33 @@ function updateAudio(scene, delta) {
   scene.carPassBy.update(carsForAudio);
 }
 
+function updateOverlapCheck(scene) {
+  if (!scene.secondCar || scene.secondCar.dead) return; // single player has no second car
+
+  let onTop = false;
+
+  scene.physics.overlap(
+    scene.car,
+    scene.secondCar,
+    () => {
+      // only runs when they overlap at least 50%
+      onTop = true;
+    },
+    (a, b) => {
+      const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
+      const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
+      const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
+      return overlapPercent >= 0.5;
+    },
+  );
+
+  // shield and extra life already blink the alpha, don't fight them
+  if (scene.ItemManager.schildAktivCar2 || scene.ItemManager.invulnerableCar2) return;
+
+  const targetAlpha = onTop ? 0.5 : 1;
+  scene.secondCar.alpha += (targetAlpha - scene.secondCar.alpha) * 0.1; // 10% closer each frame
+}
+
 function updateTrackAndHud(scene, delta) {
   const targetTrackSpeed = Math.min(1600, 700 + scene.elapsedTime * 0.005);
   scene.track1.speed = targetTrackSpeed;
@@ -107,6 +137,7 @@ export function updateGameScene(scene, delta) {
   updatePlayerOne(scene);
   updateRoadEdgeScrape(scene);
   updatePlayerTwo(scene);
+  updateOverlapCheck(scene);
   updateRoadObjects(scene, delta);
   updateAudio(scene, delta);
   updateTrackAndHud(scene, delta);

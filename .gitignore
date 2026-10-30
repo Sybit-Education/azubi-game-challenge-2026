@@ -6,6 +6,18 @@ npm-debug.log*
 
 # graphify-axet
 .graphify/
+.axet-plugin/
+.claude/
+.codex/
+.copilot/
+.gemini/
+.opencode/
 
 # Windows download metadata
 *:Zone.Identifier
+.axet-plugin/
+.claude/
+.codex/
+.copilot/
+.gemini/
+.opencode/

@@ -49,7 +49,7 @@ export default class StartScene extends Phaser.Scene {
 
     this.load.image('track', 'assets/images/race-track-assets/road.png');
     this.load.image('border', 'assets/images/race-track-assets/border.png');
-    this.load.image('background', 'assets/images/map-skins/hintergrund.png');
+    this.load.image('background', 'assets/images/map-skins/background-sybit-city.png');
     this.load.image('background-winter', 'assets/images/map-skins/background-winter-map.png');
     this.load.image('starting_Banner', 'assets/images/race-track-assets/starting-banner.png');
     this.load.image('startingLine', 'assets/images/race-track-assets/starting-and-finish-line.png');
@@ -138,7 +138,7 @@ export default class StartScene extends Phaser.Scene {
       this.car = new Car(this, this.scale.width / 2 - 90, this.scale.height / 1.2, 'car');
       this.car.body.setSize(this.car.displayWidth * 1.25, this.car.displayHeight * 1.25);
 
-      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2');
+      this.secondCar = new Car(this, this.scale.width / 2 + 90, this.scale.height / 1.2, 'car2', 2);
       this.secondCar.body.setSize(
         this.secondCar.displayWidth * 1.25,
         this.secondCar.displayHeight * 1.25,
@@ -152,6 +152,14 @@ export default class StartScene extends Phaser.Scene {
   createTrack() {
     this.track1 = new Track(this, this.scale.width / 2, 0);
     this.track2 = new Track(this, this.scale.width / 2, -this.scale.height);
+    const laneCount = 4;
+    const laneWidth = this.track1.displayWidth / laneCount;
+    const roadLeft = this.track1.x - this.track1.displayWidth / 2;
+
+    for (const car of [this.car, this.secondCar]) {
+      if (!car) continue;
+      car.x = roadLeft + (car.currentLane + 0.5) * laneWidth;
+    }
   }
 
   spawnStartingBanner() {
@@ -223,9 +231,9 @@ export default class StartScene extends Phaser.Scene {
     this.InputManager.update();
     if (
       this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button2 ||
+      this.InputManager.getControlsP1.button3 ||
       this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button2
+      this.InputManager.getControlsP2.button3
     ) {
       this.goToGame();
     }

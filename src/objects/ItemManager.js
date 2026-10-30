@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import InputManager from './InputManager.js';
 
 const MAGNET_DURATION_MS = 10000;
 const MAGNET_RANGE = 600;
@@ -6,6 +7,18 @@ const MAGNET_RANGE = 600;
 export default class ItemManager {
   constructor(scene) {
     this.scene = scene;
+    this.inputManager = new InputManager(scene);
+    this.inputManager.create();
+    scene.InputManager = this.inputManager;
+
+    this.key1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+    this.key2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+    this.key3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+    this.key4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+    this.numpad1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
+    this.numpad2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
+    this.numpad3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
+    this.numpad4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
 
     this.coinBudgetPlayer1 = 35;
     this.coinBudgetPlayer2 = 35;
@@ -18,6 +31,14 @@ export default class ItemManager {
     this.itemHeartPrize = 40;
     this.itemMagnetPrize = 35;
 
+    if (this.scene.isMultiplayer) {
+      this.itemShieldPrize = 25;
+      this.itemShrinkPrize = 15;
+      this.itemHeartPrize = 30;
+    }
+
+    this.nauseaTweenActive = false;
+    this.nauseaCount = 0;
     this.schildAktivCar1 = false;
     this.schildAktivCar2 = false;
 
@@ -26,81 +47,189 @@ export default class ItemManager {
     this.invulnerableCar1 = false;
     this.invulnerableCar2 = false;
 
+    this.carshrinkP1 = false;
+    this.carshrinkP2 = false;
+    this.cargrowP1 = false;
+    this.cargrowP2 = false;
     this.originScale = this.scene.car.scale;
+    this.carScaleTweens = new WeakMap();
+  }
+
+  animateCarScale(car, scale) {
+    this.carScaleTweens.get(car)?.stop();
+
+    const tween = this.scene.tweens.add({
+      targets: car,
+      scaleX: scale,
+      scaleY: scale,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+
+    this.carScaleTweens.set(car, tween);
+  }
+
+  removeOldPowerupTimer(texture, player) {
+    const list = player === 1 ? this.scene.hud.activePowerupsP1 : this.scene.hud.activePowerupsP2;
+
+    const index = list.findIndex((powerup) => powerup.type === texture);
+
+    if (index !== -1) {
+      const oldPowerup = list[index];
+
+      oldPowerup.icon.destroy();
+      oldPowerup.overlay.destroy();
+
+      list.splice(index, 1);
+      this.scene.hud.layoutPowerups();
+    }
   }
 
   itemShrinkCar1() {
     console.log('shrink');
-    this.scene.hud.showPowerupTimer('shrink', 10000, 0.1, 1);
+    this.carshrinkP1 = true;
+    const texture = 'shrink';
     const car = this.scene.car;
 
-    car.setScale(this.originScale * 0.5);
+    this.removeOldPowerupTimer(texture, 1);
 
-    this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+    this.scene.hud.showPowerupTimer(texture, 10000, 0.1, 1);
+
+    if (this.growTimerP1) {
+      this.growTimerP1.remove();
+      this.growTimerP1 = null;
+      this.cargrowP1 = false;
+    }
+
+    if (this.shrinkTimerP1) {
+      this.shrinkTimerP1.remove();
+    }
+
+    this.animateCarScale(car, this.originScale * 0.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
+
+    this.shrinkTimerP1 = this.scene.time.delayedCall(10100, () => {
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
+      this.shrinkTimerP1 = null;
+      this.carshrinkP1 = false;
     });
   }
 
   itemShrinkCar2() {
-    console.log('Shrink 2');
-    this.scene.hud.showPowerupTimer('shrink', 10000, 0.1, 2);
+    console.log('shrink');
+    this.carshrinkP2 = true;
+    const texture = 'shrink';
     const car = this.scene.secondCar;
 
-    car.setScale(this.originScale * 0.5);
+    this.removeOldPowerupTimer(texture, 2);
 
-    this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+    this.scene.hud.showPowerupTimer(texture, 10000, 0.1, 2);
+
+    if (this.growTimerP2) {
+      this.growTimerP2.remove();
+      this.growTimerP2 = null;
+      this.cargrowP2 = false;
+    }
+
+    if (this.shrinkTimerP2) {
+      this.shrinkTimerP2.remove();
+    }
+
+    this.animateCarScale(car, this.originScale * 0.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
+
+    this.shrinkTimerP2 = this.scene.time.delayedCall(10100, () => {
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
+      this.shrinkTimerP2 = null;
+      this.carshrinkP2 = false;
     });
   }
 
   itemGrowCar1() {
     console.log('grow');
-    this.scene.hud.showPowerupTimer('grow', 10000, 0.04, 1);
+    this.cargrowP1 = true;
 
+    const texture = 'grow';
     const car = this.scene.car;
 
-    car.setScale(this.originScale * 1.5);
-    this.scene.sound.play('plant-grow', { volume: 0.3 });
+    this.removeOldPowerupTimer(texture, 1);
 
-    this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+    this.scene.hud.showPowerupTimer(texture, 10000, 0.04, 1);
+
+    if (this.shrinkTimerP1) {
+      this.shrinkTimerP1.remove();
+      this.shrinkTimerP1 = null;
+      this.carshrinkP1 = false;
+    }
+
+    if (this.growTimerP1) {
+      this.growTimerP1.remove();
+    }
+
+    this.animateCarScale(car, this.originScale * 1.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
+
+    this.growTimerP1 = this.scene.time.delayedCall(10000, () => {
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
+
+      this.growTimerP1 = null;
+      this.cargrowP1 = false;
     });
   }
 
   itemGrowCar2() {
-    console.log('grow 2');
-    this.scene.hud.showPowerupTimer('grow', 10000, 0.04, 2);
+    console.log('grow');
+    this.cargrowP2 = true;
+
+    const texture = 'grow';
     const car = this.scene.secondCar;
 
-    car.setScale(this.originScale * 1.5);
-    this.scene.sound.play('plant-grow', { volume: 0.3 });
+    this.removeOldPowerupTimer(texture, 2);
 
-    this.scene.time.delayedCall(10000, () => {
-      car.setScale(this.originScale);
+    this.scene.hud.showPowerupTimer(texture, 10000, 0.04, 2);
+
+    if (this.shrinkTimerP2) {
+      this.shrinkTimerP2.remove();
+      this.shrinkTimerP2 = null;
+      this.carshrinkP2 = false;
+    }
+
+    if (this.growTimerP2) {
+      this.growTimerP2.remove();
+    }
+
+    this.animateCarScale(car, this.originScale * 1.5);
+    this.scene.sound.play('change-size', { volume: 0.3 });
+
+    this.growTimerP2 = this.scene.time.delayedCall(10000, () => {
+      this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
+
+      this.growTimerP2 = null;
+      this.cargrowP2 = false;
     });
   }
 
   itemExtraLifeCar1() {
     console.log('extralife collected');
     this.scene.hud.displayExtraLife(1);
+    this.scene.sound.play('collect-extra-life', { volume: 0.3 });
 
     if (!this.extraLifeActiveCar1) {
       this.extraLifeActiveCar1 = true;
-      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
   itemExtraLifeCar2() {
     console.log('extralife collected');
     this.scene.hud.displayExtraLife(2);
+    this.scene.sound.play('collect-extra-life', { volume: 0.3 });
 
     if (!this.extraLifeActiveCar2) {
       this.extraLifeActiveCar2 = true;
-      this.scene.sound.play('collect-extra-life', { volume: 0.3 });
     }
   }
 
@@ -204,6 +333,43 @@ export default class ItemManager {
 
       });
     }
+
+    if (this.shieldBlinkTimerCar1) {
+      this.shieldBlinkTweenCar1?.stop();
+      this.shieldBlinkTweenCar1 = null;
+      this.shieldBlinkTimerCar1.remove();
+    }
+
+    this.scene.car.alpha = 1;
+
+    this.schildAktivCar1 = true;
+    this.scene.car.setTexture('carShield');
+    this.scene.sound.play('shield-collected', { volume: 0.3 });
+
+    this.shieldBlinkTimerCar1 = this.scene.time.delayedCall(4500, () => {
+      this.shieldBlinkTweenCar1?.stop();
+      this.shieldBlinkTweenCar1 = null;
+      this.shieldBlinkTweenCar1 = this.scene.tweens.add({
+        targets: this.scene.car,
+        alpha: 0.2,
+        duration: 700,
+        yoyo: true,
+        repeat: -1,
+      });
+    });
+
+    this.shieldTimerCar1 = this.scene.time.delayedCall(8000, () => {
+      this.shieldBlinkTweenCar1?.stop();
+      this.shieldBlinkTweenCar1 = null;
+      this.schildAktivCar1 = false;
+      this.scene.car.alpha = 1;
+      this.scene.car.setTexture('car');
+
+      this.scene.sound.play('shield-over', { volume: 0.3 });
+
+      this.shieldTimerCar1 = null;
+      this.shieldBlinkTimerCar1 = null;
+    });
   }
 
   itemShieldCar2() {
@@ -247,6 +413,43 @@ export default class ItemManager {
         car.setDisplaySize(oldWidth, oldHeight);
       });
     }
+
+    if (this.shieldBlinkTimerCar2) {
+      this.shieldBlinkTweenCar2?.stop();
+      this.shieldBlinkTweenCar2 = null;
+      this.shieldBlinkTimerCar2.remove();
+    }
+
+    this.scene.secondCar.alpha = 1;
+
+    this.schildAktivCar2 = true;
+    this.scene.secondCar.setTexture('carShield2');
+    this.scene.sound.play('shield-collected', { volume: 0.3 });
+
+    this.shieldBlinkTimerCar2 = this.scene.time.delayedCall(4500, () => {
+      this.shieldBlinkTweenCar2?.stop();
+      this.shieldBlinkTweenCar2 = null;
+      this.shieldBlinkTweenCar2 = this.scene.tweens.add({
+        targets: this.scene.secondCar,
+        alpha: 0.2,
+        duration: 700,
+        yoyo: true,
+        repeat: -1,
+      });
+    });
+
+    this.shieldTimerCar2 = this.scene.time.delayedCall(8000, () => {
+      this.shieldBlinkTweenCar2?.stop();
+      this.shieldBlinkTweenCar2 = null;
+      this.schildAktivCar2 = false;
+      this.scene.secondCar.alpha = 1;
+      this.scene.secondCar.setTexture('car2');
+
+      this.scene.sound.play('shield-over', { volume: 0.3 });
+
+      this.shieldTimerCar2 = null;
+      this.shieldBlinkTimerCar2 = null;
+    });
   }
 
   itemMagnetCar1() {
@@ -258,34 +461,57 @@ export default class ItemManager {
   }
 
   activateMagnet(car, player) {
-    if (!car || !car.active || car.dead || car.magnetActive) return false;
+    if (!car || !car.active || car.dead) {
+      return false;
+    }
+
+    const texture = 'magnet';
+    this.removeOldPowerupTimer(texture, player);
+    this.scene.hud.showPowerupTimer(texture, MAGNET_DURATION_MS, 0.2, player);
+    this.scene.sound.play('collect-magnet', { volume: 0.3 });
+
+    const timerKey = player === 1 ? 'magnetTimerP1' : 'magnetTimerP2';
+    const eventKey = player === 1 ? 'magnetEventP1' : 'magnetEventP2';
+
+    this[timerKey]?.remove();
+    this[eventKey]?.remove();
 
     car.magnetActive = true;
-    this.scene.sound.play('collect-magnet', { volume: 0.3 });
-    this.scene.hud.showPowerupTimer('magnet', MAGNET_DURATION_MS, 0.2, player);
 
-    const magnet = this.scene.time.addEvent({
+    this[eventKey] = this.scene.time.addEvent({
       delay: 16,
       loop: true,
       callback: () => {
-        if (!car.active || car.dead) return;
-        for (const object of this.scene.roadObjects) {
-          if (!object.active || object.texture?.key !== 'coin') continue;
-
-          const distance = Phaser.Math.Distance.Between(car.x, car.y, object.x, object.y);
-          if (distance < MAGNET_RANGE) {
-            object.x += (car.x - object.x) * 0.1;
-            object.y += (car.y - object.y) * 0.1;
-          }
+        if (!car.active || car.dead) {
+          return;
         }
+        this.updateMagnet(car);
       },
     });
 
-    this.scene.time.delayedCall(MAGNET_DURATION_MS, () => {
+    this[timerKey] = this.scene.time.delayedCall(MAGNET_DURATION_MS, () => {
       car.magnetActive = false;
-      magnet.remove();
+      this[eventKey]?.remove();
+      this[eventKey] = null;
+      this[timerKey] = null;
     });
+
     return true;
+  }
+
+  updateMagnet(car) {
+    for (const object of this.scene.roadObjects) {
+      if (!object.active || object.texture?.key !== 'coin') {
+        continue;
+      }
+
+      const distance = Phaser.Math.Distance.Between(car.x, car.y, object.x, object.y);
+
+      if (distance < MAGNET_RANGE) {
+        object.x += (car.x - object.x) * 0.1;
+        object.y += (car.y - object.y) * 0.1;
+      }
+    }
   }
 
   // Checks health for car 1
@@ -311,7 +537,12 @@ export default class ItemManager {
     this.scene.gameOver(car);
   }
 
-  lebenCheckCar2(car) {
+  lebenCheckCar2(car, object) {
+    if (object.texture.key === 'random-object2') {
+      this.yeet(object);
+      return;
+    }
+
     if (this.invulnerableCar2) {
       return;
     }
@@ -323,12 +554,23 @@ export default class ItemManager {
       this.useExtraLifeCar2(car);
       return;
     }
-
     this.scene.gameOver(car);
   }
 
   itemNausea() {
     console.log('Nausea');
+
+    if (this.nauseaTweenActive) {
+      this.nauseaCount++;
+      return;
+    }
+
+    this.startNauseaTween();
+  }
+
+  startNauseaTween() {
+    this.nauseaTweenActive = true;
+
     this.scene.tweens.add({
       targets: this.scene.cameras.main,
       rotation: 0.05,
@@ -336,6 +578,17 @@ export default class ItemManager {
       duration: 500,
       yoyo: true,
       repeat: 2.5,
+      onComplete: () => {
+        this.scene.cameras.main.rotation = 0;
+        this.scene.cameras.main.zoom = 1;
+
+        if (this.nauseaCount > 0) {
+          this.nauseaCount--;
+          this.startNauseaTween();
+        } else {
+          this.nauseaTweenActive = false;
+        }
+      },
     });
   }
 
@@ -419,15 +672,25 @@ export default class ItemManager {
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
-    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, -1, car.lanes.length);
 
-    car.currentLane = targetLane;
+    // lane -1 or 4 doesn't exist, so the car slides into the wall instead
+    // bumpWall blocks lane changes on its own until the car is back, so no input lock needed
+    if (targetLane === -1) {
+      car.inputLocked = false;
+      car.bumpWall('left');
+    } else if (targetLane === car.lanes.length) {
+      car.inputLocked = false;
+      car.bumpWall('right');
+    } else {
+      car.currentLane = targetLane;
 
-    this.scene.tweens.add({
-      targets: car,
-      x: car.lanes[targetLane],
-      duration: 1250,
-    });
+      this.scene.tweens.add({
+        targets: car,
+        x: car.lanes[targetLane],
+        duration: 1250,
+      });
+    }
 
     this.scene.time.delayedCall(1500, () => {
       car.iceTriggered = false;
@@ -447,15 +710,25 @@ export default class ItemManager {
 
     let direction = Phaser.Math.Between(0, 1) ? 1 : -1;
 
-    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, 0, car.lanes.length - 1);
+    let targetLane = Phaser.Math.Clamp(car.currentLane + direction, -1, car.lanes.length);
 
-    car.currentLane = targetLane;
+    // lane -1 or 4 doesn't exist, so the car slides into the wall instead
+    // bumpWall blocks lane changes on its own until the car is back, so no input lock needed
+    if (targetLane === -1) {
+      car.inputLocked = false;
+      car.bumpWall('left');
+    } else if (targetLane === car.lanes.length) {
+      car.inputLocked = false;
+      car.bumpWall('right');
+    } else {
+      car.currentLane = targetLane;
 
-    this.scene.tweens.add({
-      targets: car,
-      x: car.lanes[targetLane],
-      duration: 1250,
-    });
+      this.scene.tweens.add({
+        targets: car,
+        x: car.lanes[targetLane],
+        duration: 1250,
+      });
+    }
 
     this.scene.time.delayedCall(1500, () => {
       car.oilTriggered = false;
@@ -475,50 +748,47 @@ export default class ItemManager {
     console.log('multiplier: ' + multiplier);
   }
 
-  multiplyCoins1(car, item) {
-    if (car.multiplierTimer) {
-      car.multiplierTimer.remove();
-    }
+  multiplyCoins(car, player, item) {
+    const texture = 'coinMultiplier';
 
-    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.6 });
+    this.removeOldPowerupTimer(texture, player);
+
+    this.scene.sound.play('coin-multiplier-picked-up', {
+      volume: player === 1 ? 0.6 : 0.3,
+    });
+
     console.log('Multiplier enabled');
-    this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 1);
+
+    this.scene.hud.showPowerupTimer(texture, 10000, 0.03, player);
+
+    car.multiplierTimer?.remove();
 
     car.coinMultiplier = 2;
+
     car.multiplierTimer = this.scene.time.delayedCall(10000, () => {
       car.coinMultiplier = 1;
+      car.multiplierTimer = null;
+
       console.log('Multiplier disabled');
     });
 
     item.destroy();
+  }
+
+  multiplyCoins1(car, item) {
+    this.multiplyCoins(car, 1, item);
   }
 
   multiplyCoins2(car, item) {
-    if (car.multiplierTimer) {
-      car.multiplierTimer.remove();
-    }
-
-    this.scene.sound.play('coin-multiplier-picked-up', { volume: 0.3 });
-    console.log('Multiplier enabled');
-    this.scene.hud.showPowerupTimer('coinMultiplier', 10000, 0.03, 2);
-    car.coinMultiplier = 2;
-    car.multiplierTimer = this.scene.time.delayedCall(10000, () => {
-      car.coinMultiplier = 1;
-      console.log('Multiplier disabled');
-    });
-
-    item.destroy();
+    this.multiplyCoins(car, 2, item);
   }
 
   itemShop() {
-    // Hotkeys Player1
-    this.key1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
-    this.key2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
-    this.key3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
-    this.key4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+    const controlsP1 = this.inputManager.getControlsP1;
+    const controlsP2 = this.inputManager.getControlsP2;
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key1) &&
+      (Phaser.Input.Keyboard.JustDown(this.key1) || controlsP1.button1) &&
       this.coinBudgetPlayer1 >= this.itemShieldPrize
     ) {
       this.itemShieldCar1();
@@ -526,7 +796,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key2) &&
+      (Phaser.Input.Keyboard.JustDown(this.key2) || controlsP1.button2) &&
       this.coinBudgetPlayer1 >= this.itemShrinkPrize
     ) {
       this.itemShrinkCar1();
@@ -534,8 +804,9 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.key3) &&
-      this.coinBudgetPlayer1 >= this.itemHeartPrize
+      (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
+      this.coinBudgetPlayer1 >= this.itemHeartPrize &&
+      !this.extraLifeActiveCar1
     ) {
       this.itemExtraLifeCar1();
       this.coinBudgetPlayer1 -= this.itemHeartPrize;
@@ -549,14 +820,8 @@ export default class ItemManager {
       this.coinBudgetPlayer1 -= this.itemMagnetPrize;
     }
 
-    // Hotkeys Player2
-    this.numpad1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
-    this.numpad2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
-    this.numpad3 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
-    this.numpad4 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
-
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad1) &&
+      (Phaser.Input.Keyboard.JustDown(this.numpad1) || controlsP2.button1) &&
       this.coinBudgetPlayer2 >= this.itemShieldPrize
     ) {
       this.itemShieldCar2();
@@ -564,7 +829,7 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad2) &&
+      (Phaser.Input.Keyboard.JustDown(this.numpad2) || controlsP2.button2) &&
       this.coinBudgetPlayer2 >= this.itemShrinkPrize
     ) {
       this.itemShrinkCar2();
@@ -572,8 +837,9 @@ export default class ItemManager {
     }
 
     if (
-      Phaser.Input.Keyboard.JustDown(this.numpad3) &&
-      this.coinBudgetPlayer2 >= this.itemHeartPrize
+      (Phaser.Input.Keyboard.JustDown(this.numpad3) || controlsP2.button3) &&
+      this.coinBudgetPlayer2 >= this.itemHeartPrize &&
+      !this.extraLifeActiveCar2
     ) {
       this.itemExtraLifeCar2();
       this.coinBudgetPlayer2 -= this.itemHeartPrize;

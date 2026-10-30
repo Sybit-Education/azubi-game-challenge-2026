@@ -454,7 +454,9 @@ export default class MenuScene extends Phaser.Scene {
 
     this.selectedIndex = 0;
     this.previousHorizontalInput = { left: false, right: false };
+    this.previousVerticalInput = { up: false, down: false };
     this.hasReadHorizontalInput = false;
+    this.hasReadVerticalInput = false;
 
     this.selectButton(this.menuButtons[0].button);
   }
@@ -466,9 +468,15 @@ export default class MenuScene extends Phaser.Scene {
       controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
     const leftPressed =
       controls.left && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
+    const downPressed =
+      controls.down && this.hasReadVerticalInput && !this.previousVerticalInput.down;
+    const upPressed = controls.up && this.hasReadVerticalInput && !this.previousVerticalInput.up;
     this.previousHorizontalInput.left = controls.left;
     this.previousHorizontalInput.right = controls.right;
+    this.previousVerticalInput.up = controls.up;
+    this.previousVerticalInput.down = controls.down;
     this.hasReadHorizontalInput = true;
+    this.hasReadVerticalInput = true;
 
     if (rightPressed && this.selectedIndex === 0) {
       this.selectMultiplayerOption();
@@ -476,7 +484,7 @@ export default class MenuScene extends Phaser.Scene {
       this.clearMultiplayerOption();
     }
 
-    if (controls.button1) {
+    if (upPressed) {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
@@ -494,7 +502,7 @@ export default class MenuScene extends Phaser.Scene {
         this.menuButtons[this.selectedIndex].scale,
       );
     }
-    if (controls.button3) {
+    if (downPressed) {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
@@ -512,12 +520,14 @@ export default class MenuScene extends Phaser.Scene {
         this.menuButtons[this.selectedIndex].scale,
       );
     }
-    if (controls.button2) {
+    if (controls.button3) {
       if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
         this.startMultiplayer();
       } else {
         this.menuButtons[this.selectedIndex].action?.();
       }
+    } else if (controls.button4 && this.isMultiplayerSelected) {
+      this.clearMultiplayerOption();
     }
   }
 }
