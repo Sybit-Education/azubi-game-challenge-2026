@@ -38,23 +38,9 @@ export function createRoadObject(scene, type) {
 
     if (type === 'coin') {
       roadObject = new Coin(scene, roadObjectX, spawnY, lane);
-      scene.physics.add.overlap(
-        scene.car,
-        roadObject,
-        () => scene.ItemManager.coinBudgetPlus1(scene.car.coinMultiplier),
-        undefined,
-        scene,
-      );
       scene.physics.add.overlap(scene.car, roadObject, scene.collectCoin, undefined, scene);
 
       if (scene.secondCar) {
-        scene.physics.add.overlap(
-          scene.secondCar,
-          roadObject,
-          () => scene.ItemManager.coinBudgetPlus2(scene.secondCar.coinMultiplier),
-          undefined,
-          scene,
-        );
         scene.physics.add.overlap(scene.secondCar, roadObject, scene.collectCoin, undefined, scene);
       }
     } else if (type === 'coinMultiplier') {
