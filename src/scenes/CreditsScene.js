@@ -13,6 +13,7 @@ export default class CreditsScene extends Phaser.Scene {
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
     );
+    this.load.image('return-button', 'assets/images/homepage/return-button.png');
   }
 
   create() {
@@ -46,12 +47,12 @@ Jonathan Kern
 
 Development
 
-Hans Solon
-Davyd Mozghov
-Berat Dalgic
 Agwad Alsayed
-Saied Tablis
+Berat Dalgic
+Davyd Mozghov
+Hans Solon
 Jamin Ibrahimovic
+Saied Tablis
 Tobias Jentzsch
 
 Art & Graphics
@@ -62,18 +63,17 @@ Sofya Skripova
 
 UI/UX Design
 
-Sofya Skripova
-Saied Tablis
 Luisa Krasniqi
+Saied Tablis
+Sofya Skripova
 
 
 Audio
 
-Sofya Skripova
-Jamin Ibrahimovic
 Agwad Alsayed
+Jamin Ibrahimovic
 Julian Thiemann
-
+Sofya Skripova
 
 Accessibility
 
@@ -93,7 +93,7 @@ Thanks for playing!
     creditsContent.textContent = creditText;
     creditsUI.hidden = false;
 
-    let skipText = 'Press SPACE to pause';
+    const pauseHint = 'Press SPACE to Pause';
 
     this.width = this.scale.width;
     this.height = this.scale.height;
@@ -115,6 +115,7 @@ Thanks for playing!
     let lineY = 0;
     let previousText = '';
     let addedBlankLine = false;
+    let thanksText;
 
     const creditLines = creditText.trim().split('\n');
     creditLines.forEach((line, index) => {
@@ -126,7 +127,7 @@ Thanks for playing!
           .map((nextLine) => nextLine.trim())
           .find(Boolean);
         if (!addedBlankLine && previousText && !creditHeadings.includes(previousText)) {
-          lineY += bodyFontSize * (nextText === 'Thanks for playing!' ? 8 : 2);
+          lineY += bodyFontSize * (nextText === 'Thanks for playing!' ? 6 : 2);
           addedBlankLine = true;
         }
         return;
@@ -140,24 +141,18 @@ Thanks for playing!
             ? 50 * this.scaleFactor
             : bodyFontSize;
 
-      creditTextContainer.add(
-        this.add
-          .text(0, lineY, text, {
-            fontSize: `${fontSize}px`,
-            fontFamily: 'Silkscreen',
-            color: '#FEFEFE',
-            align: 'center',
-          })
-          .setOrigin(0.5, 0),
-      );
+      const creditLine = this.add
+        .text(0, lineY, text, {
+          fontSize: `${fontSize}px`,
+          fontFamily: 'Silkscreen',
+          color: '#FEFEFE',
+          align: 'center',
+        })
+        .setOrigin(0.5, 0);
+      creditTextContainer.add(creditLine);
+      if (text === 'Thanks for playing!') thanksText = creditLine;
+
       lineY += fontSize * 1.2;
-      if (
-        creditHeadings.includes(text) &&
-        text !== 'SYBIT KART' &&
-        text !== 'Thanks for playing!'
-      ) {
-        lineY += bodyFontSize;
-      }
       if (text === 'SYBIT KART') {
         lineY += bodyFontSize * 3;
       }
@@ -172,22 +167,32 @@ Thanks for playing!
       this.scene.start(menuScene, { focusTarget: 'credit-btn' });
     };
 
-    this.isCreditsPaused = false;
+    this.returnButton = this.add
+      .image(200 * this.scaleFactor, 50 * this.scaleFactor, 'return-button')
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.1 * this.scaleFactor)
+      .setOrigin(0.5)
+      .on('pointerdown', this.returnToMenu);
+
     this.scroll = this.tweens.add({
       targets: creditTextContainer,
-      y: -creditTextContainer.height * 1.2,
+      y: this.height / 2 - thanksText.y - thanksText.displayHeight / 2,
 
       duration: 20000,
       ease: 'Linear',
       onComplete: () => {
-        this.returnToMenu();
+        this.time.delayedCall(2500, this.returnToMenu);
       },
     });
 
-    const skipTextElement = this.add.text(this.width - 380, this.height - 70, skipText, {
-      fontSize: '24px',
-      color: '#FEFEFE',
-    });
+    const skipTextElement = this.add
+      .text(this.width - 40 * this.scaleFactor, this.height - 70 * this.scaleFactor, pauseHint, {
+        fontSize: `${20 * this.scaleFactor}px`,
+        fontFamily: 'Silkscreen',
+        color: '#FEFEFE',
+      })
+      .setOrigin(1, 0);
+    this.pauseHintText = skipTextElement;
 
     this.tweens.add({
       targets: skipTextElement,
@@ -202,6 +207,18 @@ Thanks for playing!
     });
   }
 
+  toggleScrollPause() {
+    if (!this.scroll) return;
+
+    if (this.scroll.isPaused()) {
+      this.scroll.resume();
+      this.pauseHintText.setText('Press SPACE to Pause');
+    } else {
+      this.scroll.pause();
+      this.pauseHintText.setText('Press SPACE to Resume');
+    }
+  }
+
   update() {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
@@ -209,12 +226,7 @@ Thanks for playing!
     if (controls.button4) {
       this.returnToMenu();
     } else if (controls.space) {
-      this.isCreditsPaused = !this.isCreditsPaused;
-      if (this.isCreditsPaused) {
-        this.scroll.pause();
-      } else {
-        this.scroll.resume();
-      }
+      this.toggleScrollPause();
     }
   }
 }
