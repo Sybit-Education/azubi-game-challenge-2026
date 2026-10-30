@@ -204,25 +204,28 @@ Thanks for playing!
 
   setupPauseOnSpace() {
     const spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    const togglePause = () => {
-      if (!this.scroll) return;
+    spaceKey.on('down', this.toggleScrollPause, this);
+    this.events.once('shutdown', () => spaceKey.off('down', this.toggleScrollPause, this));
+  }
 
-      if (this.scroll.isPaused()) {
-        this.scroll.resume();
-      } else {
-        this.scroll.pause();
-      }
-    };
+  toggleScrollPause() {
+    if (!this.scroll) return;
 
-    spaceKey.on('down', togglePause);
-    this.events.once('shutdown', () => spaceKey.off('down', togglePause));
+    if (this.scroll.isPaused()) {
+      this.scroll.resume();
+    } else {
+      this.scroll.pause();
+    }
   }
 
   update() {
     this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
 
-    if (this.InputManager.getControlsP1.button4) {
+    if (controls.button4) {
       this.returnToMenu();
+    } else if (controls.button1) {
+      this.toggleScrollPause();
     }
   }
 }
