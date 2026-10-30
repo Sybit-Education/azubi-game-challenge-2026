@@ -6,6 +6,7 @@ export default class InputManager {
     // Track previous frame states for edge-triggering buttons
     this.previousButtonP1 = [false, false, false, false];
     this.previousButtonP2 = [false, false, false, false];
+    this.previousSpace = false;
     this.hasUpdated = false;
   }
 
@@ -21,12 +22,14 @@ export default class InputManager {
       rightP2: Phaser.Input.Keyboard.KeyCodes.RIGHT,
       select: Phaser.Input.Keyboard.KeyCodes.ENTER,
       escape: Phaser.Input.Keyboard.KeyCodes.ESC,
+      space: Phaser.Input.Keyboard.KeyCodes.SPACE,
     });
   }
 
   resetButtonStates() {
     this.previousButtonP1.fill(false);
     this.previousButtonP2.fill(false);
+    this.previousSpace = false;
     this.hasUpdated = false;
   }
 
@@ -55,13 +58,14 @@ export default class InputManager {
     // Check button states for both players, defaulting to false if the gamepad isn't connected
     const button1P1 = padP1?.buttons?.[0]?.pressed ?? false;
     const button2P1 = padP1?.buttons?.[1]?.pressed ?? false;
-    const button3P1 = padP1?.buttons?.[2]?.pressed ?? false;
+    const button3P1 = (padP1?.buttons?.[2]?.pressed ?? false) || this.keys.select.isDown;
     const button4P1 = (padP1?.buttons?.[3]?.pressed ?? false) || this.keys.escape.isDown;
     const button1P2 = padP2?.buttons?.[0]?.pressed ?? false;
     const button2P2 = padP2?.buttons?.[1]?.pressed ?? false;
     const button3P2 = padP2?.buttons?.[2]?.pressed ?? false;
     const button4P2 = padP2?.buttons?.[3]?.pressed ?? false;
     const deadzone = 0.2;
+    const spaceIsDown = this.hasUpdated && this.keys.space.isDown && !this.previousSpace;
 
     // Determine "just pressed" states (true only on the exact frame the button goes down)
     const button1P1isDown = this.hasUpdated && button1P1 && !this.previousButtonP1[0];
@@ -85,6 +89,7 @@ export default class InputManager {
       button2: button2P1isDown,
       button3: button3P1isDown,
       button4: button4P1isDown,
+      space: spaceIsDown,
     };
 
     this.getControlsP2 = {
@@ -110,6 +115,7 @@ export default class InputManager {
     this.previousButtonP2[1] = button2P2;
     this.previousButtonP2[2] = button3P2;
     this.previousButtonP2[3] = button4P2;
+    this.previousSpace = this.keys.space.isDown;
     this.hasUpdated = true;
   }
 }

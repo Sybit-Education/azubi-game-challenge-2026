@@ -138,7 +138,8 @@ export default class LeaderboardScene extends Phaser.Scene {
   update() {
     this.InputManager.update();
 
-    if (this.InputManager.getControlsP1.button4) {
+    const controls = this.InputManager.getControlsP1;
+    if (controls.button4) {
       this.goHome();
     }
   }

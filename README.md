@@ -47,7 +47,7 @@ Der Ablauf:
 
 **Gamepad:** Es werden bis zu zwei Gamepads unterstützt (Spieler 1 und Spieler 2). Mit dem Stick wird gefahren, im Menü navigieren die Knöpfe.
 
-**Weitere Tasten:** Die Einstellungen schließt ihr mit `Esc` oder `M`, die Credits überspringt ihr mit der Leertaste.
+**Weitere Tasten:** Die Einstellungen schließt ihr mit `Esc` oder `M`. Mit `Esc` kommt ihr auch aus Nameingabe, Credits und Leaderboard zurück; in den Credits pausiert und startet die Leertaste den Textlauf.
 
 <a id="items-hindernisse--shop"></a>
 

@@ -9,6 +9,7 @@ import {
 } from '../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
+import { preserveNativeKeyboard } from '../accessibility/nativeKeyboard.js';
 import {
   signEntry,
   createSessionToken,
@@ -204,6 +205,8 @@ export default class GameoverScene extends Phaser.Scene {
     // Register listener
     retryGame.addEventListener('click', retryFunction);
     backToHomeScreen.addEventListener('click', backToHomeFunction);
+    preserveNativeKeyboard(this, retryGame);
+    preserveNativeKeyboard(this, backToHomeScreen);
 
     // Auto focus retry button
     retryGame.focus();
@@ -396,10 +399,16 @@ export default class GameoverScene extends Phaser.Scene {
   update() {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
-    const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
-    const downPressed = controls.down && this._hasReadVerticalInput && !this._previousDown;
-    this._previousUp = controls.up;
-    this._previousDown = controls.down;
+    const gamepad = this.input.gamepad;
+    const gamepadP1 = gamepad?.enabled ? gamepad.getPad(0) : null;
+    const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
+    const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
+    const up = axisY < -0.2 || (padP1?.buttons?.[12]?.pressed ?? false);
+    const down = axisY > 0.2 || (padP1?.buttons?.[13]?.pressed ?? false);
+    const upPressed = up && this._hasReadVerticalInput && !this._previousUp;
+    const downPressed = down && this._hasReadVerticalInput && !this._previousDown;
+    this._previousUp = up;
+    this._previousDown = down;
     this._hasReadVerticalInput = true;
 
     if (upPressed) {
@@ -436,7 +445,7 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
-    if (controls.button3) {
+    if (controls.button3 && !this.InputManager.keys.select.isDown) {
       this.Buttons[this.selectedIndex].action?.();
     } else if (controls.button4) {
       this.Buttons[1].action?.();
