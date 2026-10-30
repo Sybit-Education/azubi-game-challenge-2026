@@ -406,18 +406,14 @@ export default class PopUpScene extends Phaser.Scene {
     this.tweens.killTweensOf(this._activeModeButton);
     this.tweens.killTweensOf(this._inactiveModeButton);
 
-    // Update visibility and position
+    // Reset both buttons to the original row after swapping their roles.
     this._activeModeButton.setAlpha(1);
+    this._activeModeButton.setY(this._dropdownClosedY);
     this._inactiveModeButton.setAlpha(0).setY(this._dropdownClosedY);
 
     // Re-attach Phaser pointerdown
     this._activeModeButton.on('pointerdown', () => this._toggleDropdown());
     this._inactiveModeButton.on('pointerdown', () => this._chooseAlternateMode());
-
-    // Recalculate dropdown positions from the new active button
-    this._dropdownClosedY = this._activeModeButton.y;
-    this._dropdownOpenY =
-      this._activeModeButton.y + this._activeModeButton.displayHeight + DROPDOWN_GAP;
 
     // Update ARIA labels
     gameModeMenu.setAttribute(
