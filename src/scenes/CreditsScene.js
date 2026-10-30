@@ -93,7 +93,7 @@ Thanks for playing!
     creditsContent.textContent = creditText;
     creditsUI.hidden = false;
 
-    let skipText = 'Press ESC to exit';
+    let skipText = 'Press SPACE to pause';
 
     this.width = this.scale.width;
     this.height = this.scale.height;
@@ -168,8 +168,7 @@ Thanks for playing!
       this.scene.start(menuScene, { focusTarget: 'credit-btn' });
     };
 
-    this.input.keyboard.on('keydown-SPACE', this.returnToMenu);
-
+    this.isCreditsPaused = false;
     this.scroll = this.tweens.add({
       targets: creditTextContainer,
       y: -creditTextContainer.height * 1.2,
@@ -177,8 +176,7 @@ Thanks for playing!
       duration: 20000,
       ease: 'Linear',
       onComplete: () => {
-        console.log('completed', this.time.now);
-        returnToMenu();
+        this.returnToMenu();
       },
     });
 
@@ -197,15 +195,22 @@ Thanks for playing!
 
     this.events.once('shutdown', () => {
       creditsUI.hidden = true;
-      this.input.keyboard.off('keydown-SPACE', this.returnToMenu);
     });
   }
 
   update() {
     this.InputManager.update();
+    const controls = this.InputManager.getControlsP1;
 
-    if (this.InputManager.getControlsP1.button4) {
+    if (controls.button4) {
       this.returnToMenu();
+    } else if (controls.space) {
+      this.isCreditsPaused = !this.isCreditsPaused;
+      if (this.isCreditsPaused) {
+        this.scroll.pause();
+      } else {
+        this.scroll.resume();
+      }
     }
   }
 }
