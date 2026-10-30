@@ -68,6 +68,7 @@ function updateRoadObjects(scene, delta) {
 
 function updateAudio(scene, delta) {
   scene.laneAnnouncements.update();
+  scene.itemAnnouncements.update();
   // Update after movement so sounds use the cars' current positions.
   const carsForAudio = scene.getCarsForAudio();
   const obstaclesForAudio = scene.getObstaclesForAudio();

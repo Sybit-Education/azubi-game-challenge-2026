@@ -5,7 +5,7 @@ import EnemyCar from '../objects/EnemyCar.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
-import { preloadGameplaySounds } from '../../audio/sounds.js';
+import { preloadGameplaySounds, preloadSceneMusic, playSceneMusic } from '../../audio/sounds.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
 import ItemManager from '../objects/ItemManager.js';
@@ -14,6 +14,7 @@ import { createRoadObject } from './GameSceneRoadObjects.js';
 import RandomObstacle from '../objects/RandomObstacle.js';
 import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
+import ItemAnnouncements from '../accessibility/ItemAnnouncements.js';
 import GameSpeech from '../../audio/GameSpeech.js';
 import Flickereffect from '../scenes/FlickerEffect.js';
 
@@ -30,6 +31,11 @@ export default class GameScene extends Phaser.Scene {
   //Load images.
   preload() {
     preloadGameplaySounds(this);
+    if (this.registry.get('gameMode') === 'christmas') {
+      preloadSceneMusic(this, 'christmas-gameplay-music');
+    } else {
+      preloadSceneMusic(this, 'normal-gameplay-music');
+    }
     this.load.image(
       'car',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
@@ -159,6 +165,11 @@ export default class GameScene extends Phaser.Scene {
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
   create() {
+    if (this.registry.get('gameMode') === 'christmas') {
+      playSceneMusic(this, 'christmas-gameplay-music', 0.05);
+    } else {
+      playSceneMusic(this, 'normal-gameplay-music', 0.05);
+    }
     const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     this.secondCar = null;
@@ -179,6 +190,7 @@ export default class GameScene extends Phaser.Scene {
     });
     this.coinAnnouncements = new CoinAnnouncements(this);
     this.laneAnnouncements = new LaneAnnouncements(this);
+    this.itemAnnouncements = new ItemAnnouncements(this);
     this.createTrack();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
@@ -188,9 +200,8 @@ export default class GameScene extends Phaser.Scene {
     this.iceWarning = this.sound.add('ice-warning', { volume: 0.3 });
     this.warnedIce = new WeakMap();
 
-    // Each player car gets its own proximity sensor.
+    // Accessibility cues belong to player 1; player 2 uses the visual game.
     this.carSensors = [new CarSensor(this, this.car)];
-    if (this.secondCar) this.carSensors.push(new CarSensor(this, this.secondCar, 300));
     this.carPassBy = new CarPassBy(this, [this.car, this.secondCar].filter(Boolean));
     createRoadObject(this, 'enemy-car');
     createRoadObject(this, 'coin');
