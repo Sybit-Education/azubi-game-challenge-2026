@@ -58,7 +58,7 @@ export default class InputManager {
     // Check button states for both players, defaulting to false if the gamepad isn't connected
     const button1P1 = padP1?.buttons?.[0]?.pressed ?? false;
     const button2P1 = padP1?.buttons?.[1]?.pressed ?? false;
-    const button3P1 = padP1?.buttons?.[2]?.pressed ?? false;
+    const button3P1 = (padP1?.buttons?.[2]?.pressed ?? false) || this.keys.select.isDown;
     const button4P1 = (padP1?.buttons?.[3]?.pressed ?? false) || this.keys.escape.isDown;
     const button1P2 = padP2?.buttons?.[0]?.pressed ?? false;
     const button2P2 = padP2?.buttons?.[1]?.pressed ?? false;

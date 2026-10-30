@@ -105,7 +105,9 @@ export default class ChristmasScene extends Phaser.Scene {
       this.scene.start('LeaderboardScene');
     };
     leaderboardBtn.addEventListener('click', openLeaderboard);
-    preserveNativeKeyboard(this, leaderboardBtn);
+    [playBtn, multiplayerBtn, settingsBtn, creditBtn, leaderboardBtn].forEach((button) =>
+      preserveNativeKeyboard(this, button),
+    );
 
     const openCredits = () => {
       playMenuClick(this);
@@ -508,17 +510,33 @@ export default class ChristmasScene extends Phaser.Scene {
   update() {
     this.InputManager.update();
     const controls = this.InputManager.getControlsP1;
+    const gamepad = this.input.gamepad;
+    const gamepadP1 = gamepad?.enabled ? gamepad.getPad(0) : null;
+    const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
+    const axisX = padP1?.axes?.[0]?.getValue() ?? 0;
+    const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
+    const menuLeft =
+      axisX < -0.2 ||
+      (padP1?.buttons?.[14]?.pressed ?? false);
+    const menuRight =
+      axisX > 0.2 ||
+      (padP1?.buttons?.[15]?.pressed ?? false);
+    const menuUp =
+      axisY < -0.2 ||
+      (padP1?.buttons?.[12]?.pressed ?? false);
+    const menuDown =
+      axisY > 0.2 ||
+      (padP1?.buttons?.[13]?.pressed ?? false);
     const rightPressed =
-      controls.right && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
-    const leftPressed =
-      controls.left && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
+      menuRight && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
+    const leftPressed = menuLeft && this.hasReadHorizontalInput && !this.previousHorizontalInput.left;
     const downPressed =
-      controls.down && this.hasReadVerticalInput && !this.previousVerticalInput.down;
-    const upPressed = controls.up && this.hasReadVerticalInput && !this.previousVerticalInput.up;
-    this.previousHorizontalInput.left = controls.left;
-    this.previousHorizontalInput.right = controls.right;
-    this.previousVerticalInput.up = controls.up;
-    this.previousVerticalInput.down = controls.down;
+      menuDown && this.hasReadVerticalInput && !this.previousVerticalInput.down;
+    const upPressed = menuUp && this.hasReadVerticalInput && !this.previousVerticalInput.up;
+    this.previousHorizontalInput.left = menuLeft;
+    this.previousHorizontalInput.right = menuRight;
+    this.previousVerticalInput.up = menuUp;
+    this.previousVerticalInput.down = menuDown;
     this.hasReadHorizontalInput = true;
     this.hasReadVerticalInput = true;
 
@@ -564,7 +582,7 @@ export default class ChristmasScene extends Phaser.Scene {
       );
     }
 
-    if (controls.button3) {
+    if (controls.button3 && !this.InputManager.keys.select.isDown) {
       if (this.selectedIndex === 0 && this.isMultiplayerSelected) {
         this.startMultiplayer();
       } else {
