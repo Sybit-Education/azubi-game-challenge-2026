@@ -47,13 +47,12 @@ export default class HUD {
 
     this.speedoMeter = scene.add
       .image(this.scene.scale.width - 0 * this.scaleFactor, 0 * this.scaleFactor, 'speedometer')
-      //.setOrigin(1, 0)
       .setScale(1.15 * this.scaleFactor)
       .setOrigin(0, 1)
       .setDepth(10000)
-      .setFlipX(true); // green left, red right
+      .setFlipX(true);
 
-    // bottom-left corner, box touches the screen edges like the score box does at the top
+    // Speedometer (bottom-left)
     const padding = 15 * this.scaleFactor;
     this.speedoMeter.setPosition(padding, this.scene.scale.height - padding);
 
@@ -64,18 +63,16 @@ export default class HUD {
         'speedometer-pointer',
       )
       .setScale(0.55 * this.scaleFactor)
-      .setOrigin(0.43, 0.5) // middle of the little square at the bottom of the pointer
+      .setOrigin(0.43, 0.5)
       .setDepth(10001)
       .setTint(0xffffff)
-      .setTintMode(Phaser.TintModes.FILL); // pointer is black, FILL paints it white
-    // origin is at 70% of the pointer, so move it up by the other 30% so it doesn't stick out under the speedometer
+      .setTintMode(Phaser.TintModes.FILL);
     this.speedoMeterPointer.y -= this.speedoMeterPointer.displayHeight * 0.3;
 
-    // km/h number above the speedometer, in the middle
     this.speedText = scene.add
       .text(
         this.speedoMeter.x + this.speedoMeter.displayWidth / 2,
-        this.speedoMeter.y - this.speedoMeter.displayHeight - 10 * this.scaleFactor, // a bit of space above the speedometer
+        this.speedoMeter.y - this.speedoMeter.displayHeight - 10 * this.scaleFactor,
         '60 km/h',
         {
           fontFamily: 'Silkscreen',
@@ -85,18 +82,17 @@ export default class HUD {
       .setOrigin(0.5, 1)
       .setDepth(10001);
 
-    // one dark box with a black border behind the text and the speedometer, like the distance/score box
     const boxX = this.speedoMeter.x - padding;
-    const boxY = this.speedText.y - this.speedText.displayHeight - 5 * this.scaleFactor; // small gap, the font already has some space on top
+    const boxY = this.speedText.y - this.speedText.displayHeight - 5 * this.scaleFactor;
     const boxWidth = this.speedoMeter.displayWidth + padding * 2;
-    const boxHeight = this.scene.scale.height - boxY; // down to the bottom of the screen
+    const boxHeight = this.scene.scale.height - boxY;
 
     this.speedoMeterBackground = scene.add.graphics().setDepth(9999);
     this.speedoMeterBackground.fillStyle(0x000000, 0.85);
     this.speedoMeterBackground.fillRect(boxX, boxY, boxWidth, boxHeight);
     this.speedoMeterBackground.lineStyle(10, 0x000000, 1);
     this.speedoMeterBackground.strokeRect(boxX, boxY, boxWidth, boxHeight);
-    this.shownKmh = 60; // the km/h that is shown right now, moves slowly towards the real one
+    this.shownKmh = 60;
     // Player 2 (top-right)
     if (this.secondCar) {
       this.distanceText2 = scene.add
@@ -141,13 +137,13 @@ export default class HUD {
         .setAlpha(0.6)
         .setVisible(false);
 
-      // P2 speedometer, same as P1 but in the bottom-right corner
+      // P2 speedometer (bottom-right)
       this.speedoMeter2 = scene.add
         .image(this.scene.scale.width - padding, this.scene.scale.height - padding, 'speedometer')
         .setScale(1.15 * this.scaleFactor)
         .setOrigin(1, 1)
         .setDepth(10000)
-        .setFlipX(true); // green left, red right
+        .setFlipX(true);
 
       this.speedoMeterPointer2 = scene.add
         .image(
@@ -199,23 +195,20 @@ export default class HUD {
   }
 
   update() {
-    // speed goes from 700 (start) to 1600 (max), turn that into 0 to 1
     const speedPercent = (this.scene.track1.speed - 700) / (1600 - 700);
-    // 60 to 220 km/h, +10 km/h when accelerating (velocity is negative), -10 km/h when braking (velocity is positive)
-    const carVelocity = this.car.body ? this.car.body.velocity.y : 0; // body is gone after the car got destroyed
+    const carVelocity = this.car.body ? this.car.body.velocity.y : 0;
     let kmh = Phaser.Math.Linear(60, 220, speedPercent);
     if (carVelocity < 0) kmh += 10;
     if (carVelocity > 0) kmh -= 10;
-    if (this.car.dead) kmh = 0; // dead car doesn't drive
-    this.shownKmh += (kmh - this.shownKmh) * 0.05; // 5% closer each frame so it doesn't jump
+    if (this.car.dead) kmh = 0;
+    this.shownKmh += (kmh - this.shownKmh) * 0.05;
     if (this.shownKmh >= 220) {
       this.speedText.setText('MAX! km/h');
     } else {
       this.speedText.setText(`${Math.round(this.shownKmh)} km/h`);
     }
 
-    // pointer follows the km/h, -115 = pointing left at the green, 60 = pointing right at the red (the pointer image already leans right)
-    // no max, so speeding at max speed (230 km/h) pushes the pointer a bit past the red
+    // -115 = green, 60 = red
     const pointerPercent = Math.max((this.shownKmh - 60) / (220 - 60), 0);
     this.speedoMeterPointer.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent));
 
@@ -231,7 +224,7 @@ export default class HUD {
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
 
-      // P2 speedometer, same as P1
+      // P2 speedometer
       const carVelocity2 = this.secondCar.body ? this.secondCar.body.velocity.y : 0;
       let kmh2 = Phaser.Math.Linear(60, 220, speedPercent);
       if (carVelocity2 < 0) kmh2 += 10;
