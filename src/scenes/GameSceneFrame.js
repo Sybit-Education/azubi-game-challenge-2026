@@ -1,5 +1,6 @@
 import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
 import { safePlay } from '../../audio/safePlay.js';
+import EnemyCar from '../objects/EnemyCar.js';
 
 function updatePlayerOne(scene) {
   if (scene.car.dead) return;
@@ -75,31 +76,40 @@ function updateAudio(scene, delta) {
   scene.carPassBy.update(carsForAudio);
 }
 
+// true when a and b overlap at least 50%
+function overlapsHalf(a, b) {
+  const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
+  const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
+  const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
+  return overlapPercent >= 0.5;
+}
+
+function fadeCar(car, onTop) {
+  const targetAlpha = onTop ? 0.5 : 1;
+  car.alpha += (targetAlpha - car.alpha) * 0.1; // 10% closer each frame
+}
+
 function updateOverlapCheck(scene) {
+  const enemyCars = scene.roadObjects.filter((roadObject) => roadObject instanceof EnemyCar);
+  const items = scene.ItemManager;
+
+  if (!scene.car.dead) {
+    const onEnemy = scene.physics.overlap(scene.car, enemyCars, undefined, overlapsHalf);
+
+    // shield blinking and extra life already blink the alpha, don't fight them
+    if (!items.shieldBlinkTweenCar1 && !items.invulnerableCar1) {
+      fadeCar(scene.car, onEnemy);
+    }
+  }
+
   if (!scene.secondCar || scene.secondCar.dead) return; // single player has no second car
 
-  let onTop = false;
+  const onPlayer1 = scene.physics.overlap(scene.car, scene.secondCar, undefined, overlapsHalf);
+  const onEnemy2 = scene.physics.overlap(scene.secondCar, enemyCars, undefined, overlapsHalf);
 
-  scene.physics.overlap(
-    scene.car,
-    scene.secondCar,
-    () => {
-      // only runs when they overlap at least 50%
-      onTop = true;
-    },
-    (a, b) => {
-      const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
-      const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
-      const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
-      return overlapPercent >= 0.5;
-    },
-  );
-
-  // shield and extra life already blink the alpha, don't fight them
-  if (scene.ItemManager.schildAktivCar2 || scene.ItemManager.invulnerableCar2) return;
-
-  const targetAlpha = onTop ? 0.5 : 1;
-  scene.secondCar.alpha += (targetAlpha - scene.secondCar.alpha) * 0.1; // 10% closer each frame
+  if (!items.shieldBlinkTweenCar2 && !items.invulnerableCar2) {
+    fadeCar(scene.secondCar, onPlayer1 || onEnemy2);
+  }
 }
 
 function updateTrackAndHud(scene, delta) {
