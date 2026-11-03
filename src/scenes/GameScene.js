@@ -155,6 +155,8 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('grow', 'assets/images/hud-icons/grow.png');
     this.load.image('stats-background', 'assets/images/hud-icons/stats-background.png');
     this.load.image('magnet', 'assets/images/hud-icons/magnet.png');
+    this.load.image('speedometer', 'assets/images/hud-icons/speedometer.png');
+    this.load.image('speedometer-pointer', 'assets/images/hud-icons/speedometer-pointer.png');
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
@@ -219,6 +221,7 @@ export default class GameScene extends Phaser.Scene {
       this.backgroundFlash = this.add.image(0, 0, 'background-flash').setOrigin(0, 0);
       this.backgroundFlash.setDisplaySize(this.scale.width, this.scale.height);
       this.backgroundFlash.setDepth(-9);
+      this.backgroundFlash.setTint(0xe6e6e6);
       this.backgroundFlash.setVisible(false);
       this.flickerEffect = new Flickereffect(this, this.backgroundNormal, this.backgroundFlash);
       this.flickerEffect.start();
