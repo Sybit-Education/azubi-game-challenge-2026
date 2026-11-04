@@ -1,44 +1,41 @@
 import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
 import { safePlay } from '../../audio/safePlay.js';
+import EnemyCar from '../objects/EnemyCar.js';
 
-function updatePlayerOne(scene) {
-  if (scene.car.dead) return;
+function updatePlayer(scene, player, car, controls) {
+  if (player === 1 ? car.dead : !car || car.dead) return;
 
-  scene.car.move(scene.InputManager.getControlsP1);
-  const currentLane = scene.getPlayerLane(scene.car);
-  let currentRoadEdge = null;
+  car.move(controls);
 
-  if (scene.car.x <= scene.car.leftLimit) {
-    currentRoadEdge = 'left';
-  } else if (scene.car.x >= scene.car.rightLimit) {
-    currentRoadEdge = 'right';
-  }
+  if (player === 1) {
+    const currentLane = scene.getPlayerLane(car);
+    let currentRoadEdge = null;
 
-  const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
-
-  if (scene.registry.get('accessibility enabled')) {
-    if (edgeChanged && currentRoadEdge !== null) {
-      scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
-      const pan = currentRoadEdge === 'left' ? -1 : 1;
-
-      // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
-      safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
-      safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
+    if (car.x <= car.leftLimit) {
+      currentRoadEdge = 'left';
+    } else if (car.x >= car.rightLimit) {
+      currentRoadEdge = 'right';
     }
+
+    const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
+
+    if (scene.registry.get('accessibility enabled')) {
+      if (edgeChanged && currentRoadEdge !== null) {
+        scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
+        const pan = currentRoadEdge === 'left' ? -1 : 1;
+
+        // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
+        safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
+        safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
+      }
+    }
+
+    scene.lastPlayerLane = currentLane;
+    scene.lastPlayerRoadEdge = currentRoadEdge;
   }
 
-  scene.lastPlayerLane = currentLane;
-  scene.lastPlayerRoadEdge = currentRoadEdge;
-  scene.car.update_boundary_particles();
-  scene.car.intendedXVelocity = scene.car.body.velocity.x;
-}
-
-function updatePlayerTwo(scene) {
-  if (!scene.secondCar || scene.secondCar.dead) return;
-
-  scene.secondCar.move(scene.InputManager.getControlsP2);
-  scene.secondCar.update_boundary_particles();
-  scene.secondCar.intendedXVelocity = scene.secondCar.body.velocity.x;
+  car.update_boundary_particles();
+  car.intendedXVelocity = car.body.velocity.x;
 }
 
 function updateRoadEdgeScrape(scene) {
@@ -75,31 +72,40 @@ function updateAudio(scene, delta) {
   scene.carPassBy.update(carsForAudio);
 }
 
+// true when a and b overlap at least 50%
+function overlapsHalf(a, b) {
+  const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
+  const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
+  const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
+  return overlapPercent >= 0.5;
+}
+
+function fadeCar(car, onTop) {
+  const targetAlpha = onTop ? 0.5 : 1;
+  car.alpha += (targetAlpha - car.alpha) * 0.1; // 10% closer each frame
+}
+
 function updateOverlapCheck(scene) {
+  const enemyCars = scene.roadObjects.filter((roadObject) => roadObject instanceof EnemyCar);
+  const items = scene.ItemManager;
+
+  if (!scene.car.dead) {
+    const onEnemy = scene.physics.overlap(scene.car, enemyCars, undefined, overlapsHalf);
+
+    // shield blinking and extra life already blink the alpha, don't fight them
+    if (!items.shieldBlinkTweenCar1 && !items.invulnerableCar1) {
+      fadeCar(scene.car, onEnemy);
+    }
+  }
+
   if (!scene.secondCar || scene.secondCar.dead) return; // single player has no second car
 
-  let onTop = false;
+  const onPlayer1 = scene.physics.overlap(scene.car, scene.secondCar, undefined, overlapsHalf);
+  const onEnemy2 = scene.physics.overlap(scene.secondCar, enemyCars, undefined, overlapsHalf);
 
-  scene.physics.overlap(
-    scene.car,
-    scene.secondCar,
-    () => {
-      // only runs when they overlap at least 50%
-      onTop = true;
-    },
-    (a, b) => {
-      const overlapX = Math.min(a.body.right, b.body.right) - Math.max(a.body.left, b.body.left);
-      const overlapY = Math.min(a.body.bottom, b.body.bottom) - Math.max(a.body.top, b.body.top);
-      const overlapPercent = (overlapX * overlapY) / (a.body.width * a.body.height);
-      return overlapPercent >= 0.5;
-    },
-  );
-
-  // shield and extra life already blink the alpha, don't fight them
-  if (scene.ItemManager.schildAktivCar2 || scene.ItemManager.invulnerableCar2) return;
-
-  const targetAlpha = onTop ? 0.5 : 1;
-  scene.secondCar.alpha += (targetAlpha - scene.secondCar.alpha) * 0.1; // 10% closer each frame
+  if (!items.shieldBlinkTweenCar2 && !items.invulnerableCar2) {
+    fadeCar(scene.secondCar, onPlayer1 || onEnemy2);
+  }
 }
 
 function updateTrackAndHud(scene, delta) {
@@ -134,9 +140,9 @@ export function updateGameScene(scene, delta) {
   scene.InputManager.update();
   scene.elapsedTime += delta;
 
-  updatePlayerOne(scene);
+  updatePlayer(scene, 1, scene.car, scene.InputManager.getControlsP1);
   updateRoadEdgeScrape(scene);
-  updatePlayerTwo(scene);
+  updatePlayer(scene, 2, scene.secondCar, scene.InputManager.getControlsP2);
   updateOverlapCheck(scene);
   updateRoadObjects(scene, delta);
   updateAudio(scene, delta);

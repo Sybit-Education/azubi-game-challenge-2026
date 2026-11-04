@@ -88,7 +88,7 @@ export function createRoadObject(scene, type) {
       roadObject = new EnemyCar(scene, roadObjectX, spawnY, lane);
       roadObject.body.setSize(roadObject.width, roadObject.height);
       roadObject.body.setImmovable(true);
-      roadObject.setDepth(100000);
+      roadObject.setDepth(9);
       scene.physics.add.collider(
         scene.car,
         roadObject,
