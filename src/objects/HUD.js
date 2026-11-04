@@ -194,7 +194,7 @@ export default class HUD {
       .setOrigin(0);
   }
 
-  updateSpeedometer(car, shownKmh, speedText, pointer, smoothing, showMax) {
+  updateSpeedometer(car, shownKmh, speedText, pointer, smoothing) {
     const speedPercent = (this.scene.track1.speed - 700) / (1600 - 700);
     const carVelocity = car.body ? car.body.velocity.y : 0;
     let kmh = Phaser.Math.Linear(60, 220, speedPercent);
@@ -202,7 +202,7 @@ export default class HUD {
     if (carVelocity > 0) kmh -= 10;
     if (car.dead) kmh = 0;
     shownKmh += (kmh - shownKmh) * smoothing;
-    if (showMax && shownKmh >= 220) {
+    if (Math.round(this.shownKmh) >= 220) {
       speedText.setText('MAX! km/h');
     } else {
       speedText.setText(`${Math.round(shownKmh)} km/h`);
