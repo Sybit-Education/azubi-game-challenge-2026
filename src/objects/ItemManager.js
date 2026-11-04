@@ -356,7 +356,6 @@ export default class ItemManager {
     }
   }
 
-  // Checks health for a car
   lebenCheck(car, object) {
     // Duck check
     if (object.texture.key === 'random-object2') {
@@ -426,31 +425,21 @@ export default class ItemManager {
     });
   }
 
-  // Yeets a target
   yeet(target) {
-    // Disable collition
     target.body.enable = false;
 
-    // Start coords
     const startX = target.x;
     const startY = target.y;
 
-    // Windows width
     const windowWidth = this.scene.scale.width;
 
-    // Changes texture - TODO
-    // target.setTexture('car');
-
-    // Gets tweens
     const tweens = this.scene.tweens;
-    // Target
     tweens.add({
       targets: target,
       x: startX > windowWidth / 2 ? startX + 800 : startX - 800,
       duration: 1000,
     });
 
-    // Animation
     tweens.addCounter({
       from: 0,
       to: 1,
@@ -601,71 +590,63 @@ export default class ItemManager {
   itemShop() {
     const controlsP1 = this.inputManager.getControlsP1;
     const controlsP2 = this.inputManager.getControlsP2;
+    const players = [
+      {
+        number: 1,
+        controls: controlsP1,
+        keys: [this.key1, this.key2, this.key3, this.key4],
+        car: this.scene.car,
+        budgetKey: 'coinBudgetPlayer1',
+        extraLifeKey: 'extraLifeActiveCar1',
+      },
+      {
+        number: 2,
+        controls: controlsP2,
+        keys: [this.numpad1, this.numpad2, this.numpad3, this.numpad4],
+        car: this.scene.secondCar,
+        budgetKey: 'coinBudgetPlayer2',
+        extraLifeKey: 'extraLifeActiveCar2',
+      },
+    ];
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key1) || controlsP1.button1) &&
-      this.coinBudgetPlayer1 >= this.itemShieldPrize
-    ) {
-      this.itemShield(1);
-      this.coinBudgetPlayer1 -= this.itemShieldPrize;
-    }
+    for (const { number, controls, keys, car, budgetKey, extraLifeKey } of players) {
+      const getBudget = () => this[budgetKey];
+      const spend = (price) => {
+        this[budgetKey] -= price;
+      };
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key2) || controlsP1.button2) &&
-      this.coinBudgetPlayer1 >= this.itemShrinkPrize
-    ) {
-      this.itemShrink(1);
-      this.coinBudgetPlayer1 -= this.itemShrinkPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[0]) || controls.button1) &&
+        getBudget() >= this.itemShieldPrize
+      ) {
+        this.itemShield(number);
+        spend(this.itemShieldPrize);
+      }
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
-      this.coinBudgetPlayer1 >= this.itemHeartPrize &&
-      !this.extraLifeActiveCar1
-    ) {
-      this.itemExtraLife(1);
-      this.coinBudgetPlayer1 -= this.itemHeartPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[1]) || controls.button2) &&
+        getBudget() >= this.itemShrinkPrize
+      ) {
+        this.itemShrink(number);
+        spend(this.itemShrinkPrize);
+      }
 
-    if (
-      Phaser.Input.Keyboard.JustDown(this.key4) &&
-      this.coinBudgetPlayer1 >= this.itemMagnetPrize &&
-      this.activateMagnet(this.scene.car, 1)
-    ) {
-      this.coinBudgetPlayer1 -= this.itemMagnetPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[2]) || controls.button3) &&
+        getBudget() >= this.itemHeartPrize &&
+        !this[extraLifeKey]
+      ) {
+        this.itemExtraLife(number);
+        spend(this.itemHeartPrize);
+      }
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad1) || controlsP2.button1) &&
-      this.coinBudgetPlayer2 >= this.itemShieldPrize
-    ) {
-      this.itemShield(2);
-      this.coinBudgetPlayer2 -= this.itemShieldPrize;
-    }
-
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad2) || controlsP2.button2) &&
-      this.coinBudgetPlayer2 >= this.itemShrinkPrize
-    ) {
-      this.itemShrink(2);
-      this.coinBudgetPlayer2 -= this.itemShrinkPrize;
-    }
-
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad3) || controlsP2.button3) &&
-      this.coinBudgetPlayer2 >= this.itemHeartPrize &&
-      !this.extraLifeActiveCar2
-    ) {
-      this.itemExtraLife(2);
-      this.coinBudgetPlayer2 -= this.itemHeartPrize;
-    }
-
-    if (
-      Phaser.Input.Keyboard.JustDown(this.numpad4) &&
-      this.coinBudgetPlayer2 >= this.itemMagnetPrize &&
-      this.activateMagnet(this.scene.secondCar, 2)
-    ) {
-      this.coinBudgetPlayer2 -= this.itemMagnetPrize;
+      if (
+        Phaser.Input.Keyboard.JustDown(keys[3]) &&
+        getBudget() >= this.itemMagnetPrize &&
+        this.activateMagnet(car, number)
+      ) {
+        spend(this.itemMagnetPrize);
+      }
     }
   }
 }
