@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default class HUD {
   constructor(scene, car, secondCar = null) {
     this.car = car;
@@ -43,6 +45,54 @@ export default class HUD {
       .setAlpha(0.6)
       .setVisible(false);
 
+    this.speedoMeter = scene.add
+      .image(this.scene.scale.width - 0 * this.scaleFactor, 0 * this.scaleFactor, 'speedometer')
+      .setScale(1.15 * this.scaleFactor)
+      .setOrigin(0, 1)
+      .setDepth(10000)
+      .setFlipX(true);
+
+    // Speedometer (bottom-left)
+    const padding = 15 * this.scaleFactor;
+    this.speedoMeter.setPosition(padding, this.scene.scale.height - padding);
+
+    this.speedoMeterPointer = scene.add
+      .image(
+        this.speedoMeter.x + this.speedoMeter.displayWidth / 2,
+        this.speedoMeter.y,
+        'speedometer-pointer',
+      )
+      .setScale(0.55 * this.scaleFactor)
+      .setOrigin(0.43, 0.5)
+      .setDepth(10001)
+      .setTint(0xffffff)
+      .setTintMode(Phaser.TintModes.FILL);
+    this.speedoMeterPointer.y -= this.speedoMeterPointer.displayHeight * 0.3;
+
+    this.speedText = scene.add
+      .text(
+        this.speedoMeter.x + this.speedoMeter.displayWidth / 2,
+        this.speedoMeter.y - this.speedoMeter.displayHeight - 10 * this.scaleFactor,
+        '60 km/h',
+        {
+          fontFamily: 'Silkscreen',
+          fontSize: `${40 * this.scaleFactor}px`,
+        },
+      )
+      .setOrigin(0.5, 1)
+      .setDepth(10001);
+
+    const boxX = this.speedoMeter.x - padding;
+    const boxY = this.speedText.y - this.speedText.displayHeight - 5 * this.scaleFactor;
+    const boxWidth = this.speedoMeter.displayWidth + padding * 2;
+    const boxHeight = this.scene.scale.height - boxY;
+
+    this.speedoMeterBackground = scene.add.graphics().setDepth(9999);
+    this.speedoMeterBackground.fillStyle(0x000000, 0.85);
+    this.speedoMeterBackground.fillRect(boxX, boxY, boxWidth, boxHeight);
+    this.speedoMeterBackground.lineStyle(10, 0x000000, 1);
+    this.speedoMeterBackground.strokeRect(boxX, boxY, boxWidth, boxHeight);
+    this.shownKmh = 60;
     // Player 2 (top-right)
     if (this.secondCar) {
       this.distanceText2 = scene.add
@@ -86,6 +136,55 @@ export default class HUD {
         .setRotation(0.1)
         .setAlpha(0.6)
         .setVisible(false);
+
+      // P2 speedometer (bottom-right)
+      this.speedoMeter2 = scene.add
+        .image(this.scene.scale.width - padding, this.scene.scale.height - padding, 'speedometer')
+        .setScale(1.15 * this.scaleFactor)
+        .setOrigin(1, 1)
+        .setDepth(10000)
+        .setFlipX(true);
+
+      this.speedoMeterPointer2 = scene.add
+        .image(
+          this.speedoMeter2.x - this.speedoMeter2.displayWidth / 2,
+          this.speedoMeter2.y,
+          'speedometer-pointer',
+        )
+        .setScale(0.55 * this.scaleFactor)
+        .setOrigin(0.43, 0.5)
+        .setDepth(10001)
+        .setTint(0xffffff)
+        .setTintMode(Phaser.TintModes.FILL);
+      this.speedoMeterPointer2.y -= this.speedoMeterPointer2.displayHeight * 0.3;
+
+      this.speedText2 = scene.add
+        .text(
+          this.speedoMeter2.x - this.speedoMeter2.displayWidth / 2,
+          this.speedoMeter2.y - this.speedoMeter2.displayHeight - 10 * this.scaleFactor,
+          '60 km/h',
+          {
+            fontFamily: 'Silkscreen',
+            fontSize: `${40 * this.scaleFactor}px`,
+          },
+        )
+        .setOrigin(0.5, 1)
+        .setDepth(10001);
+
+      const boxX2 = this.speedoMeter2.x - this.speedoMeter2.displayWidth - padding;
+      const boxY2 = this.speedText2.y - this.speedText2.displayHeight - 5 * this.scaleFactor;
+
+      this.speedoMeterBackground2 = scene.add.graphics().setDepth(9999);
+      this.speedoMeterBackground2.fillStyle(0x000000, 0.85);
+      this.speedoMeterBackground2.fillRect(boxX2, boxY2, boxWidth, this.scene.scale.height - boxY2);
+      this.speedoMeterBackground2.lineStyle(10, 0x000000, 1);
+      this.speedoMeterBackground2.strokeRect(
+        boxX2,
+        boxY2,
+        boxWidth,
+        this.scene.scale.height - boxY2,
+      );
+      this.shownKmh2 = 60;
     }
 
     this.statsBackground = this.scene.add
@@ -96,6 +195,23 @@ export default class HUD {
   }
 
   update() {
+    const speedPercent = (this.scene.track1.speed - 700) / (1600 - 700);
+    const carVelocity = this.car.body ? this.car.body.velocity.y : 0;
+    let kmh = Phaser.Math.Linear(60, 220, speedPercent);
+    if (carVelocity < 0) kmh += 10;
+    if (carVelocity > 0) kmh -= 10;
+    if (this.car.dead) kmh = 0;
+    this.shownKmh += (kmh - this.shownKmh) * 0.05;
+    if (this.shownKmh >= 220) {
+      this.speedText.setText('MAX! km/h');
+    } else {
+      this.speedText.setText(`${Math.round(this.shownKmh)} km/h`);
+    }
+
+    // -115 = green, 60 = red
+    const pointerPercent = Math.max((this.shownKmh - 60) / (220 - 60), 0);
+    this.speedoMeterPointer.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent));
+
     const x = this.statsBackground.x;
     const y = this.statsBackground.y;
     const width = this.statsBackground.displayWidth;
@@ -107,6 +223,18 @@ export default class HUD {
 
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
+
+      // P2 speedometer
+      const carVelocity2 = this.secondCar.body ? this.secondCar.body.velocity.y : 0;
+      let kmh2 = Phaser.Math.Linear(60, 220, speedPercent);
+      if (carVelocity2 < 0) kmh2 += 10;
+      if (carVelocity2 > 0) kmh2 -= 10;
+      if (this.secondCar.dead) kmh2 = 0;
+      this.shownKmh2 += (kmh2 - this.shownKmh2) * 0.1;
+      this.speedText2.setText(`${Math.round(this.shownKmh2)} km/h`);
+
+      const pointerPercent2 = Math.max((this.shownKmh2 - 60) / (220 - 60), 0);
+      this.speedoMeterPointer2.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent2));
 
       this.distanceText.setFontSize(30 * this.scaleFactor);
       this.scoreText.setFontSize(30 * this.scaleFactor);
@@ -160,9 +288,21 @@ export default class HUD {
 
     if (player === 1) {
       parts.push(this.scene.hotbar, this.scene.hotbarCoin, this.scene.coinText1);
+      parts.push(
+        this.speedoMeter,
+        this.speedoMeterPointer,
+        this.speedText,
+        this.speedoMeterBackground,
+      );
       this.showDeathOverlay(1);
     } else {
       parts.push(this.scene.hotbar2, this.scene.hotbarCoin2, this.scene.coinText2);
+      parts.push(
+        this.speedoMeter2,
+        this.speedoMeterPointer2,
+        this.speedText2,
+        this.speedoMeterBackground2,
+      );
       this.showDeathOverlay(2);
     }
 
