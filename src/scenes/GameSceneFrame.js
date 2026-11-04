@@ -2,44 +2,40 @@ import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
 import { safePlay } from '../../audio/safePlay.js';
 import EnemyCar from '../objects/EnemyCar.js';
 
-function updatePlayerOne(scene) {
-  if (scene.car.dead) return;
+function updatePlayer(scene, player, car, controls) {
+  if (player === 1 ? car.dead : !car || car.dead) return;
 
-  scene.car.move(scene.InputManager.getControlsP1);
-  const currentLane = scene.getPlayerLane(scene.car);
-  let currentRoadEdge = null;
+  car.move(controls);
 
-  if (scene.car.x <= scene.car.leftLimit) {
-    currentRoadEdge = 'left';
-  } else if (scene.car.x >= scene.car.rightLimit) {
-    currentRoadEdge = 'right';
-  }
+  if (player === 1) {
+    const currentLane = scene.getPlayerLane(car);
+    let currentRoadEdge = null;
 
-  const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
-
-  if (scene.registry.get('accessibility enabled')) {
-    if (edgeChanged && currentRoadEdge !== null) {
-      scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
-      const pan = currentRoadEdge === 'left' ? -1 : 1;
-
-      // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
-      safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
-      safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
+    if (car.x <= car.leftLimit) {
+      currentRoadEdge = 'left';
+    } else if (car.x >= car.rightLimit) {
+      currentRoadEdge = 'right';
     }
+
+    const edgeChanged = currentRoadEdge !== scene.lastPlayerRoadEdge;
+
+    if (scene.registry.get('accessibility enabled')) {
+      if (edgeChanged && currentRoadEdge !== null) {
+        scene.gameStatus.textContent = `${currentRoadEdge} road edge`;
+        const pan = currentRoadEdge === 'left' ? -1 : 1;
+
+        // Cooldown prevents edge jitter from spamming sounds (and reduces mixer overhead).
+        safePlay(scene, 'road-edge-hit', { volume: 0.25, pan, cooldownMs: 120 });
+        safePlay(scene, 'collision-hit', { volume: 0.15, pan, cooldownMs: 120 });
+      }
+    }
+
+    scene.lastPlayerLane = currentLane;
+    scene.lastPlayerRoadEdge = currentRoadEdge;
   }
 
-  scene.lastPlayerLane = currentLane;
-  scene.lastPlayerRoadEdge = currentRoadEdge;
-  scene.car.update_boundary_particles();
-  scene.car.intendedXVelocity = scene.car.body.velocity.x;
-}
-
-function updatePlayerTwo(scene) {
-  if (!scene.secondCar || scene.secondCar.dead) return;
-
-  scene.secondCar.move(scene.InputManager.getControlsP2);
-  scene.secondCar.update_boundary_particles();
-  scene.secondCar.intendedXVelocity = scene.secondCar.body.velocity.x;
+  car.update_boundary_particles();
+  car.intendedXVelocity = car.body.velocity.x;
 }
 
 function updateRoadEdgeScrape(scene) {
@@ -144,9 +140,9 @@ export function updateGameScene(scene, delta) {
   scene.InputManager.update();
   scene.elapsedTime += delta;
 
-  updatePlayerOne(scene);
+  updatePlayer(scene, 1, scene.car, scene.InputManager.getControlsP1);
   updateRoadEdgeScrape(scene);
-  updatePlayerTwo(scene);
+  updatePlayer(scene, 2, scene.secondCar, scene.InputManager.getControlsP2);
   updateOverlapCheck(scene);
   updateRoadObjects(scene, delta);
   updateAudio(scene, delta);

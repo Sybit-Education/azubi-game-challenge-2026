@@ -194,23 +194,35 @@ export default class HUD {
       .setOrigin(0);
   }
 
-  update() {
+  updateSpeedometer(car, shownKmh, speedText, pointer, smoothing) {
     const speedPercent = (this.scene.track1.speed - 700) / (1600 - 700);
-    const carVelocity = this.car.body ? this.car.body.velocity.y : 0;
+    const carVelocity = car.body ? car.body.velocity.y : 0;
     let kmh = Phaser.Math.Linear(60, 220, speedPercent);
     if (carVelocity < 0) kmh += 10;
     if (carVelocity > 0) kmh -= 10;
-    if (this.car.dead) kmh = 0;
-    this.shownKmh += (kmh - this.shownKmh) * 0.05;
-    if (this.shownKmh >= 220) {
-      this.speedText.setText('MAX! km/h');
+    if (car.dead) kmh = 0;
+    shownKmh += (kmh - shownKmh) * smoothing;
+    if (Math.round(this.shownKmh) >= 220) {
+      speedText.setText('MAX! km/h');
     } else {
-      this.speedText.setText(`${Math.round(this.shownKmh)} km/h`);
+      speedText.setText(`${Math.round(shownKmh)} km/h`);
     }
 
-    // -115 = green, 60 = red
-    const pointerPercent = Math.max((this.shownKmh - 60) / (220 - 60), 0);
-    this.speedoMeterPointer.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent));
+    const pointerPercent = Math.max((shownKmh - 60) / (220 - 60), 0);
+    pointer.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent));
+
+    return shownKmh;
+  }
+
+  update() {
+    this.shownKmh = this.updateSpeedometer(
+      this.car,
+      this.shownKmh,
+      this.speedText,
+      this.speedoMeterPointer,
+      0.05,
+      true,
+    );
 
     const x = this.statsBackground.x;
     const y = this.statsBackground.y;
@@ -224,17 +236,14 @@ export default class HUD {
       this.distanceText2.setText(`P2 Distance: ${this.secondCar.calculate_km()} km`);
       this.scoreText2.setText(`P2 Score: ${this.secondCar.score}`);
 
-      // P2 speedometer
-      const carVelocity2 = this.secondCar.body ? this.secondCar.body.velocity.y : 0;
-      let kmh2 = Phaser.Math.Linear(60, 220, speedPercent);
-      if (carVelocity2 < 0) kmh2 += 10;
-      if (carVelocity2 > 0) kmh2 -= 10;
-      if (this.secondCar.dead) kmh2 = 0;
-      this.shownKmh2 += (kmh2 - this.shownKmh2) * 0.1;
-      this.speedText2.setText(`${Math.round(this.shownKmh2)} km/h`);
-
-      const pointerPercent2 = Math.max((this.shownKmh2 - 60) / (220 - 60), 0);
-      this.speedoMeterPointer2.setAngle(Phaser.Math.Linear(-115, 60, pointerPercent2));
+      this.shownKmh2 = this.updateSpeedometer(
+        this.secondCar,
+        this.shownKmh2,
+        this.speedText2,
+        this.speedoMeterPointer2,
+        0.1,
+        false,
+      );
 
       this.distanceText.setFontSize(30 * this.scaleFactor);
       this.scoreText.setFontSize(30 * this.scaleFactor);

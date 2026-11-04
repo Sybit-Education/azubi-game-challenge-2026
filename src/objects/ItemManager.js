@@ -85,17 +85,16 @@ export default class ItemManager {
     }
   }
 
+  getPlayerCar(player) {
+    return player === 1 ? this.scene.car : this.scene.secondCar;
+  }
+
   itemShrink(player) {
     console.log('shrink');
     const texture = 'shrink';
-    let car = this.scene.car;
-
-    if (player === 1) {
-      this.carshrinkP1 = true;
-    } else {
-      this.carshrinkP2 = true;
-      car = this.scene.secondCar;
-    }
+    const playerNumber = player === 1 ? 1 : 2;
+    const car = this.getPlayerCar(player);
+    this[`carshrinkP${playerNumber}`] = true;
 
     this.removeOldPowerupTimer(texture, player);
 
@@ -104,11 +103,7 @@ export default class ItemManager {
     if (car.growTimer) {
       car.growTimer.remove();
       car.growTimer = null;
-      if (player === 1) {
-        this.cargrowP1 = false;
-      } else {
-        this.cargrowP2 = false;
-      }
+      this[`cargrowP${playerNumber}`] = false;
     }
 
     if (car.shrinkTimer) {
@@ -122,26 +117,16 @@ export default class ItemManager {
       this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
       car.shrinkTimer = null;
-
-      if (player === 1) {
-        this.carshrinkP1 = false;
-      } else {
-        this.carshrinkP2 = false;
-      }
+      this[`carshrinkP${playerNumber}`] = false;
     });
   }
 
   itemGrow(player) {
     console.log('grow');
     const texture = 'grow';
-    let car = this.scene.car;
-
-    if (player === 1) {
-      this.cargrowP1 = true;
-    } else {
-      this.cargrowP2 = true;
-      car = this.scene.secondCar;
-    }
+    const playerNumber = player === 1 ? 1 : 2;
+    const car = this.getPlayerCar(player);
+    this[`cargrowP${playerNumber}`] = true;
 
     this.removeOldPowerupTimer(texture, player);
 
@@ -150,11 +135,7 @@ export default class ItemManager {
     if (car.shrinkTimer) {
       car.shrinkTimer.remove();
       car.shrinkTimer = null;
-      if (player === 1) {
-        this.carshrinkP1 = false;
-      } else {
-        this.carshrinkP2 = false;
-      }
+      this[`carshrinkP${playerNumber}`] = false;
     }
 
     if (car.growTimer) {
@@ -168,12 +149,7 @@ export default class ItemManager {
       this.animateCarScale(car, this.originScale);
       this.scene.sound.play('restore-size', { volume: 0.3 });
       car.growTimer = null;
-
-      if (player === 1) {
-        this.cargrowP1 = false;
-      } else {
-        this.cargrowP2 = false;
-      }
+      this[`cargrowP${playerNumber}`] = false;
     });
   }
 
@@ -182,21 +158,13 @@ export default class ItemManager {
     this.scene.hud.displayExtraLife(player);
     this.scene.sound.play('collect-extra-life', { volume: 0.3 });
 
-    if (player === 1) {
-      this.extraLifeActiveCar1 = true;
-    } else {
-      this.extraLifeActiveCar2 = true;
-    }
+    this[`extraLifeActiveCar${player === 1 ? 1 : 2}`] = true;
   }
 
   useExtraLife(car, player) {
-    if (player === 1) {
-      this.extraLifeActiveCar1 = false;
-      this.invulnerableCar1 = true;
-    } else {
-      this.extraLifeActiveCar2 = false;
-      this.invulnerableCar2 = true;
-    }
+    const playerNumber = player === 1 ? 1 : 2;
+    this[`extraLifeActiveCar${playerNumber}`] = false;
+    this[`invulnerableCar${playerNumber}`] = true;
 
     car.setTint(0xff0000);
     this.scene.hud.deactivateExtraLife(player);
@@ -214,11 +182,7 @@ export default class ItemManager {
     });
 
     this.scene.time.delayedCall(1000, () => {
-      if (player === 1) {
-        this.invulnerableCar1 = false;
-      } else {
-        this.invulnerableCar2 = false;
-      }
+      this[`invulnerableCar${playerNumber}`] = false;
       car.clearTint();
     });
 
@@ -229,12 +193,11 @@ export default class ItemManager {
   itemShield(player) {
     const texture = 'shield';
     const christmas = this.scene.registry.get('gameMode') === 'christmas';
-    let car = this.scene.car;
+    const car = player === 2 ? this.scene.secondCar : this.scene.car;
     let carTexture = christmas ? 'winter-car' : 'car';
     let shieldTexture = christmas ? 'carShieldChristmas' : 'carShield';
 
     if (player === 2) {
-      car = this.scene.secondCar;
       carTexture = christmas ? 'winter-car2' : 'car2';
       shieldTexture = christmas ? 'carShieldChristmas2' : 'carShield2';
     }
@@ -253,12 +216,8 @@ export default class ItemManager {
     }
 
     car.alpha = 1;
-
-    if (player === 1) {
-      this.schildAktivCar1 = true;
-    } else {
-      this.schildAktivCar2 = true;
-    }
+    const playerNumber = player === 1 ? 1 : 2;
+    this[`schildAktivCar${playerNumber}`] = true;
 
     // shield texture has a different size, so keep the car as big as it was
     const oldWidth = car.displayWidth;
@@ -282,11 +241,7 @@ export default class ItemManager {
     car.shieldTimer = this.scene.time.delayedCall(8000, () => {
       car.shieldBlinkTween?.stop();
       car.shieldBlinkTween = null;
-      if (player === 1) {
-        this.schildAktivCar1 = false;
-      } else {
-        this.schildAktivCar2 = false;
-      }
+      this[`schildAktivCar${playerNumber}`] = false;
       car.alpha = 1;
 
       // size is checked again here in case the car shrank or grew during the shield
@@ -356,7 +311,6 @@ export default class ItemManager {
     }
   }
 
-  // Checks health for a car
   lebenCheck(car, object) {
     // Duck check
     if (object.texture.key === 'random-object2') {
@@ -364,27 +318,18 @@ export default class ItemManager {
       return;
     }
 
-    let player = 1;
-    let invulnerable = this.invulnerableCar1;
-    let schildAktiv = this.schildAktivCar1;
-    let extraLifeActive = this.extraLifeActiveCar1;
+    const player = car === this.scene.secondCar ? 2 : 1;
+    const playerNumber = player === 1 ? 1 : 2;
 
-    if (car === this.scene.secondCar) {
-      player = 2;
-      invulnerable = this.invulnerableCar2;
-      schildAktiv = this.schildAktivCar2;
-      extraLifeActive = this.extraLifeActiveCar2;
-    }
-
-    if (invulnerable) {
+    if (this[`invulnerableCar${playerNumber}`]) {
       return;
     }
 
-    if (schildAktiv) {
+    if (this[`schildAktivCar${playerNumber}`]) {
       return;
     }
 
-    if (extraLifeActive) {
+    if (this[`extraLifeActiveCar${playerNumber}`]) {
       this.useExtraLife(car, player);
       return;
     }
@@ -426,31 +371,21 @@ export default class ItemManager {
     });
   }
 
-  // Yeets a target
   yeet(target) {
-    // Disable collition
     target.body.enable = false;
 
-    // Start coords
     const startX = target.x;
     const startY = target.y;
 
-    // Windows width
     const windowWidth = this.scene.scale.width;
 
-    // Changes texture - TODO
-    // target.setTexture('car');
-
-    // Gets tweens
     const tweens = this.scene.tweens;
-    // Target
     tweens.add({
       targets: target,
       x: startX > windowWidth / 2 ? startX + 800 : startX - 800,
       duration: 1000,
     });
 
-    // Animation
     tweens.addCounter({
       from: 0,
       to: 1,
@@ -464,7 +399,7 @@ export default class ItemManager {
 
   itemRandom(player) {
     const random = Phaser.Math.Between(1, 5);
-    const car = player === 1 ? this.scene.car : this.scene.secondCar;
+    const car = this.getPlayerCar(player);
 
     if (random === 1) {
       return this.itemShrink(player);
@@ -556,13 +491,10 @@ export default class ItemManager {
   }
 
   coinBudgetPlus(player, multiplier = 1) {
-    if (player === 1) {
-      this.coinBudgetPlayer1 += multiplier;
-      console.log('Spieler1 has collected ' + this.coinBudgetPlayer1 + ' Coins');
-    } else {
-      this.coinBudgetPlayer2 += multiplier;
-      console.log('Spieler2 has collected ' + this.coinBudgetPlayer2 + ' Coins');
-    }
+    const playerNumber = player === 1 ? 1 : 2;
+    const budgetKey = `coinBudgetPlayer${playerNumber}`;
+    this[budgetKey] += multiplier;
+    console.log(`Spieler${playerNumber} has collected ${this[budgetKey]} Coins`);
     console.log('multiplier: ' + multiplier);
   }
 
@@ -601,71 +533,63 @@ export default class ItemManager {
   itemShop() {
     const controlsP1 = this.inputManager.getControlsP1;
     const controlsP2 = this.inputManager.getControlsP2;
+    const players = [
+      {
+        number: 1,
+        controls: controlsP1,
+        keys: [this.key1, this.key2, this.key3, this.key4],
+        car: this.scene.car,
+        budgetKey: 'coinBudgetPlayer1',
+        extraLifeKey: 'extraLifeActiveCar1',
+      },
+      {
+        number: 2,
+        controls: controlsP2,
+        keys: [this.numpad1, this.numpad2, this.numpad3, this.numpad4],
+        car: this.scene.secondCar,
+        budgetKey: 'coinBudgetPlayer2',
+        extraLifeKey: 'extraLifeActiveCar2',
+      },
+    ];
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key1) || controlsP1.button1) &&
-      this.coinBudgetPlayer1 >= this.itemShieldPrize
-    ) {
-      this.itemShield(1);
-      this.coinBudgetPlayer1 -= this.itemShieldPrize;
-    }
+    for (const { number, controls, keys, car, budgetKey, extraLifeKey } of players) {
+      const getBudget = () => this[budgetKey];
+      const spend = (price) => {
+        this[budgetKey] -= price;
+      };
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key2) || controlsP1.button2) &&
-      this.coinBudgetPlayer1 >= this.itemShrinkPrize
-    ) {
-      this.itemShrink(1);
-      this.coinBudgetPlayer1 -= this.itemShrinkPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[0]) || controls.button1) &&
+        getBudget() >= this.itemShieldPrize
+      ) {
+        this.itemShield(number);
+        spend(this.itemShieldPrize);
+      }
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.key3) || controlsP1.button3) &&
-      this.coinBudgetPlayer1 >= this.itemHeartPrize &&
-      !this.extraLifeActiveCar1
-    ) {
-      this.itemExtraLife(1);
-      this.coinBudgetPlayer1 -= this.itemHeartPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[1]) || controls.button2) &&
+        getBudget() >= this.itemShrinkPrize
+      ) {
+        this.itemShrink(number);
+        spend(this.itemShrinkPrize);
+      }
 
-    if (
-      Phaser.Input.Keyboard.JustDown(this.key4) &&
-      this.coinBudgetPlayer1 >= this.itemMagnetPrize &&
-      this.activateMagnet(this.scene.car, 1)
-    ) {
-      this.coinBudgetPlayer1 -= this.itemMagnetPrize;
-    }
+      if (
+        (Phaser.Input.Keyboard.JustDown(keys[2]) || controls.button3) &&
+        getBudget() >= this.itemHeartPrize &&
+        !this[extraLifeKey]
+      ) {
+        this.itemExtraLife(number);
+        spend(this.itemHeartPrize);
+      }
 
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad1) || controlsP2.button1) &&
-      this.coinBudgetPlayer2 >= this.itemShieldPrize
-    ) {
-      this.itemShield(2);
-      this.coinBudgetPlayer2 -= this.itemShieldPrize;
-    }
-
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad2) || controlsP2.button2) &&
-      this.coinBudgetPlayer2 >= this.itemShrinkPrize
-    ) {
-      this.itemShrink(2);
-      this.coinBudgetPlayer2 -= this.itemShrinkPrize;
-    }
-
-    if (
-      (Phaser.Input.Keyboard.JustDown(this.numpad3) || controlsP2.button3) &&
-      this.coinBudgetPlayer2 >= this.itemHeartPrize &&
-      !this.extraLifeActiveCar2
-    ) {
-      this.itemExtraLife(2);
-      this.coinBudgetPlayer2 -= this.itemHeartPrize;
-    }
-
-    if (
-      Phaser.Input.Keyboard.JustDown(this.numpad4) &&
-      this.coinBudgetPlayer2 >= this.itemMagnetPrize &&
-      this.activateMagnet(this.scene.secondCar, 2)
-    ) {
-      this.coinBudgetPlayer2 -= this.itemMagnetPrize;
+      if (
+        Phaser.Input.Keyboard.JustDown(keys[3]) &&
+        getBudget() >= this.itemMagnetPrize &&
+        this.activateMagnet(car, number)
+      ) {
+        spend(this.itemMagnetPrize);
+      }
     }
   }
 }
