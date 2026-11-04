@@ -202,7 +202,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
 
     if (
       (this.y <= maxX && this.body.velocity.y < 0) ||
-      (this.y >= maxY && this.body.velocity.y > 0)
+      (this.y >= maxY - this.scene.scale.height / 4 && this.body.velocity.y > 0)
     ) {
       this.setVelocityY(0);
     }
