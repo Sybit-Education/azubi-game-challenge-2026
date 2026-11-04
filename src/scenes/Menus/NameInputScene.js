@@ -617,7 +617,7 @@ export default class NameInputScene extends Phaser.Scene {
     }
 
     // Select char
-    if (controls.button3) {
+    if (controls.button3 && !this.InputManager.keys.select.isDown) {
       this.selectCharacter();
     }
   }
