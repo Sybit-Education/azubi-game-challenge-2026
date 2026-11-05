@@ -3,9 +3,9 @@ import Phaser from 'phaser';
 import Obstacle from './Obstacle.js';
 
 const HITBOX_SCALES_BY_TEXTURE = {
-  'random-object1': { width: 1, height: 1 }, 
+  'random-object1': { width: 1, height: 1 },
   'random-object2': { width: 1, height: 1 }, // Duck
-  'random-object3': { width: 1, height: 1 }, 
+  'random-object3': { width: 1, height: 1 },
   'random-object4': { width: 1, height: 1 }, // Barrier
   'random-object5': { width: 0.85, height: 0.7 }, // Deer
   'random-object6': { width: 1, height: 0.8 }, // Gnome
@@ -13,9 +13,9 @@ const HITBOX_SCALES_BY_TEXTURE = {
 };
 
 const HITBOX_OFFSETS_BY_TEXTURE = {
-  'random-object1': { x: 0, y: 0 }, 
+  'random-object1': { x: 0, y: 0 },
   'random-object2': { x: 0, y: 0 }, // Duck
-  'random-object3': { x: 0, y: 0 }, 
+  'random-object3': { x: 0, y: 0 },
   'random-object4': { x: 0, y: 0 }, // Barrier
   'random-object5': { x: 0, y: 15 }, // Deer
   'random-object6': { x: 0, y: 10 }, // Gnome
