@@ -157,6 +157,8 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('magnet', 'assets/images/hud-icons/magnet.png');
     this.load.image('speedometer', 'assets/images/hud-icons/speedometer.png');
     this.load.image('speedometer-pointer', 'assets/images/hud-icons/speedometer-pointer.png');
+    this.load.image('duck-fly-up', 'assets/images/entities/obstacles/bird-fly-up.png');
+    this.load.image('duck-fly-down', 'assets/images/entities/obstacles/bird-fly-down.png');
   }
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
