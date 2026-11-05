@@ -318,6 +318,11 @@ export default class ItemManager {
       return;
     }
 
+    if (object.texture.key === 'random-object6') {
+      this.yeet(object);
+      return;
+    }
+
     const player = car === this.scene.secondCar ? 2 : 1;
     const playerNumber = player === 1 ? 1 : 2;
 
@@ -371,7 +376,7 @@ export default class ItemManager {
     });
   }
 
-  yeet(target, texture1, texture2) {
+  yeet(target, texture1 = undefined, texture2 = undefined) {
     target.body.enable = false;
 
     const startX = target.x;
