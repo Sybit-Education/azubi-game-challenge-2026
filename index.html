@@ -109,6 +109,30 @@
 
     <!-- Start script -->
     <script type="module" src="src/main.js"></script>
+    <script>
+      const playButton = document.getElementById('start-game');
+      let keyboardModeEnabled = false;
+
+      document.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key === 'Tab' && !keyboardModeEnabled) { // Detect first Tab key press
+            event.preventDefault();
+
+            keyboardModeEnabled = true;
+            document.body.classList.add('keyboard-navigation');
+
+            playButton.focus();
+          }
+        },
+        true,
+      );
+
+      document.addEventListener('pointerdown', () => { // Detect any mouse click or touch event and disable keyboard navigation
+        keyboardModeEnabled = false;
+        document.body.classList.remove('keyboard-navigation'); 
+      });
+    </script>
   </body>
   <!-- Style -->
   <style>
@@ -174,10 +198,18 @@
       cursor: pointer;
     }
 
-    .accessible-layer button:focus-visible,
-    #settings-dialog button:focus-visible,
-    #settings-dialog input:focus-visible,
-    #settings-dialog select:focus-visible {
+    .accessible-layer button,
+    #settings-dialog button,
+    #settings-dialog input,
+    #settings-dialog select {
+      outline: none;
+      box-shadow: none;
+    }
+
+    body.keyboard-navigation .accessible-layer button:focus-visible,
+    body.keyboard-navigation #settings-dialog button:focus-visible,
+    body.keyboard-navigation #settings-dialog input:focus-visible,
+    body.keyboard-navigation #settings-dialog select:focus-visible {
       outline: 3px solid #ffffff;
       outline-offset: 3px;
       box-shadow: 0 0 0 6px #000000;
