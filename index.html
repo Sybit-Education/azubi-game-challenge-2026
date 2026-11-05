@@ -116,7 +116,8 @@
       document.addEventListener(
         'keydown',
         (event) => {
-          if (event.key === 'Tab' && !keyboardModeEnabled) { // Detect first Tab key press
+          // Detect first Tab key press
+          if (event.key === 'Tab' && !keyboardModeEnabled) {
             event.preventDefault();
 
             keyboardModeEnabled = true;
@@ -128,9 +129,10 @@
         true,
       );
 
-      document.addEventListener('pointerdown', () => { // Detect any mouse click or touch event and disable keyboard navigation
+      // Detect any mouse click or touch event and disable keyboard navigation
+      document.addEventListener('pointerdown', () => {
         keyboardModeEnabled = false;
-        document.body.classList.remove('keyboard-navigation'); 
+        document.body.classList.remove('keyboard-navigation');
       });
     </script>
   </body>
