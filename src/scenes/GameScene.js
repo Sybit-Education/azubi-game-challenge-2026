@@ -207,9 +207,7 @@ export default class GameScene extends Phaser.Scene {
     );
     createRoadObject(this, 'extraLife');
 
-    if (this.registry.get('gameMode') !== 'christmas') {
-      console.log('snow failed!');
-    } else {
+    if (this.registry.get('gameMode') === 'christmas') {
       this.spawnSnow();
     }
 

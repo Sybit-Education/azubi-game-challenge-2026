@@ -12,6 +12,16 @@ const HITBOX_SCALES_BY_TEXTURE = {
   'random-object7': { width: 0.8, height: 0.8 }, // Sleigh
 };
 
+const HITBOX_OFFSETS_BY_TEXTURE = {
+  'random-object1': { x: 0, y: 0 }, 
+  'random-object2': { x: 0, y: 0 }, // Duck
+  'random-object3': { x: 0, y: 0 }, 
+  'random-object4': { x: 0, y: 0 }, // Barrier
+  'random-object5': { x: 0, y: 15 }, // Deer
+  'random-object6': { x: 0, y: 10 }, // Gnome
+  'random-object7': { x: 0, y: 30 }, // Sleigh
+};
+
 export default class RandomObstacle extends Obstacle {
   constructor(scene, x, y, lane) {
     const scaleFactor = Math.min(scene.scale.width / 1920, scene.scale.height / 1080);
@@ -27,6 +37,7 @@ export default class RandomObstacle extends Obstacle {
     super(scene, x, y, texture, lane);
 
     this.hitboxScale = HITBOX_SCALES_BY_TEXTURE[texture];
+    this.hitboxOffset = HITBOX_OFFSETS_BY_TEXTURE[texture];
     this.isDuck = randomInt === 2;
     this.isBarrier = randomInt === 4;
     this.isDeer = randomInt === 5;
