@@ -314,7 +314,7 @@ export default class ItemManager {
   lebenCheck(car, object) {
     // Duck check
     if (object.texture.key === 'random-object2') {
-      this.yeet(object);
+      this.yeet(object, 'duck-fly-up', 'duck-fly-down');
       return;
     }
 
@@ -371,11 +371,13 @@ export default class ItemManager {
     });
   }
 
-  yeet(target) {
+  yeet(target, texture1, texture2) {
     target.body.enable = false;
 
     const startX = target.x;
     const startY = target.y;
+    const frameDuration = 100;
+    let currentFrame = -1;
 
     const windowWidth = this.scene.scale.width;
 
@@ -393,6 +395,14 @@ export default class ItemManager {
       onUpdate: (tween) => {
         const t = tween.getValue();
         target.y = startY + t * 25 - Math.sin(t * Math.PI) * 350;
+
+        if (texture1 && texture2) {
+          const frame = Math.floor((t * 1000) / frameDuration);
+          if (frame !== currentFrame) {
+            currentFrame = frame;
+            target.setTexture(frame % 2 === 0 ? texture1 : texture2);
+          }
+        }
       },
     });
   }
