@@ -17,10 +17,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
     );
-    this.load.image(
-      'leaderboard-homepage-btn',
-      'assets/images/gameover-scene-assets/back-to-menu-button.png',
-    );
+    this.load.image('return-button', 'assets/images/homepage/return-button.png');
   }
 
   // Builds the leaderboard scene, then applies its initial layout and controls.
@@ -34,6 +31,9 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.createTitle();
     this.createLeaderboardContent(leaderboard);
     this.registerResizeHandler();
+    //this.createFilterButton();
+    //this.createSortButton();
+    this.createBackButton();
 
     this.resize({
       width: this.scale.width,
@@ -163,6 +163,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     });
   }
 
+  // Creates the same upper-left return button used by the name input scene.
+  createBackButton() {
+    this.returnButton = this.add
+      .image(200 * this.scaleFactor, 50 * this.scaleFactor, 'return-button')
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.1 * this.scaleFactor)
+      .setOrigin(0.5)
+      .on('pointerdown', this.goHome, this);
+  }
+
   // Returns to the active menu and restores focus to its leaderboard button.
   goHome() {
     playMenuClick(this);
@@ -189,6 +199,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.resizeBackground(width, height);
     this.resizeTitle(width, height);
     this.resizeLeaderboard(width, height);
+    this.resizeBackButton();
   }
 
   // Resizes and centers the background to match the game dimensions.
@@ -201,6 +212,13 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.title
       .setPosition(width / 2, height / 12)
       .setFontSize((this.isLeaderboardTampered ? 60 : 90) * this.scaleFactor);
+  }
+
+  // Repositions and rescales the return button with the current screen size.
+  resizeBackButton() {
+    this.returnButton
+      .setPosition(200 * this.scaleFactor, 50 * this.scaleFactor)
+      .setScale(0.1 * this.scaleFactor);
   }
 
   // Calculates leaderboard layout and updates the position and size of its text.
