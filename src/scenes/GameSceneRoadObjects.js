@@ -145,8 +145,17 @@ export function createRoadObject(scene, type) {
       }
     } else if (type === 'random-obstacle') {
       roadObject = new RandomObstacle(scene, roadObjectX, spawnY, lane);
-      roadObject.body.setSize(roadObject.width, roadObject.height);
+      const { width: hitboxWidthScale, height: hitboxHeightScale } = roadObject.hitboxScale;
+      const { x: hitboxOffsetX, y: hitboxOffsetY } = roadObject.hitboxOffset;
+      roadObject.body.setSize(
+        roadObject.width * hitboxWidthScale,
+        roadObject.height * hitboxHeightScale,
+      );
       roadObject.body.setImmovable(true);
+      roadObject.body.setOffset(
+        roadObject.body.offset.x + hitboxOffsetX,
+        roadObject.body.offset.y + hitboxOffsetY,
+      );
       addPlayerCollider(scene, roadObject, (car, obstacle) =>
         hitRandomObstacle(scene, car, obstacle),
       );
