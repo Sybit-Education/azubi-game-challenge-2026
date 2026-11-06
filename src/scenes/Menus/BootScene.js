@@ -15,6 +15,7 @@ export default class BootScene extends Phaser.Scene {
     // Load persisted settings early so all scenes can rely on registry values.
     const settings = loadSettings();
     this.registry.set('accessibilityMode', settings.accessibilityMode);
+    this.registry.set('accessibility enabled', settings.accessibilityMode);
     this.registry.set('gameMode', settings.gameMode);
 
     this.scene.start(settings.gameMode === 'christmas' ? 'ChristmasScene' : 'MenuScene');
