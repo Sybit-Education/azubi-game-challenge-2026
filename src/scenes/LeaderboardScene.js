@@ -4,6 +4,18 @@ import { loadLeaderboard } from '../utils/leaderboardSecurity.js';
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
 import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
 
+// Color config
+const COLORS = {
+  grid: 0x520078,
+  border: 0xe32bff,
+  selected: 0xc8ff16,
+  mainText: '#ffffff',
+  secondaryText: '#cdb8e4',
+  keyFill: 0x180a24,
+  selectedText: '#180a24',
+  disabledFill: 0x55515b,
+  disabledText: '#8e8993',
+};
 export default class LeaderboardScene extends Phaser.Scene {
   // Initializes the Phaser scene under its registered scene key.
   constructor() {
@@ -33,6 +45,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.registerResizeHandler();
     //this.createFilterButton();
     //this.createSortButton();
+    this.createSearchBar();
     this.createBackButton();
 
     this.resize({
@@ -153,6 +166,36 @@ export default class LeaderboardScene extends Phaser.Scene {
             })
             .setOrigin(0.5)
         : null;
+  }
+
+  createSearchBar() {
+    this.nameFieldWidth = 700 * this.scaleFactor;
+    this.nameFontSize = 24 * this.scaleFactor;
+    const nameY = this.scale.height * 0.2;
+    const labelX = this.scale.width / 1.75 - this.nameFieldWidth / 2 + 12 * this.scaleFactor;
+    this.add
+      .rectangle(
+        this.scale.width / 1.75,
+        nameY,
+        this.nameFieldWidth,
+        56 * this.scaleFactor,
+        0x180a24,
+        0.8,
+      )
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
+      .setDepth(0);
+
+    const nameStyle = {
+      fontFamily: 'Silkscreen',
+      fontSize: `${this.nameFontSize}px`,
+      color: COLORS.mainText,
+    };
+
+    this.labelText = this.add
+      .text(labelX, nameY, 'SEARCH BY NAME', { ...nameStyle, color: COLORS.secondaryText })
+      .setOrigin(0, 0.5);
+
+    this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
   }
 
   // Keeps the scene layout responsive and removes the listener on shutdown.
