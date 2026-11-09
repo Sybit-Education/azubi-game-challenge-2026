@@ -205,27 +205,27 @@ export default class LeaderboardScene extends Phaser.Scene {
     const buttonTextStyle = {
       fontFamily: 'Silkscreen',
       fontSize: `${22 * this.scaleFactor}px`,
-      color: COLORS.selectedText,
+      color: COLORS.mainText,
       align: 'center',
     };
 
     const button = this.add
-      .rectangle(0, 0, 120, 56, COLORS.selected)
+      .rectangle(0, 0, 120, 56, COLORS.keyFill)
       .setScale(this.scaleFactor)
-      .setStrokeStyle(2, COLORS.border)
+      .setStrokeStyle(2, COLORS.selected)
       .setDepth(0)
       .setInteractive({ useHandCursor: true });
     const text = this.add.text(0, 0, label, buttonTextStyle).setOrigin(0.5).setDepth(1);
 
     button.on('pointerover', () => {
-      button.setFillStyle(COLORS.border);
+      button.setFillStyle(COLORS.selected);
       button.setStrokeStyle(2, COLORS.selected);
       text.setColor(COLORS.selectedText);
     });
     button.on('pointerout', () => {
-      button.setFillStyle(COLORS.selected);
-      button.setStrokeStyle(2, COLORS.border);
-      text.setColor(COLORS.selectedText);
+      button.setFillStyle(COLORS.keyFill);
+      button.setStrokeStyle(2, COLORS.selected);
+      text.setColor(COLORS.mainText);
     });
 
     return { button, text };
