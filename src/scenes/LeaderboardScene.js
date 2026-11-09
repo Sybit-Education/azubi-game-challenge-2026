@@ -43,9 +43,9 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.createTitle();
     this.createLeaderboardContent(leaderboard);
     this.registerResizeHandler();
-    //this.createFilterButton();
-    //this.createSortButton();
     this.createSearchBar();
+    this.createFilterButton();
+    this.createSortButton();
     this.createBackButton();
 
     this.resize({
@@ -171,17 +171,8 @@ export default class LeaderboardScene extends Phaser.Scene {
   createSearchBar() {
     this.nameFieldWidth = 700 * this.scaleFactor;
     this.nameFontSize = 24 * this.scaleFactor;
-    const nameY = this.scale.height * 0.2;
-    const labelX = this.scale.width / 1.75 - this.nameFieldWidth / 2 + 12 * this.scaleFactor;
-    this.add
-      .rectangle(
-        this.scale.width / 1.75,
-        nameY,
-        this.nameFieldWidth,
-        56 * this.scaleFactor,
-        0x180a24,
-        0.8,
-      )
+    this.searchBackground = this.add
+      .rectangle(0, 0, this.nameFieldWidth, 56 * this.scaleFactor, 0x180a24, 0.8)
       .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
       .setDepth(0);
 
@@ -192,10 +183,52 @@ export default class LeaderboardScene extends Phaser.Scene {
     };
 
     this.labelText = this.add
-      .text(labelX, nameY, 'SEARCH BY NAME', { ...nameStyle, color: COLORS.secondaryText })
+      .text(0, 0, 'SEARCH BY NAME', { ...nameStyle, color: COLORS.secondaryText })
       .setOrigin(0, 0.5);
 
-    this.nameText = this.add.text(labelX, nameY, '', nameStyle).setOrigin(0, 0.5);
+    this.nameText = this.add.text(0, 0, '', nameStyle).setOrigin(0, 0.5);
+  }
+
+  createFilterButton() {
+    const filter = this.createActionButton('FILTER');
+    this.filterButton = filter.button;
+    this.filterButtonText = filter.text;
+  }
+
+  createSortButton() {
+    const sort = this.createActionButton('SORT');
+    this.sortButton = sort.button;
+    this.sortButtonText = sort.text;
+  }
+
+  createActionButton(label) {
+    const buttonTextStyle = {
+      fontFamily: 'Silkscreen',
+      fontSize: `${22 * this.scaleFactor}px`,
+      color: COLORS.selectedText,
+      align: 'center',
+    };
+
+    const button = this.add
+      .rectangle(0, 0, 120, 56, COLORS.selected)
+      .setScale(this.scaleFactor)
+      .setStrokeStyle(2, COLORS.border)
+      .setDepth(0)
+      .setInteractive({ useHandCursor: true });
+    const text = this.add.text(0, 0, label, buttonTextStyle).setOrigin(0.5).setDepth(1);
+
+    button.on('pointerover', () => {
+      button.setFillStyle(COLORS.border);
+      button.setStrokeStyle(2, COLORS.selected);
+      text.setColor(COLORS.selectedText);
+    });
+    button.on('pointerout', () => {
+      button.setFillStyle(COLORS.selected);
+      button.setStrokeStyle(2, COLORS.border);
+      text.setColor(COLORS.selectedText);
+    });
+
+    return { button, text };
   }
 
   // Keeps the scene layout responsive and removes the listener on shutdown.
@@ -242,7 +275,40 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.resizeBackground(width, height);
     this.resizeTitle(width, height);
     this.resizeLeaderboard(width, height);
+    this.resizeSearchControls(width, height);
     this.resizeBackButton();
+  }
+
+  // Positions the search field and its adjacent action buttons at the current scale.
+  resizeSearchControls(width, height) {
+    this.nameFieldWidth = 700 * this.scaleFactor;
+    this.nameFontSize = 24 * this.scaleFactor;
+
+    const controlsY = height * 0.2;
+    const firstColumnBounds = this.columnHeaders[0].getBounds();
+    const lastColumnBounds = this.columnHeaders[3].getBounds();
+    const buttonWidth = 120 * this.scaleFactor;
+    const buttonGap = 12 * this.scaleFactor;
+    const controlsLeft = firstColumnBounds.left;
+    const controlsRight = lastColumnBounds.right;
+    const filterX = controlsLeft + buttonWidth / 2;
+    const sortX = controlsLeft + buttonWidth + buttonGap + buttonWidth / 2;
+    const searchLeft = controlsLeft + buttonWidth * 2 + buttonGap * 2;
+    const searchRight = controlsRight;
+    this.nameFieldWidth = searchRight - searchLeft;
+    const searchCenterX = (searchLeft + searchRight) / 2;
+    const labelX = searchLeft + 12 * this.scaleFactor;
+
+    this.searchBackground
+      .setPosition(searchCenterX, controlsY)
+      .setSize(this.nameFieldWidth, 56 * this.scaleFactor)
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected);
+    this.labelText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
+    this.nameText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
+    this.filterButton.setPosition(filterX, controlsY).setScale(this.scaleFactor);
+    this.filterButtonText.setPosition(filterX, controlsY).setFontSize(22 * this.scaleFactor);
+    this.sortButton.setPosition(sortX, controlsY).setScale(this.scaleFactor);
+    this.sortButtonText.setPosition(sortX, controlsY).setFontSize(22 * this.scaleFactor);
   }
 
   // Resizes and centers the background to match the game dimensions.
