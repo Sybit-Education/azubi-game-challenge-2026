@@ -190,13 +190,13 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   createFilterButton() {
-    const filter = this.createActionButton('FILTER');
+    const filter = this.createActionButton('FILTER ▼');
     this.filterButton = filter.button;
     this.filterButtonText = filter.text;
   }
 
   createSortButton() {
-    const sort = this.createActionButton('SORT');
+    const sort = this.createActionButton('SORT ▼');
     this.sortButton = sort.button;
     this.sortButtonText = sort.text;
   }
@@ -204,7 +204,7 @@ export default class LeaderboardScene extends Phaser.Scene {
   createActionButton(label) {
     const buttonTextStyle = {
       fontFamily: 'Silkscreen',
-      fontSize: `${22 * this.scaleFactor}px`,
+      fontSize: `${20 * this.scaleFactor}px`,
       color: COLORS.mainText,
       align: 'center',
     };
@@ -306,9 +306,9 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.labelText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
     this.nameText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
     this.filterButton.setPosition(filterX, controlsY).setScale(this.scaleFactor);
-    this.filterButtonText.setPosition(filterX, controlsY).setFontSize(22 * this.scaleFactor);
+    this.filterButtonText.setPosition(filterX, controlsY).setFontSize(20 * this.scaleFactor);
     this.sortButton.setPosition(sortX, controlsY).setScale(this.scaleFactor);
-    this.sortButtonText.setPosition(sortX, controlsY).setFontSize(22 * this.scaleFactor);
+    this.sortButtonText.setPosition(sortX, controlsY).setFontSize(20 * this.scaleFactor);
   }
 
   // Resizes and centers the background to match the game dimensions.
