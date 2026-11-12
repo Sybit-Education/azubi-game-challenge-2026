@@ -41,6 +41,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.currentFilter = 'all'; // default filter
     this.isSortDropdownOpen = false;
     this.isFilterDropdownOpen = false;
+    this.openDropdown = null;
     const leaderboard = await this.loadLeaderboardEntries();
 
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
@@ -79,9 +80,30 @@ export default class LeaderboardScene extends Phaser.Scene {
     return sortedEntries;
   }
 
+  // Reloads and redraws the leaderboard.
+  async refreshLeaderboard() {
+    // Remove existing rows
+    this.leaderboardEntries.forEach((row) => {
+      row.rank.destroy();
+      row.name.destroy();
+      row.distance.destroy();
+      row.score.destroy();
+    });
+
+    const leaderboard = await this.loadLeaderboardEntries();
+
+    const textStyle = this.getLeaderboardTextStyle();
+
+    this.leaderboardEntries = leaderboard.map((entry, index) =>
+      this.createLeaderboardRow(entry, index, textStyle),
+    );
+
+    this.resizeLeaderboard(this.scale.width, this.scale.height);
+  }
+
   // Creates a reusable dropdown menu for a button.
-  createDropdown(button, options) {
-    button.dropdownScaling = 80;
+  createDropdown(button, options, dropdownScaling = 80) {
+    button.dropdownScaling = dropdownScaling;
 
     const items = [];
 
@@ -96,7 +118,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
       .setVisible(false);
 
-    options.forEach((option, index) => {
+    options.forEach((option) => {
       const row = this.add
         .rectangle(0, 0, panelWidth, itemHeight, COLORS.keyFill)
         .setInteractive({ useHandCursor: true })
@@ -108,7 +130,7 @@ export default class LeaderboardScene extends Phaser.Scene {
           fontSize: `${20 * this.scaleFactor}px`,
           color: COLORS.mainText,
         })
-        .setOrigin(0.5)
+        .setOrigin(0, 0.5)
         .setVisible(false);
 
       row.on('pointerdown', option.callback);
@@ -165,8 +187,11 @@ export default class LeaderboardScene extends Phaser.Scene {
       const centerY = dropdownTop + itemHeight / 2 + index * itemHeight;
 
       item.row.setPosition(dropdownCenterX, centerY).setSize(panelWidth, itemHeight);
+      const leftTextPadding = 32 * this.scaleFactor;
 
-      item.text.setPosition(dropdownCenterX, centerY).setFontSize(20 * this.scaleFactor);
+      item.text
+        .setPosition(buttonLeft + leftTextPadding, centerY)
+        .setFontSize(20 * this.scaleFactor);
     });
   }
 
@@ -304,12 +329,16 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.filterButton = filter.button;
     this.filterButtonText = filter.text;
 
-    this.createDropdown(this.filterButton, [
-      {
-        label: '✔ ALL',
-        callback: () => this.changeFilter('all'),
-      },
-    ]);
+    this.createDropdown(
+      this.filterButton,
+      [
+        {
+          label: '✓  ALL',
+          callback: () => this.changeFilter('all'),
+        },
+      ],
+      40,
+    );
 
     this.filterButton.on('pointerdown', () => {
       this.toggleDropdown(this.filterButton);
@@ -324,11 +353,11 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.createDropdown(this.sortButton, [
       {
-        label: '✔ DISTANCE',
+        label: '✓  DISTANCE',
         callback: () => this.changeSort('distance'),
       },
       {
-        label: 'SCORE',
+        label: '   SCORE',
         callback: () => this.changeSort('score'),
       },
     ]);
@@ -340,6 +369,15 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // Shows or hides a dropdown menu.
   toggleDropdown(button) {
+    // Close another dropdown if one is already open.
+    if (this.openDropdown && this.openDropdown !== button) {
+      this.openDropdown.dropdown.panel.setVisible(false);
+
+      this.openDropdown.dropdown.items.forEach((item) => {
+        item.row.setVisible(false);
+        item.text.setVisible(false);
+      });
+    }
     const visible = button.dropdown.panel.visible;
 
     button.dropdown.panel.setVisible(!visible);
@@ -348,14 +386,44 @@ export default class LeaderboardScene extends Phaser.Scene {
       item.row.setVisible(!visible);
       item.text.setVisible(!visible);
     });
+    this.openDropdown = visible ? null : button;
   }
 
-  changeSort(sortType) {
+  // Changes the current sorting mode and refreshes the leaderboard.
+  async changeSort(sortType) {
+    if (this.currentSort === sortType) {
+      this.toggleDropdown(this.sortButton);
+      return;
+    }
+
     this.currentSort = sortType;
+
+    // Update dropdown labels
+    this.sortButton.dropdown.items[0].text.setText(
+      sortType === 'distance' ? '✓  DISTANCE' : '   DISTANCE',
+    );
+
+    this.sortButton.dropdown.items[1].text.setText(sortType === 'score' ? '✓  SCORE' : '   SCORE');
+
     this.toggleDropdown(this.sortButton);
 
-    // Later:
-    // this.refreshLeaderboard();
+    await this.refreshLeaderboard();
+  }
+
+  // Changes the current filter and refreshes the leaderboard.
+  async changeFilter(filterType) {
+    if (this.currentFilter === filterType) {
+      this.toggleDropdown(this.filterButton);
+      return;
+    }
+
+    this.currentFilter = filterType;
+
+    this.filterButton.dropdown.items[0].text.setText(filterType === 'all' ? '✓  ALL' : '   ALL');
+
+    this.toggleDropdown(this.filterButton);
+
+    await this.refreshLeaderboard();
   }
 
   createActionButton(label) {
