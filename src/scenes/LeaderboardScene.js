@@ -192,9 +192,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
       item.row.setPosition(dropdownCenterX, centerY).setSize(panelWidth, itemHeight);
 
-      item.text
-        .setPosition(dropdownCenterX, centerY)
-        .setFontSize(18 * this.scaleFactor);
+      item.text.setPosition(dropdownCenterX, centerY).setFontSize(18 * this.scaleFactor);
     });
   }
 
