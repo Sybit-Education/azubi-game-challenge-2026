@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
-import { loadLeaderboard } from '../utils/leaderboardSecurity.js';
+import LeaderboardTable from '../objects/LeaderboardTable.js';
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
 import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
+export { parseLeaderboard } from '../objects/LeaderboardTable.js';
 
 // Color config
 const COLORS = {
@@ -38,18 +39,18 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
 
-    this.currentSort = 'distance'; // default sort
     this.currentFilter = 'all'; // default filter
     this.isSortDropdownOpen = false;
     this.isFilterDropdownOpen = false;
     this.openDropdown = null;
-    const leaderboard = await this.loadLeaderboardEntries();
+    this.leaderboardTable = new LeaderboardTable(this);
+    const leaderboard = await this.leaderboardTable.loadEntries();
 
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     this.createParallaxBackground();
     this.createTitle();
-    this.createLeaderboardContent(leaderboard);
+    this.leaderboardTable.create(leaderboard);
     this.registerResizeHandler();
     this.createSearchBar();
     this.createFilterButton();
@@ -60,46 +61,12 @@ export default class LeaderboardScene extends Phaser.Scene {
       width: this.scale.width,
       height: this.scale.height,
     });
-    bindLeaderboardControls(this, leaderboard, data?.focusTarget, this.isLeaderboardTampered);
-  }
-
-  // Loads leaderboard data and records whether the stored entries were tampered with.
-  async loadLeaderboardEntries() {
-    const result = await loadLeaderboard();
-    this.isLeaderboardTampered = result.isTampered;
-    return this.getSortedEntries(result.entries).slice(0, 10);
-  }
-
-  getSortedEntries(entries) {
-    const sortedEntries = [...entries];
-    if (this.currentSort === 'score') {
-      sortedEntries.sort((a, b) => b.score - a.score);
-    } else {
-      sortedEntries.sort((a, b) => b.distance - a.distance);
-    }
-
-    return sortedEntries;
-  }
-
-  // Reloads and redraws the leaderboard.
-  async refreshLeaderboard() {
-    // Remove existing rows
-    this.leaderboardEntries.forEach((row) => {
-      row.rank.destroy();
-      row.name.destroy();
-      row.distance.destroy();
-      row.score.destroy();
-    });
-
-    const leaderboard = await this.loadLeaderboardEntries();
-
-    const textStyle = this.getLeaderboardTextStyle();
-
-    this.leaderboardEntries = leaderboard.map((entry, index) =>
-      this.createLeaderboardRow(entry, index, textStyle),
+    bindLeaderboardControls(
+      this,
+      leaderboard,
+      data?.focusTarget,
+      this.leaderboardTable.isTampered,
     );
-
-    this.resizeLeaderboard(this.scale.width, this.scale.height);
   }
 
   // Creates a reusable dropdown menu for a button.
@@ -221,86 +188,16 @@ export default class LeaderboardScene extends Phaser.Scene {
       .text(
         this.scale.width / 2,
         this.scale.height / 12,
-        this.isLeaderboardTampered ? 'Leaderboard\n⚠ manipuliert' : 'Leaderboard',
+        this.leaderboardTable.isTampered ? 'Leaderboard\n⚠ manipuliert' : 'Leaderboard',
         {
           fontFamily: 'Silkscreen',
-          fontSize: this.isLeaderboardTampered ? '60px' : '90px',
+          fontSize: this.leaderboardTable.isTampered ? '60px' : '90px',
           color: '#ffffff',
           align: 'center',
         },
       )
       .setOrigin(0.5)
       .setScale(1 * this.scaleFactor);
-  }
-
-  // Creates the headers, rows, and empty-state message for the leaderboard.
-  createLeaderboardContent(leaderboard) {
-    const textStyle = this.getLeaderboardTextStyle();
-    this.createColumnHeaders(textStyle);
-    this.createLeaderboardRows(leaderboard, textStyle);
-    this.createEmptyLeaderboardMessage(leaderboard.length, textStyle);
-  }
-
-  // Returns the shared text styling used by leaderboard headers and entries.
-  getLeaderboardTextStyle() {
-    return {
-      fontFamily: 'Silkscreen',
-      fontSize: `${this.scale.height / 26}px`,
-      color: '#ffffff',
-    };
-  }
-
-  // Creates the four column headers for rank, player, distance, and score.
-  createColumnHeaders(textStyle) {
-    this.columnHeaders = [
-      this.add.text(0, 0, '#', textStyle).setOrigin(0.5, 1),
-      this.add.text(0, 0, 'PLAYER', textStyle).setOrigin(0, 1),
-      this.add.text(0, 0, 'DISTANCE', textStyle).setOrigin(1),
-      this.add.text(0, 0, 'SCORE', textStyle).setOrigin(1),
-    ];
-  }
-
-  // Builds a display row for each leaderboard entry.
-  createLeaderboardRows(leaderboard, textStyle) {
-    this.leaderboardEntries = leaderboard.map((entry, index) =>
-      this.createLeaderboardRow(entry, index, textStyle),
-    );
-  }
-
-  // Creates the text objects for one leaderboard entry.
-  createLeaderboardRow(entry, index, textStyle) {
-    const name = entry.name || 'Unbekannt';
-    const displayName = entry.isTampered ? `${name} ⚠ manipuliert` : name;
-    const alpha = index <= 7 ? 1 - (index / 2) * 0.04 : 0.75;
-
-    return {
-      rank: this.add
-        .text(0, 0, String(index + 1), textStyle)
-        .setOrigin(0.5)
-        .setAlpha(alpha),
-      name: this.add.text(0, 0, displayName, textStyle).setOrigin(0, 0.5).setAlpha(alpha),
-      distance: this.add
-        .text(0, 0, `${entry.distance} km`, textStyle)
-        .setOrigin(1, 0.5)
-        .setAlpha(alpha),
-      score: this.add
-        .text(0, 0, String(entry.score ?? 0), textStyle)
-        .setOrigin(1, 0.5)
-        .setAlpha(alpha),
-    };
-  }
-
-  // Shows a centered message when the leaderboard has no entries.
-  createEmptyLeaderboardMessage(entryCount, textStyle) {
-    this.emptyLeaderboardText =
-      entryCount === 0
-        ? this.add
-            .text(this.scale.width / 2, this.scale.height / 2, 'NO ENTRIES YET', {
-              ...textStyle,
-              align: 'center',
-            })
-            .setOrigin(0.5)
-        : null;
   }
 
   createSearchBar() {
@@ -397,12 +294,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // Changes the current sorting mode and refreshes the leaderboard.
   async changeSort(sortType) {
-    if (this.currentSort === sortType) {
+    if (this.leaderboardTable.currentSort === sortType) {
       this.toggleDropdown(this.sortButton);
       return;
     }
-
-    this.currentSort = sortType;
 
     this.sortButton.dropdown.items.forEach((item) => {
       item.selected = item.value === sortType;
@@ -411,7 +306,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.toggleDropdown(this.sortButton);
 
-    await this.refreshLeaderboard();
+    await this.leaderboardTable.setSort(sortType);
   }
 
   // Changes the current filter and refreshes the leaderboard.
@@ -430,7 +325,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.toggleDropdown(this.filterButton);
 
-    await this.refreshLeaderboard();
+    await this.leaderboardTable.refresh();
   }
 
   createActionButton(label) {
@@ -510,7 +405,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.resizeBackground(width, height);
     this.resizeTitle(width, height);
-    this.resizeLeaderboard(width, height);
+    this.leaderboardTable.resize(width, height);
     this.resizeSearchControls(width, height);
     this.resizeBackButton();
   }
@@ -521,8 +416,8 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.nameFontSize = 24 * this.scaleFactor;
 
     const controlsY = height * 0.2;
-    const firstColumnBounds = this.columnHeaders[0].getBounds();
-    const lastColumnBounds = this.columnHeaders[3].getBounds();
+    const firstColumnBounds = this.leaderboardTable.columnHeaders[0].getBounds();
+    const lastColumnBounds = this.leaderboardTable.columnHeaders[3].getBounds();
     const buttonWidth = 120 * this.scaleFactor;
     const buttonGap = 12 * this.scaleFactor;
     const controlsLeft = firstColumnBounds.left;
@@ -558,7 +453,7 @@ export default class LeaderboardScene extends Phaser.Scene {
   resizeTitle(width, height) {
     this.title
       .setPosition(width / 2, height / 12)
-      .setFontSize((this.isLeaderboardTampered ? 60 : 90) * this.scaleFactor);
+      .setFontSize((this.leaderboardTable.isTampered ? 60 : 90) * this.scaleFactor);
   }
 
   // Repositions and rescales the return button with the current screen size.
@@ -567,65 +462,4 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setPosition(200 * this.scaleFactor, 50 * this.scaleFactor)
       .setScale(0.1 * this.scaleFactor);
   }
-
-  // Calculates leaderboard layout and updates the position and size of its text.
-  resizeLeaderboard(width, height) {
-    const rankX = width * 0.32;
-    const nameX = width * 0.35;
-    const distanceX = width * 0.62;
-    const scoreX = width * 0.69;
-    const headerY = height * 0.31;
-    const firstRowY = height * 0.36;
-    const rowGap = height * 0.052;
-    const rowFontSize = height / 26;
-
-    this.positionColumnHeaders({ rankX, nameX, distanceX, scoreX, headerY, rowFontSize });
-    this.positionLeaderboardRows({
-      rankX,
-      nameX,
-      distanceX,
-      scoreX,
-      firstRowY,
-      rowGap,
-      rowFontSize,
-    });
-    this.emptyLeaderboardText?.setPosition(width / 2, height * 0.5).setFontSize(rowFontSize);
-  }
-
-  // Positions the column headers using the calculated layout values.
-  positionColumnHeaders({ rankX, nameX, distanceX, scoreX, headerY, rowFontSize }) {
-    this.columnHeaders.forEach((header) => header.setFontSize(rowFontSize));
-    this.columnHeaders[0].setPosition(rankX, headerY);
-    this.columnHeaders[1].setPosition(nameX, headerY);
-    this.columnHeaders[2].setPosition(distanceX, headerY);
-    this.columnHeaders[3].setPosition(scoreX, headerY);
-  }
-
-  // Positions each row and fits player names before the distance column.
-  positionLeaderboardRows({ rankX, nameX, distanceX, scoreX, firstRowY, rowGap, rowFontSize }) {
-    this.leaderboardEntries.forEach((row, index) => {
-      const y = firstRowY + index * rowGap;
-      row.rank.setPosition(rankX, y).setFontSize(rowFontSize);
-      row.name.setPosition(nameX, y).setFontSize(rowFontSize);
-      this.fitLeaderboardName(row.name, rowFontSize, nameX, distanceX);
-      row.distance.setPosition(distanceX, y).setFontSize(rowFontSize);
-      row.score.setPosition(scoreX, y).setFontSize(rowFontSize);
-    });
-  }
-
-  // Shrinks a player name when it exceeds the space available in its column.
-  fitLeaderboardName(name, fontSize, nameX, distanceX) {
-    const availableNameWidth = distanceX - nameX - 18 * this.scaleFactor;
-    if (name.width > availableNameWidth) {
-      name.setFontSize(fontSize * (availableNameWidth / name.width));
-    }
-  }
 }
-
-// Loads the leaderboard and returns its entries without creating scene objects.
-export async function parseLeaderboard() {
-  return (await loadLeaderboard()).entries;
-}
-
-// TO-DO: Extract leaderboard rendering and dropdown logic into a separate class to reduce the size of this scene class and improve maintainability
-// TO-DO: Adjust Dropdown width
