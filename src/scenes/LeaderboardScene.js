@@ -39,7 +39,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     const leaderboard = await this.loadLeaderboardEntries();
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
-    this.createBackground();
+    this.createParallaxBackground();
     this.createTitle();
     this.createLeaderboardContent(leaderboard);
     this.registerResizeHandler();
@@ -63,21 +63,22 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   // Adds the parallax background and connects it to pointer movement.
-  createBackground() {
+ createParallaxBackground() {
     this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-2);
 
-    this.input.on('pointermove', this.handleBackgroundPointerMove, this);
-  }
-
-  // Shifts the background slightly toward the pointer for a parallax effect.
-  handleBackgroundPointerMove(pointer) {
-    this.background.setPosition(
-      this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
-      this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
-    );
+    this.parallaxPointerMove = (pointer) => {
+      this.background.setPosition(
+        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
+        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
+      );
+    };
+    this.input.on('pointermove', this.parallaxPointerMove);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off('pointermove', this.parallaxPointerMove);
+    });
   }
 
   // Creates the centered title, showing a warning when the leaderboard is tampered with.
@@ -313,7 +314,9 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   // Resizes and centers the background to match the game dimensions.
   resizeBackground(width, height) {
-    this.background.setPosition(width / 2, height / 2).setDisplaySize(width, height);
+    this.background
+    .setPosition(width / 2, height / 2)
+    .setDisplaySize(width * 1.01, height * 1.01)
   }
 
   // Repositions and scales the title for the current screen size.
