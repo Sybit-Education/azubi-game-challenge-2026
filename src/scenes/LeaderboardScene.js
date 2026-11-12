@@ -11,6 +11,7 @@ const COLORS = {
   selected: 0xc8ff16,
   mainText: '#ffffff',
   secondaryText: '#cdb8e4',
+  selectedLabel: '#c8ff16',
   keyFill: 0x180a24,
   selectedText: '#180a24',
   disabledFill: 0x55515b,
@@ -128,10 +129,17 @@ export default class LeaderboardScene extends Phaser.Scene {
         .text(0, 0, option.label, {
           fontFamily: 'Silkscreen',
           fontSize: `${20 * this.scaleFactor}px`,
-          color: COLORS.mainText,
+          color: option.selected ? COLORS.selectedLabel : COLORS.mainText,
         })
         .setOrigin(0, 0.5)
         .setVisible(false);
+
+      const item = {
+        row,
+        text,
+        value: option.value,
+        selected: option.selected ?? false,
+      };
 
       row.on('pointerdown', option.callback);
 
@@ -142,13 +150,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
       row.on('pointerout', () => {
         row.setFillStyle(COLORS.keyFill);
-        text.setColor(COLORS.mainText);
+        text.setColor(item.selected ? COLORS.selectedLabel : COLORS.mainText);
       });
 
-      items.push({
-        row,
-        text,
-      });
+      items.push(item);
     });
 
     button.dropdown = {
@@ -167,9 +172,13 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     const itemHeight = 56 * this.scaleFactor;
     const panelHeight = itemHeight * button.dropdown.items.length;
-    const panelWidth = (120 + button.dropdownScaling) * this.scaleFactor;
-
     const buttonWidth = 120 * this.scaleFactor;
+    const textPadding = 32 * this.scaleFactor;
+    button.dropdown.items.forEach((item) => {
+      item.text.setFontSize(20 * this.scaleFactor);
+    });
+    const widestLabel = Math.max(...button.dropdown.items.map((item) => item.text.width));
+    const panelWidth = Math.max(buttonWidth, widestLabel + textPadding * 2);
     const buttonLeft = button.x - buttonWidth / 2;
     const dropdownCenterX = buttonLeft + panelWidth / 2;
 
@@ -187,11 +196,9 @@ export default class LeaderboardScene extends Phaser.Scene {
       const centerY = dropdownTop + itemHeight / 2 + index * itemHeight;
 
       item.row.setPosition(dropdownCenterX, centerY).setSize(panelWidth, itemHeight);
-      const leftTextPadding = 32 * this.scaleFactor;
 
       item.text
-        .setPosition(buttonLeft + leftTextPadding, centerY)
-        .setFontSize(20 * this.scaleFactor);
+        .setPosition(buttonLeft + textPadding, centerY);
     });
   }
 
@@ -333,7 +340,9 @@ export default class LeaderboardScene extends Phaser.Scene {
       this.filterButton,
       [
         {
-          label: '✓  ALL',
+          label: 'ALL',
+          value: 'all',
+          selected: true,
           callback: () => this.changeFilter('all'),
         },
       ],
@@ -353,11 +362,14 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.createDropdown(this.sortButton, [
       {
-        label: '✓  DISTANCE',
+        label: 'DISTANCE',
+        value: 'distance',
+        selected: true,
         callback: () => this.changeSort('distance'),
       },
       {
-        label: '   SCORE',
+        label: 'SCORE',
+        value: 'score',
         callback: () => this.changeSort('score'),
       },
     ]);
@@ -398,12 +410,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.currentSort = sortType;
 
-    // Update dropdown labels
-    this.sortButton.dropdown.items[0].text.setText(
-      sortType === 'distance' ? '✓  DISTANCE' : '   DISTANCE',
-    );
-
-    this.sortButton.dropdown.items[1].text.setText(sortType === 'score' ? '✓  SCORE' : '   SCORE');
+    this.sortButton.dropdown.items.forEach((item) => {
+      item.selected = item.value === sortType;
+      item.text.setColor(item.selected ? COLORS.selectedLabel : COLORS.mainText);
+    });
 
     this.toggleDropdown(this.sortButton);
 
@@ -419,7 +429,10 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.currentFilter = filterType;
 
-    this.filterButton.dropdown.items[0].text.setText(filterType === 'all' ? '✓  ALL' : '   ALL');
+    this.filterButton.dropdown.items.forEach((item) => {
+      item.selected = item.value === filterType;
+      item.text.setColor(item.selected ? COLORS.selectedLabel : COLORS.mainText);
+    });
 
     this.toggleDropdown(this.filterButton);
 
