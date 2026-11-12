@@ -36,7 +36,13 @@ export default class LeaderboardScene extends Phaser.Scene {
   async create(data) {
     this.InputManager = new InputManager(this);
     this.InputManager.create();
+
+    this.currentSort = 'distance'; // default sort
+    this.currentFilter = 'all'; // default filter
+    this.isSortDropdownOpen = false;
+    this.isFilterDropdownOpen = false;
     const leaderboard = await this.loadLeaderboardEntries();
+
     this.scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
     this.createParallaxBackground();
@@ -59,11 +65,74 @@ export default class LeaderboardScene extends Phaser.Scene {
   async loadLeaderboardEntries() {
     const result = await loadLeaderboard();
     this.isLeaderboardTampered = result.isTampered;
-    return result.entries.slice(0, 10);
+    return this.getSortedEntries(result.entries).slice(0, 10);
+  }
+
+  getSortedEntries(entries) {
+    const sortedEntries = [...entries];
+    if (this.currentSort === 'score') {
+      sortedEntries.sort((a, b) => b.score - a.score);
+    } else {
+      sortedEntries.sort((a, b) => b.distance - a.distance);
+    }
+
+    return sortedEntries;
+  }
+
+  createDropdown(button, options) {
+    const items = [];
+
+    const x = button.x;
+    const y = button.y + 60 * this.scaleFactor;
+
+    options.forEach((option, index) => {
+      const itemY = y + index * 60 * this.scaleFactor;
+
+      const bg = this.add
+        .rectangle(
+          x,
+          itemY,
+          120 * this.scaleFactor,
+          56 * this.scaleFactor,
+          COLORS.keyFill,
+        )
+        .setStrokeStyle(2, COLORS.selected)
+        .setInteractive({ useHandCursor: true })
+        .setVisible(false);
+
+      const text = this.add
+        .text(x, itemY, option.label, {
+          fontFamily: 'Silkscreen',
+          fontSize: `${18 * this.scaleFactor}px`,
+          color: COLORS.mainText,
+        })
+        .setOrigin(0.5)
+        .setVisible(false);
+
+      bg.on('pointerdown', option.callback);
+
+      items.push(bg, text);
+    });
+
+    button.dropdownItems = items;
+  }
+
+  resizeDropdown(button) {
+    for (let index = 0; index < button.dropdownItems.length; index += 2) {
+      const optionIndex = index / 2;
+      const itemY = button.y + (60 + optionIndex * 60) * this.scaleFactor;
+      button.dropdownItems[index]
+        .setPosition(button.x, itemY)
+        .setSize(120 * this.scaleFactor, 56 * this.scaleFactor)
+        .setStrokeStyle(2 * this.scaleFactor, COLORS.selected);
+      button.dropdownItems[index + 1]
+        .setPosition(button.x, itemY)
+        .setFontSize(18 * this.scaleFactor);
+    }
   }
 
   // Adds the parallax background and connects it to pointer movement.
- createParallaxBackground() {
+  createParallaxBackground() {
     this.background = this.add
       .image(this.scale.width / 2, this.scale.height / 2, 'homepage-hintergrund')
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
@@ -192,14 +261,50 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   createFilterButton() {
     const filter = this.createActionButton('FILTER ▼');
+
     this.filterButton = filter.button;
     this.filterButtonText = filter.text;
+
+    this.createDropdown(this.filterButton, [
+      {
+        label: 'ALL',
+        callback: () => this.changeFilter('all'),
+      }
+    ]);
+
+    this.filterButton.on('pointerdown', () => {
+      this.toggleDropdown(this.filterButton);
+    });
   }
 
   createSortButton() {
     const sort = this.createActionButton('SORT ▼');
+
     this.sortButton = sort.button;
     this.sortButtonText = sort.text;
+
+    this.createDropdown(this.sortButton, [
+      {
+        label: 'DISTANCE',
+        callback: () => this.changeSort('distance'),
+      },
+      {
+        label: 'SCORE',
+        callback: () => this.changeSort('score'),
+      },
+    ]);
+
+    this.sortButton.on('pointerdown', () => {
+      this.toggleDropdown(this.sortButton);
+    });
+  }
+
+  toggleDropdown(button) {
+    const visible = button.dropdownItems[0].visible;
+
+    button.dropdownItems.forEach((item) => {
+      item.setVisible(!visible);
+    });
   }
 
   createActionButton(label) {
@@ -227,6 +332,10 @@ export default class LeaderboardScene extends Phaser.Scene {
       button.setFillStyle(COLORS.keyFill);
       button.setStrokeStyle(2, COLORS.selected);
       text.setColor(COLORS.mainText);
+    });
+
+    button.on('pointerdown', () => {
+      playMenuClick(this);
     });
 
     return { button, text };
@@ -308,15 +417,15 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.nameText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
     this.filterButton.setPosition(filterX, controlsY).setScale(this.scaleFactor);
     this.filterButtonText.setPosition(filterX, controlsY).setFontSize(20 * this.scaleFactor);
+    this.resizeDropdown(this.filterButton);
     this.sortButton.setPosition(sortX, controlsY).setScale(this.scaleFactor);
     this.sortButtonText.setPosition(sortX, controlsY).setFontSize(20 * this.scaleFactor);
+    this.resizeDropdown(this.sortButton);
   }
 
   // Resizes and centers the background to match the game dimensions.
   resizeBackground(width, height) {
-    this.background
-    .setPosition(width / 2, height / 2)
-    .setDisplaySize(width * 1.01, height * 1.01)
+    this.background.setPosition(width / 2, height / 2).setDisplaySize(width * 1.01, height * 1.01);
   }
 
   // Repositions and scales the title for the current screen size.
