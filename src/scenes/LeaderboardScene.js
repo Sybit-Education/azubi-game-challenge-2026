@@ -131,7 +131,7 @@ export default class LeaderboardScene extends Phaser.Scene {
           fontSize: `${20 * this.scaleFactor}px`,
           color: option.selected ? COLORS.selectedLabel : COLORS.mainText,
         })
-        .setOrigin(0, 0.5)
+        .setOrigin(0.5)
         .setVisible(false);
 
       const item = {
@@ -173,12 +173,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     const itemHeight = 56 * this.scaleFactor;
     const panelHeight = itemHeight * button.dropdown.items.length;
     const buttonWidth = 120 * this.scaleFactor;
-    const textPadding = 32 * this.scaleFactor;
-    button.dropdown.items.forEach((item) => {
-      item.text.setFontSize(20 * this.scaleFactor);
-    });
-    const widestLabel = Math.max(...button.dropdown.items.map((item) => item.text.width));
-    const panelWidth = Math.max(buttonWidth, widestLabel + textPadding * 2);
+    const panelWidth = buttonWidth;
     const buttonLeft = button.x - buttonWidth / 2;
     const dropdownCenterX = buttonLeft + panelWidth / 2;
 
@@ -198,7 +193,8 @@ export default class LeaderboardScene extends Phaser.Scene {
       item.row.setPosition(dropdownCenterX, centerY).setSize(panelWidth, itemHeight);
 
       item.text
-        .setPosition(buttonLeft + textPadding, centerY);
+        .setPosition(dropdownCenterX, centerY)
+        .setFontSize(18 * this.scaleFactor);
     });
   }
 
@@ -632,3 +628,6 @@ export default class LeaderboardScene extends Phaser.Scene {
 export async function parseLeaderboard() {
   return (await loadLeaderboard()).entries;
 }
+
+// TO-DO: Extract leaderboard rendering and dropdown logic into a separate class to reduce the size of this scene class and improve maintainability
+// TO-DO: Adjust Dropdown width
