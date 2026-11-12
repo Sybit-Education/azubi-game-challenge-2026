@@ -79,56 +79,95 @@ export default class LeaderboardScene extends Phaser.Scene {
     return sortedEntries;
   }
 
+  // Creates a reusable dropdown menu for a button.
   createDropdown(button, options) {
+    button.dropdownScaling = 80;
+
     const items = [];
 
-    const x = button.x;
-    const y = button.y + 60 * this.scaleFactor;
+    const itemHeight = 56 * this.scaleFactor;
+    const panelWidth = (120 + button.dropdownScaling) * this.scaleFactor;
+    const panelHeight = itemHeight * options.length;
+
+    // Background of the entire dropdown.
+    const panel = this.add
+      .rectangle(0, 0, panelWidth, panelHeight, COLORS.keyFill)
+      .setOrigin(0.5, 0)
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
+      .setVisible(false);
 
     options.forEach((option, index) => {
-      const itemY = y + index * 60 * this.scaleFactor;
-
-      const bg = this.add
-        .rectangle(
-          x,
-          itemY,
-          120 * this.scaleFactor,
-          56 * this.scaleFactor,
-          COLORS.keyFill,
-        )
-        .setStrokeStyle(2, COLORS.selected)
+      const row = this.add
+        .rectangle(0, 0, panelWidth, itemHeight, COLORS.keyFill)
         .setInteractive({ useHandCursor: true })
         .setVisible(false);
 
       const text = this.add
-        .text(x, itemY, option.label, {
+        .text(0, 0, option.label, {
           fontFamily: 'Silkscreen',
-          fontSize: `${18 * this.scaleFactor}px`,
+          fontSize: `${20 * this.scaleFactor}px`,
           color: COLORS.mainText,
         })
         .setOrigin(0.5)
         .setVisible(false);
 
-      bg.on('pointerdown', option.callback);
+      row.on('pointerdown', option.callback);
 
-      items.push(bg, text);
+      row.on('pointerover', () => {
+        row.setFillStyle(COLORS.selected);
+        text.setColor(COLORS.selectedText);
+      });
+
+      row.on('pointerout', () => {
+        row.setFillStyle(COLORS.keyFill);
+        text.setColor(COLORS.mainText);
+      });
+
+      items.push({
+        row,
+        text,
+      });
     });
 
-    button.dropdownItems = items;
+    button.dropdown = {
+      panel,
+      items,
+    };
+
+    this.resizeDropdown(button);
   }
 
+  // Repositions and rescales a dropdown after screen resize or button movement.
   resizeDropdown(button) {
-    for (let index = 0; index < button.dropdownItems.length; index += 2) {
-      const optionIndex = index / 2;
-      const itemY = button.y + (60 + optionIndex * 60) * this.scaleFactor;
-      button.dropdownItems[index]
-        .setPosition(button.x, itemY)
-        .setSize(120 * this.scaleFactor, 56 * this.scaleFactor)
-        .setStrokeStyle(2 * this.scaleFactor, COLORS.selected);
-      button.dropdownItems[index + 1]
-        .setPosition(button.x, itemY)
-        .setFontSize(18 * this.scaleFactor);
+    if (!button.dropdown) {
+      return;
     }
+
+    const itemHeight = 56 * this.scaleFactor;
+    const panelHeight = itemHeight * button.dropdown.items.length;
+    const panelWidth = (120 + button.dropdownScaling) * this.scaleFactor;
+
+    const buttonWidth = 120 * this.scaleFactor;
+    const buttonLeft = button.x - buttonWidth / 2;
+    const dropdownCenterX = buttonLeft + panelWidth / 2;
+
+    // Position directly below button.
+    const dropdownTop = button.y + (56 * this.scaleFactor) / 2 + 4 * this.scaleFactor;
+
+    // Resize and position panel.
+    button.dropdown.panel
+      .setPosition(dropdownCenterX, dropdownTop)
+      .setSize(panelWidth, panelHeight)
+      .setStrokeStyle(2 * this.scaleFactor, COLORS.selected);
+
+    // Position each row inside the panel.
+    button.dropdown.items.forEach((item, index) => {
+      const centerY = dropdownTop + itemHeight / 2 + index * itemHeight;
+
+      item.row.setPosition(dropdownCenterX, centerY).setSize(panelWidth, itemHeight);
+
+      item.text.setPosition(dropdownCenterX, centerY).setFontSize(20 * this.scaleFactor);
+    });
   }
 
   // Adds the parallax background and connects it to pointer movement.
@@ -267,9 +306,9 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.createDropdown(this.filterButton, [
       {
-        label: 'ALL',
+        label: '✔ ALL',
         callback: () => this.changeFilter('all'),
-      }
+      },
     ]);
 
     this.filterButton.on('pointerdown', () => {
@@ -285,7 +324,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.createDropdown(this.sortButton, [
       {
-        label: 'DISTANCE',
+        label: '✔ DISTANCE',
         callback: () => this.changeSort('distance'),
       },
       {
@@ -299,12 +338,24 @@ export default class LeaderboardScene extends Phaser.Scene {
     });
   }
 
+  // Shows or hides a dropdown menu.
   toggleDropdown(button) {
-    const visible = button.dropdownItems[0].visible;
+    const visible = button.dropdown.panel.visible;
 
-    button.dropdownItems.forEach((item) => {
-      item.setVisible(!visible);
+    button.dropdown.panel.setVisible(!visible);
+
+    button.dropdown.items.forEach((item) => {
+      item.row.setVisible(!visible);
+      item.text.setVisible(!visible);
     });
+  }
+
+  changeSort(sortType) {
+    this.currentSort = sortType;
+    this.toggleDropdown(this.sortButton);
+
+    // Later:
+    // this.refreshLeaderboard();
   }
 
   createActionButton(label) {
