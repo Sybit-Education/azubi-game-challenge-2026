@@ -6,7 +6,6 @@ mock.module('phaser', { defaultExport: { Scene: class {} } });
 mock.module('../../audio/sounds.js', {
   namedExports: {
     preloadMenuSounds() {},
-    preloadCountdownSounds() {},
     playMenuClick() {},
     bindMenuFocusSounds() {},
   },
@@ -32,26 +31,6 @@ function createScene({ state = 'running', locked = false, missingKey } = {}) {
   context.state = state;
   context.addEventListener = context.on.bind(context);
   context.removeEventListener = context.off.bind(context);
-  context.sampleRate = 48000;
-  context.createBuffer = (channels, length, sampleRate) => ({ channels, length, sampleRate });
-  scene.audioSources = [];
-  context.createBufferSource = () => {
-    const source = {
-      connect() {},
-      disconnect() {
-        source.disconnected = true;
-      },
-      start() {
-        source.started = true;
-      },
-      stop() {
-        source.stopped = true;
-        source.onended?.();
-      },
-    };
-    scene.audioSources.push(source);
-    return source;
-  };
   let resolveResume;
   context.resume = () =>
     new Promise((resolve) => {
@@ -96,74 +75,86 @@ function createScene({ state = 'running', locked = false, missingKey } = {}) {
    * @returns {void}
    */
   scene.runTimers = () => {
-    for (const source of scene.audioSources) {
-      if (!source.stopped) source.onended?.();
-    }
-    for (const timer of [...scene.timers].sort((first, second) => first.delay - second.delay)) {
+    const processed = new Set();
+    while (true) {
+      const timer = scene.timers
+        .filter((candidate) => !processed.has(candidate))
+        .sort((first, second) => first.delay - second.delay)[0];
+      if (!timer) break;
+      processed.add(timer);
       if (!timer.removed) timer.callback();
     }
   };
   return scene;
 }
 
-test('renders a silent intro before starting sound and image together', () => {
+test('continues the visual countdown without waiting for audio unlock', () => {
+  const scene = createScene({ state: 'suspended', locked: true });
+
+  scene.countdown();
+
+  assert.deepEqual(
+    scene.timers.map((timer) => timer.delay),
+    [1500],
+  );
+  assert.deepEqual(scene.played, []);
+  assert.deepEqual(scene.shown, []);
+
+  scene.runTimers();
+
+  assert.deepEqual(scene.played, []);
+  assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
+});
+
+test('starts sound and image together when audio is ready', () => {
   const scene = createScene();
 
   scene.countdown();
-
-  assert.deepEqual(scene.played, []);
-  assert.deepEqual(scene.shown, []);
-  assert.equal(scene.audioSources.length, 1);
-  const [intro] = scene.audioSources;
-  assert.equal(intro.started, true);
-  assert.equal(intro.buffer.length / intro.buffer.sampleRate, 1.5);
-  intro.onended();
-
-  assert.deepEqual(scene.played, ['countdown-3']);
-  assert.deepEqual(scene.shown, ['start-count-3']);
-  assert.deepEqual(
-    scene.timers.map((timer) => timer.delay),
-    [900, 1800, 2700, 4000],
-  );
-  assert.equal(scene.sound.listenerCount('unlocked'), 0);
-  assert.equal(scene.sound.context.listenerCount('statechange'), 0);
-  assert.equal(intro.disconnected, true);
-});
-
-test('waits for resume before starting the entire countdown', async () => {
-  const scene = createScene({ state: 'suspended' });
-
-  scene.countdown();
-  assert.equal(scene.timers.length, 0);
-  assert.deepEqual(scene.shown, []);
-
-  await scene.resumeAudio();
   scene.runTimers();
 
   assert.deepEqual(scene.played, ['countdown-3', 'countdown-2', 'countdown-1', 'countdown-go']);
   assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
+  assert.deepEqual(
+    scene.timers.map((timer) => timer.delay),
+    [1500, 900, 1800, 2700, 4000],
+  );
+  assert.equal(scene.sound.listenerCount('unlocked'), 0);
+  assert.equal(scene.sound.context.listenerCount('statechange'), 0);
 });
 
-test('waits for Phaser unlock and starts only once', async () => {
-  const scene = createScene({ locked: true });
-
-  scene.countdown();
-  assert.equal(scene.timers.length, 0);
-
-  scene.sound.locked = false;
-  scene.sound.emit('unlocked');
-  await scene.resumeAudio();
-  scene.runTimers();
-
-  assert.equal(scene.played.filter((key) => key === 'countdown-3').length, 1);
-});
-
-test('does not start after shutdown while audio is pending', async () => {
+test('does not wait for AudioContext resume before starting the countdown', async () => {
   const scene = createScene({ state: 'suspended' });
 
   scene.countdown();
-  scene.events.emit('shutdown');
+  assert.deepEqual(
+    scene.timers.map((timer) => timer.delay),
+    [1500],
+  );
+  assert.deepEqual(scene.shown, []);
+
+  scene.runTimers();
+
+  assert.deepEqual(scene.played, ['countdown-3', 'countdown-2', 'countdown-1', 'countdown-go']);
+  assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
   await scene.resumeAudio();
+});
+
+test('shows every countdown number without waiting for Phaser unlock', () => {
+  const scene = createScene({ locked: true });
+
+  scene.countdown();
+  assert.equal(scene.timers.length, 1);
+  scene.runTimers();
+
+  assert.deepEqual(scene.played, []);
+  assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
+});
+
+test('cancels the countdown timer on shutdown', () => {
+  const scene = createScene();
+
+  scene.countdown();
+  scene.events.emit('shutdown');
   scene.runTimers();
 
   assert.deepEqual(scene.played, []);
@@ -179,15 +170,15 @@ test('does not advance the countdown if an audio asset is missing', () => {
     scene.countdown();
     scene.runTimers();
 
-    assert.deepEqual(scene.played, []);
-    assert.deepEqual(scene.shown, []);
-    assert.equal(warning.mock.callCount(), 1);
+    assert.deepEqual(scene.played, ['countdown-2', 'countdown-1', 'countdown-go']);
+    assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
+    assert.equal(warning.mock.callCount(), 0);
   } finally {
     warning.mock.restore();
   }
 });
 
-test('does not show the first number if playback fails', () => {
+test('continues the countdown if the first sound cannot play', () => {
   const scene = createScene();
   scene.sound.play = () => false;
   const warning = mock.method(console, 'warn', () => {});
@@ -195,9 +186,8 @@ test('does not show the first number if playback fails', () => {
     scene.countdown();
     scene.runTimers();
 
-    assert.deepEqual(scene.shown, []);
-    assert.equal(scene.timers.length, 0);
-    assert.equal(warning.mock.callCount(), 1);
+    assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
+    assert.equal(warning.mock.callCount(), 0);
   } finally {
     warning.mock.restore();
   }
@@ -218,16 +208,13 @@ test('does not restart an intro skipped while audio is pending', async () => {
   assert.deepEqual(scene.shown, []);
 });
 
-test('stops the silent intro on shutdown without starting the countdown', () => {
-  const scene = createScene();
+test('shows every countdown number when every audio clip is missing', () => {
+  const scene = createScene({ missingKey: 'all' });
+  scene.cache.audio.exists = () => false;
 
   scene.countdown();
-  assert.equal(scene.audioSources.length, 1);
-  scene.events.emit('shutdown');
   scene.runTimers();
 
-  assert.equal(scene.audioSources[0].stopped, true);
-  assert.equal(scene.audioSources[0].disconnected, true);
   assert.deepEqual(scene.played, []);
-  assert.deepEqual(scene.shown, []);
+  assert.deepEqual(scene.shown, ['start-count-3', 'start-count-2', 'start-count-1', 'start-go']);
 });

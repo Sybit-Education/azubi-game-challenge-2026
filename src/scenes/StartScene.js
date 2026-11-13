@@ -1,12 +1,7 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
-import {
-  preloadMenuSounds,
-  preloadCountdownSounds,
-  playMenuClick,
-  bindMenuFocusSounds,
-} from '../../audio/sounds.js';
+import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../audio/sounds.js';
 import { safePlay } from '../../audio/safePlay.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
@@ -41,7 +36,6 @@ export default class StartScene extends Phaser.Scene {
    */
   preload() {
     preloadMenuSounds(this);
-    preloadCountdownSounds(this);
     this.load.image(
       'car',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
@@ -72,7 +66,6 @@ export default class StartScene extends Phaser.Scene {
     this.InputManager.create();
 
     this.leaving = false;
-    this.countdownStarted = false;
     this.secondCar = null;
     this.number = null;
 
@@ -120,99 +113,28 @@ export default class StartScene extends Phaser.Scene {
   }
 
   /**
-   * Requests the countdown once, after checking cached audio and audio readiness.
-   * Pending unlock and state-change listeners are removed on start or shutdown.
+   * Schedules the countdown once without waiting for browser audio readiness.
+   * Missing or blocked sounds are skipped while the visual countdown continues.
    *
    * @returns {void}
    */
   countdown() {
-    if (this.leaving || this.countdownStarted) return;
-    this.countdownStarted = true;
-
-    const keys = ['countdown-3', 'countdown-2', 'countdown-1', 'countdown-go'];
-    const missingKeys = keys.filter((key) => !this.cache.audio.exists(key));
-    if (missingKeys.length > 0) {
-      console.warn('Countdown audio missing:', missingKeys);
-      return;
-    }
-
-    const context = this.sound.context;
-    let cancelled = false;
-    const cleanup = () => {
-      cancelled = true;
-      this.sound.off('unlocked', begin);
-      context?.removeEventListener('statechange', begin);
-      this.events.off('shutdown', cleanup);
-    };
-    const begin = () => {
-      if (cancelled || this.leaving || this.sound.locked) return;
-      if (context && context.state !== 'running') return;
-      cleanup();
-      this.prepareCountdownAudio();
-    };
-
-    this.events.once('shutdown', cleanup);
-    this.sound.on('unlocked', begin);
-    context?.addEventListener('statechange', begin);
-    if (context?.state === 'suspended') {
-      context
-        .resume()
-        .then(begin)
-        .catch(() => {});
-    }
-    begin();
-  }
-
-  /**
-   * Renders 1.5 seconds of digital silence before starting the countdown.
-   * Without Web Audio, a scene timer preserves the intro delay instead. The
-   * temporary source is stopped on shutdown; output keep-alive is separate.
-   *
-   * @returns {void}
-   */
-  prepareCountdownAudio() {
-    const context = this.sound.context;
-    if (!context) {
-      this.time.delayedCall(1500, () => this.playCountdown());
-      return;
-    }
-
-    const source = context.createBufferSource();
-    source.buffer = context.createBuffer(
-      1,
-      Math.ceil(context.sampleRate * 1.5),
-      context.sampleRate,
-    );
-    source.connect(this.sound.destination);
-
-    const cleanup = () => {
-      source.onended = null;
-      source.disconnect();
-      this.events.off('shutdown', cancel);
-    };
-    const cancel = () => {
-      cleanup();
-      source.stop();
-    };
-    source.onended = () => {
-      cleanup();
+    const countdownDelay = this.time.delayedCall(1500, () => {
+      this.events.off('shutdown', cancelCountdown);
       if (!this.leaving) this.playCountdown();
-    };
-    this.events.once('shutdown', cancel);
-    source.start();
+    });
+    const cancelCountdown = () => countdownDelay.remove();
+    this.events.once('shutdown', cancelCountdown);
   }
 
   /**
    * Starts the first sound and image, then schedules the remaining countdown.
-   * Cars accelerate at Go. Scheduling aborts if Phaser rejects the first sound.
+   * Cars accelerate at Go. Sound playback is best-effort and never blocks visuals.
    *
    * @returns {void}
    */
   playCountdown() {
-    if (!this.sound.play('countdown-3', { volume: 0.8 })) {
-      console.warn('Countdown audio could not start.');
-      return;
-    }
+    safePlay(this, 'countdown-3', { volume: 0.8 });
     this.showNumber('start-count-3');
 
     this.time.delayedCall(900, () => {
@@ -358,7 +280,6 @@ export default class StartScene extends Phaser.Scene {
       return;
     }
     this.leaving = true;
-    this.sound.stopByKey('countdown');
     this.sound.stopByKey('countdown-3');
     this.sound.stopByKey('countdown-2');
     this.sound.stopByKey('countdown-1');
