@@ -25,6 +25,7 @@ export default class GameScene extends Phaser.Scene {
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
     this.isChristmas = data?.isChristmas ?? false;
+    this.blind = this.registry.get('accessibilityMode') === true;
   }
 
   //Load images.
@@ -519,6 +520,7 @@ export default class GameScene extends Phaser.Scene {
       distance2: this.secondCar ? this.secondCar.calculate_km() : null,
       score2: this.secondCar ? this.secondCar.score : null,
       isMultiplayer: this.isMultiplayer,
+      blind: this.blind,
     }); // Change to DeathScene once there is one
   }
 
