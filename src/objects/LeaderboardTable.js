@@ -46,6 +46,7 @@ export default class LeaderboardTable {
       row.name.destroy();
       row.distance.destroy();
       row.score.destroy();
+      row.blind?.destroy();
     });
     this.emptyLeaderboardText?.destroy();
 
@@ -91,10 +92,7 @@ export default class LeaderboardTable {
         .text(0, 0, String(index + 1), textStyle)
         .setOrigin(0.5)
         .setAlpha(alpha),
-      name: this.scene.add
-        .text(0, 0, displayName, textStyle)
-        .setOrigin(0, 0.5)
-        .setAlpha(alpha),
+      name: this.scene.add.text(0, 0, displayName, textStyle).setOrigin(0, 0.5).setAlpha(alpha),
       distance: this.scene.add
         .text(0, 0, `${entry.distance} km`, textStyle)
         .setOrigin(1, 0.5)
@@ -103,6 +101,12 @@ export default class LeaderboardTable {
         .text(0, 0, String(entry.score ?? 0), textStyle)
         .setOrigin(1, 0.5)
         .setAlpha(alpha),
+      blind: entry.blind
+        ? this.scene.add
+            .image(0, 0, 'blind-icon')
+            .setDisplaySize(36 * this.scene.scaleFactor, 36 * this.scene.scaleFactor)
+            .setAlpha(alpha)
+        : null,
     };
   }
 
@@ -123,17 +127,19 @@ export default class LeaderboardTable {
     const nameX = width * 0.35;
     const distanceX = width * 0.62;
     const scoreX = width * 0.69;
+    const blindX = width * 0.71;
     const headerY = height * 0.31;
     const firstRowY = height * 0.36;
     const rowGap = height * 0.052;
     const rowFontSize = height / 26;
 
-    this.positionColumnHeaders({ rankX, nameX, distanceX, scoreX, headerY, rowFontSize });
+    this.positionColumnHeaders({ rankX, nameX, distanceX, scoreX, blindX, headerY, rowFontSize });
     this.positionLeaderboardRows({
       rankX,
       nameX,
       distanceX,
       scoreX,
+      blindX,
       firstRowY,
       rowGap,
       rowFontSize,
@@ -149,7 +155,16 @@ export default class LeaderboardTable {
     this.columnHeaders[3].setPosition(scoreX, headerY);
   }
 
-  positionLeaderboardRows({ rankX, nameX, distanceX, scoreX, firstRowY, rowGap, rowFontSize }) {
+  positionLeaderboardRows({
+    rankX,
+    nameX,
+    distanceX,
+    scoreX,
+    blindX,
+    firstRowY,
+    rowGap,
+    rowFontSize,
+  }) {
     this.leaderboardEntries.forEach((row, index) => {
       const y = firstRowY + index * rowGap;
       row.rank.setPosition(rankX, y).setFontSize(rowFontSize);
@@ -157,6 +172,9 @@ export default class LeaderboardTable {
       this.fitLeaderboardName(row.name, rowFontSize, nameX, distanceX);
       row.distance.setPosition(distanceX, y).setFontSize(rowFontSize);
       row.score.setPosition(scoreX, y).setFontSize(rowFontSize);
+      row.blind
+        ?.setPosition(blindX, y + 2 * this.scene.scaleFactor)
+        .setDisplaySize(50 * this.scene.scaleFactor, 50 * this.scene.scaleFactor);
     });
   }
 

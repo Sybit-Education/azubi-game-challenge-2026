@@ -22,6 +22,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       'assets/images/homepage/default-homepage/background.png',
     );
     this.load.image('return-button', 'assets/images/homepage/return-button.png');
+    this.load.image('blind-icon', 'assets/images/leaderboard-scene-assets/blind.png');
   }
 
   // Builds the leaderboard scene, then applies its initial layout and controls.

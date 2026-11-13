@@ -13,7 +13,7 @@ export function bindLeaderboardControls(scene, entries, focusTarget, isTampered 
   if (entries.length === 0) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
-    cell.colSpan = 3;
+    cell.colSpan = 4;
     cell.textContent = 'No entries yet';
     row.append(cell);
     rows.append(row);
@@ -22,12 +22,14 @@ export function bindLeaderboardControls(scene, entries, focusTarget, isTampered 
   entries.forEach((entry, index) => {
     const row = document.createElement('tr');
     const displayName = entry.isTampered ? `${entry.name} ⚠ manipuliert` : entry.name;
-    [index + 1, displayName, `${entry.distance} km`].forEach((value) => {
-      const cell = document.createElement('td');
-      // Player names come from storage; insert them as text, never HTML.
-      cell.textContent = String(value);
-      row.append(cell);
-    });
+    [index + 1, displayName, `${entry.distance} km`, entry.blind ? 'Yes' : 'No'].forEach(
+      (value) => {
+        const cell = document.createElement('td');
+        // Player names come from storage; insert them as text, never HTML.
+        cell.textContent = String(value);
+        row.append(cell);
+      },
+    );
     rows.append(row);
   });
 
