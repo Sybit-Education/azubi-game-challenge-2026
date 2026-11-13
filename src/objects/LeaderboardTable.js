@@ -4,6 +4,7 @@ export default class LeaderboardTable {
   constructor(scene) {
     this.scene = scene;
     this.currentSort = 'distance';
+    this.currentFilter = 'all';
     this.isTampered = false;
     this.columnHeaders = [];
     this.leaderboardEntries = [];
@@ -13,8 +14,18 @@ export default class LeaderboardTable {
   async loadEntries() {
     const result = await loadLeaderboard();
     this.isTampered = result.isTampered;
-    this.entries = this.getSortedEntries(result.entries).slice(0, 10);
+    this.entries = this.getSortedEntries(this.getFilteredEntries(result.entries)).slice(0, 10);
     return this.entries;
+  }
+
+  getFilteredEntries(entries) {
+    if (this.currentFilter === 'blinded') {
+      return entries.filter((entry) => entry.blind === true);
+    }
+    if (this.currentFilter === 'non-blinded') {
+      return entries.filter((entry) => entry.blind === false);
+    }
+    return entries;
   }
 
   getSortedEntries(entries) {
@@ -37,6 +48,11 @@ export default class LeaderboardTable {
 
   async setSort(sortType) {
     this.currentSort = sortType;
+    return this.refresh();
+  }
+
+  async setFilter(filterType) {
+    this.currentFilter = filterType;
     return this.refresh();
   }
 

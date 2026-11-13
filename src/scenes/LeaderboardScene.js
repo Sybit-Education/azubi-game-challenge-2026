@@ -5,7 +5,7 @@ import LeaderboardDropdown, {
   LEADERBOARD_COLORS as COLORS,
 } from '../objects/LeaderboardDropdown.js';
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
-import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
+import { bindLeaderboardControls, renderLeaderboardEntries } from '../accessibility/leaderboard.js';
 export { parseLeaderboard } from '../objects/LeaderboardTable.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
@@ -119,14 +119,29 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.filterButton = filter.button;
     this.filterButtonText = filter.text;
 
-    this.filterDropdown = new LeaderboardDropdown(this, this.filterButton, [
-      {
-        label: 'ALL',
-        value: 'all',
-        selected: true,
-        callback: () => this.changeFilter('all'),
-      },
-    ]);
+    this.filterDropdown = new LeaderboardDropdown(
+      this,
+      this.filterButton,
+      [
+        {
+          label: 'ALL',
+          value: 'all',
+          selected: true,
+          callback: () => this.changeFilter('all'),
+        },
+        {
+          label: 'BLINDED',
+          value: 'blinded',
+          callback: () => this.changeFilter('blinded'),
+        },
+        {
+          label: 'SIGHTED',
+          value: 'non-blinded',
+          callback: () => this.changeFilter('non-blinded'),
+        },
+      ],
+      190,
+    );
 
     this.filterButton.on('pointerdown', () => {
       this.toggleDropdown(this.filterDropdown);
@@ -179,7 +194,8 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.toggleDropdown(this.sortDropdown);
 
-    await this.leaderboardTable.setSort(sortType);
+    const entries = await this.leaderboardTable.setSort(sortType);
+    renderLeaderboardEntries(entries);
   }
 
   // Changes the current filter and refreshes the leaderboard.
@@ -195,7 +211,8 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     this.toggleDropdown(this.filterDropdown);
 
-    await this.leaderboardTable.refresh();
+    const entries = await this.leaderboardTable.setFilter(filterType);
+    renderLeaderboardEntries(entries);
   }
 
   createActionButton(label) {

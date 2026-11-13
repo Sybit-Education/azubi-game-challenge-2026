@@ -10,6 +10,7 @@ const COLORS = {
   disabledFill: 0x55515b,
   disabledText: '#8e8993',
 };
+const DROPDOWN_DEPTH = 10;
 
 export { COLORS as LEADERBOARD_COLORS };
 
@@ -18,20 +19,23 @@ export default class LeaderboardDropdown {
     this.scene = scene;
     this.button = button;
     this.items = [];
+    this.width = 120;
 
     const itemHeight = 56 * scene.scaleFactor;
-    const panelWidth = 120 * scene.scaleFactor;
+    const panelWidth = this.width * scene.scaleFactor;
     const panelHeight = itemHeight * options.length;
 
     this.panel = scene.add
       .rectangle(0, 0, panelWidth, panelHeight, COLORS.keyFill)
       .setOrigin(0.5, 0)
+      .setDepth(DROPDOWN_DEPTH)
       .setStrokeStyle(2 * scene.scaleFactor, COLORS.selected)
       .setVisible(false);
 
     options.forEach((option) => {
       const row = scene.add
         .rectangle(0, 0, panelWidth, itemHeight, COLORS.keyFill)
+        .setDepth(DROPDOWN_DEPTH)
         .setInteractive({ useHandCursor: true })
         .setVisible(false);
 
@@ -41,6 +45,7 @@ export default class LeaderboardDropdown {
           fontSize: `${20 * scene.scaleFactor}px`,
           color: option.selected ? COLORS.selectedLabel : COLORS.mainText,
         })
+        .setDepth(DROPDOWN_DEPTH)
         .setOrigin(0.5)
         .setVisible(false);
 
@@ -93,7 +98,7 @@ export default class LeaderboardDropdown {
   resize() {
     const scaleFactor = this.scene.scaleFactor;
     const itemHeight = 56 * scaleFactor;
-    const panelWidth = 120 * scaleFactor;
+    const panelWidth = this.width * scaleFactor;
     const panelHeight = itemHeight * this.items.length;
     const buttonLeft = this.button.x - panelWidth / 2;
     const dropdownCenterX = buttonLeft + panelWidth / 2;
