@@ -6,6 +6,10 @@ import typingClick3Url from './menu/typing-click-3.wav?url';
 import typingClick4Url from './menu/typing-click-4.wav?url';
 import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
+import normalMenuMusicUrl from './music/normalMenu.mp3?url';
+import christmasMenuMusicUrl from './music/christmasMenu.mp3?url';
+import christmasGameplayMusicUrl from './music/christmasGameplay.mp3?url';
+import normalGameplayMusicUrl from './music/normal-gameplay.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
@@ -62,6 +66,30 @@ function loadSound(scene, key, fileUrl) {
 
 export function preloadCountdownSound(scene) {
   loadSound(scene, 'countdown', countdownUrl);
+}
+
+export function preloadSceneMusic(scene, key) {
+  if (key === 'normal-menu-music') loadSound(scene, key, normalMenuMusicUrl);
+  if (key === 'christmas-menu-music') loadSound(scene, key, christmasMenuMusicUrl);
+  if (key === 'christmas-gameplay-music') loadSound(scene, key, christmasGameplayMusicUrl);
+  if (key === 'normal-gameplay-music') loadSound(scene, key, normalGameplayMusicUrl);
+}
+
+export function playSceneMusic(scene, key, volume) {
+  const music = scene.sound.add(key, { loop: true, volume });
+  const startMusic = () => music.play();
+
+  // The first menu may open before the browser allows audio playback.
+  if (scene.sound.locked) {
+    scene.sound.once('unlocked', startMusic);
+  } else {
+    startMusic();
+  }
+
+  scene.events.once('shutdown', () => {
+    scene.sound.off('unlocked', startMusic);
+    music.destroy();
+  });
 }
 
 export function preloadGameplaySounds(scene) {
