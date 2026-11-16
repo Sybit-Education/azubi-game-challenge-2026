@@ -75,10 +75,20 @@ export function preloadCountdownSounds(scene) {
 }
 
 export function preloadSceneMusic(scene, key) {
-  if (key === 'normal-menu-music') loadSound(scene, key, normalMenuMusicUrl);
-  if (key === 'christmas-menu-music') loadSound(scene, key, christmasMenuMusicUrl);
-  if (key === 'christmas-gameplay-music') loadSound(scene, key, christmasGameplayMusicUrl);
-  if (key === 'normal-gameplay-music') loadSound(scene, key, normalGameplayMusicUrl);
+  switch (key) {
+    case 'normal-menu-music':
+      loadSound(scene, key, normalMenuMusicUrl);
+      break;
+    case 'christmas-menu-music':
+      loadSound(scene, key, christmasMenuMusicUrl);
+      break;
+    case 'christmas-gameplay-music':
+      loadSound(scene, key, christmasGameplayMusicUrl);
+      break;
+    case 'normal-gameplay-music':
+      loadSound(scene, key, normalGameplayMusicUrl);
+      break;
+  }
 }
 
 export function playSceneMusic(scene, key, volume) {

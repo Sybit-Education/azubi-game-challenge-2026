@@ -198,7 +198,7 @@ export default class PopUpScene extends Phaser.Scene {
 
   /** Reads the persisted accessibility setting and resets hover/selection flags. */
   _initAccessibilityState() {
-    this._accessibilityEnabled = this.registry.get('accessibilityMode') ?? false;
+    this._accessibilityEnabled = this.registry.get('accessibility enabled') ?? false;
     this._switchHovered = false;
     this._switchSelected = false;
   }
@@ -534,8 +534,6 @@ export default class PopUpScene extends Phaser.Scene {
    */
   _setAccessibilityEnabled(enabled) {
     this._accessibilityEnabled = enabled;
-    this.registry.set('accessibilityMode', enabled);
-    // Gameplay announcements still read this key; keep both values in sync.
     this.registry.set('accessibility enabled', enabled);
     setSetting('accessibilityMode', enabled);
     this._html.accessibilityToggle.checked = enabled;
