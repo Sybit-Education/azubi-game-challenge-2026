@@ -55,7 +55,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   create(data) {
-    playSceneMusic(this, 'normal-menu-music', 0.09);
+    playSceneMusic(this, 'normal-menu-music', 0.1);
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it
