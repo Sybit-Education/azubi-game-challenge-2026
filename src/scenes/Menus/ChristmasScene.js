@@ -70,7 +70,7 @@ export default class ChristmasScene extends Phaser.Scene {
 
   // Create scene
   create(data) {
-    playSceneMusic(this, 'christmas-menu-music', 0.1);
+    playSceneMusic(this, 'christmas-menu-music', 0.7);
     this.InputManager = new InputManager(this);
     this.InputManager.create();
     //html Menus erneut für diese Scene herholen.
