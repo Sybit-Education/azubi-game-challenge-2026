@@ -170,10 +170,12 @@ export default class GameScene extends Phaser.Scene {
 
   // BootScene loads the font; initialize synchronously before Phaser starts update().
   create() {
+    // With accessibility on, the music stays quiet so the announcements are easy to hear.
+    const musicVolume = this.registry.get('accessibility enabled') ? 0.1 : 0.5;
     if (this.registry.get('gameMode') === 'christmas') {
-      playSceneMusic(this, 'christmas-gameplay-music', 0.05);
+      playSceneMusic(this, 'christmas-gameplay-music', musicVolume);
     } else {
-      playSceneMusic(this, 'normal-gameplay-music', 0.05);
+      playSceneMusic(this, 'normal-gameplay-music', musicVolume);
     }
     const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
 
