@@ -5,7 +5,9 @@ export default class LeaderboardTable {
     this.scene = scene;
     this.currentSort = 'distance';
     this.currentFilter = 'all';
+    this.currentSearch = '';
     this.isTampered = false;
+    this.sourceEntries = [];
     this.columnHeaders = [];
     this.leaderboardEntries = [];
     this.emptyLeaderboardText = null;
@@ -14,18 +16,29 @@ export default class LeaderboardTable {
   async loadEntries() {
     const result = await loadLeaderboard();
     this.isTampered = result.isTampered;
-    this.entries = this.getSortedEntries(this.getFilteredEntries(result.entries)).slice(0, 10);
+    this.sourceEntries = result.entries;
+    this.entries = this.getVisibleEntries();
     return this.entries;
   }
 
   getFilteredEntries(entries) {
+    let filteredEntries = entries;
     if (this.currentFilter === 'blinded') {
-      return entries.filter((entry) => entry.blind === true);
+      filteredEntries = filteredEntries.filter((entry) => entry.blind === true);
+    } else if (this.currentFilter === 'non-blinded') {
+      filteredEntries = filteredEntries.filter((entry) => entry.blind === false);
     }
-    if (this.currentFilter === 'non-blinded') {
-      return entries.filter((entry) => entry.blind === false);
+    const search = this.currentSearch.toLowerCase();
+    if (search) {
+      filteredEntries = filteredEntries.filter((entry) =>
+        (entry.name ?? '').toLowerCase().includes(search),
+      );
     }
-    return entries;
+    return filteredEntries;
+  }
+
+  getVisibleEntries() {
+    return this.getSortedEntries(this.getFilteredEntries(this.sourceEntries)).slice(0, 10);
   }
 
   getSortedEntries(entries) {
@@ -56,7 +69,17 @@ export default class LeaderboardTable {
     return this.refresh();
   }
 
+  setSearchQuery(query) {
+    this.currentSearch = query;
+    return this.refreshVisibleEntries();
+  }
+
   async refresh() {
+    await this.loadEntries();
+    return this.refreshVisibleEntries();
+  }
+
+  refreshVisibleEntries() {
     this.leaderboardEntries.forEach((row) => {
       row.rank.destroy();
       row.name.destroy();
@@ -66,7 +89,8 @@ export default class LeaderboardTable {
     });
     this.emptyLeaderboardText?.destroy();
 
-    const entries = await this.loadEntries();
+    const entries = this.getVisibleEntries();
+    this.entries = entries;
     const textStyle = this.getLeaderboardTextStyle();
     this.createLeaderboardRows(entries, textStyle);
     this.createEmptyLeaderboardMessage(entries.length, textStyle);

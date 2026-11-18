@@ -31,6 +31,8 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.InputManager.create();
 
     this.currentFilter = 'all'; // default filter
+    this.searchQuery = '';
+    this.maxSearchLength = 45;
     this.isSortDropdownOpen = false;
     this.isFilterDropdownOpen = false;
     this.openDropdown = null;
@@ -44,6 +46,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.leaderboardTable.create(leaderboard);
     this.registerResizeHandler();
     this.createSearchBar();
+    this.createKeyboardInput();
     this.createFilterButton();
     this.createSortButton();
     this.createBackButton();
@@ -111,6 +114,63 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setOrigin(0, 0.5);
 
     this.nameText = this.add.text(0, 0, '', nameStyle).setOrigin(0, 0.5);
+  }
+
+  createKeyboardInput() {
+    let selectedAll = false;
+
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        selectedAll = this.searchQuery.length > 0;
+        return;
+      }
+
+      if (event.key === 'Backspace') {
+        this.searchQuery = selectedAll ? '' : this.searchQuery.slice(0, -1);
+        selectedAll = false;
+        this.updateSearchPrompt();
+        renderLeaderboardEntries(this.leaderboardTable.setSearchQuery(this.searchQuery));
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9]$/.test(event.key)) return;
+
+      const character = event.key.toUpperCase();
+      if (selectedAll) {
+        this.searchQuery = character;
+      } else if (this.searchQuery.length < this.maxSearchLength) {
+        this.searchQuery += character;
+      }
+      selectedAll = false;
+      this.updateSearchPrompt();
+      renderLeaderboardEntries(this.leaderboardTable.setSearchQuery(this.searchQuery));
+    };
+
+    this.input.keyboard.on('keydown', handleKeyDown);
+    this.events.once('shutdown', () => {
+      this.input.keyboard.off('keydown', handleKeyDown);
+    });
+  }
+
+  updateSearchPrompt() {
+    const hasQuery = this.searchQuery.length > 0;
+    const labelWidth = hasQuery ? 0 : this.labelText.width;
+    this.labelText.setVisible(!hasQuery);
+
+    const nameTextX = this.labelText.x + labelWidth + (hasQuery ? 0 : 8 * this.scaleFactor);
+    this.nameText
+      .setText(this.searchQuery)
+      .setFontSize(this.nameFontSize)
+      .setPosition(nameTextX, this.labelText.y);
+
+    const availableQueryWidth = Math.max(
+      0,
+      this.nameFieldWidth - labelWidth - (hasQuery ? 24 : 36) * this.scaleFactor,
+    );
+    if (this.nameText.width > availableQueryWidth) {
+      this.nameText.setFontSize(this.nameFontSize * (availableQueryWidth / this.nameText.width));
+    }
   }
 
   createFilterButton() {
@@ -322,7 +382,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setSize(this.nameFieldWidth, 56 * this.scaleFactor)
       .setStrokeStyle(2 * this.scaleFactor, COLORS.selected);
     this.labelText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
-    this.nameText.setPosition(labelX, controlsY).setFontSize(this.nameFontSize);
+    this.updateSearchPrompt();
     this.filterButton.setPosition(filterX, controlsY).setScale(this.scaleFactor);
     this.filterButtonText.setPosition(filterX, controlsY).setFontSize(20 * this.scaleFactor);
     this.filterDropdown.resize();
