@@ -11,6 +11,9 @@ export default class InputManager {
   }
 
   create() {
+    this.scene.input.gamepad.once('connected', () => {
+      console.debug('Controller connected!');
+    });
     this.keys = this.scene.input.keyboard.addKeys({
       upP1: Phaser.Input.Keyboard.KeyCodes.W,
       downP1: Phaser.Input.Keyboard.KeyCodes.S,
