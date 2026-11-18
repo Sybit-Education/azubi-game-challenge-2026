@@ -1,4 +1,4 @@
-import { loadLeaderboard } from '../utils/leaderboardSecurity.js';
+import { loadLeaderboard } from './leaderboardSecurity.js';
 
 export default class LeaderboardTable {
   constructor(scene) {
