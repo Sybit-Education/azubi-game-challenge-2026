@@ -3,29 +3,24 @@ const COIN_STEP = 5;
 export default class CoinAnnouncements {
   constructor(scene) {
     this.scene = scene;
-    this.previousBalances = [0, 0];
+    this.previousBalance = 0;
   }
 
   update() {
-    const manager = this.scene.ItemManager;
-    const balances = [manager.coinBudgetPlayer1];
-    if (this.scene.secondCar) balances.push(manager.coinBudgetPlayer2);
+    const balance = this.scene.ItemManager.coinBudgetPlayer1;
+    const previousStep = Math.floor(this.previousBalance / COIN_STEP);
+    const currentStep = Math.floor(balance / COIN_STEP);
+    this.previousBalance = balance;
 
-    const messages = [];
-    balances.forEach((balance, index) => {
-      const previousStep = Math.floor(this.previousBalances[index] / COIN_STEP);
-      const currentStep = Math.floor(balance / COIN_STEP);
-      this.previousBalances[index] = balance;
-
-      // Spending lowers the threshold again; only upward crossings announce money.
-      if (currentStep <= previousStep) return;
-      const player = this.scene.secondCar ? `Player ${index + 1}: ` : '';
-      messages.push(`${player}${balance} coins`);
-    });
-
-    if (!this.scene.registry.get('accessibility enabled')) {
+    if (!this.scene.registry.get('accessibility enabled') || this.scene.car.dead) {
+      this.scene.speech.cancel('coins');
       return;
     }
-    if (messages.length > 0) this.scene.speech.speak(messages.join('. '), { key: 'coins' });
+    // Only player 1 receives accessibility announcements, including in multiplayer.
+    if (currentStep <= previousStep) return;
+    this.scene.speech.speak(`${balance} coins`, {
+      key: 'coins',
+      isValid: () => this.scene.registry.get('accessibility enabled') && !this.scene.car.dead,
+    });
   }
 }
