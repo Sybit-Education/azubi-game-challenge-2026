@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 import {
-  preloadCountdownSound,
+  preloadCountdownSounds,
   preloadGameplaySounds,
   preloadMenuSounds,
   preloadTypingSounds,
@@ -21,7 +21,7 @@ export default class LoadingScene extends Phaser.Scene {
     preloadMenuSounds(this);
     preloadGameplaySounds(this);
     preloadTypingSounds(this);
-    preloadCountdownSound(this);
+    preloadCountdownSounds(this);
 
     this.load.image(
       'homepage-hintergrund',
