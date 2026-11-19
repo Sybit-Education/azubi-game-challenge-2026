@@ -97,15 +97,15 @@ export default class StartScene extends Phaser.Scene {
     });
 
     const skipButton = this.add
-      .text(1300, 600, 'Skip Intro!', {
+      .text(this.scale.width * 0.95, this.scale.height * 0.95, 'Skip Intro!', {
         fontSize: '32px',
         backgroundColor: '#000000',
         padding: {
-          x: 10,
+          x: 30,
           y: 5,
         },
       })
-      .setOrigin(0.5)
+      .setOrigin(1)
       .setDepth(30)
       .setInteractive();
 
