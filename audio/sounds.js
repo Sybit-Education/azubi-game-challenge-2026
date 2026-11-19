@@ -6,6 +6,9 @@ import typingClick3Url from './menu/typing-click-3.wav?url';
 import typingClick4Url from './menu/typing-click-4.wav?url';
 import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
+import christmasGameplayMusic from './music/christmasGameplay.mp3?url';
+import christmasMenuMusic from './music/christmasMenu.mp3?url';
+import normalMenuMusic from './music/normalMenu.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
@@ -64,6 +67,10 @@ export function preloadCountdownSound(scene) {
   loadSound(scene, 'countdown', countdownUrl);
 }
 
+export function preloadChristmasGameplayMusic(scene) {
+  loadSound(scene, 'christmas-gameplay', christmasGameplayMusic);
+}
+
 export function preloadGameplaySounds(scene) {
   loadSound(scene, 'collect-coin', collectCoinUrl);
   loadSound(scene, 'collect-extra-life', collectExtraLifeUrl);
@@ -93,12 +100,46 @@ export function preloadMenuSounds(scene) {
   loadSound(scene, 'menu-focus', menuFocusUrl);
   loadSound(scene, 'christmas-whoosh', christmasModeSound);
   loadSound(scene, 'winter-wind', secondChristmasSound);
+  loadSound(scene, 'christmas-menu-music', christmasMenuMusic);
+  loadSound(scene, 'normal-menu-music', normalMenuMusic);
+}
+
+export function startMenuMusic(scene, gameMode) {
+  const musicKey = gameMode === 'christmas' ? 'christmas-menu-music' : 'normal-menu-music';
+  const music = scene.sound.add(musicKey, { loop: true, volume: 1 / 12 });
+  const startMusic = () => {
+    return music.isPlaying || music.play();
+  };
+
+  if (!startMusic()) scene.sound.once('unlocked', startMusic);
+
+  scene.events.once('shutdown', () => {
+    scene.sound.off('unlocked', startMusic);
+    music.stop();
+    music.destroy();
+  });
+}
+
+export function playMenuSoundWhenUnlocked(scene, key, config) {
+  if (!scene.cache.audio.exists(key)) return;
+  const playSound = () => {
+    if (!scene.sound.locked && scene.cache.audio.exists(key)) {
+      scene.sound.play(key, config);
+    }
+  };
+
+  if (scene.sound.locked) {
+    scene.sound.once('unlocked', playSound);
+    scene.events.once('shutdown', () => scene.sound.off('unlocked', playSound));
+  } else {
+    playSound();
+  }
 }
 
 export function playMenuClick(scene) {
   if (!scene.cache.audio.exists('menu-click')) return;
   // Phaser's sound manager belongs to the game, so scene changes do not cut off clicks.
-  scene.sound.play('menu-click', { volume: 0.3 });
+  scene.sound.play('menu-click', { volume: 0.01 });
 }
 
 export function bindMenuFocusSounds(scene, elementIds) {
@@ -112,7 +153,7 @@ export function bindMenuFocusSounds(scene, elementIds) {
     lastFocusTime = now;
     // Browser audio may stay locked until the first user interaction.
     if (!scene.sound.locked && scene.cache.audio.exists('menu-focus')) {
-      scene.sound.play('menu-focus', { volume: 0.12 });
+      scene.sound.play('menu-focus', { volume: 0.05 });
     }
   };
   for (const element of elements) element.addEventListener('focus', playFocus);

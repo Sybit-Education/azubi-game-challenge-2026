@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
-import { preloadMenuSounds, preloadTypingSounds } from '../../../audio/sounds.js';
+import { preloadMenuSounds, preloadTypingSounds, startMenuMusic } from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
 
 // Color config
@@ -43,6 +43,8 @@ export default class NameInputScene extends Phaser.Scene {
 
   // Create
   async create() {
+    startMenuMusic(this, this.registry.get('gameMode'));
+
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();

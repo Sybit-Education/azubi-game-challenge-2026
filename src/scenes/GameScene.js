@@ -5,7 +5,7 @@ import EnemyCar from '../objects/EnemyCar.js';
 import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
-import { preloadGameplaySounds } from '../../audio/sounds.js';
+import { preloadChristmasGameplayMusic, preloadGameplaySounds } from '../../audio/sounds.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
 import ItemManager from '../objects/ItemManager.js';
@@ -30,6 +30,9 @@ export default class GameScene extends Phaser.Scene {
   //Load images.
   preload() {
     preloadGameplaySounds(this);
+    if (this.registry.get('gameMode') === 'christmas') {
+      preloadChristmasGameplayMusic(this);
+    }
     this.load.image(
       'car',
       'assets/images/entities/player-skins/player-sprites/sybit-kart-player-1.png',
@@ -164,6 +167,18 @@ export default class GameScene extends Phaser.Scene {
   // BootScene loads the font; initialize synchronously before Phaser starts update().
   create() {
     const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+
+    if (this.registry.get('gameMode') === 'christmas') {
+      const christmasGameplayMusic = this.sound.add('christmas-gameplay', {
+        loop: true,
+        volume: 1 / 20,
+      });
+      christmasGameplayMusic.play();
+      this.events.once('shutdown', () => {
+        christmasGameplayMusic.stop();
+        christmasGameplayMusic.destroy();
+      });
+    }
 
     this.secondCar = null;
 

@@ -1,6 +1,11 @@
 import Phaser from 'phaser';
 
-import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+import {
+  preloadMenuSounds,
+  playMenuClick,
+  bindMenuFocusSounds,
+  startMenuMusic,
+} from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 import { preserveNativeKeyboard } from '../../accessibility/nativeKeyboard.js';
@@ -54,6 +59,7 @@ export default class MenuScene extends Phaser.Scene {
   // Create scene
   create(data) {
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
+    startMenuMusic(this, 'standard');
 
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
