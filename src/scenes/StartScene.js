@@ -232,12 +232,12 @@ export default class StartScene extends Phaser.Scene {
       car.x = roadLeft + (car.currentLane + 0.5) * laneWidth;
     }
   }
-  
-   /**
+
+  /**
    * Creates Nametags (another one if player 2)
    *
    * @returns {void}
-   */ 
+   */
   createNametags() {
     this.nametags = [new Nametag(this, this.car, 1)];
     if (this.secondCar) {
