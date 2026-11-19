@@ -564,7 +564,7 @@ export default class ItemManager {
       },
     ];
 
-    for (const { number, controls, keys, car, budgetKey, extraLifeKey } of players) {
+    for (const { number, controls, keys, budgetKey, extraLifeKey } of players) {
       const getBudget = () => this[budgetKey];
       const spend = (price) => {
         this[budgetKey] -= price;
