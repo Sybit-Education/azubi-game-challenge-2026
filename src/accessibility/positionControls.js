@@ -7,6 +7,7 @@ export function positionAccessibleControls(scene, controls) {
     const scaleY = canvas.height / scene.scale.height;
 
     for (const [element, object] of controls) {
+      if (!object?.getBounds) continue;
       const bounds = object.getBounds();
       const left =
         canvas.left + (camera.x + (bounds.x - camera.worldView.x) * camera.zoom) * scaleX;

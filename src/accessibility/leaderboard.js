@@ -21,7 +21,7 @@ export function bindLeaderboardControls(scene, entries, focusTarget, isTampered 
   layer.addEventListener('keydown', handleEscape);
   preserveNativeKeyboard(scene, layer);
   layer.hidden = false;
-  positionAccessibleControls(scene, [[home, scene.backButton]]);
+  positionAccessibleControls(scene, [[home, scene.returnButton]]);
   bindMenuFocusSounds(scene, ['leaderboard-home']);
   document.getElementById(focusTarget ?? 'leaderboard-title').focus();
 
