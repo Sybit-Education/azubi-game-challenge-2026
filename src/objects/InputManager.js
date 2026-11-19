@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getPlayerPadIndexes } from './gamepadPadSelection.js';
 
 export default class InputManager {
   constructor(scene) {
@@ -38,8 +39,13 @@ export default class InputManager {
 
   update() {
     const gamepad = this.scene.input.gamepad;
-    const gamepadP1 = gamepad && gamepad.enabled ? gamepad.getPad(0) : null;
-    const gamepadP2 = gamepad && gamepad.enabled ? gamepad.getPad(1) : null;
+    const browserGamepads =
+      typeof navigator !== 'undefined' && typeof navigator.getGamepads === 'function'
+        ? navigator.getGamepads()
+        : [];
+    const padIndexes = getPlayerPadIndexes(browserGamepads);
+    const gamepadP1 = gamepad && gamepad.enabled ? gamepad.getPad(padIndexes.player1) : null;
+    const gamepadP2 = gamepad && gamepad.enabled ? gamepad.getPad(padIndexes.player2) : null;
     const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
     const padP2 = gamepadP2?.pad?.connected ? gamepadP2 : null;
 

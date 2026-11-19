@@ -47,6 +47,8 @@ Der Ablauf:
 
 **Gamepad:** Es werden bis zu zwei Gamepads unterstützt (Spieler 1 und Spieler 2). Mit dem Stick wird gefahren, im Menü navigieren die Knöpfe.
 
+**Joy-Con:** Wird ein Controller mit „Joy-Con“ im Browsernamen erkannt, wird er Spieler 1 zugeordnet, auch wenn Windows ihn nicht als Gamepad 0 meldet. Die bestehenden Standard-Button-Indizes bleiben unverändert.
+
 **Weitere Tasten:** Die Einstellungen schließt ihr mit `Esc` oder `M`. Mit `Esc` kommt ihr auch aus Nameingabe, Credits und Leaderboard zurück; in den Credits pausiert und startet die Leertaste den Textlauf.
 
 <a id="items-hindernisse--shop"></a>
