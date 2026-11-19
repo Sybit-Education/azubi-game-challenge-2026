@@ -11,6 +11,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import StartingBanner from '../objects/StartingBanner.js';
 import StartingLine from '../objects/StartingLine.js';
+import Nametag from '../objects/Nametag.js';
 
 /** Displays the starting grid and coordinates the countdown before gameplay. */
 export default class StartScene extends Phaser.Scene {
@@ -64,6 +65,15 @@ export default class StartScene extends Phaser.Scene {
     this.load.image('start-count-2', 'assets/images/race-track-assets/countdown-2.png');
     this.load.image('start-count-1', 'assets/images/race-track-assets/countdown-1.png');
     this.load.image('start-go', 'assets/images/race-track-assets/go-label.png');
+
+    this.load.image(
+      'p1-nametag-arrow',
+      'assets/images/entities/player-nametags/p1-nametag-arrow.png',
+    );
+    this.load.image(
+      'p2-nametag-arrow',
+      'assets/images/entities/player-nametags/p2-nametag-arrow.png',
+    );
   }
 
   /**
@@ -114,6 +124,7 @@ export default class StartScene extends Phaser.Scene {
     skipButton.on('pointerdown', skipIntro);
     this.createPlayer();
     this.createTrack();
+    this.createNametags();
     this.createWalls();
     this.setBackground(
       this.registry.get('gameMode') === 'christmas' ? 'background-winter' : 'background',
@@ -219,6 +230,18 @@ export default class StartScene extends Phaser.Scene {
     for (const car of [this.car, this.secondCar]) {
       if (!car) continue;
       car.x = roadLeft + (car.currentLane + 0.5) * laneWidth;
+    }
+  }
+
+  /**
+   * Creates Nametags (another one if player 2)
+   *
+   * @returns {void}
+   */
+  createNametags() {
+    this.nametags = [new Nametag(this, this.car, 1)];
+    if (this.secondCar) {
+      this.nametags.push(new Nametag(this, this.secondCar, 2));
     }
   }
 

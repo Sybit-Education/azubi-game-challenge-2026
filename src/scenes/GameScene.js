@@ -16,6 +16,7 @@ import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
 import GameSpeech from '../../audio/GameSpeech.js';
 import Flickereffect from '../scenes/FlickerEffect.js';
+import Nametag from '../objects/Nametag.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -45,6 +46,14 @@ export default class GameScene extends Phaser.Scene {
     this.load.image(
       'winter-car2',
       'assets/images/entities/player-skins/player-sprites/winter-car-P2.png',
+    );
+    this.load.image(
+      'p1-nametag-arrow',
+      'assets/images/entities/player-nametags/p1-nametag-arrow.png',
+    );
+    this.load.image(
+      'p2-nametag-arrow',
+      'assets/images/entities/player-nametags/p2-nametag-arrow.png',
     );
 
     this.load.image('track', 'assets/images/race-track-assets/road.png');
@@ -184,6 +193,7 @@ export default class GameScene extends Phaser.Scene {
     this.coinAnnouncements = new CoinAnnouncements(this);
     this.laneAnnouncements = new LaneAnnouncements(this);
     this.createTrack();
+    this.createNametags();
     this.createWalls();
     this.roadEdgeScrape = this.sound.add('road-edge-scrape', {
       volume: 0.2,
@@ -403,6 +413,13 @@ export default class GameScene extends Phaser.Scene {
     this.gameStatus = document.getElementById('game-status');
     this.gameStatus.textContent = '';
     this.lastPlayerRoadEdge = null;
+  }
+
+  createNametags() {
+    this.nametags = [new Nametag(this, this.car, 1)];
+    if (this.secondCar) {
+      this.nametags.push(new Nametag(this, this.secondCar, 2));
+    }
   }
 
   createWalls() {
