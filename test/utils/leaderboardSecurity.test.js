@@ -37,7 +37,7 @@ test('detects changed, removed, added and reordered entries and changed versions
     { ...board, entries: board.entries.slice(1) },
     { ...board, entries: [...board.entries].reverse() },
     { ...board, entries: [...board.entries, board.entries[0]] },
-    ...['name', 'distance', 'score', 'token', 'sig'].map((field) => ({
+    ...['name', 'distance', 'score', 'token', 'blind', 'sig'].map((field) => ({
       ...board,
       entries: [{ ...board.entries[0], [field]: 'changed' }, board.entries[1]],
     })),
@@ -54,11 +54,25 @@ test('preserves entry verification and rejects unsigned entries', async () => {
   assert.equal((await security.verifyEntry(entry)).valid, true);
   assert.equal((await security.verifyEntry({ ...entry, sig: undefined })).valid, false);
   assert.equal((await security.verifyEntry({ ...entry, score: 100 })).valid, false);
+  const nonBlindEntry = await security.signEntry({
+    name: 'Non-blind',
+    distance: 10,
+    score: 50,
+    token: 'tab',
+    blind: false,
+  });
+  assert.equal((await security.verifyEntry(nonBlindEntry)).valid, true);
 });
 
 test('stores a signed envelope using the sybitkart prefix and only persistent entry fields', async () => {
   assert.equal(typeof security.saveLeaderboard, 'function');
-  const entry = await security.signEntry({ name: 'Test', distance: 10, score: 50, token: 'tab' });
+  const entry = await security.signEntry({
+    name: 'Test',
+    distance: 10,
+    score: 50,
+    token: 'tab',
+    blind: true,
+  });
   await security.saveLeaderboard([{ ...entry, isTampered: false }]);
   const stored = JSON.parse(localStorage.getItem('sybitkart:leaderboard'));
   assert.equal(localStorage.getItem('leaderboard'), null);
@@ -67,6 +81,7 @@ test('stores a signed envelope using the sybitkart prefix and only persistent en
   const loaded = await security.loadLeaderboard();
   assert.equal(loaded.isTampered, false);
   assert.equal(loaded.entries[0].isTampered, false);
+  assert.equal(loaded.entries[0].blind, true);
 });
 
 test('migrates legacy storage without signing invalid entries as trusted', async () => {

@@ -30,6 +30,7 @@ export default class GameoverScene extends Phaser.Scene {
     this.distance2 = data.distance2; //added player 2 score and distance
     this.score2 = data.score2;
     this.isMultiplayer = data?.isMultiplayer ?? false;
+    this.blind = data?.blind === true;
   }
 
   // Pre load scene
@@ -89,10 +90,17 @@ export default class GameoverScene extends Phaser.Scene {
         existing.distance = dist;
         existing.score = sc;
         existing.token = sessionToken;
+        existing.blind = this.blind;
         return existing;
       }
 
-      const newEntry = { name: playerKey, distance: dist, score: sc, token: sessionToken };
+      const newEntry = {
+        name: playerKey,
+        distance: dist,
+        score: sc,
+        token: sessionToken,
+        blind: this.blind,
+      };
       leaderboard.push(newEntry);
       return newEntry;
     };
