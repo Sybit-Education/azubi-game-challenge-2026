@@ -99,7 +99,11 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.searchBackground = this.add
       .rectangle(0, 0, this.nameFieldWidth, 56 * this.scaleFactor, 0x180a24, 0.8)
       .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
-      .setDepth(0);
+      .setDepth(0)
+      .setInteractive({ cursor: 'text' });
+    this.searchBackground.on('pointerdown', () => {
+      document.getElementById('leaderboard-search').focus();
+    });
 
     const nameStyle = {
       fontFamily: 'Silkscreen',
