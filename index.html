@@ -198,20 +198,20 @@
     <script type="module" src="src/main.js"></script>
     <script>
       const playButton = document.getElementById('start-game');
+      const menu = document.getElementById('accessible-ui');
       let keyboardModeEnabled = false;
 
       document.addEventListener(
         'keydown',
         (event) => {
-          // Detect first Tab key press
-          if (event.key === 'Tab' && !keyboardModeEnabled) {
-            event.preventDefault();
+          if (event.key !== 'Tab' || keyboardModeEnabled) return;
 
-            keyboardModeEnabled = true;
-            document.body.classList.add('keyboard-navigation');
+          keyboardModeEnabled = true;
+          document.body.classList.add('keyboard-navigation');
+          if (menu.hidden) return;
 
-            playButton.focus();
-          }
+          event.preventDefault();
+          playButton.focus();
         },
         true,
       );
