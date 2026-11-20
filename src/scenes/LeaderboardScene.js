@@ -99,7 +99,11 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.searchBackground = this.add
       .rectangle(0, 0, this.nameFieldWidth, 56 * this.scaleFactor, 0x180a24, 0.8)
       .setStrokeStyle(2 * this.scaleFactor, COLORS.selected)
-      .setDepth(0);
+      .setDepth(0)
+      .setInteractive({ cursor: 'text' });
+    this.searchBackground.on('pointerdown', () => {
+      document.getElementById('leaderboard-search').focus();
+    });
 
     const nameStyle = {
       fontFamily: 'Silkscreen',
@@ -125,30 +129,44 @@ export default class LeaderboardScene extends Phaser.Scene {
       }
 
       if (event.key === 'Backspace') {
-        this.searchQuery = selectedAll ? '' : this.searchQuery.slice(0, -1);
+        const query = selectedAll ? '' : this.searchQuery.slice(0, -1);
         selectedAll = false;
-        this.updateSearchPrompt();
-        renderLeaderboardEntries(this.leaderboardTable.setSearchQuery(this.searchQuery));
+        this.setSearchQuery(query);
         return;
       }
 
       if (!/^[a-zA-Z0-9]$/.test(event.key)) return;
 
       const character = event.key.toUpperCase();
+      let query = this.searchQuery;
       if (selectedAll) {
-        this.searchQuery = character;
-      } else if (this.searchQuery.length < this.maxSearchLength) {
-        this.searchQuery += character;
+        query = character;
+      } else if (query.length < this.maxSearchLength) {
+        query += character;
       }
       selectedAll = false;
-      this.updateSearchPrompt();
-      renderLeaderboardEntries(this.leaderboardTable.setSearchQuery(this.searchQuery));
+      this.setSearchQuery(query);
     };
 
     this.input.keyboard.on('keydown', handleKeyDown);
     this.events.once('shutdown', () => {
       this.input.keyboard.off('keydown', handleKeyDown);
     });
+  }
+
+  // Applies a new search query to the canvas, the HTML search field and the table.
+  setSearchQuery(query) {
+    this.searchQuery = query;
+    const searchField = document.getElementById('leaderboard-search');
+    if (searchField && searchField.value !== query) searchField.value = query;
+    this.updateSearchPrompt();
+    this.refreshAccessibleEntries(this.leaderboardTable.setSearchQuery(query));
+  }
+
+  // Re-renders the screen reader table and syncs the HTML controls with the canvas state.
+  refreshAccessibleEntries(entries) {
+    renderLeaderboardEntries(entries, this.leaderboardTable.currentSort);
+    this.syncAccessibleControls?.();
   }
 
   updateSearchPrompt() {
@@ -239,6 +257,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     }
     dropdown.toggle();
     this.openDropdown = dropdown.isOpen ? dropdown : null;
+    this.syncAccessibleControls?.();
   }
 
   // Changes the current sorting mode and refreshes the leaderboard.
@@ -253,7 +272,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.toggleDropdown(this.sortDropdown);
 
     const entries = await this.leaderboardTable.setSort(sortType);
-    renderLeaderboardEntries(entries);
+    this.refreshAccessibleEntries(entries);
   }
 
   // Changes the current filter and refreshes the leaderboard.
@@ -270,7 +289,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.toggleDropdown(this.filterDropdown);
 
     const entries = await this.leaderboardTable.setFilter(filterType);
-    renderLeaderboardEntries(entries);
+    this.refreshAccessibleEntries(entries);
   }
 
   createActionButton(label) {

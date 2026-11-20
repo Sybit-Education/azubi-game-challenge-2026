@@ -26,7 +26,7 @@ export default class GameScene extends Phaser.Scene {
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
     this.isChristmas = data?.isChristmas ?? false;
-    this.blind = this.registry.get('accessibilityMode') === true;
+    this.blind = this.registry.get('accessibility enabled') === true;
   }
 
   //Load images.
