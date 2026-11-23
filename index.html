@@ -20,6 +20,7 @@
       <button id="start-game" type="button">play</button>
       <button id="multiplayer-btn" type="button">multiplayer</button>
       <button id="settings-btn" type="button">Settings</button>
+      <button id="how-to-play" type="button">How to play</button>
       <button id="leaderboard-btn" type="button">Leaderboard</button>
       <button id="credit-btn" type="button">credits</button>
     </main>
@@ -106,6 +107,32 @@
         <p class="sr-only">press escape to close the settings dialog.</p>
         <button id="close-settings" type="button" autofocus>Close</button>
       </dialog>
+    </section>
+
+    <!-- How to play: guided practice drive. Visible panel, not an invisible overlay. -->
+    <section id="how-to-play-ui" aria-labelledby="how-to-play-title" hidden>
+      <p id="how-to-play-progress" class="htp-progress"></p>
+      <h2 id="how-to-play-title" tabindex="-1"></h2>
+      <p id="how-to-play-text"></p>
+      <div
+        id="how-to-play-sounds"
+        class="htp-sounds"
+        role="group"
+        aria-label="Sound examples"
+        hidden
+      >
+        <p class="htp-hint">Press a button to hear the sound.</p>
+        <div id="how-to-play-sound-list" class="htp-row"></div>
+      </div>
+      <div class="htp-row">
+        <button id="how-to-play-back" type="button" class="htp-secondary">Back</button>
+        <button id="how-to-play-next" type="button" class="htp-primary">Next</button>
+        <button id="how-to-play-repeat" type="button" class="htp-primary" hidden>
+          Repeat practice
+        </button>
+        <button id="how-to-play-exit" type="button" class="htp-exit">Main menu</button>
+      </div>
+      <p class="htp-hint">Press Escape at any time to return to the main menu.</p>
     </section>
 
     <!-- Start script -->
@@ -235,6 +262,105 @@
     #settings-dialog::backdrop {
       background: transparent;
       pointer-events: none;
+    }
+
+    /* How to play panel. Change the colours here only. */
+    #how-to-play-ui {
+      --htp-primary: #c7e29e; /* main buttons */
+      --htp-primary-text: #14210f;
+      --htp-panel: #14210f;
+      --htp-text: #f4f9ec;
+      --htp-secondary: #2f4a22; /* Back and sound buttons */
+      --htp-exit: #f3c9b8; /* Main menu button */
+      --htp-exit-text: #3a1608;
+
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 20;
+      box-sizing: border-box;
+      width: min(26rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
+      padding: 1rem;
+      border: 3px solid var(--htp-primary);
+      border-radius: 8px;
+      background: var(--htp-panel);
+      color: var(--htp-text);
+      font-family: system-ui, sans-serif;
+      font-size: 1.05rem;
+      line-height: 1.45;
+    }
+
+    #how-to-play-ui[hidden] {
+      display: none;
+    }
+
+    #how-to-play-ui h2 {
+      margin: 0 0 0.5rem;
+      font-family: Silkscreen, system-ui, sans-serif;
+      font-size: 1.3rem;
+      outline: none;
+    }
+
+    #how-to-play-ui p {
+      margin: 0 0 0.75rem;
+    }
+
+    #how-to-play-ui .htp-progress,
+    #how-to-play-ui .htp-hint {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .htp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    #how-to-play-ui button {
+      min-height: 2.75rem;
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--htp-primary);
+      border-radius: 6px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #how-to-play-ui button[hidden] {
+      display: none;
+    }
+
+    #how-to-play-ui button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #how-to-play-ui .htp-primary {
+      background: var(--htp-primary);
+      color: var(--htp-primary-text);
+    }
+
+    #how-to-play-ui .htp-secondary,
+    #how-to-play-ui .htp-sounds button {
+      background: var(--htp-secondary);
+      color: var(--htp-text);
+    }
+
+    #how-to-play-ui .htp-exit {
+      margin-left: auto;
+      border-color: var(--htp-exit);
+      background: var(--htp-exit);
+      color: var(--htp-exit-text);
+    }
+
+    #how-to-play-ui button:focus-visible {
+      outline: 3px solid #ffffff;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px #000000;
     }
   </style>
 </html>

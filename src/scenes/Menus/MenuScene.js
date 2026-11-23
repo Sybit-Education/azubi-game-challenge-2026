@@ -65,6 +65,7 @@ export default class MenuScene extends Phaser.Scene {
     const playBtn = document.getElementById('start-game');
     const multiplayerBtn = document.getElementById('multiplayer-btn');
     const settingsBtn = document.getElementById('settings-btn');
+    const howToPlayBtn = document.getElementById('how-to-play');
     const creditBtn = document.getElementById('credit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-btn');
     const menu = document.getElementById('accessible-ui');
@@ -90,14 +91,20 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.launch('PopUpScene');
     };
 
+    const openHowToPlay = () => {
+      playMenuClick(this);
+      this.registry.set('gameMode', 'standard');
+      this.scene.start('GameScene', { isMultiplayer: false, isTestGame: true });
+    };
+
     const openLeaderboard = () => {
       playMenuClick(this);
       this.registry.set('gameMode', 'standard');
       this.scene.start('LeaderboardScene');
     };
     leaderboardBtn.addEventListener('click', openLeaderboard);
-    [playBtn, multiplayerBtn, settingsBtn, creditBtn, leaderboardBtn].forEach((button) =>
-      preserveNativeKeyboard(this, button),
+    [playBtn, multiplayerBtn, settingsBtn, howToPlayBtn, creditBtn, leaderboardBtn].forEach(
+      (button) => preserveNativeKeyboard(this, button),
     );
 
     const openCredits = () => {
@@ -112,12 +119,16 @@ export default class MenuScene extends Phaser.Scene {
     multiplayerBtn.addEventListener('click', startMultiplayer);
 
     settingsBtn.addEventListener('click', openSettings);
+
+    howToPlayBtn.addEventListener('click', openHowToPlay);
+
     creditBtn.addEventListener('click', openCredits);
 
     this.events.once('shutdown', () => {
       playBtn.removeEventListener('click', startGame);
       multiplayerBtn.removeEventListener('click', startMultiplayer);
       settingsBtn.removeEventListener('click', openSettings);
+      howToPlayBtn.removeEventListener('click', openHowToPlay);
       creditBtn.removeEventListener('click', openCredits);
       leaderboardBtn.removeEventListener('click', openLeaderboard);
       menu.hidden = true;
@@ -390,6 +401,8 @@ export default class MenuScene extends Phaser.Scene {
       this.selectButton(howToPlayButton, howToPlayScale);
     });
 
+    howToPlayButton.on('pointerdown', openHowToPlay);
+
     howToPlayButton.on('pointerout', () => {
       this.deselectButton(howToPlayButton, howToPlayScale);
     });
@@ -418,6 +431,7 @@ export default class MenuScene extends Phaser.Scene {
       [playBtn, this.play_button],
       [multiplayerBtn, twoPlayerButton],
       [settingsBtn, settings_button],
+      [howToPlayBtn, howToPlayButton],
       [creditBtn, creditsButton],
       [leaderboardBtn, leaderboardButton],
     ]);

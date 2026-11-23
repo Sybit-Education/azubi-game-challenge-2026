@@ -335,6 +335,18 @@ export default class ItemManager {
       this.useExtraLife(car, player);
       return;
     }
+
+    // Test game: play the crash sounds once per obstacle, then keep driving.
+    // The collider fires every frame while the cars touch, so remember the hit.
+    if (this.scene.isTestGame) {
+      if (object.crashSoundPlayed) return;
+      object.crashSoundPlayed = true;
+      for (const key of ['collision-hit', 'collision-bang', 'collision-impact']) {
+        this.scene.sound.play(key, { volume: 0.3 });
+      }
+      return;
+    }
+
     this.scene.gameOver(car);
   }
 

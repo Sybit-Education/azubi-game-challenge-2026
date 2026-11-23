@@ -16,6 +16,7 @@ import CoinAnnouncements from '../accessibility/CoinAnnouncements.js';
 import LaneAnnouncements from '../../audio/LaneAnnouncements.js';
 import ItemAnnouncements from '../accessibility/ItemAnnouncements.js';
 import GameSpeech from '../../audio/GameSpeech.js';
+import { bindHowToPlay } from '../accessibility/howToPlay.js';
 import Flickereffect from '../scenes/FlickerEffect.js';
 
 export default class GameScene extends Phaser.Scene {
@@ -25,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
 
   init(data) {
     this.isMultiplayer = data?.isMultiplayer ?? false;
+    this.isTestGame = data?.isTestGame ?? false;
     this.isChristmas = data?.isChristmas ?? false;
     this.blind = this.registry.get('accessibilityMode') === true;
   }
@@ -328,6 +330,8 @@ export default class GameScene extends Phaser.Scene {
       this.roadEdgeScrape.destroy();
       this.iceWarning.destroy();
     });
+
+    if (this.isTestGame) bindHowToPlay(this);
   }
 
   setBackground(img) {
