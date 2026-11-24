@@ -87,9 +87,18 @@ export default class InputManager {
     const button3P2isDown = this.hasUpdated && button3P2 && !this.previousButtonP2[2];
     const button4P2isDown = this.hasUpdated && button4P2 && !this.previousButtonP2[3];
 
+    const leftDownP1 = this.keys.leftP1.isDown || axisX1 < -deadzone || dpadLeftP1;
+    // true nur im ersten Frame, in dem links gedrückt wird
+    const leftPressedP1 = leftDownP1 && !this.previousLeftP1;
+
+    const rightDownP1 = this.keys.rightP1.isDown || axisX1 > deadzone || dpadRightP1;
+    const rightPressedP1 = rightDownP1 && !this.previousRightP1;
+
     this.getControlsP1 = {
-      left: this.keys.leftP1.isDown || axisX1 < -deadzone || dpadLeftP1,
-      right: this.keys.rightP1.isDown || axisX1 > deadzone || dpadRightP1,
+      left: leftDownP1,
+      leftPressed: leftPressedP1,
+      right: rightDownP1,
+      rightPressed: rightPressedP1,
       up: this.keys.upP1.isDown || axisY1 < -deadzone || dpadUpP1,
       down: this.keys.downP1.isDown || axisY1 > deadzone || dpadDownP1,
       accelerate: this.keys.upP1.isDown || axisY1 < -deadzone,
@@ -125,6 +134,8 @@ export default class InputManager {
     this.previousButtonP2[2] = button3P2;
     this.previousButtonP2[3] = button4P2;
     this.previousSpace = this.keys.space.isDown;
+    this.previousLeftP1 = leftDownP1;
+    this.previousRightP1 = rightDownP1;
     this.hasUpdated = true;
   }
 }

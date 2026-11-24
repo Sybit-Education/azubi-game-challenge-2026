@@ -121,7 +121,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (this.laneCooldown > 0) {
       this.laneCooldown--;
     }
-    if (controls.left) {
+    if (controls.leftPressed) {
       if (controls.left && this.laneCooldown <= 0 && this.currentLane > 0) {
         this.currentLane--;
 
@@ -150,7 +150,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       }
     }
 
-    if (controls.right) {
+    if (controls.rightPressed) {
       if (controls.right && this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
         this.currentLane++;
 
