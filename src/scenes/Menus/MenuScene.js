@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+import { preloadSceneMusic, playSceneMusic } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 import { preserveNativeKeyboard } from '../../accessibility/nativeKeyboard.js';
@@ -21,6 +22,7 @@ export default class MenuScene extends Phaser.Scene {
   // Pre load images
   preload() {
     preloadMenuSounds(this);
+    preloadSceneMusic(this, 'normal-menu-music');
     this.load.image('homepage-2player', 'assets/images/homepage/2-multiplayer.png');
     this.load.image(
       'homepage-hintergrund',
@@ -58,6 +60,7 @@ export default class MenuScene extends Phaser.Scene {
 
   // Create scene
   create(data) {
+    playSceneMusic(this, 'normal-menu-music', 0.7);
     console.log('PHASER.VERSION: ' + Phaser.VERSION);
 
     // Create InputManager instance and initialize it

@@ -17,7 +17,7 @@
 //
 // The approach
 // ─────────────────────────────────────────────────────────────────────────────
-//  • HMAC-SHA-256 (WebCrypto) over "name|distance|score|sessionToken"
+//  • HMAC-SHA-256 (WebCrypto) over entry values including optional blind status
 //  • Every entry stores its own per-game-session token.  The token is randomly
 //    generated once per GameScene session (by GameScene / GameoverScene via
 //    `createSessionToken`) and is embedded in the signature so that a forged
@@ -91,14 +91,15 @@ function _fnv1a32(str) {
 }
 
 // ─── Message builder ─────────────────────────────────────────────────────────
-// All fields that matter for fairness are included in the signed payload.
-// Changing ANY of them (name, distance, score, token) invalidates the sig.
+// Changing any entry field (name, distance, score, token, blind) invalidates the sig.
+// Omitting blind preserves signatures for entries saved before the field existed.
 function _buildMessage(entry) {
   const name = (entry.name ?? 'Unbekannt').trim();
   const distance = Number(entry.distance ?? 0);
   const score = Number(entry.score ?? 0);
   const token = String(entry.token ?? '');
-  return `${name}|${distance}|${score}|${token}`;
+  const blind = entry.blind === undefined ? '' : `|${entry.blind}`;
+  return `${name}|${distance}|${score}|${token}${blind}`;
 }
 
 // ─── Internal signing (NOT exported) ─────────────────────────────────────────
@@ -127,6 +128,7 @@ function _isPlausible(entry) {
 
   if (!Number.isFinite(d) || d < 0 || d > MAX_DISTANCE_KM) return false;
   if (!Number.isFinite(s) || s < 0 || s > MAX_SCORE_POINTS) return false;
+  if (entry.blind !== undefined && typeof entry.blind !== 'boolean') return false;
 
   return true;
 }
@@ -233,11 +235,12 @@ const LEADERBOARD_STORAGE_KEY = 'sybitkart:leaderboard';
 const LEGACY_LEADERBOARD_STORAGE_KEY = 'leaderboard';
 
 export async function saveLeaderboard(entries, { isTampered = false } = {}) {
-  const persistentEntries = entries.map(({ name, distance, score, token, sig }) => ({
+  const persistentEntries = entries.map(({ name, distance, score, token, blind, sig }) => ({
     name,
     distance,
     score,
     token,
+    blind,
     sig,
   }));
   // Never re-establish trust after a detected whole-board modification.
@@ -290,6 +293,7 @@ async function _readLeaderboard(board) {
             distance: rawEntry?.distance == null ? NaN : Number(rawEntry.distance),
             score: Number(rawEntry?.score ?? 0),
             token: String(rawEntry?.token ?? ''),
+            ...(rawEntry?.blind !== undefined ? { blind: rawEntry.blind } : {}),
             sig: rawEntry?.sig,
           };
     entry.isTampered = !(await verifyEntry(entry)).valid;

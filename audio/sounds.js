@@ -6,6 +6,10 @@ import typingClick3Url from './menu/typing-click-3.wav?url';
 import typingClick4Url from './menu/typing-click-4.wav?url';
 import christmasModeSound from './menu/christmas-whoosh.mp3?url';
 import secondChristmasSound from './menu/winter-wind.mp3?url';
+import normalMenuMusicUrl from './music/normalMenu.mp3?url';
+import christmasMenuMusicUrl from './music/christmasMenu.mp3?url';
+import christmasGameplayMusicUrl from './music/christmasGameplay.mp3?url';
+import normalGameplayMusicUrl from './music/normal-gameplay.mp3?url';
 import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
@@ -14,7 +18,10 @@ import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
-import countdownUrl from './gameplay/countdown.mp3?url';
+import countdown3Url from './gameplay/splits/countdown-3.wav?url';
+import countdown2Url from './gameplay/splits/countdown-2.wav?url';
+import countdown1Url from './gameplay/splits/countdown-1.wav?url';
+import countdownGoUrl from './gameplay/splits/countdown-go.wav?url';
 import sensorBeepUrl from './gameplay/sensor-beep.wav?url';
 import carPassByUrl from './gameplay/car-pass-by-spatial.wav?url';
 import carPassByJohnnyUrl from './gameplay/car-pass-by-johnnyfarmer-spatial.wav?url';
@@ -60,8 +67,45 @@ function loadSound(scene, key, fileUrl) {
   scene.load.audio(key, url);
 }
 
-export function preloadCountdownSound(scene) {
-  loadSound(scene, 'countdown', countdownUrl);
+export function preloadCountdownSounds(scene) {
+  loadSound(scene, 'countdown-3', countdown3Url);
+  loadSound(scene, 'countdown-2', countdown2Url);
+  loadSound(scene, 'countdown-1', countdown1Url);
+  loadSound(scene, 'countdown-go', countdownGoUrl);
+}
+
+export function preloadSceneMusic(scene, key) {
+  switch (key) {
+    case 'normal-menu-music':
+      loadSound(scene, key, normalMenuMusicUrl);
+      break;
+    case 'christmas-menu-music':
+      loadSound(scene, key, christmasMenuMusicUrl);
+      break;
+    case 'christmas-gameplay-music':
+      loadSound(scene, key, christmasGameplayMusicUrl);
+      break;
+    case 'normal-gameplay-music':
+      loadSound(scene, key, normalGameplayMusicUrl);
+      break;
+  }
+}
+
+export function playSceneMusic(scene, key, volume) {
+  const music = scene.sound.add(key, { loop: true, volume });
+  const startMusic = () => music.play();
+
+  // The first menu may open before the browser allows audio playback.
+  if (scene.sound.locked) {
+    scene.sound.once('unlocked', startMusic);
+  } else {
+    startMusic();
+  }
+
+  scene.events.once('shutdown', () => {
+    scene.sound.off('unlocked', startMusic);
+    music.destroy();
+  });
 }
 
 export function preloadGameplaySounds(scene) {
