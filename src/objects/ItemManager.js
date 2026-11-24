@@ -410,7 +410,7 @@ export default class ItemManager {
   }
 
   itemRandom(player) {
-    const random = Phaser.Math.Between(1, 5);
+    const random = 5; //Phaser.Math.Between(1, 5);
     const car = this.getPlayerCar(player);
 
     if (random === 1) {

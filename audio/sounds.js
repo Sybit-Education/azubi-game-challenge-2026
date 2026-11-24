@@ -14,7 +14,7 @@ import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
 import restoreSizeUrl from './gameplay/restore-size.mp3?url';
-import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
+import collectMagnetUrl from './gameplay/collect-magnet.mp3?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
