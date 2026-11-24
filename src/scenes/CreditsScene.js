@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
+import {
+  addButtonPrompt,
+  BUTTON_PROMPT_SIZE,
+  buttonPromptWidth,
+  preloadButtonPrompts,
+  updateButtonPromptPressed,
+} from '../objects/buttonPrompts.js';
 
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
 export default class CreditsScene extends Phaser.Scene {
@@ -9,6 +16,7 @@ export default class CreditsScene extends Phaser.Scene {
 
   preload() {
     preloadMenuSounds(this);
+    preloadButtonPrompts(this);
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -93,7 +101,7 @@ Thanks for playing!
     creditsContent.textContent = creditText;
     creditsUI.hidden = false;
 
-    const pauseHint = 'Press SPACE to Pause';
+    const pauseHint = this.pauseHintLabel();
 
     this.width = this.scale.width;
     this.height = this.scale.height;
@@ -202,21 +210,27 @@ Thanks for playing!
       repeat: -1,
     });
 
+    // Joy-Con icons: Y next to the return button, X in the pause hint (positioned in update())
+    const promptSize = BUTTON_PROMPT_SIZE * this.scaleFactor;
+    this.backPrompt = addButtonPrompt(this, 'y', promptSize);
+    this.pausePrompt = addButtonPrompt(this, 'x', promptSize * 0.8);
+
     this.events.once('shutdown', () => {
       creditsUI.hidden = true;
     });
   }
 
+  // "Press SPACE to Pause", or just "to Pause" next to the X icon on a Joy-Con
+  pauseHintLabel() {
+    const action = this.scroll?.isPaused() ? 'Resume' : 'Pause';
+    return this.InputManager.showJoyConPrompts ? `to ${action}` : `Press SPACE to ${action}`;
+  }
+
   toggleScrollPause() {
     if (!this.scroll) return;
 
-    if (this.scroll.isPaused()) {
-      this.scroll.resume();
-      this.pauseHintText.setText('Press SPACE to Pause');
-    } else {
-      this.scroll.pause();
-      this.pauseHintText.setText('Press SPACE to Resume');
-    }
+    if (this.scroll.isPaused()) this.scroll.resume();
+    else this.scroll.pause();
   }
 
   update() {
@@ -225,8 +239,35 @@ Thanks for playing!
 
     if (controls.button4) {
       this.returnToMenu();
-    } else if (controls.space) {
+    } else if (controls.space || controls.button3) {
       this.toggleScrollPause();
     }
+    this.updateButtonPrompts(controls);
+  }
+
+  // Shows the Y / X icons while a Joy-Con was the last input.
+  updateButtonPrompts(controls) {
+    const show = Boolean(this.InputManager.showJoyConPrompts);
+    const label = this.pauseHintLabel();
+    if (this.pauseHintText.text !== label) this.pauseHintText.setText(label);
+
+    this.backPrompt.setVisible(show);
+    this.pausePrompt.setVisible(show);
+    if (!show) return;
+
+    const gap = 12 * this.scaleFactor;
+    const back = this.returnButton.getBounds();
+    updateButtonPromptPressed(this.backPrompt, controls);
+    this.backPrompt.setPosition(
+      back.right + gap + buttonPromptWidth(this.backPrompt) / 2,
+      back.centerY,
+    );
+
+    const hint = this.pauseHintText.getBounds();
+    updateButtonPromptPressed(this.pausePrompt, controls);
+    this.pausePrompt.setPosition(
+      hint.left - gap - buttonPromptWidth(this.pausePrompt) / 2,
+      hint.centerY,
+    );
   }
 }

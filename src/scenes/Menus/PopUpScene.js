@@ -2,6 +2,13 @@ import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+import {
+  addButtonPrompt,
+  BUTTON_PROMPT_SIZE,
+  buttonPromptWidth,
+  preloadButtonPrompts,
+  updateButtonPromptPressed,
+} from '../../objects/buttonPrompts.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 import { setSetting } from '../../settings/gameSettings.js';
 
@@ -38,6 +45,7 @@ export default class PopUpScene extends Phaser.Scene {
   /** Loads all assets required by the settings panel. */
   preload() {
     preloadMenuSounds(this);
+    preloadButtonPrompts(this);
     this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
     this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
     this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
@@ -83,6 +91,7 @@ export default class PopUpScene extends Phaser.Scene {
     this._setupCloseHandlers();
     this._setupHtmlEventHandlers();
     this._setupGamepadNavigation();
+    this._createButtonPrompts();
     this._animateIn(width);
 
     this._html.dialog.showModal();
@@ -116,6 +125,7 @@ export default class PopUpScene extends Phaser.Scene {
    */
   update() {
     this.InputManager.update();
+    this._updateButtonPrompts();
     const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems;
     const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
@@ -141,6 +151,43 @@ export default class PopUpScene extends Phaser.Scene {
   // -------------------------------------------------------------------------
   // Initialisation helpers
   // -------------------------------------------------------------------------
+
+  /** Joy-Con button icons: Y next to the close button, X next to the selected item. */
+  _createButtonPrompts() {
+    const size = BUTTON_PROMPT_SIZE * this._uiScale;
+    this._promptGap = 12 * this._uiScale;
+    this._closePrompt = addButtonPrompt(this, 'y', size);
+    this._selectPrompt = addButtonPrompt(this, 'x', size);
+  }
+
+  /**
+   * Places the icons left of their buttons every frame, so they follow the
+   * slide-in/out animation and the gamepad selection. Shown only while a
+   * Joy-Con was the last input.
+   */
+  _updateButtonPrompts() {
+    if (!this._closePrompt) return;
+    const show = Boolean(this.InputManager.showJoyConPrompts);
+    const controls = this.InputManager.getControlsP1;
+    updateButtonPromptPressed(this._closePrompt, controls);
+    updateButtonPromptPressed(this._selectPrompt, controls);
+    const placeLeftOf = (prompt, button) => {
+      const bounds = button.getBounds();
+      prompt.setPosition(
+        bounds.left - this._promptGap - buttonPromptWidth(prompt) / 2,
+        bounds.centerY,
+      );
+    };
+
+    placeLeftOf(this._closePrompt, this._closeButton);
+    this._closePrompt.setVisible(show);
+
+    // The close button already has the Y icon; X there would overlap it
+    const selected = this.navigationItems?.[this.selectedIndex]?.button;
+    const showSelect = show && Boolean(selected) && selected !== this._closeButton;
+    if (showSelect) placeLeftOf(this._selectPrompt, selected);
+    this._selectPrompt.setVisible(showSelect);
+  }
 
   /** Creates and initialises the InputManager for this scene. */
   _setupInputManager() {

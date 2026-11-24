@@ -6,6 +6,7 @@ import Track from '../objects/Track.js';
 import Border from '../objects/Wall.js';
 import HUD from '../objects/HUD.js';
 import { preloadGameplaySounds } from '../../audio/sounds.js';
+import { addShopPrompts, preloadButtonPrompts } from '../objects/buttonPrompts.js';
 import CarSensor, { nearestCar } from '../../audio/CarSensor.js';
 import CarPassBy from '../../audio/CarPassBy.js';
 import ItemManager from '../objects/ItemManager.js';
@@ -150,6 +151,7 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('hotbar', 'assets/images/race-track-assets/hotbar.png');
     this.load.image('hotbarMultiplayer', 'assets/images/race-track-assets/hotbarMultiplayer.png');
     this.load.image('hotbar-coin', 'assets/images/race-track-assets/hotbar-coin.png');
+    preloadButtonPrompts(this);
     this.load.image('shield', 'assets/images/hud-icons/shield.png');
     this.load.image('shrink', 'assets/images/hud-icons/shrink.png');
     this.load.image('grow', 'assets/images/hud-icons/grow.png');
@@ -240,6 +242,9 @@ export default class GameScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setScale(0.5 * scaleFactor);
 
+    // A / B / Y icons over the slot numbers while a gamepad is in use (updateShopPrompts)
+    this.shopPromptsP1 = addShopPrompts(this, this.hotbar);
+
     this.hotbarCoin = this.add
       .image(this.hotbar.displayWidth * 1.1, this.hotbar.y * 1.1, 'hotbar-coin')
       .setScale(0.7 * scaleFactor)
@@ -266,6 +271,7 @@ export default class GameScene extends Phaser.Scene {
         .setDepth(1000)
         .setScrollFactor(0)
         .setScale(0.5 * scaleFactor);
+      this.shopPromptsP2 = addShopPrompts(this, this.hotbar2);
 
       // Coin Icon Player 2
       this.hotbarCoin2 = this.add

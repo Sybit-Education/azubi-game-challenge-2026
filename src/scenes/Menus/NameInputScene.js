@@ -2,6 +2,12 @@ import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, preloadTypingSounds } from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
+import {
+  addButtonPrompt,
+  BUTTON_PROMPT_SIZE,
+  preloadButtonPrompts,
+  updateButtonPromptPressed,
+} from '../../objects/buttonPrompts.js';
 
 // Color config
 const COLORS = {
@@ -39,6 +45,7 @@ export default class NameInputScene extends Phaser.Scene {
     );
 
     this.load.image('return-button', 'assets/images/homepage/return-button.png');
+    preloadButtonPrompts(this);
   }
 
   // Create
@@ -46,7 +53,12 @@ export default class NameInputScene extends Phaser.Scene {
     // Create InputManager instance and initialize it
     this.InputManager = new InputManager(this);
     this.InputManager.create();
-    this.previousNavigation = { left: false, right: false, up: false, down: false };
+    this.previousNavigation = [0, 1].map(() => ({
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+    }));
 
     // Setup typing sound manager
     this.typingSound = new TypingSoundPlayer(this);
@@ -125,6 +137,25 @@ export default class NameInputScene extends Phaser.Scene {
       .setScale(0.1 * this.scaleFactor)
       .setOrigin(0.5)
       .on('pointerdown', this.backToHomeFunction, this);
+
+    this.createButtonPrompts();
+  }
+
+  // Joy-Con button icons: Y next to "back to menu", B next to DELETE.
+  // Only visible while a Joy-Con was the last input (see update()).
+  createButtonPrompts() {
+    const size = BUTTON_PROMPT_SIZE * this.scaleFactor;
+    const gap = 12 * this.scaleFactor;
+    const addPrompt = (button, x, y) =>
+      addButtonPrompt(this, button, size).setPosition(x, y).setDepth(2);
+
+    const back = this.returnButton;
+    const deleteCell = this.characterCells[this.characterCells.length - 1][0];
+
+    this.buttonPrompts = [
+      addPrompt('y', back.x + back.displayWidth / 2 + gap + size / 2, back.y),
+      addPrompt('b', deleteCell.x - deleteCell.width / 2 - gap - size / 2, deleteCell.y),
+    ];
   }
 
   playMenuClick(scene) {
@@ -397,12 +428,6 @@ export default class NameInputScene extends Phaser.Scene {
     this.saveNamesAndStart();
   }
 
-  // Skips name entry
-  skipNameEntry() {
-    this.playerNames = this.isMultiplayer ? ['PLAYER1', 'PLAYER2'] : ['UNKNOWN'];
-    this.saveNamesAndStart();
-  }
-
   // Saves name and starts
   saveNamesAndStart() {
     // Player 1
@@ -571,39 +596,49 @@ export default class NameInputScene extends Phaser.Scene {
       return;
     }
 
-    // Get controller input
-    const controls = this.InputManager.getControlsP1;
+    // Only Player 1 can go back; the player whose name is being
+    // entered is the only one whose controller can type
+    const menuControls = this.InputManager.getControlsP1;
+    const playerControls = [this.InputManager.getControlsP1, this.InputManager.getControlsP2];
+    const controls = playerControls[this.activePlayer] ?? menuControls;
 
-    // Back
-    if (controls.button4) {
+    // Show Joy-Con button icons only while a Joy-Con was used last; they press in
+    // while held (Y = Player 1's back, B = the typing player's delete)
+    if (this.buttonPrompts) {
+      const showPrompts = Boolean(this.InputManager.showJoyConPrompts);
+      const [backPrompt, deletePrompt] = this.buttonPrompts;
+      updateButtonPromptPressed(backPrompt, menuControls);
+      updateButtonPromptPressed(deletePrompt, controls);
+      this.buttonPrompts.forEach((prompt) => prompt.setVisible(showPrompts));
+    }
+
+    // Back (button1 / A intentionally does nothing here)
+    if (menuControls.button4) {
       this.backToHomeFunction();
       return;
     }
 
-    // Skip input
-    if (controls.button1) {
-      this.skipNameEntry();
-      return;
-    }
+    // Gamepad directions for both players (the keyboard is handled separately), so a
+    // stick held while the other player was typing does not fire on the turn change
+    const navigation = playerControls.map((playerControl) => ({
+      left: playerControl.padLeft,
+      right: playerControl.padRight,
+      up: playerControl.padUp,
+      down: playerControl.padDown,
+    }));
+    const directions = navigation[this.activePlayer];
+    const previous = this.previousNavigation[this.activePlayer];
 
-    // Directions
-    const directions = {
-      left: controls.left && !this.InputManager.keys.leftP1.isDown,
-      right: controls.right && !this.InputManager.keys.rightP1.isDown,
-      up: controls.up && !this.InputManager.keys.upP1.isDown,
-      down: controls.down && !this.InputManager.keys.downP1.isDown,
-    };
-
-    // Gets keys that werent pressed last frame
+    // Gets directions that werent pressed last frame
     const justPressed = {
-      left: directions.left && !this.previousNavigation.left,
-      right: directions.right && !this.previousNavigation.right,
-      up: directions.up && !this.previousNavigation.up,
-      down: directions.down && !this.previousNavigation.down,
+      left: directions.left && !previous.left,
+      right: directions.right && !previous.right,
+      up: directions.up && !previous.up,
+      down: directions.down && !previous.down,
     };
 
     // Sets last navigation with current
-    this.previousNavigation = directions;
+    this.previousNavigation = navigation;
 
     // Moves cursor
     if (justPressed.left) {
@@ -619,6 +654,9 @@ export default class NameInputScene extends Phaser.Scene {
     // Select char
     if (controls.button3 && !this.InputManager.keys.select.isDown) {
       this.selectCharacter();
+    } else if (controls.button2) {
+      // B deletes the last character (only the typing player's controller)
+      this.deleteCharacter();
     }
   }
 }

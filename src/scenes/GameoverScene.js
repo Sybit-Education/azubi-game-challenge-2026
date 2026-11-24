@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import InputManager from '../objects/InputManager.js';
+import { createSelectionOutline, updateSelectionOutline } from '../objects/menuSelectionOutline.js';
 import {
   preloadMenuSounds,
   preloadGameplaySounds,
@@ -384,6 +385,9 @@ export default class GameoverScene extends Phaser.Scene {
 
     this.selectButton(this.Buttons[0].button);
 
+    // Outline showing where the controller is (drawn in update())
+    this.selectionOutline = createSelectionOutline(this);
+
     this.resize({
       width: this.scale.width,
       height: this.scale.height,
@@ -398,13 +402,16 @@ export default class GameoverScene extends Phaser.Scene {
   // On every frame
   update() {
     this.InputManager.update();
+    updateSelectionOutline(
+      this,
+      this.selectionOutline,
+      this.Buttons?.[this.selectedIndex]?.button,
+      this.InputManager.usingGamepad,
+    );
     const controls = this.InputManager.getControlsP1;
-    const gamepad = this.input.gamepad;
-    const gamepadP1 = gamepad?.enabled ? gamepad.getPad(0) : null;
-    const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
-    const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
-    const up = axisY < -0.2 || (padP1?.buttons?.[12]?.pressed ?? false);
-    const down = axisY > 0.2 || (padP1?.buttons?.[13]?.pressed ?? false);
+    // Only Player 1's controller navigates the menu
+    const up = controls.padUp;
+    const down = controls.padDown;
     const upPressed = up && this._hasReadVerticalInput && !this._previousUp;
     const downPressed = down && this._hasReadVerticalInput && !this._previousDown;
     this._previousUp = up;

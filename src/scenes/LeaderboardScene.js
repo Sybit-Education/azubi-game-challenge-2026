@@ -3,6 +3,14 @@ import InputManager from '../objects/InputManager.js';
 import { loadLeaderboard } from '../utils/leaderboardSecurity.js';
 import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
 import { bindLeaderboardControls } from '../accessibility/leaderboard.js';
+import {
+  addButtonPrompt,
+  BUTTON_PROMPT_SIZE,
+  buttonPromptWidth,
+  preloadButtonPrompts,
+  setButtonPromptSize,
+  updateButtonPromptPressed,
+} from '../objects/buttonPrompts.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
   // Constructor
@@ -12,6 +20,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   preload() {
     preloadMenuSounds(this);
+    preloadButtonPrompts(this);
     this.load.image(
       'homepage-hintergrund',
       'assets/images/homepage/default-homepage/background.png',
@@ -116,6 +125,9 @@ export default class LeaderboardScene extends Phaser.Scene {
       });
     });
 
+    // Joy-Con Y icon next to "back to menu" (positioned in update())
+    this.backPrompt = addButtonPrompt(this, 'y', BUTTON_PROMPT_SIZE * this.scaleFactor);
+
     //listener for resizing
     this.scale.on('resize', this.resize, this);
     this.events.once('shutdown', () => {
@@ -137,11 +149,30 @@ export default class LeaderboardScene extends Phaser.Scene {
 
   update() {
     this.InputManager.update();
+    this.updateButtonPrompt();
 
     const controls = this.InputManager.getControlsP1;
     if (controls.button4) {
       this.goHome();
     }
+  }
+
+  // Keeps the Y icon left of the back button (follows hover scaling and resizes).
+  // Shown only while a Joy-Con was the last input.
+  updateButtonPrompt() {
+    if (!this.backPrompt || !this.backButton) return;
+    const show = Boolean(this.InputManager.showJoyConPrompts);
+    this.backPrompt.setVisible(show);
+    if (!show) return;
+
+    const scaleFactor = Math.min(this.scale.width / 1920, this.scale.height / 1080);
+    const bounds = this.backButton.getBounds();
+    setButtonPromptSize(this.backPrompt, BUTTON_PROMPT_SIZE * scaleFactor);
+    updateButtonPromptPressed(this.backPrompt, this.InputManager.getControlsP1);
+    this.backPrompt.setPosition(
+      bounds.left - 12 * scaleFactor - buttonPromptWidth(this.backPrompt) / 2,
+      bounds.centerY,
+    );
   }
 
   resize(gameSize) {

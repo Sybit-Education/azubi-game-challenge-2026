@@ -229,12 +229,8 @@ export default class StartScene extends Phaser.Scene {
       this.goToGame();
     }
     this.InputManager.update();
-    if (
-      this.InputManager.getControlsP1.button4 ||
-      this.InputManager.getControlsP1.button3 ||
-      this.InputManager.getControlsP2.button4 ||
-      this.InputManager.getControlsP2.button3
-    ) {
+    // Only Player 1 controls menus and skips
+    if (this.InputManager.getControlsP1.button4 || this.InputManager.getControlsP1.button3) {
       this.goToGame();
     }
   }

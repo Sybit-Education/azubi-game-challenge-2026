@@ -14,11 +14,9 @@ export default class ItemManager {
     this.key1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
     this.key2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
     this.key3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
-    this.key4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
     this.numpad1 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE);
     this.numpad2 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO);
     this.numpad3 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE);
-    this.numpad4 = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR);
 
     this.coinBudgetPlayer1 = 0;
     this.coinBudgetPlayer2 = 0;
@@ -29,7 +27,6 @@ export default class ItemManager {
     this.itemShieldPrize = 35;
     this.itemShrinkPrize = 25;
     this.itemHeartPrize = 40;
-    this.itemMagnetPrize = 35;
 
     if (this.scene.isMultiplayer) {
       this.itemShieldPrize = 25;
@@ -552,28 +549,27 @@ export default class ItemManager {
       {
         number: 1,
         controls: controlsP1,
-        keys: [this.key1, this.key2, this.key3, this.key4],
-        car: this.scene.car,
+        keys: [this.key1, this.key2, this.key3],
         budgetKey: 'coinBudgetPlayer1',
         extraLifeKey: 'extraLifeActiveCar1',
       },
       {
         number: 2,
         controls: controlsP2,
-        keys: [this.numpad1, this.numpad2, this.numpad3, this.numpad4],
-        car: this.scene.secondCar,
+        keys: [this.numpad1, this.numpad2, this.numpad3],
         budgetKey: 'coinBudgetPlayer2',
         extraLifeKey: 'extraLifeActiveCar2',
       },
     ];
 
-    for (const { number, controls, keys, car, budgetKey, extraLifeKey } of players) {
+    for (const { number, controls, keys, budgetKey, extraLifeKey } of players) {
       const getBudget = () => this[budgetKey];
       const spend = (price) => {
         this[budgetKey] -= price;
       };
 
       if (
+        // Gamepad: A buys the shield, B shrinks, Y buys the extra life
         (Phaser.Input.Keyboard.JustDown(keys[0]) || controls.button1) &&
         getBudget() >= this.itemShieldPrize
       ) {
@@ -590,20 +586,14 @@ export default class ItemManager {
       }
 
       if (
-        (Phaser.Input.Keyboard.JustDown(keys[2]) || controls.button3) &&
+        // button4 also fires on Escape for Player 1; only the gamepad's Y should buy here
+        (Phaser.Input.Keyboard.JustDown(keys[2]) ||
+          (controls.button4 && !this.inputManager.keys.escape.isDown)) &&
         getBudget() >= this.itemHeartPrize &&
         !this[extraLifeKey]
       ) {
         this.itemExtraLife(number);
         spend(this.itemHeartPrize);
-      }
-
-      if (
-        Phaser.Input.Keyboard.JustDown(keys[3]) &&
-        getBudget() >= this.itemMagnetPrize &&
-        this.activateMagnet(car, number)
-      ) {
-        spend(this.itemMagnetPrize);
       }
     }
   }

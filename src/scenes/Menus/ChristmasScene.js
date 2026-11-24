@@ -1,5 +1,10 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
+import {
+  createSelectionOutline,
+  updateSelectionOutline,
+} from '../../objects/menuSelectionOutline.js';
+import { MAIN_MENU_NAVIGATION, nextMenuIndex } from '../../objects/menuNavigation.js';
 
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 
@@ -498,6 +503,10 @@ export default class ChristmasScene extends Phaser.Scene {
     this.hasReadVerticalInput = false;
     this.selectButton(this.menuButtons[0].button);
 
+    // Outline showing where the controller is (drawn in update())
+    this.twoPlayerButton = twoPlayerButton;
+    this.selectionOutline = createSelectionOutline(this);
+
     this.tweens.add({
       targets: lights,
       alpha: 0.2,
@@ -509,16 +518,21 @@ export default class ChristmasScene extends Phaser.Scene {
 
   update() {
     this.InputManager.update();
+    const outlineTarget = this.isMultiplayerSelected
+      ? this.twoPlayerButton
+      : this.menuButtons?.[this.selectedIndex]?.button;
+    updateSelectionOutline(
+      this,
+      this.selectionOutline,
+      outlineTarget,
+      this.InputManager.usingGamepad,
+    );
     const controls = this.InputManager.getControlsP1;
-    const gamepad = this.input.gamepad;
-    const gamepadP1 = gamepad?.enabled ? gamepad.getPad(0) : null;
-    const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
-    const axisX = padP1?.axes?.[0]?.getValue() ?? 0;
-    const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
-    const menuLeft = axisX < -0.2 || (padP1?.buttons?.[14]?.pressed ?? false);
-    const menuRight = axisX > 0.2 || (padP1?.buttons?.[15]?.pressed ?? false);
-    const menuUp = axisY < -0.2 || (padP1?.buttons?.[12]?.pressed ?? false);
-    const menuDown = axisY > 0.2 || (padP1?.buttons?.[13]?.pressed ?? false);
+    // Only Player 1's controller navigates the menu
+    const menuLeft = controls.padLeft;
+    const menuRight = controls.padRight;
+    const menuUp = controls.padUp;
+    const menuDown = controls.padDown;
     const rightPressed =
       menuRight && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
     const leftPressed =
@@ -538,36 +552,23 @@ export default class ChristmasScene extends Phaser.Scene {
       this.clearMultiplayerOption();
     }
 
-    if (upPressed) {
+    // Move along the on-screen layout (see MAIN_MENU_NAVIGATION)
+    const direction =
+      (upPressed && 'up') ||
+      (downPressed && 'down') ||
+      (leftPressed && 'left') ||
+      (rightPressed && 'right') ||
+      null;
+    const nextIndex = direction
+      ? nextMenuIndex(MAIN_MENU_NAVIGATION, this.selectedIndex, direction)
+      : this.selectedIndex;
+    if (nextIndex !== this.selectedIndex) {
       this.clearMultiplayerOption();
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].scale,
       );
-
-      this.selectedIndex--;
-      if (this.selectedIndex < 0) {
-        this.selectedIndex = this.menuButtons.length - 1;
-      }
-
-      this.selectButton(
-        this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].scale,
-      );
-    }
-
-    if (downPressed) {
-      this.clearMultiplayerOption();
-      this.deselectButton(
-        this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].scale,
-      );
-
-      this.selectedIndex++;
-      if (this.selectedIndex >= this.menuButtons.length) {
-        this.selectedIndex = 0;
-      }
-
+      this.selectedIndex = nextIndex;
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].scale,

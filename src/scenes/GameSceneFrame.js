@@ -1,5 +1,6 @@
 import { updateIceWarning, updateLaneDanger } from './GameSceneWarnings.js';
 import { safePlay } from '../../audio/safePlay.js';
+import { updateButtonPromptPressed } from '../objects/buttonPrompts.js';
 import EnemyCar from '../objects/EnemyCar.js';
 
 function updatePlayer(scene, player, car, controls) {
@@ -108,6 +109,24 @@ function updateOverlapCheck(scene) {
   }
 }
 
+// Shows each player's A / B / Y shop icons while a gamepad was the last input
+// and that player has one; the icons press in while their button is held.
+function updateShopPrompts(scene) {
+  const input = scene.InputManager;
+  const players = [
+    [scene.shopPromptsP1, input.padConnectedP1, input.getControlsP1],
+    [scene.shopPromptsP2, input.padConnectedP2, input.getControlsP2],
+  ];
+  for (const [prompts, hasPad, controls] of players) {
+    if (!prompts) continue;
+    const show = Boolean(hasPad && input.usingGamepad);
+    for (const prompt of prompts) {
+      updateButtonPromptPressed(prompt, controls);
+      prompt.setVisible(show);
+    }
+  }
+}
+
 function updateTrackAndHud(scene, delta) {
   const targetTrackSpeed = Math.min(1600, 700 + scene.elapsedTime * 0.005);
   scene.track1.speed = targetTrackSpeed;
@@ -127,6 +146,7 @@ function updateTrackAndHud(scene, delta) {
   scene.track2.move(delta);
   scene.hud.update();
   scene.ItemManager.itemShop();
+  updateShopPrompts(scene);
   scene.coinAnnouncements.update();
   scene.coinText1.setText(String(scene.ItemManager.coinBudgetPlayer1));
 
