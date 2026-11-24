@@ -246,17 +246,25 @@ function readPad(pad) {
 }
 
 // True while anything on the pad is pressed or pushed.
-function isPadActive(state) {
-  return (
-    state.left ||
-    state.right ||
-    state.up ||
-    state.down ||
-    state.shoulderLeft ||
-    state.shoulderRight ||
-    state.buttons.some(Boolean)
-  );
+function padFlags(state) {
+  return [
+    state.left,
+    state.right,
+    state.up,
+    state.down,
+    state.shoulderLeft,
+    state.shoulderRight,
+    ...state.buttons,
+  ];
 }
+
+// Keyboard keys that belong to Player 2 (arrows, numpad shop keys); every other key
+// counts as Player 1's
+const PLAYER_2_KEY_CODES = new Set(
+  ['UP', 'DOWN', 'LEFT', 'RIGHT', 'NUMPAD_ONE', 'NUMPAD_TWO', 'NUMPAD_THREE'].map(
+    (name) => Phaser.Input.Keyboard.KeyCodes[name],
+  ),
+);
 
 export default class InputManager {
   constructor(scene) {
@@ -266,6 +274,12 @@ export default class InputManager {
     this.previousButtonP2 = new Array(BUTTON_COUNT).fill(false);
     this.previousSpace = false;
     this.hasUpdated = false;
+    // Pad flags from the last frame, to notice newly pressed input (see update())
+    this.previousPadFlags = { 1: [], 2: [] };
+    // Last device per player in a race ('pad' | 'keyboard'), so one player switching to
+    // the keyboard doesn't depend on what the other player does
+    const startDevice = this.usingGamepad ? 'pad' : 'keyboard';
+    this.lastDevice = { 1: startDevice, 2: startDevice };
   }
 
   create() {
@@ -287,7 +301,10 @@ export default class InputManager {
     });
 
     // Keyboard and mouse switch the last input away from the gamepad
-    const onKeyboard = () => this.setLastInput('keyboard');
+    const onKeyboard = (event) => {
+      this.setLastInput('keyboard');
+      this.lastDevice[PLAYER_2_KEY_CODES.has(event?.keyCode) ? 2 : 1] = 'keyboard';
+    };
     const onPointer = () => this.setLastInput('pointer');
     this.scene.input.keyboard.on('keydown', onKeyboard);
     this.scene.input.on('pointerdown', onPointer);
@@ -310,6 +327,11 @@ export default class InputManager {
   }
 
   // True while a gamepad or Joy-Con was the last input (not keyboard / mouse)
+  // True while `player`'s last input was their controller (per player, for the race HUD)
+  playerUsingPad(player) {
+    return this.lastDevice?.[player] === 'pad';
+  }
+
   get usingGamepad() {
     return this.lastInput === 'gamepad' || this.lastInput === 'joycon';
   }
@@ -409,8 +431,19 @@ export default class InputManager {
     const padP1 = readPad(pads.player1);
     const padP2 = readPad(pads.player2);
 
-    for (const pad of [padP1, padP2]) {
-      if (isPadActive(pad)) this.setLastInput(pad.joyCon ? 'joycon' : 'gamepad');
+    // A pad counts as used only when something is newly pressed or pushed, so a stick
+    // that rests slightly off-centre (Joy-Con drift) can't keep overriding the keyboard
+    for (const [player, pad] of [
+      [1, padP1],
+      [2, padP2],
+    ]) {
+      const flags = padFlags(pad);
+      const previous = this.previousPadFlags[player];
+      if (flags.some((on, index) => on && !previous[index])) {
+        this.setLastInput(pad.joyCon ? 'joycon' : 'gamepad');
+        this.lastDevice[player] = 'pad';
+      }
+      this.previousPadFlags[player] = flags;
     }
     // Show Switch button prompts while Player 1 holds a Joy-Con and it was used last
     this.showJoyConPrompts = padP1.joyCon && this.lastInput === 'joycon';

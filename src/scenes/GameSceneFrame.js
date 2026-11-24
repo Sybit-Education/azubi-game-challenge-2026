@@ -120,12 +120,13 @@ function updateOverlapCheck(scene) {
 function updateShopPrompts(scene) {
   const input = scene.InputManager;
   const players = [
-    [scene.shopPromptsP1, input.padConnectedP1, input.getControlsP1],
-    [scene.shopPromptsP2, input.padConnectedP2, input.getControlsP2],
+    [1, scene.shopPromptsP1, input.padConnectedP1, input.getControlsP1],
+    [2, scene.shopPromptsP2, input.padConnectedP2, input.getControlsP2],
   ];
-  for (const [prompts, hasPad, controls] of players) {
+  for (const [player, prompts, hasPad, controls] of players) {
     if (!prompts) continue;
-    const show = Boolean(hasPad && input.usingGamepad);
+    // Per player: one player on the keyboard sees 1 / 2 / 3 even if the other uses a pad
+    const show = Boolean(hasPad && input.playerUsingPad(player));
     for (const prompt of prompts) {
       updateButtonPromptPressed(prompt, controls);
       prompt.setVisible(show);
