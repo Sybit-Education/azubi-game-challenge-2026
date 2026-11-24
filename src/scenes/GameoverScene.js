@@ -8,6 +8,7 @@ import {
   playMenuClick,
   bindMenuFocusSounds,
 } from '../../audio/sounds.js';
+import { menuMoveFeedback } from '../objects/menuNavigation.js';
 
 import { positionAccessibleControls } from '../accessibility/positionControls.js';
 import { preserveNativeKeyboard } from '../accessibility/nativeKeyboard.js';
@@ -206,6 +207,7 @@ export default class GameoverScene extends Phaser.Scene {
     // Back to home function
     const backToHomeFunction = () => {
       playMenuClick(this);
+      this.InputManager?.rumbleBack();
       this.scene.start(
         this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
       );
@@ -460,6 +462,7 @@ export default class GameoverScene extends Phaser.Scene {
         this.Buttons[this.selectedIndex].y,
       );
     }
+    if (upPressed || downPressed) menuMoveFeedback(this);
     if (controls.button3 && !this.InputManager.keys.select.isDown) {
       this.Buttons[this.selectedIndex].action?.();
     } else if (controls.button4) {

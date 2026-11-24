@@ -12,6 +12,9 @@ import {
   setButtonPromptSize,
   updateButtonPromptPressed,
 } from '../objects/buttonPrompts.js';
+import { createSelectionOutline, updateSelectionOutline } from '../objects/menuSelectionOutline.js';
+import { menuMoveFeedback } from '../objects/menuNavigation.js';
+import { createParallax } from '../objects/parallax.js';
 export { parseLeaderboard } from '../utils/LeaderboardTable.js';
 
 export default class LeaderboardScene extends Phaser.Scene {
@@ -57,6 +60,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     this.createFilterButton();
     this.createSortButton();
     this.createBackButton();
+    this.createControllerNavigation();
 
     this.resize({
       width: this.scale.width,
@@ -72,16 +76,10 @@ export default class LeaderboardScene extends Phaser.Scene {
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-2);
 
-    this.parallaxPointerMove = (pointer) => {
-      this.background.setPosition(
-        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
-        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
-      );
-    };
-    this.input.on('pointermove', this.parallaxPointerMove);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.input.off('pointermove', this.parallaxPointerMove);
-    });
+    // Follows the mouse, and glides to the controller's selection (see update())
+    this.parallax = createParallax(this, [
+      { object: this.background, base: (w, h) => [w / 2, h / 2], factor: 0.01 },
+    ]);
   }
 
   // Creates the centered title, showing a warning when the leaderboard is tampered with.
@@ -357,19 +355,107 @@ export default class LeaderboardScene extends Phaser.Scene {
   // Returns to the active menu and restores focus to its leaderboard button.
   goHome() {
     playMenuClick(this);
+    this.InputManager?.rumbleBack();
     const menu = this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene';
     this.scene.start(menu, { focusTarget: 'leaderboard-btn' });
   }
 
-  // Updates input and returns to the menu when the back control is pressed.
+  // Controller focus for the FILTER / SORT buttons and their dropdowns.
+  createControllerNavigation() {
+    this.navButtons = [
+      { button: this.filterButton, dropdown: this.filterDropdown },
+      { button: this.sortButton, dropdown: this.sortDropdown },
+    ];
+    this.navIndex = 0;
+    this.dropdownIndex = -1; // highlighted dropdown row, -1 while no dropdown is open
+    this.previousNavigation = { left: false, right: false, up: false, down: false };
+    this.selectionOutline = createSelectionOutline(this);
+  }
+
+  // Updates input and handles controller navigation; Y closes a dropdown or returns to the menu.
   update() {
     this.InputManager.update();
     this.updateButtonPrompt();
 
     const controls = this.InputManager.getControlsP1;
+    if (!this.navButtons) return; // create() is still loading
+
+    const { dropdown } = this.navButtons[this.navIndex];
+    // Closed by the mouse: drop the controller highlight so it isn't stuck on reopening
+    if (!dropdown.isOpen && this.dropdownIndex >= 0) this.highlightDropdownItem(dropdown, -1);
+
     if (controls.button4) {
-      this.goHome();
+      if (this.openDropdown) this.closeDropdownFromController();
+      else this.goHome();
+      return;
     }
+
+    this.handleControllerNavigation(controls);
+    // Parallax follows the controller's selection like it follows the mouse
+    if (this.InputManager.usingGamepad) {
+      const current = this.navButtons[this.navIndex];
+      const row = current.dropdown.isOpen && current.dropdown.items[this.dropdownIndex]?.row;
+      this.parallax?.focusOn(row || current.button);
+    }
+    updateSelectionOutline(
+      this,
+      this.selectionOutline,
+      this.navButtons[this.navIndex].button,
+      this.InputManager.usingGamepad,
+    );
+  }
+
+  handleControllerNavigation(controls) {
+    const pressed = {};
+    for (const direction of ['left', 'right', 'up', 'down']) {
+      const key = `pad${direction[0].toUpperCase()}${direction.slice(1)}`;
+      pressed[direction] = controls[key] && !this.previousNavigation[direction];
+      this.previousNavigation[direction] = controls[key];
+    }
+    // X confirms; Enter (also button3) is ignored so typing a search doesn't open dropdowns
+    const confirm = controls.button3 && this.InputManager.usingGamepad;
+    const { dropdown } = this.navButtons[this.navIndex];
+
+    if (dropdown.isOpen) {
+      const count = dropdown.items.length;
+      if (pressed.up || pressed.down) {
+        const step = pressed.down ? 1 : -1;
+        this.highlightDropdownItem(dropdown, (this.dropdownIndex + step + count) % count);
+        menuMoveFeedback(this);
+      }
+      if (confirm && this.dropdownIndex >= 0) {
+        const item = dropdown.items[this.dropdownIndex];
+        playMenuClick(this);
+        this.highlightDropdownItem(dropdown, -1);
+        item.row.emit('pointerdown'); // runs the option's callback, which closes the dropdown
+      }
+      return;
+    }
+
+    if (pressed.left || pressed.right) {
+      const count = this.navButtons.length;
+      this.navIndex = (this.navIndex + (pressed.right ? 1 : -1) + count) % count;
+      menuMoveFeedback(this);
+    }
+    if (confirm) {
+      playMenuClick(this);
+      this.toggleDropdown(dropdown);
+      const selected = dropdown.items.findIndex((item) => item.selected);
+      this.highlightDropdownItem(dropdown, Math.max(0, selected));
+    }
+  }
+
+  // Moves the controller highlight to dropdown row `index` (-1 clears it),
+  // reusing the rows' mouse-hover look.
+  highlightDropdownItem(dropdown, index) {
+    dropdown.items[this.dropdownIndex]?.row.emit('pointerout');
+    this.dropdownIndex = index;
+    dropdown.items[index]?.row.emit('pointerover');
+  }
+
+  closeDropdownFromController() {
+    this.highlightDropdownItem(this.openDropdown, -1);
+    this.toggleDropdown(this.openDropdown);
   }
 
   // Recalculates scene sizing and positions after a screen resize.

@@ -238,6 +238,7 @@ Thanks for playing!
     const controls = this.InputManager.getControlsP1;
 
     if (controls.button4) {
+      this.InputManager.rumbleBack();
       this.returnToMenu();
     } else if (controls.space || controls.button3) {
       this.toggleScrollPause();

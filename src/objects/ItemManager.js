@@ -162,6 +162,7 @@ export default class ItemManager {
     const playerNumber = player === 1 ? 1 : 2;
     this[`extraLifeActiveCar${playerNumber}`] = false;
     this[`invulnerableCar${playerNumber}`] = true;
+    this.inputManager.rumbleCrash(player, false);
 
     car.setTint(0xff0000);
     this.scene.hud.deactivateExtraLife(player);
@@ -412,6 +413,8 @@ export default class ItemManager {
   itemRandom(player) {
     const random = Phaser.Math.Between(1, 5);
     const car = this.getPlayerCar(player);
+    const items = ['shrink', 'grow', 'shield', 'nausea', 'magnet'];
+    this.inputManager.rumbleItem(player, items[random - 1]);
 
     if (random === 1) {
       return this.itemShrink(player);
@@ -471,6 +474,7 @@ export default class ItemManager {
 
     car.oilTriggered = true;
     car.inputLocked = true;
+    this.inputManager.rumbleEffect(car === this.scene.secondCar ? 2 : 1, 'oil');
 
     console.log('oil!');
 
@@ -519,6 +523,7 @@ export default class ItemManager {
     }
 
     this.removeOldPowerupTimer(texture, player);
+    this.inputManager.rumbleEffect(player, 'coinMultiplier');
 
     this.scene.sound.play('coin-multiplier-picked-up', {
       volume: player === 1 ? 0.6 : 0.3,
@@ -574,6 +579,7 @@ export default class ItemManager {
         getBudget() >= this.itemShieldPrize
       ) {
         this.itemShield(number);
+        this.inputManager.rumbleItem(number, 'shield', { fromBox: false });
         spend(this.itemShieldPrize);
       }
 
@@ -582,6 +588,7 @@ export default class ItemManager {
         getBudget() >= this.itemShrinkPrize
       ) {
         this.itemShrink(number);
+        this.inputManager.rumbleItem(number, 'shrink', { fromBox: false });
         spend(this.itemShrinkPrize);
       }
 
@@ -593,6 +600,7 @@ export default class ItemManager {
         !this[extraLifeKey]
       ) {
         this.itemExtraLife(number);
+        this.inputManager.rumbleEffect(number, 'heart');
         spend(this.itemHeartPrize);
       }
     }

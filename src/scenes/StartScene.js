@@ -146,20 +146,26 @@ export default class StartScene extends Phaser.Scene {
   playCountdown() {
     safePlay(this, 'countdown-3', { volume: 0.8 });
     this.showNumber('start-count-3');
+    this.rumbleCountdown(3);
+    this.engineIdling = true; // idle vibration until Go (see update())
 
     this.time.delayedCall(900, () => {
       safePlay(this, 'countdown-2', { volume: 0.8 });
       this.showNumber('start-count-2');
+      this.rumbleCountdown(2);
     });
 
     this.time.delayedCall(1800, () => {
       safePlay(this, 'countdown-1', { volume: 0.8 });
       this.showNumber('start-count-1');
+      this.rumbleCountdown(1);
     });
 
     this.time.delayedCall(2700, () => {
       safePlay(this, 'countdown-go', { volume: 0.8 });
       this.showNumber('start-go');
+      this.engineIdling = false;
+      this.rumbleCountdown('go');
 
       this.car.startAnim();
       if (this.secondCar) {
@@ -289,6 +295,24 @@ export default class StartScene extends Phaser.Scene {
   }
 
   /**
+   * Vibrates every racing player's controller for one countdown step (3, 2, 1 or 'go').
+   *
+   * @param {3|2|1|'go'} step
+   * @returns {void}
+   */
+  rumbleCountdown(step) {
+    // Vibration is optional and must never hold up the countdown
+    for (const player of this.racingPlayers()) {
+      this.InputManager?.rumbleCountdown(player, step);
+    }
+  }
+
+  /** @returns {number[]} Player numbers taking part in this race. */
+  racingPlayers() {
+    return this.secondCar ? [1, 2] : [1];
+  }
+
+  /**
    * Stops countdown sounds and requests gameplay once, preserving mode flags.
    *
    * @returns {void}
@@ -318,6 +342,9 @@ export default class StartScene extends Phaser.Scene {
       this.goToGame();
     }
     this.InputManager.update();
+    if (this.engineIdling && !this.leaving) {
+      for (const player of this.racingPlayers()) this.InputManager.rumbleHold(player, 'idle');
+    }
     // Only Player 1 controls menus and skips
     if (this.InputManager.getControlsP1.button4 || this.InputManager.getControlsP1.button3) {
       this.goToGame();

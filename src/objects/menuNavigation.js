@@ -1,3 +1,12 @@
+import { playMenuFocus } from '../../audio/sounds.js';
+
+// Feedback when the controller moves to another menu item: the mouse-hover
+// sound plus a short buzz on Player 1's controller.
+export function menuMoveFeedback(scene) {
+  playMenuFocus(scene);
+  scene.InputManager?.rumbleP1();
+}
+
 // Gamepad navigation for the main menu, matching its on-screen layout:
 //
 //   [0 Play] ──right──> 2-player option (handled by the scene)
@@ -9,8 +18,9 @@ export const MAIN_MENU_NAVIGATION = [
   { up: 2, down: 1 }, // Play (up wraps to the footer)
   { up: 0, down: 2 }, // Settings
   { up: 1, down: 0, right: 3 }, // How to play
-  { up: 1, down: 0, left: 2, right: 4 }, // Leaderboard
-  { up: 1, down: 0, left: 3 }, // Credits
+  // Leaderboard and Credits sit off to the side: only left/right, How to play leads back up
+  { left: 2, right: 4 }, // Leaderboard
+  { left: 3 }, // Credits
 ];
 
 // Index reached by moving `direction` from `index`; stays put if there is nothing that way.

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { loadSettings } from '../../settings/gameSettings.js';
+import { rumble } from '../../objects/rumble.js';
 import { keepAudioOutputAwake } from '../../../audio/keepAudioOutputAwake.js';
 
 /** Initializes shared audio, fonts and settings before opening the selected menu. */
@@ -25,6 +26,8 @@ export default class BootScene extends Phaser.Scene {
     const settings = loadSettings();
     this.registry.set('accessibility enabled', settings.accessibilityMode);
     this.registry.set('gameMode', settings.gameMode);
+    this.registry.set('vibration', settings.vibration);
+    rumble.setLevel(settings.vibration);
 
     this.scene.start(settings.gameMode === 'christmas' ? 'ChristmasScene' : 'MenuScene');
   }

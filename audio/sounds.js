@@ -140,25 +140,31 @@ export function preloadMenuSounds(scene) {
 }
 
 export function playMenuClick(scene) {
+  // Clicky "click-clack" like the name input's keys (only while a controller is in use)
+  scene.InputManager?.rumbleClick?.();
   if (!scene.cache.audio.exists('menu-click')) return;
   // Phaser's sound manager belongs to the game, so scene changes do not cut off clicks.
   scene.sound.play('menu-click', { volume: 0.3 });
 }
 
+let lastFocusTime = -Infinity;
+
+// The sound for moving onto a menu button (mouse hover, keyboard focus or controller).
+export function playMenuFocus(scene) {
+  // Mouse and keyboard can reach the same control in quick succession.
+  // A short minimum interval prevents duplicate focus sounds.
+  const now = performance.now();
+  if (now - lastFocusTime < 80) return;
+  lastFocusTime = now;
+  // Browser audio may stay locked until the first user interaction.
+  if (!scene.sound.locked && scene.cache.audio.exists('menu-focus')) {
+    scene.sound.play('menu-focus', { volume: 0.12 });
+  }
+}
+
 export function bindMenuFocusSounds(scene, elementIds) {
   const elements = elementIds.map((id) => document.getElementById(id));
-  let lastFocusTime = -Infinity;
-  const playFocus = () => {
-    // Mouse and keyboard can reach the same control in quick succession.
-    // A short minimum interval prevents duplicate focus sounds.
-    const now = performance.now();
-    if (now - lastFocusTime < 80) return;
-    lastFocusTime = now;
-    // Browser audio may stay locked until the first user interaction.
-    if (!scene.sound.locked && scene.cache.audio.exists('menu-focus')) {
-      scene.sound.play('menu-focus', { volume: 0.12 });
-    }
-  };
+  const playFocus = () => playMenuFocus(scene);
   for (const element of elements) element.addEventListener('focus', playFocus);
   const buttons = scene.children.list.filter(
     (object) => object.input && (object.type === 'Image' || object.type === 'Text'),

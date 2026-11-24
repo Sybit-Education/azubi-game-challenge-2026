@@ -116,6 +116,7 @@ function standardPad(gamepad) {
     buttons: faceButtons.map((index) => pressed(gamepad, index)),
     shoulders: STANDARD_SHOULDERS.map((index) => pressed(gamepad, index)),
     joyCon: isJoyCon(gamepad),
+    rumble: { gamepad, side: 'both' },
     dpad: {
       up: pressed(gamepad, STANDARD_DPAD.up),
       down: pressed(gamepad, STANDARD_DPAD.down),
@@ -133,6 +134,7 @@ function combinedRightPad(gamepad) {
     buttons: COMBINED_RIGHT_FACE_BUTTONS.map((index) => pressed(gamepad, index)),
     shoulders: COMBINED_RIGHT_SHOULDERS.map((index) => pressed(gamepad, index)),
     joyCon: true,
+    rumble: { gamepad, side: 'right' },
     dpad: { ...NO_DPAD },
   };
 }
@@ -145,6 +147,7 @@ function combinedLeftPad(gamepad) {
     buttons: COMBINED_LEFT_FACE_BUTTONS.map((index) => pressed(gamepad, index)),
     shoulders: COMBINED_LEFT_SHOULDERS.map((index) => pressed(gamepad, index)),
     joyCon: true,
+    rumble: { gamepad, side: 'left' },
     dpad: { ...NO_DPAD },
   };
 }

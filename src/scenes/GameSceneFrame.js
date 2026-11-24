@@ -37,6 +37,11 @@ function updatePlayer(scene, player, car, controls) {
 
   car.update_boundary_particles();
   car.intendedXVelocity = car.body.velocity.x;
+
+  // Continuous vibration while grinding along the wall, and while the screen is dizzy
+  // (the nausea wobble hits everyone still racing, for as long as it lasts)
+  if (car.boundaryParticles?.emitting) scene.InputManager.rumbleHold(player, 'scrape');
+  if (scene.ItemManager.nauseaTweenActive) scene.InputManager.rumbleHold(player, 'dizzy');
 }
 
 function updateRoadEdgeScrape(scene) {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { createParallax } from '../../objects/parallax.js';
 import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, preloadTypingSounds } from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
@@ -166,6 +167,7 @@ export default class NameInputScene extends Phaser.Scene {
 
   backToHomeFunction = () => {
     this.playMenuClick(this);
+    this.InputManager?.rumbleBack();
     this.scene.start(
       this.registry.get('gameMode') === 'christmas' ? 'ChristmasScene' : 'MenuScene',
     );
@@ -177,16 +179,10 @@ export default class NameInputScene extends Phaser.Scene {
       .setDisplaySize(this.scale.width * 1.01, this.scale.height * 1.01)
       .setDepth(-2);
 
-    this.parallaxPointerMove = (pointer) => {
-      this.background.setPosition(
-        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
-        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
-      );
-    };
-    this.input.on('pointermove', this.parallaxPointerMove);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.input.off('pointermove', this.parallaxPointerMove);
-    });
+    // Follows the mouse, and glides to the controller's selected key (see update())
+    this.parallax = createParallax(this, [
+      { object: this.background, base: (w, h) => [w / 2, h / 2], factor: 0.01 },
+    ]);
   }
 
   // Creates input field
@@ -405,21 +401,30 @@ export default class NameInputScene extends Phaser.Scene {
     }
   }
 
+  // Vibrates the typing player's controller (or `playerIndex`'s, 0 = Player 1) for a
+  // virtual keyboard action; see InputManager.rumbleKeyboard
+  keyboardRumble(effect, playerIndex = this.activePlayer) {
+    this.InputManager?.rumbleKeyboard(playerIndex + 1, effect);
+  }
+
   // Submits name
   submitName() {
     const currentName = (this.playerNames[this.activePlayer] || '').trim();
 
     // Name is empty
     if (currentName.length === 0) {
+      this.keyboardRumble('denied');
       return;
     }
 
     // Sets name
     this.playerNames[this.activePlayer] = currentName;
+    this.keyboardRumble('enter');
 
     // Propmpty player 2
     if (this.isMultiplayer && this.activePlayer === 0) {
       this.activePlayer = 1;
+      this.keyboardRumble('yourTurn');
       this.updateNamePrompt();
       return;
     }
@@ -465,11 +470,13 @@ export default class NameInputScene extends Phaser.Scene {
 
     // Input empty
     if (currentName.length === 0) {
+      this.keyboardRumble('denied');
       return;
     }
 
     // Removes last char
     this.playerNames[this.activePlayer] = currentName.slice(0, -1);
+    this.keyboardRumble('delete');
 
     // Play sound
     this.typingSound.play();
@@ -484,11 +491,13 @@ export default class NameInputScene extends Phaser.Scene {
 
     // Name too long
     if (currentName.length >= this.maxNameLength) {
+      this.keyboardRumble('denied');
       return;
     }
 
     // Adds char
     this.playerNames[this.activePlayer] = currentName + character;
+    this.keyboardRumble('type');
 
     // Play sound
     this.typingSound.play();
@@ -584,6 +593,13 @@ export default class NameInputScene extends Phaser.Scene {
         ? Math.min(this.selectedColumn, rowLength - 1)
         : Phaser.Math.Wrap(this.selectedColumn + dx, 0, rowLength);
 
+    // A heavier thunk when the cursor wraps around an edge, a light notch otherwise
+    const moved = row !== this.selectedRow || column !== this.selectedColumn;
+    const wrapped =
+      (dx !== 0 && column !== this.selectedColumn + dx) ||
+      (dy !== 0 && row !== this.selectedRow + dy);
+    if (moved) this.keyboardRumble(wrapped ? 'wrap' : 'move');
+
     this.setSelection(row, column, true);
   }
 
@@ -639,6 +655,11 @@ export default class NameInputScene extends Phaser.Scene {
 
     // Sets last navigation with current
     this.previousNavigation = navigation;
+
+    // Parallax follows the selected key like it follows the mouse
+    if (this.InputManager.usingGamepad) {
+      this.parallax?.focusOn(this.characterTexts[this.selectedRow]?.[this.selectedColumn]);
+    }
 
     // Moves cursor
     if (justPressed.left) {

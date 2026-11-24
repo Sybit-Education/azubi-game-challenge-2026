@@ -10,6 +10,7 @@ function playDuckSound(scene, car, obstacle) {
   if (!obstacle.isDuck || obstacle.duckSoundPlayed) return;
 
   obstacle.duckSoundPlayed = true;
+  scene.InputManager.rumbleDuck(car === scene.secondCar ? 2 : 1);
   const soundIndex = Phaser.Math.Between(0, DUCK_QUACK_SOUND_KEYS.length - 1);
   const soundKey = DUCK_QUACK_SOUND_KEYS[soundIndex];
   const accessibilityEnabled = scene.registry.get('accessibility enabled') && car === scene.car;

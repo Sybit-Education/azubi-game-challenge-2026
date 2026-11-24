@@ -85,6 +85,18 @@
         <label class="sr-only" for="accessible-toggle">accessibility mode</label>
         <input id="accessible-toggle" type="checkbox" />
 
+        <button
+          id="vibration-setting"
+          type="button"
+          aria-label="Haptic feedback: full"
+          aria-expanded="false"
+          aria-controls="vibration-choice-1 vibration-choice-2"
+        >
+          haptic feedback
+        </button>
+        <button id="vibration-choice-1" type="button" hidden disabled>reduced</button>
+        <button id="vibration-choice-2" type="button" hidden disabled>off</button>
+
         <label class="sr-only" for="game-mode-menu">game mode</label>
         <button
           id="game-mode-menu"
