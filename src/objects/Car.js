@@ -133,7 +133,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
         this.scene.tweens.add({
           targets: this,
           x: this.lanes[this.currentLane],
-          duration: 300,
+          duration: 200,
           ease: 'Sine.easeOut',
         });
 
@@ -144,7 +144,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
           delay: 100,
           ease: 'Sine.easeInOut',
         });
-        this.laneCooldown = 20;
+        this.laneCooldown = 10;
       } else if (this.laneCooldown <= 0 && this.currentLane === 0) {
         this.bumpWall('left');
       }
@@ -173,7 +173,7 @@ export default class Car extends Phaser.Physics.Arcade.Image {
           delay: 100,
           ease: 'Sine.easeInOut',
         });
-        this.laneCooldown = 20;
+        this.laneCooldown = 10;
       } else if (this.laneCooldown <= 0 && this.currentLane === this.lanes.length - 1) {
         this.bumpWall('right');
       }
