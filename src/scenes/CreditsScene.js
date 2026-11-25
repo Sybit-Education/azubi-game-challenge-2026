@@ -8,10 +8,15 @@ import {
   updateButtonPromptPressed,
 } from '../objects/buttonPrompts.js';
 
-import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
+import { preloadMenuSounds, playMenuClick, continueSceneMusic } from '../../audio/sounds.js';
 export default class CreditsScene extends Phaser.Scene {
   constructor() {
     super('CreditsScene');
+  }
+
+  // Keeps the menu music playing instead of restarting it (see continueSceneMusic)
+  init() {
+    continueSceneMusic(this);
   }
 
   preload() {

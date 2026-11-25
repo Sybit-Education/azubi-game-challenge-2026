@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import InputManager from '../objects/InputManager.js';
 import LeaderboardTable from '../utils/LeaderboardTable.js';
 import LeaderboardDropdown, { LEADERBOARD_COLORS as COLORS } from '../utils/LeaderboardDropdown.js';
-import { preloadMenuSounds, playMenuClick } from '../../audio/sounds.js';
+import { preloadMenuSounds, playMenuClick, continueSceneMusic } from '../../audio/sounds.js';
 import { bindLeaderboardControls, renderLeaderboardEntries } from '../accessibility/leaderboard.js';
 import {
   addButtonPrompt,
@@ -24,6 +24,11 @@ export default class LeaderboardScene extends Phaser.Scene {
   }
 
   // Preloads menu audio and the images used by the leaderboard scene.
+  // Keeps the menu music playing instead of restarting it (see continueSceneMusic)
+  init() {
+    continueSceneMusic(this);
+  }
+
   preload() {
     preloadMenuSounds(this);
     preloadButtonPrompts(this);
