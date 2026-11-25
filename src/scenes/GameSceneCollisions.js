@@ -3,8 +3,8 @@ import Phaser from 'phaser';
 import { DUCK_QUACK_SOUND_KEYS } from '../../audio/sounds.js';
 
 const DUCK_SOUND_DURATION = 0.8;
-const DUCK_SOUND_VOLUME = 0.12;
-const QUIET_DUCK_SOUND_VOLUME = 0.04;
+const COLLISION_SOUND_VOLUME = 0.12;
+const QUIET_COLLISION_SOUND_VOLUME = 0.04;
 
 function playDuckSound(scene, car, obstacle) {
   if (!obstacle.isDuck || obstacle.duckSoundPlayed) return;
@@ -19,9 +19,21 @@ function playDuckSound(scene, car, obstacle) {
     start: 0,
     duration: DUCK_SOUND_DURATION,
     config: {
-      volume: accessibilityEnabled ? QUIET_DUCK_SOUND_VOLUME : DUCK_SOUND_VOLUME,
+      volume: accessibilityEnabled ? QUIET_COLLISION_SOUND_VOLUME : COLLISION_SOUND_VOLUME,
       loop: false,
     },
+  });
+}
+
+function playGnomeSound(scene, car, obstacle) {
+  if (!obstacle.isGnome || obstacle.gnomeSoundPlayed) return;
+
+  obstacle.gnomeSoundPlayed = true;
+  const accessibilityEnabled = scene.registry.get('accessibility enabled') && car === scene.car;
+
+  scene.sound.play('gnomescream', {
+    volume: accessibilityEnabled ? QUIET_COLLISION_SOUND_VOLUME : COLLISION_SOUND_VOLUME,
+    loop: false,
   });
 }
 
@@ -30,6 +42,7 @@ export function hitRandomObstacle(scene, car, obstacle) {
 
   // A duck only quacks once, even when the collision lasts a few frames.
   playDuckSound(scene, car, obstacle);
+  playGnomeSound(scene, car, obstacle);
 
   if (car === scene.car || car === scene.secondCar) {
     scene.ItemManager.lebenCheck(car, obstacle);

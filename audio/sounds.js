@@ -14,7 +14,7 @@ import collectCoinUrl from './gameplay/collect-coin.mp3?url';
 import collectExtraLifeUrl from './gameplay/collect-extra-life.mp3?url';
 import coinMultiplierPickedUpUrl from './gameplay/coin-multiplier-picked-up.mp3?url';
 import restoreSizeUrl from './gameplay/restore-size.mp3?url';
-import collectMagnetUrl from './gameplay/collect-magnet.wav?url';
+import collectMagnetUrl from './gameplay/collect-magnet.mp3?url';
 import shieldCollectedUrl from './gameplay/shield-collected.mp3?url';
 import shieldOverUrl from './gameplay/shield-over.mp3?url';
 
@@ -36,6 +36,7 @@ import iceWarningUrl from './gameplay/ice-warning.wav?url';
 import duckQuack1Url from './gameplay/duck-quack-1.mp3?url';
 import duckQuack2Url from './gameplay/duck-quack-2.mp3?url';
 import duckQuack3Url from './gameplay/duck-quack-3.mp3?url';
+import gnomeScreamUrl from './gameplay/gnome-scream.mp3?url';
 
 const duckQuackSounds = [
   { key: 'duck-quack-1', url: duckQuack1Url },
@@ -127,6 +128,7 @@ export function preloadGameplaySounds(scene) {
   loadSound(scene, 'road-edge-hit', roadEdgeHitUrl);
   loadSound(scene, 'road-edge-scrape', roadEdgeScrapeUrl);
   loadSound(scene, 'ice-warning', iceWarningUrl);
+  loadSound(scene, 'gnomescream', gnomeScreamUrl);
   for (const sound of duckQuackSounds) {
     loadSound(scene, sound.key, sound.url);
   }

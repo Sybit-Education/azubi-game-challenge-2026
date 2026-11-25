@@ -56,5 +56,6 @@ export default class RandomObstacle extends Obstacle {
       this.setScale(scene.scale.height / 10000);
     }
     this.duckSoundPlayed = false;
+    this.gnomeSoundPlayed = false;
   }
 }
