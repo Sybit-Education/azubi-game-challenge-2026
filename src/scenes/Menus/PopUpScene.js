@@ -2,8 +2,18 @@ import Phaser from 'phaser';
 
 import InputManager from '../../objects/InputManager.js';
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
+import { menuMoveFeedback } from '../../objects/menuNavigation.js';
+import {
+  addButtonPrompt,
+  BUTTON_PROMPT_SIZE,
+  buttonPromptWidth,
+  preloadButtonPrompts,
+  updateButtonPromptPressed,
+} from '../../objects/buttonPrompts.js';
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
-import { setSetting } from '../../settings/gameSettings.js';
+import { setSetting, VIBRATION_LEVELS } from '../../settings/gameSettings.js';
+import { rumble } from '../../objects/rumble.js';
+import { createSettingsTextures, HAPTIC_LABELS } from '../../objects/settingsTextures.js';
 
 // ---------------------------------------------------------------------------
 // UI constants
@@ -14,6 +24,10 @@ const SCALE_LABEL_LARGE = 0.35;
 const SCALE_SWITCH = 0.37;
 const SCALE_CLOSE_LABEL = 0.66;
 const SCALE_MODE_BTN = 0.3;
+
+// Haptic feedback buttons use generated textures the size of the game mode button PNG
+const HAPTIC_BUTTON = { width: 804, height: 147 };
+const INFO_GAP = 10; // between the haptic feedback label and its info line
 
 const DIM_ALPHA = 0.48;
 const ROW_GAP_BASE = 120;
@@ -38,26 +52,11 @@ export default class PopUpScene extends Phaser.Scene {
   /** Loads all assets required by the settings panel. */
   preload() {
     preloadMenuSounds(this);
+    preloadButtonPrompts(this);
     this.load.image('settingsBackground', 'assets/images/homepage/settings-menu/background.png');
-    this.load.image('settingsLabel', 'assets/images/homepage/settings-menu/settings.png');
     this.load.image('xButton', 'assets/images/homepage/settings-menu/x.png');
-    this.load.image(
-      'accessibilityModeLabel',
-      'assets/images/homepage/settings-menu/accessibility-mode.png',
-    );
-    this.load.image('switchOn', 'assets/images/homepage/settings-menu/switch-on.png');
-    this.load.image('switchOff', 'assets/images/homepage/settings-menu/switch-off.png');
     this.load.image('switchCircle', 'assets/images/homepage/settings-menu/switch-circle.png');
-    this.load.image('gameModeLabel', 'assets/images/homepage/settings-menu/game-mode-label.png');
-    this.load.image(
-      'standardModeButton',
-      'assets/images/homepage/settings-menu/standard-mode-button.png',
-    );
     this.load.image('closeLabel', 'assets/images/homepage/settings-menu/close-label.png');
-    this.load.image(
-      'christmasModeButton',
-      'assets/images/homepage/settings-menu/christmas-mode-button.png',
-    );
   }
 
   /**
@@ -73,16 +72,21 @@ export default class PopUpScene extends Phaser.Scene {
     this._uiScale = Phaser.Math.Clamp(Math.min(width / 1920, height / 1080), 0.6, 1);
 
     this._html = this._getHtmlElements();
+    // Labels and buttons with text, drawn in one font instead of loaded PNGs
+    createSettingsTextures(this);
     this._initGameModeState();
     this._initAccessibilityState();
+    this._vibration = this.registry.get('vibration') ?? 'full';
 
     this._closing = false;
     this._buildLayout(width, height);
     this._setupGameModeDropdown();
     this._setupAccessibilitySwitch();
+    this._setupVibrationSetting();
     this._setupCloseHandlers();
     this._setupHtmlEventHandlers();
     this._setupGamepadNavigation();
+    this._createButtonPrompts();
     this._animateIn(width);
 
     this._html.dialog.showModal();
@@ -116,6 +120,7 @@ export default class PopUpScene extends Phaser.Scene {
    */
   update() {
     this.InputManager.update();
+    this._updateButtonPrompts();
     const controls = this.InputManager.getControlsP1;
     const items = this.navigationItems;
     const upPressed = controls.up && this._hasReadVerticalInput && !this._previousUp;
@@ -127,20 +132,59 @@ export default class PopUpScene extends Phaser.Scene {
     if (upPressed) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex - 1, 0, items.length);
       this.updateGamepadSelection();
+      menuMoveFeedback(this);
     } else if (downPressed) {
       this.selectedIndex = Phaser.Math.Wrap(this.selectedIndex + 1, 0, items.length);
       this.updateGamepadSelection();
+      menuMoveFeedback(this);
     } else if (controls.button3) {
       items[this.selectedIndex].action();
       this.updateGamepadSelection();
     } else if (controls.button4) {
-      items[0].action();
+      // Y closes the settings (the X button itself isn't in the controller navigation)
+      this._close();
     }
   }
 
   // -------------------------------------------------------------------------
   // Initialisation helpers
   // -------------------------------------------------------------------------
+
+  /** Joy-Con button icons: Y next to the close button, X next to the selected item. */
+  _createButtonPrompts() {
+    const size = BUTTON_PROMPT_SIZE * this._uiScale;
+    this._promptGap = 12 * this._uiScale;
+    this._closePrompt = addButtonPrompt(this, 'y', size);
+    this._selectPrompt = addButtonPrompt(this, 'x', size);
+  }
+
+  /**
+   * Places the icons left of their buttons every frame, so they follow the
+   * slide-in/out animation and the gamepad selection. Shown only while a
+   * Joy-Con was the last input.
+   */
+  _updateButtonPrompts() {
+    if (!this._closePrompt) return;
+    const show = Boolean(this.InputManager.showJoyConPrompts);
+    const controls = this.InputManager.getControlsP1;
+    updateButtonPromptPressed(this._closePrompt, controls);
+    updateButtonPromptPressed(this._selectPrompt, controls);
+    const placeLeftOf = (prompt, button) => {
+      const bounds = button.getBounds();
+      prompt.setPosition(
+        bounds.left - this._promptGap - buttonPromptWidth(prompt) / 2,
+        bounds.centerY,
+      );
+    };
+
+    placeLeftOf(this._closePrompt, this._closeButton);
+    this._closePrompt.setVisible(show);
+
+    const selected = this.navigationItems?.[this.selectedIndex]?.button;
+    const showSelect = show && Boolean(selected);
+    if (showSelect) placeLeftOf(this._selectPrompt, selected);
+    this._selectPrompt.setVisible(showSelect);
+  }
 
   /** Creates and initialises the InputManager for this scene. */
   _setupInputManager() {
@@ -167,6 +211,9 @@ export default class PopUpScene extends Phaser.Scene {
       closeSettingsBtn: document.getElementById('close-settings'),
       dialog: document.getElementById('settings-dialog'),
       accessibilityToggle: document.getElementById('accessible-toggle'),
+      vibrationSetting: document.getElementById('vibration-setting'),
+      vibrationChoice1: document.getElementById('vibration-choice-1'),
+      vibrationChoice2: document.getElementById('vibration-choice-2'),
       gameModeMenu: document.getElementById('game-mode-menu'),
       christmasModeChoice: document.getElementById('christmas-mode-choice'),
     };
@@ -220,7 +267,9 @@ export default class PopUpScene extends Phaser.Scene {
     const rowGap = ROW_GAP_BASE * s;
     const row1Y = height * 0.2;
     const row2Y = row1Y + rowGap;
-    const row3Y = row2Y + rowGap * 2;
+    // Vibration comes last, so its dropdown opens into the free space below
+    const vibrationY = row1Y + rowGap * 2;
+    const row3Y = row1Y + rowGap * 3;
 
     const background = this.add.image(width * 0.8, 0, 'settingsBackground').setOrigin(0.5);
     background.displayWidth = width / 2.5;
@@ -280,6 +329,8 @@ export default class PopUpScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setInteractive({ useHandCursor: true });
 
+    this._buildVibrationRow(leftColumn, rightColumn, vibrationY);
+
     // Game-mode buttons — active one is shown, inactive one slides down as dropdown
     this._standardModeButton = this.add
       .image(rightColumn, row2Y, 'standardModeButton')
@@ -319,6 +370,9 @@ export default class PopUpScene extends Phaser.Scene {
       this._accessibilityKnob,
       this._standardModeButton,
       this._christmasModeButton,
+      this._vibrationLabel,
+      this._vibrationInfo,
+      ...Object.values(this._vibrationButtons),
     ];
   }
 
@@ -435,6 +489,9 @@ export default class PopUpScene extends Phaser.Scene {
     positionAccessibleControls(this, [
       [closeSettingsBtn, this._closeButton],
       [accessibilityToggle, this._accessibilitySwitch],
+      [this._html.vibrationSetting, this._vibrationSlot(0)],
+      [this._html.vibrationChoice1, this._vibrationSlot(1)],
+      [this._html.vibrationChoice2, this._vibrationSlot(2)],
       [gameModeMenu, this._activeModeButton],
       [christmasModeChoice, this._inactiveModeButton],
     ]);
@@ -548,6 +605,184 @@ export default class PopUpScene extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
+  // Vibration setting (FULL / REDUCED = highlights only, see InputManager / OFF)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Creates the "HAPTIC FEEDBACK" label with its info line underneath, and one dropdown
+   * button per vibration level.
+   */
+  _buildVibrationRow(leftColumn, rightColumn, y) {
+    const s = this._uiScale;
+    this._vibrationLabel = this.add
+      .image(leftColumn, y, 'hapticFeedbackLabel')
+      .setScale(SCALE_LABEL_LARGE * s)
+      .setOrigin(0);
+    this._vibrationInfo = this.add
+      .image(
+        leftColumn,
+        y + this._vibrationLabel.displayHeight + INFO_GAP * s,
+        'hapticFeedbackInfo',
+      )
+      .setScale(SCALE_LABEL_LARGE * s)
+      .setOrigin(0);
+
+    this._vibrationClosedY = y;
+    this._isVibrationOpen = false;
+    this._vibrationButtons = {};
+    for (const level of VIBRATION_LEVELS) {
+      this._vibrationButtons[level] = this._createVibrationButton(level, rightColumn, y);
+    }
+  }
+
+  /**
+   * One dropdown button: the generated pill texture (like the game mode buttons) in a
+   * container anchored at its top-right corner, so growing on hover works the same way.
+   */
+  _createVibrationButton(level, right, y) {
+    const k = SCALE_MODE_BTN * this._uiScale;
+    const width = HAPTIC_BUTTON.width * k;
+    const height = HAPTIC_BUTTON.height * k;
+
+    const image = this.add.image(0, 0, `hapticButton-${level}`).setOrigin(1, 0).setScale(k);
+    // Invisible hit area; it also gives the container its bounds for the gamepad icon
+    // and the HTML overlay
+    const hitArea = this.add
+      .zone(-width, 0, width, height)
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
+
+    const button = this.add.container(right, y, [image, hitArea]);
+    button.setData({ level, image, hitArea, hovered: false, selected: false });
+
+    hitArea.on('pointerdown', () => this._pressVibrationButton(level));
+    hitArea.on('pointerover', () => this._setVibrationHighlight(button, 'hovered', true));
+    hitArea.on('pointerout', () => this._setVibrationHighlight(button, 'hovered', false));
+    return button;
+  }
+
+  /** Shows the small ◀ only on the button with the current level. */
+  _drawVibrationOutline(button, isCurrent) {
+    const level = button.getData('level');
+    button.getData('image').setTexture(`hapticButton-${level}${isCurrent ? '-current' : ''}`);
+  }
+
+  /** Grows a button while hovered or gamepad-selected, like the other settings buttons. */
+  _setVibrationHighlight(button, state, value) {
+    button.setData(state, value);
+    const grown = button.getData('hovered') || button.getData('selected');
+    button.getData('growTween')?.remove();
+    button.setData(
+      'growTween',
+      this.tweens.add({
+        targets: button,
+        scale: grown ? HOVER_SCALE_FACTOR : 1,
+        duration: TWEEN_DURATION_FAST,
+      }),
+    );
+  }
+
+  /** The buttons in dropdown order: the current level first, then the other levels. */
+  _vibrationOrder() {
+    const levels = [this._vibration, ...VIBRATION_LEVELS.filter((l) => l !== this._vibration)];
+    return levels.map((level) => this._vibrationButtons[level]);
+  }
+
+  /** The level shown in dropdown slot `slot` (0 = current). */
+  _vibrationLevelAt(slot) {
+    return this._vibrationOrder()[slot].getData('level');
+  }
+
+  /** Stand-in for the button in a dropdown slot, for positioning the HTML overlay. */
+  _vibrationSlot(slot) {
+    return { getBounds: () => this._vibrationOrder()[slot].getBounds() };
+  }
+
+  /** Shows the current level at startup. */
+  _setupVibrationSetting() {
+    this._layoutVibrationButtons(false);
+  }
+
+  /**
+   * Places the buttons: the current level in the row, the others slid out below it while
+   * the dropdown is open (same motion as the game mode dropdown), hidden otherwise.
+   * Also keeps the hidden HTML buttons in sync for screen readers.
+   */
+  _layoutVibrationButtons(animate = true) {
+    const step = HAPTIC_BUTTON.height * SCALE_MODE_BTN * this._uiScale + DROPDOWN_GAP;
+    this._vibrationOrder().forEach((button, slot) => {
+      const shown = slot === 0 || this._isVibrationOpen;
+      const y = this._vibrationClosedY + (this._isVibrationOpen ? slot * step : 0);
+      this._drawVibrationOutline(button, slot === 0);
+      button.getData('hitArea').input.enabled = shown;
+      if (!shown) {
+        button.setData({ hovered: false, selected: false });
+        button.setScale(1);
+      }
+
+      button.getData('moveTween')?.remove();
+      if (animate) {
+        button.setData(
+          'moveTween',
+          this.tweens.add({
+            targets: button,
+            y,
+            alpha: shown ? 1 : 0,
+            duration: TWEEN_DURATION_MID,
+            ease: 'Power2',
+          }),
+        );
+      } else {
+        button.setY(y).setAlpha(shown ? 1 : 0);
+      }
+    });
+
+    const { vibrationSetting, vibrationChoice1, vibrationChoice2 } = this._html;
+    const label = (slot) => HAPTIC_LABELS[this._vibrationLevelAt(slot)].toLowerCase();
+    vibrationSetting.setAttribute('aria-label', `Haptic feedback: ${label(0)}`);
+    vibrationSetting.setAttribute('aria-expanded', String(this._isVibrationOpen));
+    [vibrationChoice1, vibrationChoice2].forEach((element, index) => {
+      element.textContent = label(index + 1);
+      element.setAttribute('aria-label', `Haptic feedback ${label(index + 1)}`);
+      element.hidden = !this._isVibrationOpen;
+      element.disabled = !this._isVibrationOpen;
+    });
+  }
+
+  /** The current level opens / closes the dropdown; another level is chosen. */
+  _pressVibrationButton(level) {
+    if (level === this._vibration) this._toggleVibrationDropdown();
+    else this._chooseVibration(level);
+  }
+
+  _toggleVibrationDropdown() {
+    playMenuClick(this);
+    this._isVibrationOpen = !this._isVibrationOpen;
+    this._layoutVibrationButtons();
+    this._rebuildNavigationItems();
+  }
+
+  /**
+   * Saves and applies `level`, then closes the dropdown with the chosen level sliding up
+   * into the row. The click plays after the change, so choosing FULL can be felt right away.
+   */
+  _chooseVibration(level) {
+    this._vibration = level;
+    this.registry.set('vibration', level);
+    setSetting('vibration', level);
+    rumble.setLevel(level);
+
+    this._isVibrationOpen = false;
+    this._layoutVibrationButtons();
+    this._rebuildNavigationItems();
+    // Keep the gamepad selection on the vibration row
+    const current = this._vibrationButtons[level];
+    this.selectedIndex = this.navigationItems.findIndex((item) => item.button === current);
+    this.updateGamepadSelection();
+    playMenuClick(this);
+  }
+
+  // -------------------------------------------------------------------------
   // Close / animation
   // -------------------------------------------------------------------------
 
@@ -564,6 +799,7 @@ export default class PopUpScene extends Phaser.Scene {
   _close() {
     if (this._closing) return;
     playMenuClick(this);
+    this.InputManager?.rumbleBack();
     this._closing = true;
     this.tweens.add({
       targets: this._panelObjects,
@@ -610,8 +846,14 @@ export default class PopUpScene extends Phaser.Scene {
    * positions the accessible overlay controls and schedules cleanup on shutdown.
    */
   _setupHtmlEventHandlers() {
-    const { dialog, accessibilityToggle, gameModeMenu, christmasModeChoice, closeSettingsBtn } =
-      this._html;
+    const {
+      dialog,
+      accessibilityToggle,
+      vibrationSetting,
+      gameModeMenu,
+      christmasModeChoice,
+      closeSettingsBtn,
+    } = this._html;
     const s = this._uiScale;
 
     // Prevent Phaser from receiving events that target HTML form controls
@@ -625,6 +867,9 @@ export default class PopUpScene extends Phaser.Scene {
       playMenuClick(this);
       this._setAccessibilityEnabled(accessibilityToggle.checked);
     };
+    this._handleVibrationClick = () => this._toggleVibrationDropdown();
+    this._handleVibrationChoice1 = () => this._chooseVibration(this._vibrationLevelAt(1));
+    this._handleVibrationChoice2 = () => this._chooseVibration(this._vibrationLevelAt(2));
     this._handleGameModeClick = () => this._toggleDropdown();
     this._handleAlternateModeClick = () => this._chooseAlternateMode();
     this._handleCloseClick = () => this._close();
@@ -637,6 +882,9 @@ export default class PopUpScene extends Phaser.Scene {
     };
 
     accessibilityToggle.addEventListener('change', this._handleAccessibilityChange);
+    vibrationSetting.addEventListener('click', this._handleVibrationClick);
+    this._html.vibrationChoice1.addEventListener('click', this._handleVibrationChoice1);
+    this._html.vibrationChoice2.addEventListener('click', this._handleVibrationChoice2);
     gameModeMenu.addEventListener('click', this._handleGameModeClick);
     christmasModeChoice.addEventListener('click', this._handleAlternateModeClick);
     closeSettingsBtn.addEventListener('click', this._handleCloseClick);
@@ -676,11 +924,19 @@ export default class PopUpScene extends Phaser.Scene {
     positionAccessibleControls(this, [
       [closeSettingsBtn, this._closeButton],
       [accessibilityToggle, this._accessibilitySwitch],
+      [this._html.vibrationSetting, this._vibrationSlot(0)],
+      [this._html.vibrationChoice1, this._vibrationSlot(1)],
+      [this._html.vibrationChoice2, this._vibrationSlot(2)],
       [gameModeMenu, this._activeModeButton],
       [christmasModeChoice, this._inactiveModeButton],
     ]);
 
-    bindMenuFocusSounds(this, ['close-settings', 'accessible-toggle', 'game-mode-menu']);
+    bindMenuFocusSounds(this, [
+      'close-settings',
+      'accessible-toggle',
+      'vibration-setting',
+      'game-mode-menu',
+    ]);
 
     this.events.once('shutdown', () => this._cleanup());
   }
@@ -690,6 +946,7 @@ export default class PopUpScene extends Phaser.Scene {
     const {
       dialog,
       accessibilityToggle,
+      vibrationSetting,
       gameModeMenu,
       christmasModeChoice,
       closeSettingsBtn,
@@ -697,6 +954,9 @@ export default class PopUpScene extends Phaser.Scene {
     } = this._html;
     NATIVE_INPUT_EVENTS.forEach((name) => dialog.removeEventListener(name, this._stopPhaserInput));
     accessibilityToggle.removeEventListener('change', this._handleAccessibilityChange);
+    vibrationSetting.removeEventListener('click', this._handleVibrationClick);
+    this._html.vibrationChoice1.removeEventListener('click', this._handleVibrationChoice1);
+    this._html.vibrationChoice2.removeEventListener('click', this._handleVibrationChoice2);
     gameModeMenu.removeEventListener('click', this._handleGameModeClick);
     christmasModeChoice.removeEventListener('click', this._handleAlternateModeClick);
     closeSettingsBtn.removeEventListener('click', this._handleCloseClick);
@@ -764,8 +1024,8 @@ export default class PopUpScene extends Phaser.Scene {
    */
   _rebuildNavigationItems() {
     const s = this._uiScale;
+    // No entry for the X button: Y already closes the settings
     this.navigationItems = [
-      { button: this._closeButton, action: () => this._close(), scale: SCALE_CLOSE_BTN * s },
       {
         button: this._accessibilitySwitch,
         action: () => this._toggleAccessibility(),
@@ -789,5 +1049,15 @@ export default class PopUpScene extends Phaser.Scene {
         scale: SCALE_MODE_BTN * s,
       });
     }
+
+    // Vibration: the current level opens / closes its dropdown, the others pick a level
+    this._vibrationOrder().forEach((button, slot) => {
+      if (slot > 0 && !this._isVibrationOpen) return;
+      this.navigationItems.push({
+        button,
+        action: () => this._pressVibrationButton(button.getData('level')),
+        applySelection: (selected) => this._setVibrationHighlight(button, 'selected', selected),
+      });
+    });
   }
 }

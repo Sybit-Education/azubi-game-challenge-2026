@@ -3,10 +3,17 @@ const STORAGE_KEY = 'sybitkart:settings';
 export const DEFAULT_SETTINGS = Object.freeze({
   accessibilityMode: false,
   gameMode: 'standard', // 'standard' | 'christmas'
+  vibration: 'full', // 'full' | 'reduced' (highlights only) | 'off'
 });
+
+export const VIBRATION_LEVELS = Object.freeze(['full', 'reduced', 'off']);
 
 function isValidGameMode(value) {
   return value === 'standard' || value === 'christmas';
+}
+
+function isValidVibration(value) {
+  return VIBRATION_LEVELS.includes(value);
 }
 
 function normalizeSettings(settings) {
@@ -16,6 +23,9 @@ function normalizeSettings(settings) {
         ? settings.accessibilityMode
         : DEFAULT_SETTINGS.accessibilityMode,
     gameMode: isValidGameMode(settings?.gameMode) ? settings.gameMode : DEFAULT_SETTINGS.gameMode,
+    vibration: isValidVibration(settings?.vibration)
+      ? settings.vibration
+      : DEFAULT_SETTINGS.vibration,
   };
 
   return normalized;

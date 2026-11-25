@@ -1,5 +1,15 @@
 import Phaser from 'phaser';
 import InputManager from '../../objects/InputManager.js';
+import {
+  createSelectionOutline,
+  updateSelectionOutline,
+} from '../../objects/menuSelectionOutline.js';
+import { createParallax } from '../../objects/parallax.js';
+import {
+  MAIN_MENU_NAVIGATION,
+  menuMoveFeedback,
+  nextMenuIndex,
+} from '../../objects/menuNavigation.js';
 
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
 import { preloadSceneMusic, playSceneMusic } from '../../../audio/sounds.js';
@@ -193,7 +203,7 @@ export default class ChristmasScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     const homepageCar = this.add
-      .image(this.scale.width, this.scale.height / 1.45, 'homepage-car')
+      .image(this.scale.width, this.scale.height / 1.45, 'christmas-homepage-car')
       .setOrigin(0.5)
       .setScale(0.3 * this.scaleFactor);
 
@@ -238,6 +248,7 @@ export default class ChristmasScene extends Phaser.Scene {
           isPlayHovered ||
           isTwoPlayerHovered ||
           this.isMultiplayerSelected ||
+          this.playSelectedByController ||
           document.activeElement === multiplayerBtn
         ) {
           return;
@@ -255,7 +266,8 @@ export default class ChristmasScene extends Phaser.Scene {
             if (
               !isPlayHovered &&
               !isTwoPlayerHovered &&
-              document.activeElement !== multiplayerBtn
+              document.activeElement !== multiplayerBtn &&
+              !this.playSelectedByController
             ) {
               twoPlayerButton.setVisible(false);
               twoPlayerButton.setAlpha(1);
@@ -405,37 +417,14 @@ export default class ChristmasScene extends Phaser.Scene {
       });
     });
 
-    //Background parralax effect
-    this.input.on('pointermove', (pointer) => {
-      background.setPosition(
-        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.01,
-        this.scale.height / 2 + (pointer.y - this.scale.height / 2) * 0.01,
-      );
-    });
-
-    //homepage car parallax effect
-    this.input.on('pointermove', (pointer) => {
-      homepageCar.setPosition(
-        this.scale.width + (pointer.x - this.scale.width / 2) * 0.015,
-        this.scale.height / 1.45 + (pointer.y - this.scale.height / 2) * 0.015,
-      );
-    });
-
-    //christmas lights parallax effect
-    this.input.on('pointermove', (pointer) => {
-      lights.setPosition(
-        this.scale.width / 2 + (pointer.x - this.scale.width / 2) * 0.03,
-        this.scale.height / 6 + (pointer.y - this.scale.height / 2) * 0.03,
-      );
-    });
-
-    //christmas trees parallax effect
-    this.input.on('pointermove', (pointer) => {
-      trees.setPosition(
-        this.scale.width / 3 + (pointer.x - this.scale.width / 2) * 0.0225,
-        this.scale.height + (pointer.y - this.scale.height / 2) * 0.0225,
-      );
-    });
+    // Parallax (background, car, lights, trees at different depths): follows the mouse,
+    // and glides to the controller's selection (see update())
+    this.parallax = createParallax(this, [
+      { object: background, base: (w, h) => [w / 2, h / 2], factor: 0.01 },
+      { object: homepageCar, base: (w, h) => [w, h / 1.45], factor: 0.015 },
+      { object: lights, base: (w, h) => [w / 2, h / 6], factor: 0.03 },
+      { object: trees, base: (w, h) => [w / 3, h], factor: 0.0225 },
+    ]);
 
     const startSinglePlayer = startGame;
     twoPlayerButton.on('pointerdown', () => {
@@ -478,6 +467,7 @@ export default class ChristmasScene extends Phaser.Scene {
       {
         button: settings_button,
         action: () => {
+          playMenuClick(this);
           this.scene.launch('PopUpScene');
           this.scene.bringToTop('PopUpScene');
         },
@@ -490,7 +480,7 @@ export default class ChristmasScene extends Phaser.Scene {
       },
       {
         button: creditsButton,
-        action: () => this.scene.start('CreditsScene'),
+        action: openCredits,
       },
     ];
 
@@ -500,6 +490,13 @@ export default class ChristmasScene extends Phaser.Scene {
     this.hasReadHorizontalInput = false;
     this.hasReadVerticalInput = false;
     this.selectButton(this.menuButtons[0].button);
+
+    // Outline showing where the controller is (drawn in update())
+    this.twoPlayerButton = twoPlayerButton;
+    this.revealTwoPlayerButton = revealTwoPlayerButton;
+    this.hideTwoPlayerButton = scheduleHide;
+    this.playSelectedByController = false;
+    this.selectionOutline = createSelectionOutline(this);
 
     this.tweens.add({
       targets: lights,
@@ -512,16 +509,23 @@ export default class ChristmasScene extends Phaser.Scene {
 
   update() {
     this.InputManager.update();
+    const outlineTarget = this.isMultiplayerSelected
+      ? this.twoPlayerButton
+      : this.menuButtons?.[this.selectedIndex]?.button;
+    updateSelectionOutline(
+      this,
+      this.selectionOutline,
+      outlineTarget,
+      this.InputManager.usingGamepad,
+    );
+    // Parallax follows the controller's selection like it follows the mouse
+    if (this.InputManager.usingGamepad) this.parallax?.focusOn(outlineTarget);
     const controls = this.InputManager.getControlsP1;
-    const gamepad = this.input.gamepad;
-    const gamepadP1 = gamepad?.enabled ? gamepad.getPad(0) : null;
-    const padP1 = gamepadP1?.pad?.connected ? gamepadP1 : null;
-    const axisX = padP1?.axes?.[0]?.getValue() ?? 0;
-    const axisY = padP1?.axes?.[1]?.getValue() ?? 0;
-    const menuLeft = axisX < -0.2 || (padP1?.buttons?.[14]?.pressed ?? false);
-    const menuRight = axisX > 0.2 || (padP1?.buttons?.[15]?.pressed ?? false);
-    const menuUp = axisY < -0.2 || (padP1?.buttons?.[12]?.pressed ?? false);
-    const menuDown = axisY > 0.2 || (padP1?.buttons?.[13]?.pressed ?? false);
+    // Only Player 1's controller navigates the menu
+    const menuLeft = controls.padLeft;
+    const menuRight = controls.padRight;
+    const menuUp = controls.padUp;
+    const menuDown = controls.padDown;
     const rightPressed =
       menuRight && this.hasReadHorizontalInput && !this.previousHorizontalInput.right;
     const leftPressed =
@@ -537,44 +541,42 @@ export default class ChristmasScene extends Phaser.Scene {
 
     if (rightPressed && this.selectedIndex === 0) {
       this.selectMultiplayerOption();
+      menuMoveFeedback(this);
     } else if (leftPressed && this.isMultiplayerSelected) {
       this.clearMultiplayerOption();
+      menuMoveFeedback(this);
     }
 
-    if (upPressed) {
+    // Move along the on-screen layout (see MAIN_MENU_NAVIGATION)
+    const direction =
+      (upPressed && 'up') ||
+      (downPressed && 'down') ||
+      (leftPressed && 'left') ||
+      (rightPressed && 'right') ||
+      null;
+    const nextIndex = direction
+      ? nextMenuIndex(MAIN_MENU_NAVIGATION, this.selectedIndex, direction)
+      : this.selectedIndex;
+    if (nextIndex !== this.selectedIndex) {
       this.clearMultiplayerOption();
+      menuMoveFeedback(this);
       this.deselectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].scale,
       );
-
-      this.selectedIndex--;
-      if (this.selectedIndex < 0) {
-        this.selectedIndex = this.menuButtons.length - 1;
-      }
-
+      this.selectedIndex = nextIndex;
       this.selectButton(
         this.menuButtons[this.selectedIndex].button,
         this.menuButtons[this.selectedIndex].scale,
       );
     }
 
-    if (downPressed) {
-      this.clearMultiplayerOption();
-      this.deselectButton(
-        this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].scale,
-      );
-
-      this.selectedIndex++;
-      if (this.selectedIndex >= this.menuButtons.length) {
-        this.selectedIndex = 0;
-      }
-
-      this.selectButton(
-        this.menuButtons[this.selectedIndex].button,
-        this.menuButtons[this.selectedIndex].scale,
-      );
+    // While the controller is on Play, slide out the 2-player button like a mouse hover does
+    const playSelected = this.selectedIndex === 0 && this.InputManager.usingGamepad;
+    if (playSelected !== this.playSelectedByController) {
+      this.playSelectedByController = playSelected;
+      if (playSelected) this.revealTwoPlayerButton();
+      else this.hideTwoPlayerButton();
     }
 
     if (controls.button3 && !this.InputManager.keys.select.isDown) {

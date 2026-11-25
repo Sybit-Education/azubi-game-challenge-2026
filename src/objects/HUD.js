@@ -297,6 +297,7 @@ export default class HUD {
 
     if (player === 1) {
       parts.push(this.scene.hotbar, this.scene.hotbarCoin, this.scene.coinText1);
+      parts.push(...(this.scene.shopPromptsP1 ?? []));
       parts.push(
         this.speedoMeter,
         this.speedoMeterPointer,
@@ -306,6 +307,7 @@ export default class HUD {
       this.showDeathOverlay(1);
     } else {
       parts.push(this.scene.hotbar2, this.scene.hotbarCoin2, this.scene.coinText2);
+      parts.push(...(this.scene.shopPromptsP2 ?? []));
       parts.push(
         this.speedoMeter2,
         this.speedoMeterPointer2,
