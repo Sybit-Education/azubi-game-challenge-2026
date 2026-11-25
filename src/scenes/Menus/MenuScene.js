@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import { preloadMenuSounds, playMenuClick, bindMenuFocusSounds } from '../../../audio/sounds.js';
-import { preloadSceneMusic, playSceneMusic } from '../../../audio/sounds.js';
+import { preloadSceneMusic, playSceneMusic, continueSceneMusic } from '../../../audio/sounds.js';
 
 import { positionAccessibleControls } from '../../accessibility/positionControls.js';
 import { preserveNativeKeyboard } from '../../accessibility/nativeKeyboard.js';
@@ -25,6 +25,11 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   // Pre load images
+  // Keeps the menu music playing instead of restarting it (see continueSceneMusic)
+  init() {
+    continueSceneMusic(this, 'normal-menu-music');
+  }
+
   preload() {
     preloadMenuSounds(this);
     preloadSceneMusic(this, 'normal-menu-music');

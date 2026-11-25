@@ -92,9 +92,51 @@ export function preloadSceneMusic(scene, key) {
   }
 }
 
+// The music track that's playing, and the scene it belongs to. A scene can take it over
+// (continueSceneMusic) so it keeps playing across a scene change, e.g. menu → leaderboard.
+let currentMusic = null; // { key, sound, owner, startMusic }
+
+function stopCurrentMusic(scene) {
+  if (!currentMusic) return;
+  scene.sound.off('unlocked', currentMusic.startMusic);
+  currentMusic.sound.destroy();
+  currentMusic = null;
+}
+
+// Makes `scene` the owner of the current music. When the owner shuts down, the music
+// stops, unless the next scene took it over in the meantime (scenes do that in init(),
+// which runs right after the previous scene shuts down, in the same game step).
+function claimMusic(scene) {
+  const music = currentMusic;
+  music.owner = scene;
+  scene.events.once('shutdown', () => {
+    scene.game.events.once('poststep', () => {
+      if (currentMusic === music && music.owner === scene) stopCurrentMusic(scene);
+    });
+  });
+}
+
+/**
+ * Keeps the music from the previous scene playing in `scene`. With `key`, only that
+ * track is kept (so a menu doesn't adopt the race music). Call it from init().
+ */
+export function continueSceneMusic(scene, key) {
+  if (!currentMusic || (key && currentMusic.key !== key)) return;
+  claimMusic(scene);
+}
+
 export function playSceneMusic(scene, key, volume) {
-  const music = scene.sound.add(key, { loop: true, volume });
-  const startMusic = () => music.play();
+  // Already playing (taken over from the previous scene): keep it going, no restart
+  if (currentMusic?.key === key) {
+    currentMusic.sound.setVolume(volume);
+    if (currentMusic.owner !== scene) claimMusic(scene);
+    return;
+  }
+
+  stopCurrentMusic(scene);
+  const sound = scene.sound.add(key, { loop: true, volume });
+  const startMusic = () => sound.play();
+  currentMusic = { key, sound, owner: null, startMusic };
 
   // The first menu may open before the browser allows audio playback.
   if (scene.sound.locked) {
@@ -102,11 +144,7 @@ export function playSceneMusic(scene, key, volume) {
   } else {
     startMusic();
   }
-
-  scene.events.once('shutdown', () => {
-    scene.sound.off('unlocked', startMusic);
-    music.destroy();
-  });
+  claimMusic(scene);
 }
 
 export function preloadGameplaySounds(scene) {

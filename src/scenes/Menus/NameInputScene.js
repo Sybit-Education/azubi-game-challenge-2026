@@ -1,7 +1,11 @@
 import Phaser from 'phaser';
 import { createParallax } from '../../objects/parallax.js';
 import InputManager from '../../objects/InputManager.js';
-import { preloadMenuSounds, preloadTypingSounds } from '../../../audio/sounds.js';
+import {
+  preloadMenuSounds,
+  preloadTypingSounds,
+  continueSceneMusic,
+} from '../../../audio/sounds.js';
 import TypingSoundPlayer from '../../../audio/TypingSoundPlayer.js';
 import {
   addButtonPrompt,
@@ -32,6 +36,8 @@ export default class NameInputScene extends Phaser.Scene {
   // Init
   init(data) {
     this.isMultiplayer = data.isMultiplayer;
+    // Keeps the menu music playing while typing (see continueSceneMusic)
+    continueSceneMusic(this);
   }
 
   // Pre-load
