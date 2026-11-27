@@ -12,8 +12,8 @@ export default class Nametag {
       .image(0, 0, `p${playerNumber}-nametag-arrow`)
       .setOrigin(0.5, 1.2)
       .setDepth(12)
-      .setAlpha(0.5)
-      .setScale(0.5);
+      .setAlpha(0.3)
+      .setScale(0.35);
 
     this.label = scene.add
       .text(0, 0, name?.trim() || fallback, {
@@ -24,7 +24,9 @@ export default class Nametag {
         strokeThickness: 4,
       })
       .setOrigin(0.5, 1.2)
-      .setDepth(13);
+      .setDepth(13)
+      .setAlpha(0.9)
+      .setScale(0.9);
 
     scene.events.on(Phaser.Scenes.Events.POST_UPDATE, this.update, this);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, this.destroy, this);
