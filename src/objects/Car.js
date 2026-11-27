@@ -121,8 +121,17 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (this.laneCooldown > 0) {
       this.laneCooldown--;
     }
-    if (controls.left) {
-      if (controls.left && this.laneCooldown <= 0 && this.currentLane > 0) {
+    // A controller push steers like a key press without repeat: it waits out the
+    // cooldown while held, steers once, then needs letting go to steer again
+    this.padSteerUsed ??= { left: false, right: false };
+    if (!controls.padSteerLeft) this.padSteerUsed.left = false;
+    if (!controls.padSteerRight) this.padSteerUsed.right = false;
+    const steerLeft = controls.left || (controls.padSteerLeft && !this.padSteerUsed.left);
+    const steerRight = controls.right || (controls.padSteerRight && !this.padSteerUsed.right);
+
+    if (steerLeft) {
+      if (this.laneCooldown <= 0) this.padSteerUsed.left = Boolean(controls.padSteerLeft);
+      if (this.laneCooldown <= 0 && this.currentLane > 0) {
         this.currentLane--;
 
         this.setLight('left');
@@ -150,8 +159,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       }
     }
 
-    if (controls.right) {
-      if (controls.right && this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
+    if (steerRight) {
+      if (this.laneCooldown <= 0) this.padSteerUsed.right = Boolean(controls.padSteerRight);
+      if (this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
         this.currentLane++;
 
         this.setLight('right');

@@ -142,7 +142,7 @@ export default class NameInputScene extends Phaser.Scene {
     this.createButtonPrompts();
   }
 
-  // Joy-Con button icons: Y next to "back to menu", B next to DELETE.
+  // Joy-Con button icons: Y next to "back to menu", B next to DELETE, A next to ENTER.
   // Only visible while a Joy-Con was the last input (see update()).
   createButtonPrompts() {
     const size = BUTTON_PROMPT_SIZE * this.scaleFactor;
@@ -151,11 +151,13 @@ export default class NameInputScene extends Phaser.Scene {
       addButtonPrompt(this, button, size).setPosition(x, y).setDepth(2);
 
     const back = this.returnButton;
-    const deleteCell = this.characterCells[this.characterCells.length - 1][0];
+    const actionRow = this.characterCells[this.characterCells.length - 1];
+    const [deleteCell, enterCell] = actionRow;
 
     this.buttonPrompts = [
       addPrompt('y', back.x + back.displayWidth / 2 + gap + size / 2, back.y),
       addPrompt('b', deleteCell.x - deleteCell.width / 2 - gap - size / 2, deleteCell.y),
+      addPrompt('a', enterCell.x + enterCell.width / 2 + gap + size / 2, enterCell.y),
     ];
   }
 
@@ -619,16 +621,17 @@ export default class NameInputScene extends Phaser.Scene {
     const controls = playerControls[this.activePlayer] ?? menuControls;
 
     // Show Joy-Con button icons only while a Joy-Con was used last; they press in
-    // while held (Y = Player 1's back, B = the typing player's delete)
+    // while held (Y = Player 1's back, B / A = the typing player's delete / enter)
     if (this.buttonPrompts) {
       const showPrompts = Boolean(this.InputManager.showJoyConPrompts);
-      const [backPrompt, deletePrompt] = this.buttonPrompts;
+      const [backPrompt, deletePrompt, enterPrompt] = this.buttonPrompts;
       updateButtonPromptPressed(backPrompt, menuControls);
       updateButtonPromptPressed(deletePrompt, controls);
+      updateButtonPromptPressed(enterPrompt, controls);
       this.buttonPrompts.forEach((prompt) => prompt.setVisible(showPrompts));
     }
 
-    // Back (button1 / A intentionally does nothing here)
+    // Back
     if (menuControls.button4) {
       this.backToHomeFunction();
       return;
@@ -678,6 +681,9 @@ export default class NameInputScene extends Phaser.Scene {
     } else if (controls.button2) {
       // B deletes the last character (only the typing player's controller)
       this.deleteCharacter();
+    } else if (controls.button1) {
+      // A submits the name, like ENTER (only the typing player's controller)
+      this.submitName();
     }
   }
 }

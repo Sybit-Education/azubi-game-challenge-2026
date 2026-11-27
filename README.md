@@ -45,9 +45,9 @@ Der Ablauf:
 | Shop: Schild (20 Münzen)     | 1         | Numpad 1  |
 | Shop: Schrumpfen (15 Münzen) | 2         | Numpad 2  |
 
-**Gamepad:** Es werden bis zu zwei Gamepads unterstützt (Spieler 1 und Spieler 2). Mit dem Stick wird gefahren, im Menü navigieren die Knöpfe.
+**Gamepad:** Es werden bis zu zwei Gamepads unterstützt (Spieler 1 und Spieler 2). Mit dem Stick wird gelenkt (links/rechts), SR gibt Gas, SL bremst; im Menü navigieren die Knöpfe.
 
-**Joy-Con:** Jede Person hält einen einzelnen Joy-Con quer (SL/SR oben, Stick links, Knöpfe rechts). Der rechte Joy-Con ist immer Spieler 1, der linke Spieler 2. Chrome meldet zwei gekoppelte Joy-Cons als ein Gamepad „Joy-Con L+R“; das Spiel teilt es wieder in zwei Controller auf. Die Menüs bedient nur Spieler 1. Bei der Namenseingabe tippt jeweils nur der Controller des Spielers, der gerade dran ist. Bestätigen ist der rechte Knopf (X beim rechten Joy-Con), zurück der obere. Im Rennen kauft A ein Schild, B Schrumpfen und Y ein Extra-Leben; mit SL/SR könnt ihr zusätzlich nach links/rechts lenken. Lenken zählt erst, wenn der Stick deutlich zur Seite zeigt, damit leicht schräges Gasgeben nicht die Spur wechselt.
+**Joy-Con:** Jede Person hält einen einzelnen Joy-Con quer (SL/SR oben, Stick links, Knöpfe rechts). Der rechte Joy-Con ist immer Spieler 1, der linke Spieler 2. Chrome meldet zwei gekoppelte Joy-Cons als ein Gamepad „Joy-Con L+R“; das Spiel teilt es wieder in zwei Controller auf. Die Menüs bedient nur Spieler 1. Bei der Namenseingabe tippt jeweils nur der Controller des Spielers, der gerade dran ist. Bestätigen ist der rechte Knopf (X beim rechten Joy-Con), zurück der obere. Im Rennen kauft A ein Schild, B Schrumpfen und Y ein Extra-Leben. Gelenkt wird nur mit dem Stick (links/rechts), SR gibt Gas und SL bremst.
 
 **Weitere Tasten:** Die Einstellungen schließt ihr mit `Esc` oder `M`. Mit `Esc` kommt ihr auch aus Nameingabe, Credits und Leaderboard zurück; in den Credits pausiert und startet die Leertaste den Textlauf.
 
