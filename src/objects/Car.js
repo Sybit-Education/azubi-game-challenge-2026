@@ -121,8 +121,17 @@ export default class Car extends Phaser.Physics.Arcade.Image {
     if (this.laneCooldown > 0) {
       this.laneCooldown--;
     }
-    if (controls.left) {
-      if (controls.left && this.laneCooldown <= 0 && this.currentLane > 0) {
+    // A new press during the cooldown is remembered and runs once it ends, so two
+    // quick stick pushes still change two lanes
+    if (controls.left && !this.previousSteer?.left) this.queuedSteer = 'left';
+    if (controls.right && !this.previousSteer?.right) this.queuedSteer = 'right';
+    this.previousSteer = { left: controls.left, right: controls.right };
+    const steerLeft = controls.left || this.queuedSteer === 'left';
+    const steerRight = controls.right || this.queuedSteer === 'right';
+    if (steerLeft && this.laneCooldown <= 0) this.queuedSteer = null;
+
+    if (steerLeft) {
+      if (this.laneCooldown <= 0 && this.currentLane > 0) {
         this.currentLane--;
 
         this.setLight('left');
@@ -150,8 +159,9 @@ export default class Car extends Phaser.Physics.Arcade.Image {
       }
     }
 
-    if (controls.right) {
-      if (controls.right && this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
+    if (steerRight && this.laneCooldown <= 0) this.queuedSteer = null;
+    if (steerRight) {
+      if (this.laneCooldown <= 0 && this.currentLane < this.lanes.length - 1) {
         this.currentLane++;
 
         this.setLight('right');
