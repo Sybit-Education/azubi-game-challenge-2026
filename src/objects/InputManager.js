@@ -242,7 +242,7 @@ export default class InputManager {
     this.previousSpace = false;
     this.hasUpdated = false;
     this.previousPadFlags = { 1: [], 2: [] };
-    this.steerArmed = { 1: { left: true, right: true }, 2: { left: true, right: true } };
+    this.steerHeld = { 1: { left: false, right: false }, 2: { left: false, right: false } };
     // Per player, so one player switching to the keyboard doesn't affect the other
     const startDevice = this.usingGamepad ? 'pad' : 'keyboard';
     this.lastDevice = { 1: startDevice, 2: startDevice };
@@ -369,19 +369,17 @@ export default class InputManager {
     this.hasUpdated = false;
   }
 
-  // True only on the frame the stick or D-pad is pushed (see STEER_RELEASE)
-  padSteerPushes(player, pad) {
-    const armed = this.steerArmed[player];
-    const pushes = {};
+  // Stick or D-pad held left / right, released only below STEER_RELEASE
+  padSteerHeld(player, pad) {
+    const held = this.steerHeld[player];
     for (const [direction, sign] of [
       ['left', -1],
       ['right', 1],
     ]) {
-      pushes[direction] = this.hasUpdated && armed[direction] && pad[direction];
-      if (pad[direction]) armed[direction] = false;
-      else if (pad.stickX * sign < STEER_RELEASE) armed[direction] = true;
+      if (pad[direction]) held[direction] = true;
+      else if (pad.stickX * sign < STEER_RELEASE) held[direction] = false;
     }
-    return pushes;
+    return { ...held };
   }
 
   update() {
@@ -425,13 +423,15 @@ export default class InputManager {
     );
     const spaceIsDown = this.hasUpdated && this.keys.space.isDown && !this.previousSpace;
 
-    // Held keys keep steering; the controller steers one lane per push.
-    // Menus use padLeft / padRight instead.
-    const steerP1 = this.padSteerPushes(1, padP1);
-    const steerP2 = this.padSteerPushes(2, padP2);
+    // left / right: held keys. padSteerLeft / padSteerRight: held controller, which
+    // Car turns into one lane per push. Menus use padLeft / padRight instead.
+    const steerP1 = this.padSteerHeld(1, padP1);
+    const steerP2 = this.padSteerHeld(2, padP2);
     this.getControlsP1 = {
-      left: this.keys.leftP1.isDown || steerP1.left,
-      right: this.keys.rightP1.isDown || steerP1.right,
+      left: this.keys.leftP1.isDown,
+      right: this.keys.rightP1.isDown,
+      padSteerLeft: steerP1.left,
+      padSteerRight: steerP1.right,
       up: this.keys.upP1.isDown || padP1.up,
       down: this.keys.downP1.isDown || padP1.down,
       accelerate: this.keys.upP1.isDown || padP1.shoulderRight,
@@ -450,8 +450,10 @@ export default class InputManager {
     };
 
     this.getControlsP2 = {
-      left: this.keys.leftP2.isDown || steerP2.left,
-      right: this.keys.rightP2.isDown || steerP2.right,
+      left: this.keys.leftP2.isDown,
+      right: this.keys.rightP2.isDown,
+      padSteerLeft: steerP2.left,
+      padSteerRight: steerP2.right,
       up: this.keys.upP2.isDown || padP2.up,
       down: this.keys.downP2.isDown || padP2.down,
       accelerate: this.keys.upP2.isDown || padP2.shoulderRight,
