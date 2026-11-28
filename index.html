@@ -61,15 +61,101 @@
       aria-labelledby="leaderboard-title"
     >
       <h2 id="leaderboard-title" class="sr-only" tabindex="-1">Leaderboard</h2>
+      <p id="leaderboard-status" class="sr-only" role="status" aria-atomic="true"></p>
+
+      <button
+        id="leaderboard-filter"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-controls="leaderboard-filter-options"
+      >
+        Filter
+      </button>
+      <div id="leaderboard-filter-options" role="menu" aria-label="Filter options" hidden>
+        <button
+          id="leaderboard-filter-all"
+          type="button"
+          role="menuitemradio"
+          aria-checked="false"
+          data-value="all"
+          disabled
+        >
+          All
+        </button>
+        <button
+          id="leaderboard-filter-blinded"
+          type="button"
+          role="menuitemradio"
+          aria-checked="false"
+          data-value="blinded"
+          disabled
+        >
+          Blinded
+        </button>
+        <button
+          id="leaderboard-filter-non-blinded"
+          type="button"
+          role="menuitemradio"
+          aria-checked="false"
+          data-value="non-blinded"
+          disabled
+        >
+          Sighted
+        </button>
+      </div>
+
+      <button
+        id="leaderboard-sort"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-controls="leaderboard-sort-options"
+      >
+        Sort
+      </button>
+      <div id="leaderboard-sort-options" role="menu" aria-label="Sort options" hidden>
+        <button
+          id="leaderboard-sort-distance"
+          type="button"
+          role="menuitemradio"
+          aria-checked="false"
+          data-value="distance"
+          disabled
+        >
+          Distance
+        </button>
+        <button
+          id="leaderboard-sort-score"
+          type="button"
+          role="menuitemradio"
+          aria-checked="false"
+          data-value="score"
+          disabled
+        >
+          Score
+        </button>
+      </div>
+
+      <label class="sr-only" for="leaderboard-search">Search by name</label>
+      <input
+        id="leaderboard-search"
+        type="search"
+        maxlength="45"
+        autocomplete="off"
+        spellcheck="false"
+      />
+
       <table class="sr-only">
-        <caption>
-          Top 10 distances
+        <caption id="leaderboard-caption">
+          Top 10 by distance
         </caption>
         <thead>
           <tr>
             <th scope="col">Rank</th>
             <th scope="col">Player</th>
             <th scope="col">Distance</th>
+            <th scope="col">Score</th>
             <th scope="col">Blind</th>
           </tr>
         </thead>
@@ -124,20 +210,20 @@
     <script type="module" src="src/main.js"></script>
     <script>
       const playButton = document.getElementById('start-game');
+      const menu = document.getElementById('accessible-ui');
       let keyboardModeEnabled = false;
 
       document.addEventListener(
         'keydown',
         (event) => {
-          // Detect first Tab key press
-          if (event.key === 'Tab' && !keyboardModeEnabled) {
-            event.preventDefault();
+          if (event.key !== 'Tab' || keyboardModeEnabled) return;
 
-            keyboardModeEnabled = true;
-            document.body.classList.add('keyboard-navigation');
+          keyboardModeEnabled = true;
+          document.body.classList.add('keyboard-navigation');
+          if (menu.hidden) return;
 
-            playButton.focus();
-          }
+          event.preventDefault();
+          playButton.focus();
         },
         true,
       );
@@ -183,6 +269,7 @@
     }
 
     .accessible-layer button,
+    .accessible-layer input,
     #settings-dialog button,
     #settings-dialog input,
     #settings-dialog select {
@@ -214,6 +301,7 @@
     }
 
     .accessible-layer button,
+    .accessible-layer input,
     #settings-dialog button,
     #settings-dialog input,
     #settings-dialog select {
@@ -221,7 +309,14 @@
       box-shadow: none;
     }
 
+    #leaderboard-search {
+      font-size: 16px;
+      -webkit-text-fill-color: transparent;
+      caret-color: transparent;
+    }
+
     body.keyboard-navigation .accessible-layer button:focus-visible,
+    body.keyboard-navigation .accessible-layer input:focus-visible,
     body.keyboard-navigation #settings-dialog button:focus-visible,
     body.keyboard-navigation #settings-dialog input:focus-visible,
     body.keyboard-navigation #settings-dialog select:focus-visible {
